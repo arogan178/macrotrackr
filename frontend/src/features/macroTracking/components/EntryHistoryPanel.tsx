@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
+import Dropdown from "@/components/form/Dropdown";
 import {
   Button,
   ChevronDownIcon,
@@ -18,6 +19,8 @@ import {
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
+
+import { MEAL_TYPE_OPTIONS } from "../constants";
 
 import DesktopEntryTable from "./DesktopEntryTable";
 import { EntryHistoryContext } from "./EntryHistoryContext";
@@ -570,25 +573,16 @@ const EntryHistoryComponent = function EntryHistory({
               className="w-full rounded-control border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
             />
           </div>
-          <div>
-            <label
-              htmlFor="groupMealType"
-              className="mb-2 block text-sm font-medium text-foreground"
-            >
-              Meal Type
-            </label>
-            <select
-              id="groupMealType"
-              value={groupMealType}
-              onChange={(event) => setGroupMealType(event.target.value)}
-              className="w-full rounded-control border border-border bg-surface px-4 py-3 text-sm text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
-            >
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch">Lunch</option>
-              <option value="dinner">Dinner</option>
-              <option value="snack">Snack</option>
-            </select>
-          </div>
+          <Dropdown
+            id="groupMealType"
+            label="Meal type"
+            value={groupMealType}
+            onChange={(value) => setGroupMealType(String(value))}
+            options={MEAL_TYPE_OPTIONS.map((option) => ({
+              value: option.value,
+              label: option.display,
+            }))}
+          />
           <div className="mt-6 flex justify-end gap-3">
             <Button
               variant="secondary"

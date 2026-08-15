@@ -47,22 +47,22 @@ const getActionConfigs = () =>
     "password-toggle": {
       icon: undefined, // Icon is always passed as prop for this variant
       className:
-        "text-foreground bg-surface-2 hover:bg-surface-2 focus-visible:ring-gray-500 transition-colors duration-200",
+        "text-foreground bg-surface-2 hover:bg-surface-2 transition-colors duration-200",
     },
     delete: {
       icon: TrashIcon,
       className:
-        "text-error bg-error/10 border border-transparent hover:bg-error/20 hover:border-error/30 focus-visible:ring-red-500 transition-colors duration-200",
+        "text-error bg-error/10 border border-transparent hover:bg-error/20 hover:border-error/30 transition-colors duration-200",
     },
     edit: {
       icon: EditIcon,
       className:
-        "text-foreground bg-surface-2 border border-transparent hover:bg-surface-2 hover:border-border focus-visible:ring-gray-500 transition-colors duration-200",
+        "text-foreground bg-surface-2 border border-transparent hover:bg-surface-2 hover:border-border transition-colors duration-200",
     },
     close: {
       icon: CloseIcon,
       className:
-        "text-foreground bg-surface-2 border border-transparent hover:bg-surface-2 hover:border-border focus-visible:ring-gray-500 !rounded-full transition-colors duration-200",
+        "text-foreground bg-surface-2 border border-transparent hover:bg-surface-2 hover:border-border !rounded-full transition-colors duration-200",
     },
     add: {
       icon: PlusIcon,
@@ -72,22 +72,22 @@ const getActionConfigs = () =>
     more: {
       icon: MoreVerticalIcon,
       className:
-        "text-foreground bg-surface-3 border border-transparent hover:bg-surface-3 hover:border-border focus-visible:ring-gray-500 transition-colors duration-200",
+        "text-foreground bg-surface-3 border border-transparent hover:bg-surface-3 hover:border-border transition-colors duration-200",
     },
     info: {
       icon: InfoIcon,
       className:
-        "text-blue-400 bg-blue-400/10 border border-transparent hover:bg-blue-400/20 hover:border-blue-400/30 focus-visible:ring-blue-500 transition-colors duration-200",
+        "text-carbs bg-carbs/10 border border-transparent hover:bg-carbs/20 hover:border-carbs/30 transition-colors duration-200",
     },
     warning: {
       icon: WarningIcon,
       className:
-        "text-warning bg-warning/10 border border-transparent hover:bg-warning/20 hover:border-warning/30 focus-visible:ring-yellow-500 transition-colors duration-200",
+        "text-warning bg-warning/10 border border-transparent hover:bg-warning/20 hover:border-warning/30 transition-colors duration-200",
     },
     export: {
       icon: ExportIcon,
       className:
-        "text-foreground bg-success/10 border border-transparent hover:text-success hover:bg-success/20 hover:border-success/30 focus-visible:ring-emerald-500 transition-colors duration-200",
+        "text-foreground bg-success/10 border border-transparent hover:text-success hover:bg-success/20 hover:border-success/30 transition-colors duration-200",
     },
     custom: {
       icon: undefined,

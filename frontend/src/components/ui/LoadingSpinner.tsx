@@ -6,12 +6,15 @@ interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   color?: string;
   label?: string;
+  /** Centres the spinner in the viewport, for route-level fallbacks. */
+  fullScreen?: boolean;
 }
 
 function LoadingSpinner({
   size = "md",
   color = "text-primary",
   label,
+  fullScreen = false,
 }: LoadingSpinnerProps) {
   // Size mappings
   const sizeClasses = {
@@ -21,7 +24,13 @@ function LoadingSpinner({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div
+      className={
+        fullScreen
+          ? "flex min-h-screen flex-col items-center justify-center"
+          : "flex flex-col items-center justify-center"
+      }
+    >
       <LoadingSpinnerIcon
         className={`animate-spin ${sizeClasses[size]} ${color}`}
       />

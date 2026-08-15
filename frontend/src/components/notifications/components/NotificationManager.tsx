@@ -17,7 +17,9 @@ function NotificationManager() {
 
   return (
     <div
-      className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2"
+      // z-80: above AppHeader and MobileTabBar (both z-70), below Modal (z-100)
+      // so a confirmation dialog still covers its own toast.
+      className="pointer-events-none fixed left-1/2 z-80 -translate-x-1/2"
       style={{
         top: "var(--floating-notification-top, 80px)",
       }}

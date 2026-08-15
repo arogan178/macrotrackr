@@ -44,6 +44,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ onLog }) => {
     [navigate],
   );
 
+
   const [left, right] = [TABS.slice(0, 2), TABS.slice(2)];
 
   const renderTab = ({

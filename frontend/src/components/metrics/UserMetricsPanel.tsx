@@ -27,14 +27,12 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
         {[0, 1].map((index) => (
           <div
             key={index}
-            className="flex h-40 animate-pulse flex-col justify-between rounded-card border border-border bg-surface p-5"
+            className="animate-pulse rounded-card border border-border bg-surface p-5"
           >
             <div className="flex items-start gap-4">
-              <div className="rounded-card border border-border bg-surface-2 p-3.5">
-                <div className="h-6 w-6 rounded-control bg-surface-3" />
-              </div>
+              <div className="h-11 w-11 shrink-0 rounded-card bg-surface-2" />
               <div className="min-w-0 flex-1">
-                <div className="mb-2 h-4 w-3/4 rounded-control bg-surface-2" />
+                <div className="mb-2 h-4 w-16 rounded-control bg-surface-2" />
                 <div className="h-8 w-2/5 rounded-control bg-surface-2" />
               </div>
             </div>
@@ -45,10 +43,6 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
   );
 });
 
-function formatOrUndefined(n?: number) {
-  return n ?? undefined;
-}
-
 function UserMetricsPanel({
   bmr,
   tdee,
@@ -57,8 +51,20 @@ function UserMetricsPanel({
   if (isLoading) return <LoadingSkeleton />;
 
   const metrics = [
-    { label: "BMR", value: bmr, icon: UserIcon, iconClass: "text-primary" },
-    { label: "TDEE", value: tdee, icon: StarIcon, iconClass: "text-primary" },
+    {
+      label: "BMR",
+      meaning: "at rest",
+      value: bmr,
+      icon: UserIcon,
+      iconClass: "text-primary",
+    },
+    {
+      label: "TDEE",
+      meaning: "with activity",
+      value: tdee,
+      icon: StarIcon,
+      iconClass: "text-primary",
+    },
   ];
 
   return (
@@ -80,23 +86,22 @@ function UserMetricsPanel({
         ))}
       </div>
 
+      {/* Two cards, as before. What truncated was never the layout — it was
+          spelling out "Basal Metabolic Rate (BMR)" in a third-width column.
+          The acronyms are the names people actually use for these, and the
+          subtitle says what they mean without competing for the line. */}
       <div className="hidden sm:grid sm:grid-cols-2 sm:gap-4">
-        <MetricCard
-          icon={UserIcon}
-          title="Basal Metabolic Rate"
-          acronym="BMR"
-          value={formatOrUndefined(bmr)}
-          tone="primary"
-          unit="kcal"
-        />
-        <MetricCard
-          icon={StarIcon}
-          title="Total Daily Energy"
-          acronym="TDEE"
-          value={formatOrUndefined(tdee)}
-          tone="primary"
-          unit="kcal"
-        />
+        {metrics.map(({ label, meaning, value, icon }) => (
+          <MetricCard
+            key={label}
+            icon={icon}
+            title={label}
+            subtitle={meaning}
+            value={value || undefined}
+            tone="primary"
+            unit="kcal"
+          />
+        ))}
       </div>
     </>
   );
