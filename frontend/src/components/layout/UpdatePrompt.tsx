@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 const UpdatePrompt: React.FC = () => {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -45,7 +46,8 @@ const UpdatePrompt: React.FC = () => {
   }, []);
 
   const applyUpdate = useCallback(() => {
-    if (!waiting) return;
+    if (!waiting || isUpdating) return;
+    setIsUpdating(true);
 
     // Reload once the new worker takes control, so the page and its chunks
     // always come from the same build.
@@ -55,7 +57,7 @@ const UpdatePrompt: React.FC = () => {
       { once: true },
     );
     waiting.postMessage({ type: "SKIP_WAITING" });
-  }, [waiting]);
+  }, [waiting, isUpdating]);
 
   if (!waiting || dismissed) return null;
 
@@ -71,12 +73,15 @@ const UpdatePrompt: React.FC = () => {
           variant="ghost"
           buttonSize="sm"
           onClick={() => setDismissed(true)}
+          disabled={isUpdating}
           text="Later"
         />
         <Button
           variant="primary"
           buttonSize="sm"
           onClick={applyUpdate}
+          isLoading={isUpdating}
+          loadingText="Updating…"
           text="Update"
         />
       </div>
