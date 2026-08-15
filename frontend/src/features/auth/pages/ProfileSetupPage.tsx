@@ -27,7 +27,7 @@ export default function ProfileSetupPage() {
 
 function ClerkProfileSetupPage() {
   const { isSignedIn, isLoaded } = useAuth();
-  const search = useSearch({ from: "/profile-setup" }) as {
+  const search = (useSearch({ strict: false }) ?? {}) as {
     redirectTo?: string;
   };
   const { data: user, isLoading: isUserLoading } = useUser({

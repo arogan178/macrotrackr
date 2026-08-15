@@ -41,7 +41,7 @@ const VALID_TABS = new Set<TabType>([
 
 export default function SettingsPage() {
   // Read tab from URL search params
-  const search = useSearch({ from: "/settings" }) as { tab?: string };
+  const search = (useSearch({ strict: false }) ?? {}) as { tab?: string };
 
   // Use TanStack Query for settings data and mutations
   const {
