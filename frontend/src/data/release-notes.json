@@ -25,7 +25,7 @@
     "type": "release",
     "highlights": [
       "Five free calculators at /tools: TDEE, BMR, macro split, weight loss timeline, and protein intake",
-      "No account required \u2014 every calculator runs entirely in the browser",
+      "No account required, every calculator runs entirely in the browser",
       "New Tools menu in the header and a calculator hub with cross-linking",
       "Structured data and sitemap coverage so the calculators are discoverable in search",
       "Container images now published to Docker Hub alongside GHCR, for both amd64 and arm64"
