@@ -133,19 +133,25 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
 
   const anyFieldIsUndefined =
     protein === undefined || carbs === undefined || fats === undefined;
+  const allFieldsAreUndefined =
+    protein === undefined && carbs === undefined && fats === undefined;
   const allFieldsAreZero = protein === 0 && carbs === 0 && fats === 0;
   const isFormValid =
     !anyFieldIsUndefined && !allFieldsAreZero && mealName.trim() !== "";
 
-  // Shown at every breakpoint: a disabled button with no reason is a dead end
-  // on mobile, where the old hints were hidden.
-  const validationHint = isFormValid
-    ? undefined
-    : mealName.trim() === ""
-      ? "Name this meal to save it"
+  // The hint explains why the button is disabled once values are entered,
+  // without cluttering the initial empty form before interaction.
+  const isFormPristine = mealName.trim() === "" && allFieldsAreUndefined;
+  const validationHint =
+    isFormValid || isFormPristine
+      ? undefined
       : anyFieldIsUndefined
         ? "Enter protein, carbs and fats"
-        : "Macros must add up to more than 0";
+        : allFieldsAreZero
+          ? "Macros must add up to more than 0"
+          : mealName.trim() === ""
+            ? "Name this meal to save it"
+            : undefined;
 
   const handleSearchResult = useCallback(
     ({
@@ -475,7 +481,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   return (
     <CardContainer
       variant="interactive"
-      className="relative flex h-full flex-col justify-between overflow-hidden"
+      className="relative overflow-hidden"
     >
       <div className="relative z-10 p-3.5 sm:p-5">
         <div className="mb-4 sm:mb-5">

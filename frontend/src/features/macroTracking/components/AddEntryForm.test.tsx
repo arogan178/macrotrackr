@@ -122,6 +122,14 @@ describe("AddEntryForm", () => {
 
     const submit = screen.getByRole("button", { name: /add entry/i });
     expect(submit).toBeDisabled();
+    expect(
+      screen.queryByText("Name this meal to save it"),
+    ).not.toBeInTheDocument();
+
+    // Entering macros without meal name triggers the hint
+    fireEvent.change(screen.getByLabelText("Protein"), { target: { value: "25" } });
+    fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
 
     // The hint must not be hidden below the sm breakpoint: a disabled button
     // with no visible reason is a dead end on mobile.

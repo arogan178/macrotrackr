@@ -203,7 +203,7 @@ const ProductPreview: React.FC = () => {
   const goTo = (index: number) => {
     setStopped(true);
     setScene(index);
-    setStep(0);
+    setStep(SCENES[index].steps);
     setVisible(true);
   };
 
@@ -263,7 +263,7 @@ const ProductPreview: React.FC = () => {
               aria-label={item.label}
               tabIndex={index === scene ? 0 : -1}
               onClick={() => goTo(index)}
-              className="group flex min-h-11 items-center px-1.5 focus-visible:outline-none"
+              className="group flex min-h-11 cursor-pointer items-center px-1.5 focus-visible:outline-none"
             >
               <span
                 className={cn(
