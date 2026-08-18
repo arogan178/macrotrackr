@@ -53,7 +53,7 @@ export const MASTER_COMPARISON_MATRIX: readonly MasterComparisonRow[] = [
     myfitnesspal: "$19.99/mo",
     macrofactor: "$11.99/mo",
     cronometer: "$9.99/mo",
-    loseIt: "$39.99/yr",
+    loseIt: "$9.99/mo",
     highlight: true,
   },
   {
