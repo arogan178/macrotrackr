@@ -12,6 +12,7 @@ import {
   InfoIcon,
   MoreVerticalIcon,
   PlusIcon,
+  ShareIcon,
   TrashIcon,
   WarningIcon,
 } from "./Icons";
@@ -26,6 +27,7 @@ type ActionVariant =
   | "info"
   | "warning"
   | "export"
+  | "share"
   | "password-toggle"
   | "custom";
 
@@ -88,6 +90,11 @@ const getActionConfigs = () =>
       icon: ExportIcon,
       className:
         "text-foreground bg-success/10 border border-transparent hover:text-success hover:bg-success/20 hover:border-success/30 transition-colors duration-200",
+    },
+    share: {
+      icon: ShareIcon,
+      className:
+        "text-foreground bg-surface-2 border border-transparent hover:bg-surface-3 hover:border-border transition-colors duration-200",
     },
     custom: {
       icon: undefined,

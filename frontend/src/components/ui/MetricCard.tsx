@@ -38,6 +38,7 @@ export interface MetricCardProps {
   delay?: number;
   className?: string;
   children?: React.ReactNode;
+  size?: "default" | "compact";
 }
 
 const scoreToneClass = (score: number): string => {
@@ -60,12 +61,15 @@ function MetricCardInner({
   delay = 0,
   className,
   children,
+  size = "default",
 }: MetricCardProps) {
   const numericValue = useMemo(() => {
     if (value === undefined) return undefined;
 
     return typeof value === "number" ? value : Number.parseFloat(value);
   }, [value]);
+
+  const isCompact = size === "compact";
 
   return (
     <motion.div
@@ -74,10 +78,25 @@ function MetricCardInner({
       transition={{ duration: 0.2, delay }}
       className={cn("h-full", className)}
     >
-      <Panel className="flex h-full flex-col">
-        <div className="mb-2 flex items-start justify-between gap-2">
+      <Panel
+        padding={isCompact ? "none" : "regular"}
+        className={cn("flex h-full flex-col", isCompact && "p-3")}
+      >
+        <div
+          className={cn(
+            "flex items-start justify-between gap-2",
+            isCompact ? "mb-1" : "mb-2",
+          )}
+        >
           <div className="flex min-w-0 items-center gap-2">
-            <Heading level="panel" as="h3" className="truncate text-sm">
+            <Heading
+              level="panel"
+              as="h3"
+              className={cn(
+                "truncate",
+                isCompact ? "text-xs font-medium" : "text-sm",
+              )}
+            >
               {title}
             </Heading>
             {tooltipText ? <InfoTooltip text={tooltipText} /> : null}
@@ -85,7 +104,10 @@ function MetricCardInner({
           <div className="flex shrink-0 items-center gap-2">
             {Icon ? (
               <Icon
-                className={cn("h-4 w-4", TONE_TEXT[tone])}
+                className={cn(
+                  isCompact ? "h-3.5 w-3.5" : "h-4 w-4",
+                  TONE_TEXT[tone],
+                )}
                 strokeWidth={1.5}
               />
             ) : null}
@@ -99,30 +121,57 @@ function MetricCardInner({
         </div>
 
         {numericValue === undefined ? (
-          children ? null : <p className="text-sm text-muted">Complete profile</p>
+          children ? null : (
+            <p className="text-sm text-muted">Complete profile</p>
+          )
+        ) : isCompact ? (
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="flex items-baseline gap-1">
+              <span className="text-xl font-light tracking-tight tabular-nums">
+                {animateValue ? (
+                  <AnimatedNumber
+                    value={numericValue}
+                    toFixedValue={0}
+                    duration={0.8}
+                  />
+                ) : (
+                  Math.round(numericValue).toLocaleString()
+                )}
+              </span>
+              {unit ? (
+                <span className="text-xs text-muted">{unit}</span>
+              ) : null}
+            </p>
+            {subtitle ? (
+              <span className="text-[11px] text-muted">{subtitle}</span>
+            ) : null}
+          </div>
         ) : (
-          <p className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-light tracking-tight tabular-nums">
-              {animateValue ? (
-                <AnimatedNumber
-                  value={numericValue}
-                  toFixedValue={0}
-                  duration={0.8}
-                />
-              ) : (
-                Math.round(numericValue).toLocaleString()
-              )}
-            </span>
-            {unit ? <span className="text-sm text-muted">{unit}</span> : null}
-          </p>
+          <>
+            <p className="flex items-baseline gap-1.5">
+              <span className="text-3xl font-light tracking-tight tabular-nums">
+                {animateValue ? (
+                  <AnimatedNumber
+                    value={numericValue}
+                    toFixedValue={0}
+                    duration={0.8}
+                  />
+                ) : (
+                  Math.round(numericValue).toLocaleString()
+                )}
+              </span>
+              {unit ? (
+                <span className="text-sm text-muted">{unit}</span>
+              ) : null}
+            </p>
+            {/* The subtitle used to sit on the value's own line with `ml-auto`,
+                which pushed it hard right and wrapped it to two ragged lines in a
+                narrow card. It qualifies the number, so it belongs under it. */}
+            {subtitle ? (
+              <p className="mt-1 text-xs text-muted">{subtitle}</p>
+            ) : null}
+          </>
         )}
-
-        {/* The subtitle used to sit on the value's own line with `ml-auto`,
-            which pushed it hard right and wrapped it to two ragged lines in a
-            narrow card. It qualifies the number, so it belongs under it. */}
-        {subtitle && numericValue !== undefined ? (
-          <p className="mt-1 text-xs text-muted">{subtitle}</p>
-        ) : null}
 
         {children ? (
           <div className="flex flex-1 flex-col justify-between">{children}</div>

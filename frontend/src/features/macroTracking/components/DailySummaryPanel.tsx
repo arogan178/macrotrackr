@@ -1,14 +1,18 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 
 import {
   MacroDistributionBar,
   MacroTargetLegend,
 } from "@/components/macros/MacroComponents";
 import Heading from "@/components/ui/Heading";
+import IconButton from "@/components/ui/IconButton";
 import Panel from "@/components/ui/Panel";
 import ProgressBar from "@/components/ui/ProgressBar";
 import Value from "@/components/ui/Value";
+import MacroSnapshotModal from "@/features/macroTracking/components/MacroSnapshotModal";
+import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+import { getDisplayDate } from "@/utils/dateUtilities";
 
 import {
   calculateCaloriesFromMacros,
@@ -49,6 +53,7 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
+  const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
   const target = macroTarget ?? DEFAULT_TARGET;
   const dailyCalorieTarget = calorieTarget ?? 0;
@@ -172,16 +177,52 @@ function DailySummaryInner({
     ],
   );
 
+  const snapshotData: MacroSnapshotData = useMemo(
+    () => ({
+      title: "Today's Macros",
+      dateLabel: getDisplayDate(new Date()),
+      calories: macroCalories.total,
+      calorieTarget: dailyCalorieTarget,
+      protein: safeTotal.protein,
+      proteinTarget: targetGrams.protein,
+      carbs: safeTotal.carbs,
+      carbsTarget: targetGrams.carbs,
+      fats: safeTotal.fats,
+      fatsTarget: targetGrams.fats,
+      complianceScore: completionPercentages.calories,
+    }),
+    [
+      macroCalories.total,
+      dailyCalorieTarget,
+      safeTotal.protein,
+      targetGrams.protein,
+      safeTotal.carbs,
+      targetGrams.carbs,
+      safeTotal.fats,
+      targetGrams.fats,
+      completionPercentages.calories,
+    ],
+  );
+
   return (
     <Panel padding="none" className="flex h-full flex-col">
       {/* One idea — calories, then its macro breakdown — so one panel, split by
           dividers. It used to be six bordered boxes. */}
       <div className="p-4 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <Heading level="panel">Today</Heading>
-          <span className="text-xs text-muted">
-            {completionPercentages.calories}% of target
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted">
+              {completionPercentages.calories}% of target
+            </span>
+            <IconButton
+              variant="share"
+              buttonSize="sm"
+              iconSize="sm"
+              ariaLabel="Share Snapshot"
+              onClick={() => setIsSnapshotOpen(true)}
+            />
+          </div>
         </div>
 
         {/* The one animated number on the page: the value that moves. */}
@@ -252,6 +293,12 @@ function DailySummaryInner({
           </div>
         ))}
       </div>
+
+      <MacroSnapshotModal
+        isOpen={isSnapshotOpen}
+        onClose={() => setIsSnapshotOpen(false)}
+        data={snapshotData}
+      />
     </Panel>
   );
 }

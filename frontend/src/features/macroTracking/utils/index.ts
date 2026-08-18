@@ -3,4 +3,5 @@
  */
 
 export * from "./historyExport";
+export * from "./macroSnapshotCanvas";
 export * from "./units";

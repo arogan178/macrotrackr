@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>MacroTrackr</Name>
+  <Repository>ghcr.io/arogan178/macrotrackr-backend:latest</Repository>
+  <Registry>https://ghcr.io/arogan178/macrotrackr-backend</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/arogan178/macrotrackr/issues</Support>
+  <Project>https://github.com/arogan178/macrotrackr</Project>
+  <Overview>MacroTrackr is an open-source, modern nutrition and macronutrient tracking application designed for self-hosters. Track calories, macros, custom meals, and daily fitness goals with local SQLite data storage and full privacy.</Overview>
+  <Category>Productivity: Tools: Health:</Category>
+  <WebUI>http://[IP]:[PORT:5173]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/arogan178/macrotrackr/main/templates/unraid/macrotrackr.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png</Icon>
+  <ExtraParams></ExtraParams>
+  <PostArgs></PostArgs>
+  <CPUset></CPUset>
+  <DateInstalled></DateInstalled>
+  <DonateText></DonateText>
+  <DonateLink></DonateLink>
+  <Requires></Requires>
+  <Config Name="Web UI Port" Target="80" Default="5173" Mode="tcp" Description="Host port for web user interface access." Type="Port" Display="always" Required="true" Mask="false">5173</Config>
+  <Config Name="Backend API Port (Internal)" Target="3000" Default="3000" Mode="tcp" Description="Internal API port." Type="Port" Display="advanced" Required="false" Mask="false">3000</Config>
+  <Config Name="App Data Storage" Target="/data" Default="/mnt/user/appdata/macrotrackr/data" Mode="rw" Description="Host storage path for SQLite database file." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/macrotrackr/data</Config>
+  <Config Name="DATABASE_PATH" Target="DATABASE_PATH" Default="/data/macrotrackr.db" Description="Path inside container where SQLite database is located." Type="Variable" Display="always" Required="true" Mask="false">/data/macrotrackr.db</Config>
+  <Config Name="APP_URL" Target="APP_URL" Default="http://localhost:5173" Description="Full public URL to access MacroTrackr UI (e.g. http://192.168.1.100:5173)." Type="Variable" Display="always" Required="true" Mask="false">http://localhost:5173</Config>
+  <Config Name="CORS_ORIGIN" Target="CORS_ORIGIN" Default="http://localhost:5173" Description="Allowed CORS origins for API requests (match your APP_URL)." Type="Variable" Display="advanced" Required="false" Mask="false">http://localhost:5173</Config>
+  <Config Name="APP_MODE" Target="APP_MODE" Default="self-hosted" Description="Application deployment mode (self-hosted or managed)." Type="Variable" Display="advanced" Required="false" Mask="false">self-hosted</Config>
+  <Config Name="AUTH_MODE" Target="AUTH_MODE" Default="local" Description="Authentication provider (local or clerk)." Type="Variable" Display="advanced" Required="false" Mask="false">local</Config>
+  <Config Name="BILLING_MODE" Target="BILLING_MODE" Default="disabled" Description="Billing integration mode (disabled or managed)." Type="Variable" Display="advanced" Required="false" Mask="false">disabled</Config>
+  <Config Name="ANALYTICS_MODE" Target="ANALYTICS_MODE" Default="disabled" Description="Analytics provider mode (disabled or posthog)." Type="Variable" Display="advanced" Required="false" Mask="false">disabled</Config>
+  <Config Name="EMAIL_MODE" Target="EMAIL_MODE" Default="disabled" Description="Email notification provider (disabled, smtp, or resend)." Type="Variable" Display="advanced" Required="false" Mask="false">disabled</Config>
+  <Config Name="TRUST_PROXY" Target="TRUST_PROXY" Default="true" Description="Trust proxy headers (X-Real-IP / X-Forwarded-For) from frontend proxy." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+</Container>

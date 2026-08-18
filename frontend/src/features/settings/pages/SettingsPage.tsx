@@ -13,6 +13,7 @@ import {
   LogoutIcon,
   Modal,
   TabBar,
+  UploadIcon,
   UserIcon,
 } from "@/components/ui";
 import { isClerkAuthMode, isManagedBillingMode } from "@/config/runtime";
@@ -20,6 +21,7 @@ import {
   BillingForm,
   ChangePasswordForm,
   ConnectedAccountsForm,
+  DataImporter,
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
@@ -29,7 +31,7 @@ import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
-type TabType = "profile" | "billing" | "accounts" | "security";
+type TabType = "profile" | "data" | "billing" | "accounts" | "security";
 
 const BILLING_TAB_ENABLED = isManagedBillingMode;
 const ACCOUNTS_TAB_ENABLED = isClerkAuthMode;
@@ -37,6 +39,7 @@ const ACCOUNTS_TAB_ENABLED = isClerkAuthMode;
 // Valid tab values for validation
 const VALID_TABS = new Set<TabType>([
   "profile",
+  "data",
   ...(BILLING_TAB_ENABLED ? (["billing"] as TabType[]) : []),
   ...(ACCOUNTS_TAB_ENABLED ? (["accounts"] as TabType[]) : []),
   "security",
@@ -231,6 +234,15 @@ export default function SettingsPage() {
                   </>
                 ),
               },
+              {
+                key: "data",
+                label: (
+                  <>
+                    <UploadIcon className="h-4 w-4" />
+                    Import Data
+                  </>
+                ),
+              },
               ...(BILLING_TAB_ENABLED
                 ? [
                     {
@@ -296,6 +308,11 @@ export default function SettingsPage() {
                   isSaving={isSaving}
                   hasChanges={hasSettingsChanges}
                 />
+              </PageTransition>
+            )}
+            {activeTab === "data" && (
+              <PageTransition key="data">
+                <DataImporter />
               </PageTransition>
             )}
             {BILLING_TAB_ENABLED && activeTab === "billing" && (

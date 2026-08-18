@@ -52,6 +52,7 @@ import {
   ScanBarcode,
   Search,
   Settings,
+  Share2,
   ShieldCheck,
   Sparkles,
   Star,
@@ -61,6 +62,7 @@ import {
   TrendingDown,
   TrendingUp,
   Unlock,
+  Upload,
   User,
   Wheat,
   X,
@@ -136,6 +138,8 @@ export const ReportingIcon = createIcon(BarChart2);
 export const SettingsIcon = createIcon(Settings);
 export const LogoutIcon = createIcon(LogOut);
 export const ExportIcon = createIcon(Download);
+export const UploadIcon = createIcon(Upload);
+export const ImportIcon = createIcon(Upload);
 export const WarningIcon = createIcon(AlertCircle);
 export const PlusCircleIcon = createIcon(PlusCircle);
 export const CalorieIcon = createIcon(Flame);
@@ -178,6 +182,8 @@ export const CopyIcon = createIcon(Copy);
 export const Link2Icon = createIcon(Link2);
 export const BarcodeIcon = createIcon(ScanBarcode);
 export const CameraIcon = createIcon(Camera);
+export const ShareIcon = createIcon(Share2);
+export const Share2Icon = createIcon(Share2);
 
 // Social Provider Icons
 const GOOGLE_BRAND_COLORS = {

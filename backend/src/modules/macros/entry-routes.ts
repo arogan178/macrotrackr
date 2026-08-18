@@ -3,6 +3,7 @@ import {
   safeExecute,
   safeQuery,
   safeQueryAll,
+  withTransaction,
   type MacroEntryRow,
 } from "../../lib/data/database";
 import { getLocalDate } from "../../lib/utils/dates";
@@ -17,6 +18,12 @@ import {
 } from "../../lib/http/mutation-contract";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
+import { generateId } from "../../utils/id-generator";
+import {
+  normalizeDate,
+  normalizeTime,
+  parseImportFile,
+} from "./importer";
 import { MacroSchemas } from "./schemas";
 import {
   type MacroEntryResponse,
@@ -285,6 +292,146 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         response: MacroSchemas.macroEntryResponse,
         detail: {
           summary: "Add a new macro entry for the user",
+          tags: ["Macros"],
+        },
+      },
+    )
+    .post(
+      "/import",
+      async (context: MacrosRouteContext) => {
+        const { db, body } = context;
+        const internalUserId = context.authenticatedUser.userId;
+
+        if (!internalUserId) {
+          throw new AuthenticationError("Authentication required.");
+        }
+
+        if (!body) {
+          throw new BadRequestError("Request body is required.");
+        }
+
+        const payload = body as {
+          source?: string;
+          entries?: Array<{
+            protein: number;
+            carbs: number;
+            fats: number;
+            mealType: "breakfast" | "lunch" | "dinner" | "snack";
+            mealName?: string;
+            entryDate: string;
+            entryTime?: string;
+            ingredients?: unknown[];
+          }>;
+          weightLogs?: Array<{
+            timestamp: string;
+            weight: number;
+          }>;
+          rawData?: string;
+        };
+
+        let entries = payload.entries ?? [];
+        let weightLogs = payload.weightLogs ?? [];
+
+        if (entries.length === 0 && weightLogs.length === 0 && payload.rawData) {
+          const parsed = parseImportFile(
+            payload.rawData,
+            payload.source as any,
+          );
+          entries = parsed.entries;
+          weightLogs = parsed.weightLogs;
+        }
+
+        if (entries.length === 0 && weightLogs.length === 0) {
+          throw new BadRequestError(
+            "No valid macro entries or weight logs found in import payload.",
+          );
+        }
+
+        const dates = new Set<string>();
+
+        withTransaction(db, () => {
+          if (entries.length > 0) {
+            const insertMacroStmt = db.prepare(
+              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            );
+
+            for (const entry of entries) {
+              const ingredientsJson = entry.ingredients
+                ? JSON.stringify(entry.ingredients)
+                : null;
+              const date = normalizeDate(entry.entryDate) ?? entry.entryDate;
+              dates.add(date);
+              const time = normalizeTime(entry.entryTime, entry.mealType);
+              insertMacroStmt.run(
+                internalUserId,
+                Math.max(0, entry.protein),
+                Math.max(0, entry.carbs),
+                Math.max(0, entry.fats),
+                entry.mealType,
+                entry.mealName ?? "",
+                date,
+                time,
+                ingredientsJson,
+              );
+            }
+          }
+
+          if (weightLogs.length > 0) {
+            const insertWeightStmt = db.prepare(
+              `INSERT INTO weight_log (id, user_id, timestamp, weight)
+               VALUES (?, ?, ?, ?)`,
+            );
+
+            for (const wl of weightLogs) {
+              const date = normalizeDate(wl.timestamp) ?? wl.timestamp;
+              const dateOnly = date.split("T")[0];
+              if (dateOnly) {
+                dates.add(dateOnly);
+              }
+              const id = generateId("wl");
+              insertWeightStmt.run(id, internalUserId, date, wl.weight);
+            }
+          }
+        });
+
+        publishUserSyncEvent(internalUserId, "macros");
+        if (weightLogs.length > 0) {
+          publishUserSyncEvent(internalUserId, "goals");
+        }
+
+        const sortedDates = Array.from(dates).sort();
+        const dateRange =
+          sortedDates.length > 0 && sortedDates[0] && sortedDates[sortedDates.length - 1]
+            ? {
+                start: sortedDates[0],
+                end: sortedDates[sortedDates.length - 1]!,
+              }
+            : null;
+
+        return {
+          success: true,
+          importedCount: {
+            macros: entries.length,
+            weightLogs: weightLogs.length,
+          },
+          dateRange,
+          message: `Successfully imported ${entries.length} macro ${
+            entries.length === 1 ? "entry" : "entries"
+          }${
+            weightLogs.length > 0
+              ? ` and ${weightLogs.length} weight ${
+                  weightLogs.length === 1 ? "record" : "records"
+                }`
+              : ""
+          }.`,
+        };
+      },
+      {
+        body: MacroSchemas.importDataPayload,
+        response: MacroSchemas.importDataResponse,
+        detail: {
+          summary: "Bulk import macro entries and weight records",
           tags: ["Macros"],
         },
       },

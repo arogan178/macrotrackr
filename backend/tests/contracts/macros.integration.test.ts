@@ -70,4 +70,83 @@ describe("Macros Module Integration", () => {
     });
     expect(body.macroTarget).not.toHaveProperty("protein_percentage");
   });
+
+  it("POST /api/macros/import imports structured entries and weight logs", async () => {
+    const payload = {
+      source: "macrotrackr",
+      entries: [
+        {
+          protein: 30,
+          carbs: 40,
+          fats: 10,
+          mealType: "breakfast",
+          mealName: "Oatmeal and Shake",
+          entryDate: "2026-07-01",
+          entryTime: "08:00:00",
+        },
+        {
+          protein: 45,
+          carbs: 60,
+          fats: 15,
+          mealType: "lunch",
+          mealName: "Chicken and Rice",
+          entryDate: "2026-07-01",
+          entryTime: "12:30:00",
+        },
+      ],
+      weightLogs: [
+        {
+          timestamp: "2026-07-01",
+          weight: 78.5,
+        },
+      ],
+    };
+
+    const res = await app.handle(
+      new Request("http://localhost/api/macros/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.importedCount.macros).toBe(2);
+    expect(body.importedCount.weightLogs).toBe(1);
+    expect(body.dateRange).toEqual({
+      start: "2026-07-01",
+      end: "2026-07-01",
+    });
+
+    const entriesCount = db
+      .prepare("SELECT COUNT(*) as count FROM macro_entries WHERE user_id = 1")
+      .get() as { count: number };
+    expect(entriesCount.count).toBe(2);
+
+    const weightCount = db
+      .prepare("SELECT COUNT(*) as count FROM weight_log WHERE user_id = 1")
+      .get() as { count: number };
+    expect(weightCount.count).toBe(1);
+  });
+
+  it("POST /api/macros/import parses raw CSV data automatically", async () => {
+    const rawCsv = `Date,Meal,Calories,Fat (g),Carbohydrates (g),Protein (g),Note
+2026-07-02,Breakfast,400,10,50,25,Pancakes
+2026-07-02,Dinner,600,20,40,40,Salmon`;
+
+    const res = await app.handle(
+      new Request("http://localhost/api/macros/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rawData: rawCsv }),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.importedCount.macros).toBe(2);
+  });
 });

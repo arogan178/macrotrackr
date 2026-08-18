@@ -68,6 +68,18 @@ bun run typecheck
 bun run lint
 ```
 
+## 1-Click App Store Manifests & Homelab Templates
+
+MacroTrackr supports 1-click deployments across popular self-hosted homelab platforms:
+
+- **Unraid**: Community Applications template (`templates/unraid/macrotrackr.xml`)
+- **CasaOS / ZimaOS**: App Store manifest and compose (`templates/casaos/docker-compose.yml`, `templates/casaos/macrotrackr.json`)
+- **Umbrel**: Umbrel App Store package (`templates/umbrel/umbrel-app.yml`, `templates/umbrel/docker-compose.yml`)
+- **Cosmos Cloud**: ServApp template (`templates/cosmos/servapp.json`)
+- **TrueNAS SCALE**: Electric Eel / Dockge compose template (`templates/truenas/docker-compose.yml`)
+
+See the full [Self-Hosting & Templates Guide](docs/self-hosting.md) for detailed platform-specific installation steps, volume configuration, and environment parameters.
+
 ## Self-Hosting with Docker Compose
 
 This repository includes a self-host starter compose stack.
