@@ -8,7 +8,6 @@ import {
   CheckCircleIcon,
   CheckIcon,
   CloseIcon,
-  SparklesIcon,
 } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
@@ -185,14 +184,7 @@ export default function ComparisonArticlePage() {
 
           {/* Hero Header */}
           <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                <SparklesIcon className="h-3.5 w-3.5" />
-                {comparison.badge}
-              </span>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-bold tracking-tight">
+            <h1 className="text-3xl font-bold tracking-tight">
               {comparison.title}
             </h1>
             <p className="mt-3 text-lg leading-relaxed text-muted">
