@@ -11,7 +11,6 @@ import {
   GithubIcon,
   GoalsIcon,
   HomeIcon,
-  LogoutIcon,
   MenuIcon,
   ReportingIcon,
   SettingsIcon,
@@ -20,7 +19,6 @@ import {
   CALCULATOR_TOOLS,
   TOOLS_HUB_PATH,
 } from "@/features/landing/tools/toolsCatalog";
-import { useLogout } from "@/hooks/auth/useAuthQueries";
 import { DOCS_URL, GITHUB_REPO_URL } from "@/utils/appConstants";
 
 import LogoButton from "./LogoButton";
@@ -109,7 +107,7 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
           aria-label={label}
           style={{ touchAction: "manipulation" }}
         >
-          <div className="flex min-w-0 items-center gap-2 lg:gap-4">
+          <div className="flex min-w-0 items-center gap-2 md:gap-4">
             <LogoButton compact ariaLabel={logoLabel} onClick={onLogoClick} />
             {leading}
           </div>
@@ -125,7 +123,7 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
                 onClick={menu.onToggle}
                 aria-label={menu.isOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menu.isOpen}
-                className={`${iconButtonClasses} lg:hidden ${
+                className={`${iconButtonClasses} md:hidden ${
                   menu.isOpen ? "bg-surface-2 text-foreground" : ""
                 }`}
               >
@@ -244,41 +242,7 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
 };
 
 const AppModeHeader: React.FC = () => {
-  const { navigate, isActiveRoute, goTo, isSheetOpen, setIsSheetOpen } =
-    useHeaderNavigation();
-  const shouldReduceMotion = useReducedMotion() ?? false;
-  const logoutMutation = useLogout();
-
-  const handleLogout = useCallback(() => {
-    logoutMutation.mutate();
-    setIsSheetOpen(false);
-  }, [logoutMutation, setIsSheetOpen]);
-
-  const items = useMemo<MobileNavItem[]>(
-    () =>
-      APP_NAV_ITEMS.map((item) => ({
-        key: item.path,
-        label: item.label,
-        icon: item.icon,
-        isActive: isActiveRoute(item.path),
-        onSelect: () => goTo(item.path),
-      })),
-    [goTo, isActiveRoute],
-  );
-
-  const actions = useMemo<MobileNavAction[]>(
-    () => [
-      {
-        key: "logout",
-        label: "Log out",
-        icon: LogoutIcon,
-        onSelect: handleLogout,
-        disabled: logoutMutation.isPending,
-        tone: "danger",
-      },
-    ],
-    [handleLogout, logoutMutation.isPending],
-  );
+  const { navigate, isActiveRoute, goTo } = useHeaderNavigation();
 
   return (
     <HeaderFrame
@@ -288,7 +252,7 @@ const AppModeHeader: React.FC = () => {
         navigate({ to: "/home", search: { limit: 20, offset: 0 } })
       }
       leading={
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 md:flex">
           {APP_NAV_ITEMS.map(({ path, label, icon: Icon }) => {
             const isActive = isActiveRoute(path);
 
@@ -309,38 +273,7 @@ const AppModeHeader: React.FC = () => {
           })}
         </div>
       }
-      trailing={
-        <div className="hidden lg:flex">
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={logoutMutation.isPending}
-            className={getButtonClasses(
-              "ghost",
-              "sm",
-              false,
-              "gap-2.5 rounded-full font-medium",
-            )}
-          >
-            <LogoutIcon className="h-4 w-4" />
-            <span>Log out</span>
-          </button>
-        </div>
-      }
-      menu={{
-        isOpen: isSheetOpen,
-        onToggle: () => setIsSheetOpen((open) => !open),
-      }}
-    >
-      <MobileNavSheet
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        items={items}
-        actions={actions}
-        shouldReduceMotion={shouldReduceMotion}
-        label="Main navigation"
-      />
-    </HeaderFrame>
+    />
   );
 };
 
@@ -412,7 +345,7 @@ const PublicModeHeader: React.FC = () => {
       logoLabel="MacroTrackr home"
       onLogoClick={() => navigate({ to: "/" })}
       center={
-        <div className="hidden items-center justify-center gap-1 lg:flex lg:flex-1">
+        <div className="hidden items-center justify-center gap-1 md:flex md:flex-1">
           <ToolsDropdown
             isActive={isActiveRoute("/tools")}
             currentPath={pathname}
@@ -452,7 +385,7 @@ const PublicModeHeader: React.FC = () => {
         </div>
       }
       trailing={
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 md:flex">
           <Link
             to="/login"
             search={{ returnTo: undefined }}

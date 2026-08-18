@@ -472,7 +472,7 @@ const DesktopEntryTable = memo(
     );
 
     return (
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <div
           ref={tableContainerReference}
           className={`overflow-hidden rounded-control border border-border bg-surface shadow-xs ${shouldVirtualize ? "max-h-150 overflow-auto" : ""}`}

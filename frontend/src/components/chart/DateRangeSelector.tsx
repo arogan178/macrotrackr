@@ -83,7 +83,7 @@ export default function DateRangeSelector({
 
         {/* Export CSV Button aligned right on same line */}
         <div className="shrink-0">
-          <div className="flex lg:hidden">
+          <div className="flex md:hidden">
             <IconButton
               variant="export"
               ariaLabel="Export data as CSV file"
@@ -91,7 +91,7 @@ export default function DateRangeSelector({
               disabled={isExportDisabled}
             />
           </div>
-          <div className="hidden lg:flex">
+          <div className="hidden md:flex">
             <Button
               onClick={onExportClick}
               disabled={isExportDisabled}

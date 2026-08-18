@@ -6,7 +6,6 @@ import AppHeader from "./AppHeader";
 
 let pathname = "/home";
 const navigateMock = vi.fn();
-const logoutMock = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname }),
@@ -25,15 +24,10 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-vi.mock("@/hooks/auth/useAuthQueries", () => ({
-  useLogout: () => ({ mutate: logoutMock, isPending: false }),
-}));
-
 describe("AppHeader", () => {
   beforeEach(() => {
     pathname = "/home";
     navigateMock.mockReset();
-    logoutMock.mockReset();
   });
 
   it("renders exactly one navigation landmark per mode", () => {
@@ -51,7 +45,6 @@ describe("AppHeader", () => {
     for (const label of ["Home", "Goals", "Analytics", "Settings"]) {
       expect(within(nav).getByText(label)).toBeInTheDocument();
     }
-    expect(within(nav).getByText("Log out")).toBeInTheDocument();
   });
 
   it("marks the current app route as the current page", () => {
@@ -61,6 +54,15 @@ describe("AppHeader", () => {
     const current = screen.getAllByRole("button", { current: "page" });
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveTextContent("Goals");
+  });
+
+  it("navigates when an app route button is clicked", async () => {
+    render(<AppHeader mode="app" />);
+
+    const nav = screen.getByRole("navigation", { name: "Main navigation" });
+    await userEvent.click(within(nav).getByText("Analytics"));
+
+    expect(navigateMock).toHaveBeenCalledWith({ to: "/reporting" });
   });
 
   it("carries the public destinations in public mode", () => {
@@ -94,16 +96,12 @@ describe("AppHeader", () => {
     }
   });
 
-  it("opens the same sheet for the app destinations", async () => {
+  it("has no menu button in app mode because MobileTabBar handles mobile navigation", () => {
     render(<AppHeader mode="app" />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Open menu" }));
-
-    const sheet = screen.getByRole("dialog", { name: "Main navigation" });
-    expect(within(sheet).getByText("Analytics")).toBeInTheDocument();
-
-    await userEvent.click(within(sheet).getByText("Analytics"));
-    expect(navigateMock).toHaveBeenCalledWith({ to: "/reporting" });
+    expect(
+      screen.queryByRole("button", { name: "Open menu" }),
+    ).not.toBeInTheDocument();
   });
 
   it("has no menu button in minimal mode", () => {

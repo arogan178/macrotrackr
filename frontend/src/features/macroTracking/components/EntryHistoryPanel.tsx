@@ -327,7 +327,7 @@ const EntryHistoryComponent = function EntryHistory({
   // are the only motion here that carries information.
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between gap-4 lg:hidden">
+      <div className="mb-5 flex items-center justify-between gap-4 md:hidden">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Entry History
@@ -362,7 +362,7 @@ const EntryHistoryComponent = function EntryHistory({
         </div>
       </div>
 
-      <div className="mb-6 hidden flex-row items-center justify-between gap-4 lg:flex">
+      <div className="mb-6 hidden flex-row items-center justify-between gap-4 md:flex">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Entry History
@@ -417,11 +417,11 @@ const EntryHistoryComponent = function EntryHistory({
       ) : (
         <div className="overflow-hidden rounded-control border border-border bg-transparent">
           <EntryHistoryContext.Provider value={controller}>
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <DesktopEntryTable groupedEntries={displayedEntries} />
             </div>
 
-            <div className="lg:hidden">
+            <div className="md:hidden">
               <MobileEntryCards groupedEntries={displayedEntries} />
             </div>
           </EntryHistoryContext.Provider>
@@ -483,10 +483,7 @@ const EntryHistoryComponent = function EntryHistory({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 24 }}
               transition={{ duration: DURATIONS.base, ease: EASINGS.modal }}
-              // Sits above the tab bar and clear of the home indicator; it
-              // used to be pinned to bottom-6 with no safe-area padding.
-              style={{ bottom: "calc(5.5rem + var(--sab))" }}
-              className="fixed left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 md:gap-4 md:px-6 md:py-3.5 lg:bottom-6"
+              className="fixed bottom-[calc(5.5rem+var(--sab))] left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 md:bottom-6 md:gap-4 md:px-6 md:py-3.5"
             >
               <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                 <span className="text-sm font-medium whitespace-nowrap text-foreground">

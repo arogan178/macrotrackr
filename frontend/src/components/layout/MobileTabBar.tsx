@@ -74,7 +74,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ onLog }) => {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-70 flex items-stretch border-t border-border bg-surface pb-[var(--sab)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-70 flex items-stretch border-t border-border bg-surface pb-[var(--sab)] md:hidden"
     >
       {left.map(renderTab)}
 
