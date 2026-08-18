@@ -11,7 +11,11 @@ permissions:
   packages: write
 
 jobs:
+  quality:
+    uses: ./.github/workflows/quality-gate.yml
+
   publish-backend:
+    needs: quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -57,8 +61,11 @@ jobs:
           push: true
           tags: ${{ steps.backend-meta.outputs.tags }}
           labels: ${{ steps.backend-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   publish-frontend:
+    needs: quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -104,3 +111,33 @@ jobs:
           push: true
           tags: ${{ steps.frontend-meta.outputs.tags }}
           labels: ${{ steps.frontend-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  dispatch-deploy:
+    needs: [publish-backend, publish-frontend]
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate dispatch source values
+        run: |
+          set -euo pipefail
+
+          if [ -z "${{ github.sha }}" ]; then
+            echo "Missing github.sha"
+            exit 1
+          fi
+
+          if [ "${{ github.repository }}" != "arogan178/macrotrackr" ]; then
+            echo "Unexpected repository: ${{ github.repository }}"
+            exit 1
+          fi
+
+      - name: Dispatch to private infra repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_REPO_DISPATCH }}
+          repository: arogan178/macrotrackr-infra
+          event-type: deploy-trigger
+          client-payload: >-
+            {"sha":"${{ github.sha }}","ref":"${{ github.ref }}","repository":"${{ github.repository }}","actor":"${{ github.actor }}"}
