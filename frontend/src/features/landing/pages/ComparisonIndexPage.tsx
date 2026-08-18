@@ -48,10 +48,6 @@ export default function ComparisonIndexPage() {
       <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-10 text-center">
-            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Transparent & Objective Comparisons
-            </span>
             <h1 className="text-3xl font-bold tracking-tight lg:text-5xl">
               Compare {APP_NAME}
             </h1>
@@ -103,11 +99,7 @@ export default function ComparisonIndexPage() {
                   {MASTER_COMPARISON_MATRIX.map((row, index) => (
                     <tr
                       key={index}
-                      className={
-                        row.highlight
-                          ? "bg-primary/5 transition-colors hover:bg-primary/10"
-                          : "transition-colors hover:bg-surface-2"
-                      }
+                      className="transition-colors hover:bg-surface-2"
                     >
                       <td className="py-3 pr-4 pl-5 font-medium text-foreground">
                         {row.feature}
@@ -141,12 +133,9 @@ export default function ComparisonIndexPage() {
                 <Link
                   to="/compare/$slug"
                   params={{ slug: comp.slug }}
-                  className={`group relative flex h-full min-h-48 flex-col justify-between overflow-hidden ${calculatorCardClass} transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`}
+                  className={`group relative flex h-full min-h-40 flex-col justify-between overflow-hidden ${calculatorCardClass} transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`}
                 >
                   <div>
-                    <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-primary uppercase">
-                      {comp.badge}
-                    </span>
                     <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                       {comp.shortTitle}
                     </h3>
