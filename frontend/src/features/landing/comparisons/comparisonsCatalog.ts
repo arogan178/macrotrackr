@@ -4,7 +4,6 @@ export interface ComparisonFeatureRow {
   feature: string;
   macrotrackr: string;
   competitor: string;
-  highlight?: boolean;
 }
 
 export interface MasterComparisonRow {
@@ -14,7 +13,6 @@ export interface MasterComparisonRow {
   macrofactor: string;
   cronometer: string;
   loseIt: string;
-  highlight?: boolean;
 }
 
 export interface ComparisonDetail {
@@ -156,43 +154,49 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
     ],
     matrix: [
       {
+        feature: "Free Tier",
+        macrotrackr: "Full (Self-Hosted)",
+        competitor: "Limited (Ads)",
+      },
+      {
+        feature: "Cloud / Premium",
+        macrotrackr: "$3.99/mo",
+        competitor: "$19.99/mo",
+      },
+      {
         feature: "Barcode Scanner",
-        macrotrackr: "Included Free",
+        macrotrackr: "Free",
         competitor: "Paywalled ($19.99/mo)",
-        highlight: true,
       },
       {
-        feature: "Custom Macro Targets (Grams & %)",
-        macrotrackr: "Included Free",
-        competitor: "Limited on Free tier",
-        highlight: true,
+        feature: "Custom Macro Targets",
+        macrotrackr: "Free",
+        competitor: "Paywalled",
       },
       {
-        feature: "Ad-Free Clean Interface",
+        feature: "Ad-Free Interface",
         macrotrackr: "100% Ad-Free",
-        competitor: "Heavy Ads on Free",
-        highlight: true,
+        competitor: "Ads on Free",
       },
       {
-        feature: "Self-Hostable (Docker / SQLite)",
-        macrotrackr: "Yes (AGPLv3 Open Source)",
-        competitor: "No (Proprietary)",
-        highlight: true,
+        feature: "Self-Hostable",
+        macrotrackr: "Yes (AGPLv3)",
+        competitor: "No",
       },
       {
-        feature: "Weekly Rolling Averages & Trends",
-        macrotrackr: "Included Free",
-        competitor: "Premium Only",
+        feature: "Weekly Trend Averages",
+        macrotrackr: "Free",
+        competitor: "Paywalled",
       },
       {
-        feature: "Multi-Ingredient Custom Meals",
-        macrotrackr: "Included Free",
+        feature: "Multi-Ingredient Meals",
+        macrotrackr: "Free",
         competitor: "Included",
       },
       {
-        feature: "Data Export (JSON / CSV)",
-        macrotrackr: "Included Free",
-        competitor: "Premium Only",
+        feature: "Data Export",
+        macrotrackr: "Free",
+        competitor: "Paywalled",
       },
     ],
     faqs: [
@@ -248,37 +252,39 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
     ],
     matrix: [
       {
-        feature: "Price",
-        macrotrackr: "Free Core & Self-Hosted / $3.99 Cloud",
-        competitor: "$11.99 / month (No free tier)",
-        highlight: true,
+        feature: "Free Tier",
+        macrotrackr: "Full (Self-Hosted)",
+        competitor: "None",
+      },
+      {
+        feature: "Cloud / Premium",
+        macrotrackr: "$3.99/mo",
+        competitor: "$11.99/mo",
       },
       {
         feature: "Self-Hostable",
-        macrotrackr: "Yes (Docker + SQLite)",
-        competitor: "No (Closed Source)",
-        highlight: true,
+        macrotrackr: "Yes (AGPLv3)",
+        competitor: "No",
       },
       {
-        feature: "Weekly Rolling Averages",
-        macrotrackr: "Included Free",
-        competitor: "Included in Paid Sub",
+        feature: "Weekly Trend Averages",
+        macrotrackr: "Free",
+        competitor: "Included",
       },
       {
         feature: "Barcode Scanner",
-        macrotrackr: "Included Free",
-        competitor: "Included in Paid Sub",
+        macrotrackr: "Free",
+        competitor: "Included ($11.99/mo)",
       },
       {
         feature: "User Target Control",
-        macrotrackr: "Complete Manual & Percentage Control",
+        macrotrackr: "Full Control",
         competitor: "Algorithm Guided",
       },
       {
-        feature: "Open Source Codebase",
+        feature: "Open Source",
         macrotrackr: "Yes (AGPLv3)",
-        competitor: "No (Proprietary)",
-        highlight: true,
+        competitor: "No",
       },
     ],
     faqs: [
@@ -329,37 +335,39 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
     ],
     matrix: [
       {
+        feature: "Free Tier",
+        macrotrackr: "Full (Self-Hosted)",
+        competitor: "Limited (Ads)",
+      },
+      {
+        feature: "Cloud / Premium",
+        macrotrackr: "$3.99/mo",
+        competitor: "$9.99/mo",
+      },
+      {
         feature: "User Interface",
-        macrotrackr: "Streamlined, High-Density & Modern",
-        competitor: "Dense Spreadsheet / Micronutrient heavy",
-        highlight: true,
+        macrotrackr: "Streamlined & Modern",
+        competitor: "Dense / Spreadsheet",
       },
       {
         feature: "Advertisements",
-        macrotrackr: "Zero Ads (Always)",
-        competitor: "Banner Ads on Free Tier",
-        highlight: true,
+        macrotrackr: "Zero Ads",
+        competitor: "Banner Ads on Free",
       },
       {
         feature: "Barcode Scanner",
-        macrotrackr: "Included Free",
-        competitor: "Included Free",
+        macrotrackr: "Free",
+        competitor: "Free",
       },
       {
         feature: "Custom Macro Targets",
-        macrotrackr: "Included Free",
-        competitor: "Included Free",
+        macrotrackr: "Free",
+        competitor: "Free",
       },
       {
-        feature: "Self-Hosting",
-        macrotrackr: "Yes (Docker + SQLite)",
-        competitor: "No (Cloud Only)",
-        highlight: true,
-      },
-      {
-        feature: "Cloud Sync Option",
-        macrotrackr: "Available ($3.99/mo)",
-        competitor: "Available ($9.99/mo Gold)",
+        feature: "Self-Hostable",
+        macrotrackr: "Yes (AGPLv3)",
+        competitor: "No",
       },
     ],
     faqs: [
@@ -410,38 +418,44 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
     ],
     matrix: [
       {
-        feature: "Custom Macro Gram Goals",
-        macrotrackr: "Included Free",
-        competitor: "Paywalled ($39.99/yr)",
-        highlight: true,
+        feature: "Free Tier",
+        macrotrackr: "Full (Self-Hosted)",
+        competitor: "Limited (Ads)",
+      },
+      {
+        feature: "Cloud / Premium",
+        macrotrackr: "$3.99/mo",
+        competitor: "$9.99/mo",
+      },
+      {
+        feature: "Custom Macro Targets",
+        macrotrackr: "Free",
+        competitor: "Paywalled",
       },
       {
         feature: "Popups & Upsells",
         macrotrackr: "None",
-        competitor: "Frequent discount popups",
-        highlight: true,
+        competitor: "Frequent popups",
       },
       {
         feature: "Barcode Scanner",
-        macrotrackr: "Included Free",
-        competitor: "Included Free",
+        macrotrackr: "Free",
+        competitor: "Free",
       },
       {
-        feature: "Self-Hosting",
-        macrotrackr: "Yes (Docker + SQLite)",
+        feature: "Self-Hostable",
+        macrotrackr: "Yes (AGPLv3)",
         competitor: "No",
-        highlight: true,
       },
       {
-        feature: "Weekly Rolling Averages",
-        macrotrackr: "Included Free",
-        competitor: "Paywalled Insights",
+        feature: "Weekly Trend Averages",
+        macrotrackr: "Free",
+        competitor: "Paywalled",
       },
       {
         feature: "Open Source",
         macrotrackr: "Yes (AGPLv3)",
         competitor: "No",
-        highlight: true,
       },
     ],
     faqs: [

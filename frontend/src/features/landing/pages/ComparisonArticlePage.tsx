@@ -236,37 +236,42 @@ export default function ComparisonArticlePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {comparison.matrix.map((row) => (
-                    <tr
-                      key={row.feature}
-                      className={
-                        row.highlight
-                          ? "bg-surface-2 font-medium"
-                          : "transition-colors hover:bg-surface-2"
-                      }
-                    >
-                      <td className="px-4 py-3.5 font-medium text-foreground">
-                        {row.feature}
-                      </td>
-                      <td className="px-4 py-3.5 font-semibold text-primary">
-                        <div className="flex items-center gap-1.5">
-                          <CheckIcon className="h-4 w-4 shrink-0 text-primary" />
-                          <span>{row.macrotrackr}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-muted">
-                        <div className="flex items-center gap-1.5">
-                          {row.competitor.toLowerCase().includes("no") ||
-                          row.competitor.toLowerCase().includes("paywalled") ? (
-                            <CloseIcon className="h-4 w-4 shrink-0 text-muted" />
-                          ) : (
-                            <CheckIcon className="h-4 w-4 shrink-0 text-muted" />
-                          )}
-                          <span>{row.competitor}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {comparison.matrix.map((row) => {
+                    const isCompetitorNegative =
+                      row.competitor.toLowerCase().startsWith("no") ||
+                      row.competitor.toLowerCase().includes("paywalled") ||
+                      row.competitor.toLowerCase().includes("ads") ||
+                      row.competitor.toLowerCase().includes("dense") ||
+                      row.competitor.toLowerCase().includes("frequent") ||
+                      row.competitor.toLowerCase() === "none";
+
+                    return (
+                      <tr
+                        key={row.feature}
+                        className="transition-colors hover:bg-surface-2"
+                      >
+                        <td className="px-4 py-3.5 font-medium text-foreground">
+                          {row.feature}
+                        </td>
+                        <td className="px-4 py-3.5 font-semibold text-primary">
+                          <div className="flex items-center gap-1.5">
+                            <CheckIcon className="h-4 w-4 shrink-0 text-primary" />
+                            <span>{row.macrotrackr}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5 text-muted">
+                          <div className="flex items-center gap-1.5">
+                            {isCompetitorNegative ? (
+                              <CloseIcon className="h-4 w-4 shrink-0 text-muted" />
+                            ) : (
+                              <CheckIcon className="h-4 w-4 shrink-0 text-muted" />
+                            )}
+                            <span>{row.competitor}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
