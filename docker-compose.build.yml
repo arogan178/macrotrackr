@@ -12,7 +12,7 @@ services:
       args:
         VITE_API_URL: "${VITE_API_URL:-}"
         VITE_APP_URL: "${VITE_APP_URL:-https://macrotrackr.com}"
-        VITE_PUBLIC_APP_NAME: "${VITE_PUBLIC_APP_NAME:-Macro Tracker}"
+        VITE_PUBLIC_APP_NAME: "${VITE_PUBLIC_APP_NAME:-MacroTrackr}"
         VITE_SUPPORT_EMAIL: "${VITE_SUPPORT_EMAIL:-support@local.invalid}"
         VITE_AUTH_MODE: "${VITE_AUTH_MODE:-clerk}"
         VITE_BILLING_MODE: "${VITE_BILLING_MODE:-managed}"

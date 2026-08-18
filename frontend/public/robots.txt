@@ -1,4 +1,4 @@
-# robots.txt for Macro Tracker
+# robots.txt for MacroTrackr
 User-agent: *
 Allow: /
 Disallow: /home

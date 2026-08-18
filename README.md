@@ -1,6 +1,6 @@
-# Macro Tracker
+# MacroTrackr
 
-Macro Tracker is an AGPLv3 nutrition and macro tracking application designed for self-hosting.
+MacroTrackr is an AGPLv3 nutrition and macro tracking application designed for self-hosting.
 
 The backend uses SQLite with local authentication and billing disabled by default.
 

@@ -1,4 +1,4 @@
-# Macro Tracker - AI Coding Agent Instructions
+# MacroTrackr - AI Coding Agent Instructions
 
 Quick reference for AI agents working in this codebase.
 

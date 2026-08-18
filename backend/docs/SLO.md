@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the Service Level Objectives for the Macro Tracker application. SLOs are targets that define the expected level of service quality.
+This document defines the Service Level Objectives for the MacroTrackr application. SLOs are targets that define the expected level of service quality.
 
 ## Service Level Indicators (SLIs)
 

@@ -1,4 +1,4 @@
-# Macro Tracker Design System
+# MacroTrackr Design System
 
 A hybrid design language for nutrition tracking applications, combining Memoria-inspired premium aesthetics with brand-specific color coding for macro tracking.
 

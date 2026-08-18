@@ -1,6 +1,6 @@
 # Trademark Policy
 
-"Macro Tracker" and related logos are trademarks of the project maintainers.
+"MacroTrackr" and related logos are trademarks of the project maintainers.
 
 This repository is licensed under AGPLv3, but trademark rights are not granted
 by that license.

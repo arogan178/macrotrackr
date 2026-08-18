@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines alerting rules, escalation procedures, and runbooks for the Macro Tracker application.
+This document defines alerting rules, escalation procedures, and runbooks for the MacroTrackr application.
 
 ## Alert Channels
 
