@@ -1,7 +1,16 @@
 # robots.txt for Macro Tracker
-# Allow all crawlers to access the site
 User-agent: *
 Allow: /
+Disallow: /home
+Disallow: /goals
+Disallow: /reporting
+Disallow: /settings
+Disallow: /profile-setup
+Disallow: /auth-ready
+Disallow: /sso-callback
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
 
 # Sitemap
 Sitemap: https://macrotrackr.com/sitemap.xml

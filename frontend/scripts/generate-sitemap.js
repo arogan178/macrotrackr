@@ -14,9 +14,6 @@ const routes = [
   { path: "/tools/weight-loss-calculator", changefreq: "monthly", priority: 0.6 },
   { path: "/tools/protein-calculator", changefreq: "monthly", priority: 0.6 },
   { path: "/pricing", changefreq: "monthly", priority: 0.6 },
-  { path: "/login", changefreq: "monthly", priority: 0.5 },
-  { path: "/register", changefreq: "monthly", priority: 0.5 },
-  { path: "/reset-password", changefreq: "monthly", priority: 0.5 },
   { path: "/privacy", changefreq: "yearly", priority: 0.2 },
   { path: "/terms", changefreq: "yearly", priority: 0.2 },
 ];

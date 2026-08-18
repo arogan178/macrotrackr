@@ -55,24 +55,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://macrotrackr.com/login</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/register</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/reset-password</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://macrotrackr.com/privacy</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>yearly</changefreq>
