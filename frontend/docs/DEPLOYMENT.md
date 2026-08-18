@@ -9,7 +9,7 @@ Create a `frontend/.env` file (or provide equivalent CI env vars) with:
 ```env
 VITE_API_URL=http://localhost:3000
 VITE_APP_URL=http://localhost:5173
-VITE_PUBLIC_APP_NAME=Macro Tracker
+VITE_PUBLIC_APP_NAME=MacroTrackr
 VITE_SUPPORT_EMAIL=support@local.invalid
 
 # Runtime profile knobs

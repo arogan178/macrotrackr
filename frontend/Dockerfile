@@ -17,7 +17,7 @@ COPY shared /shared
 
 ARG VITE_API_URL=
 ARG VITE_APP_URL=http://localhost:5173
-ARG VITE_PUBLIC_APP_NAME="Macro Tracker"
+ARG VITE_PUBLIC_APP_NAME="MacroTrackr"
 ARG VITE_SUPPORT_EMAIL=support@local.invalid
 ARG VITE_AUTH_MODE=local
 ARG VITE_BILLING_MODE=disabled

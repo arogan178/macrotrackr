@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Macro Tracker.
+Thanks for helping improve MacroTrackr.
 
 ## Development setup
 

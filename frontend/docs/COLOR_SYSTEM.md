@@ -1,6 +1,6 @@
 # Color System
 
-This documents the actual color system used in Macro Tracker, defined via Tailwind CSS 4's `@theme` directive in `src/style.css`.
+This documents the actual color system used in MacroTrackr, defined via Tailwind CSS 4's `@theme` directive in `src/style.css`.
 
 ## Overview
 
