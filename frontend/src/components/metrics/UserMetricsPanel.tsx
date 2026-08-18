@@ -23,19 +23,18 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
           </div>
         ))}
       </div>
-      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-4">
+      <div className="hidden sm:grid grid-cols-2 gap-3.5">
         {[0, 1].map((index) => (
           <div
             key={index}
-            className="animate-pulse rounded-card border border-border bg-surface p-5"
+            className="animate-pulse rounded-card border border-border bg-surface p-3"
           >
-            <div className="flex items-start gap-4">
-              <div className="h-11 w-11 shrink-0 rounded-card bg-surface-2" />
-              <div className="min-w-0 flex-1">
-                <div className="mb-2 h-4 w-16 rounded-control bg-surface-2" />
-                <div className="h-8 w-2/5 rounded-control bg-surface-2" />
-              </div>
+            <div className="mb-1 flex items-center justify-between">
+              <div className="h-3 w-12 rounded-control bg-surface-2" />
+              <div className="h-3.5 w-3.5 rounded-control bg-surface-2" />
             </div>
+            <div className="mb-1 h-6 w-20 rounded-control bg-surface-2" />
+            <div className="h-2.5 w-14 rounded-control bg-surface-2" />
           </div>
         ))}
       </div>
@@ -90,7 +89,7 @@ function UserMetricsPanel({
           spelling out "Basal Metabolic Rate (BMR)" in a third-width column.
           The acronyms are the names people actually use for these, and the
           subtitle says what they mean without competing for the line. */}
-      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-4">
+      <div className="hidden sm:grid grid-cols-2 gap-3.5">
         {metrics.map(({ label, meaning, value, icon }) => (
           <MetricCard
             key={label}
@@ -100,6 +99,7 @@ function UserMetricsPanel({
             value={value || undefined}
             tone="primary"
             unit="kcal"
+            size="compact"
           />
         ))}
       </div>

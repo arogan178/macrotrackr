@@ -156,4 +156,44 @@ export const MacroSchemas = {
       rawQuantity: t.Optional(t.String()),
     })
   ),
+  importDataPayload: t.Object({
+    source: t.Optional(t.String()),
+    entries: t.Optional(
+      t.Array(
+        t.Object({
+          protein: MacroValueSchema,
+          carbs: MacroValueSchema,
+          fats: MacroValueSchema,
+          mealType: MealTypeSchema,
+          mealName: t.Optional(t.String()),
+          entryDate: DateSchema,
+          entryTime: t.Optional(t.String()),
+          ingredients: t.Optional(t.Nullable(t.Array(t.Unknown()))),
+        })
+      )
+    ),
+    weightLogs: t.Optional(
+      t.Array(
+        t.Object({
+          timestamp: t.String(),
+          weight: t.Number({ minimum: 0 }),
+        })
+      )
+    ),
+    rawData: t.Optional(t.String()),
+  }),
+  importDataResponse: t.Object({
+    success: t.Boolean(),
+    importedCount: t.Object({
+      macros: t.Number(),
+      weightLogs: t.Number(),
+    }),
+    dateRange: t.Nullable(
+      t.Object({
+        start: t.String(),
+        end: t.String(),
+      })
+    ),
+    message: t.String(),
+  }),
 };

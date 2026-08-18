@@ -7,6 +7,7 @@ import {
   ExportIcon,
   IconButton,
   LockIcon,
+  ShareIcon,
   TabBar,
 } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
@@ -16,6 +17,7 @@ interface DateRangeSelectorProps {
   currentRange: string;
   onRangeChange: (range: string) => void;
   onExportClick: () => void;
+  onShareClick?: () => void;
   isExportDisabled: boolean;
   disabledRanges?: string[];
   isPro?: boolean;
@@ -25,6 +27,7 @@ export default function DateRangeSelector({
   currentRange,
   onRangeChange,
   onExportClick,
+  onShareClick,
   isExportDisabled,
   disabledRanges = [],
   isPro = false,
@@ -81,8 +84,32 @@ export default function DateRangeSelector({
           )}
         </div>
 
-        {/* Export CSV Button aligned right on same line */}
-        <div className="shrink-0">
+        {/* Actions aligned right on same line */}
+        <div className="flex items-center gap-2 shrink-0">
+          {onShareClick && (
+            <>
+              <div className="flex md:hidden">
+                <IconButton
+                  variant="share"
+                  ariaLabel="Share macro snapshot"
+                  onClick={onShareClick}
+                  disabled={isExportDisabled}
+                />
+              </div>
+              <div className="hidden md:flex">
+                <Button
+                  onClick={onShareClick}
+                  disabled={isExportDisabled}
+                  ariaLabel="Share macro snapshot"
+                  variant="secondary"
+                  leftIcon={<ShareIcon size="sm" />}
+                >
+                  Share Snapshot
+                </Button>
+              </div>
+            </>
+          )}
+
           <div className="flex md:hidden">
             <IconButton
               variant="export"

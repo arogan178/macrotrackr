@@ -271,4 +271,48 @@ export const macrosApi = {
 
     return null;
   },
+
+  /**
+   * Bulk import parsed or raw macro entries and weight records
+   * @throws {ApiError}
+   */
+  importData: async (payload: {
+    source?: string;
+    entries?: Array<{
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: "breakfast" | "lunch" | "dinner" | "snack";
+      mealName?: string;
+      entryDate: string;
+      entryTime?: string;
+      ingredients?: unknown[];
+    }>;
+    weightLogs?: Array<{ timestamp: string; weight: number }>;
+    rawData?: string;
+  }): Promise<{
+    success: boolean;
+    importedCount: {
+      macros: number;
+      weightLogs: number;
+    };
+    dateRange: {
+      start: string;
+      end: string;
+    } | null;
+    message: string;
+  }> => {
+    return apiClient.post<{
+      success: boolean;
+      importedCount: {
+        macros: number;
+        weightLogs: number;
+      };
+      dateRange: {
+        start: string;
+        end: string;
+      } | null;
+      message: string;
+    }>("/api/macros/import", payload);
+  },
 };

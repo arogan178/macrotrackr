@@ -1,0 +1,58 @@
+{
+  "name": "MacroTrackr",
+  "description": "MacroTrackr is an open-source nutrition and macronutrient tracking application designed for self-hosting with local SQLite storage.",
+  "icon": "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png",
+  "category": "Health",
+  "tags": [
+    "nutrition",
+    "fitness",
+    "macros",
+    "health",
+    "tracker"
+  ],
+  "routes": [
+    {
+      "name": "macrotrackr-ui",
+      "target": "http://macrotrackr-frontend:80",
+      "mode": "SERVAPP",
+      "smartShield": {
+        "enabled": true
+      }
+    }
+  ],
+  "compose": {
+    "version": "3.8",
+    "services": {
+      "backend": {
+        "image": "ghcr.io/arogan178/macrotrackr-backend:latest",
+        "container_name": "macrotrackr-backend",
+        "restart": "unless-stopped",
+        "volumes": [
+          "{DATA_PATH}/macrotrackr/data:/data"
+        ],
+        "environment": [
+          "DATABASE_PATH=/data/macrotrackr.db",
+          "APP_MODE=self-hosted",
+          "AUTH_MODE=local",
+          "BILLING_MODE=disabled",
+          "ANALYTICS_MODE=disabled",
+          "EMAIL_MODE=disabled",
+          "APP_URL=http://localhost:5173",
+          "CORS_ORIGIN=http://localhost:5173",
+          "TRUST_PROXY=true"
+        ]
+      },
+      "frontend": {
+        "image": "ghcr.io/arogan178/macrotrackr-frontend:latest",
+        "container_name": "macrotrackr-frontend",
+        "restart": "unless-stopped",
+        "depends_on": [
+          "backend"
+        ],
+        "ports": [
+          "5173:80"
+        ]
+      }
+    }
+  }
+}

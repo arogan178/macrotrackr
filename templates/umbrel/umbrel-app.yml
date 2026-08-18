@@ -1,0 +1,33 @@
+manifestVersion: 1.1
+id: macrotrackr
+name: MacroTrackr
+tagline: Modern self-hosted nutrition and macronutrient tracker
+icon: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
+category: Health
+version: "1.0.0"
+port: 5173
+description: >-
+  MacroTrackr is an open-source, privacy-first nutrition and macronutrient tracking application designed for self-hosters.
+  
+  Features:
+  - Daily calorie and macronutrient tracking (Protein, Carbs, Fat)
+  - Custom food database and recipe creation
+  - Progress charts and nutrition history
+  - Local SQLite persistence with zero telemetry
+  - Mobile-responsive web UI and PWA support
+developer: arogan178
+website: https://github.com/arogan178/macrotrackr
+repo: https://github.com/arogan178/macrotrackr
+support: https://github.com/arogan178/macrotrackr/issues
+gallery:
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/dashboard.png
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/food-entry.png
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/progress.png
+releaseNotes: >-
+  Initial release of MacroTrackr for Umbrel App Store.
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: arogan178
+submission: https://github.com/getumbrel/umbrel-apps

@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  backend:
+    image: ghcr.io/arogan178/macrotrackr-backend:latest
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    environment:
+      DATABASE_PATH: /data/macrotrackr.db
+      APP_MODE: self-hosted
+      AUTH_MODE: local
+      BILLING_MODE: disabled
+      ANALYTICS_MODE: disabled
+      EMAIL_MODE: disabled
+      APP_URL: http://umbrel.local:5173
+      CORS_ORIGIN: http://umbrel.local:5173
+      TRUST_PROXY: "true"
+    expose:
+      - "3000"
+
+  frontend:
+    image: ghcr.io/arogan178/macrotrackr-frontend:latest
+    restart: on-failure
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"

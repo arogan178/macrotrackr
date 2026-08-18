@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "title": {
+    "en_us": "MacroTrackr"
+  },
+  "tagline": {
+    "en_us": "Modern self-hosted nutrition and macronutrient tracker"
+  },
+  "description": {
+    "en_us": "MacroTrackr is an open-source, privacy-first nutrition and macronutrient tracking application designed for self-hosters. Track calories, protein, carbs, fats, custom recipes, and daily fitness goals with local SQLite data storage."
+  },
+  "icon": "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png",
+  "screenshot_link": [
+    "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/dashboard.png",
+    "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/food-entry.png",
+    "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/progress.png"
+  ],
+  "category": "Health",
+  "developer": "arogan178",
+  "author": "arogan178",
+  "port_map": "5173",
+  "scheme": "http",
+  "index": "/",
+  "compose": "https://raw.githubusercontent.com/arogan178/macrotrackr/main/templates/casaos/docker-compose.yml"
+}

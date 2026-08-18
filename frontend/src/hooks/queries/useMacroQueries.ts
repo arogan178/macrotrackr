@@ -485,3 +485,23 @@ export function useUpdateMacroTarget() {
     onError: logUpdateMacroTargetError,
   });
 }
+
+export function useImportMacros() {
+  const queryClient = useQueryClient();
+  const logImportError = createMutationErrorLogger("Error importing macro data");
+
+  return useMutation({
+    mutationKey: [...queryKeys.macros.all(), "import"],
+    mutationFn: async (payload: Parameters<typeof macrosApi.importData>[0]) => {
+      return await macrosApi.importData(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
+      queryClient.invalidateQueries({ queryKey: ["reporting"] });
+      broadcastLocalDataChange("macros");
+      broadcastLocalDataChange("goals");
+    },
+    onError: logImportError,
+  });
+}

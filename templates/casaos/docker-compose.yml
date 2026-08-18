@@ -1,0 +1,82 @@
+name: macrotrackr
+services:
+  backend:
+    image: ghcr.io/arogan178/macrotrackr-backend:latest
+    container_name: macrotrackr-backend
+    restart: unless-stopped
+    volumes:
+      - /DATA/AppData/macrotrackr/data:/data
+    environment:
+      - DATABASE_PATH=/data/macrotrackr.db
+      - APP_MODE=self-hosted
+      - AUTH_MODE=local
+      - BILLING_MODE=disabled
+      - ANALYTICS_MODE=disabled
+      - EMAIL_MODE=disabled
+      - APP_URL=http://localhost:5173
+      - CORS_ORIGIN=http://localhost:5173
+      - TRUST_PROXY=true
+    expose:
+      - "3000"
+    networks:
+      - macrotrackr-network
+    x-casaos:
+      envs:
+        - container: DATABASE_PATH
+          description:
+            en_us: Path to the SQLite database file inside the container.
+        - container: APP_URL
+          description:
+            en_us: Public URL to access MacroTrackr UI.
+        - container: CORS_ORIGIN
+          description:
+            en_us: Allowed CORS origin header.
+        - container: TRUST_PROXY
+          description:
+            en_us: Trust incoming proxy headers from the frontend nginx reverse proxy.
+      volumes:
+        - container: /data
+          description:
+            en_us: Persistent storage directory for SQLite database and user data.
+
+  frontend:
+    image: ghcr.io/arogan178/macrotrackr-frontend:latest
+    container_name: macrotrackr-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - macrotrackr-network
+    x-casaos:
+      ports:
+        - container: "80"
+          description:
+            en_us: Web UI port for MacroTrackr.
+
+networks:
+  macrotrackr-network:
+    driver: bridge
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: frontend
+  description:
+    en_us: MacroTrackr is an open-source nutrition and macronutrient tracking application designed for self-hosting. Track calories, macros, custom meals, and daily fitness goals with local SQLite data storage and full privacy.
+  tagline:
+    en_us: Modern self-hosted nutrition and macronutrient tracker
+  developer: arogan178
+  author: arogan178
+  icon: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
+  thumbnail: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
+  screenshot_link:
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/dashboard.png
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/food-entry.png
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/progress.png
+  category: Health
+  port_map: "5173"
+  scheme: http
+  index: /

@@ -1,0 +1,37 @@
+# TrueNAS SCALE (24.10+ Electric Eel) / Dockge Compose Template
+services:
+  backend:
+    image: ghcr.io/arogan178/macrotrackr-backend:latest
+    container_name: macrotrackr-backend
+    restart: unless-stopped
+    volumes:
+      - /mnt/tank/apps/macrotrackr/data:/data
+    environment:
+      DATABASE_PATH: /data/macrotrackr.db
+      APP_MODE: self-hosted
+      AUTH_MODE: local
+      BILLING_MODE: disabled
+      ANALYTICS_MODE: disabled
+      EMAIL_MODE: disabled
+      APP_URL: http://localhost:5173
+      CORS_ORIGIN: http://localhost:5173
+      TRUST_PROXY: "true"
+    expose:
+      - "3000"
+    networks:
+      - macrotrackr_net
+
+  frontend:
+    image: ghcr.io/arogan178/macrotrackr-frontend:latest
+    container_name: macrotrackr-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - macrotrackr_net
+
+networks:
+  macrotrackr_net:
+    driver: bridge
