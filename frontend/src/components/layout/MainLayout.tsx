@@ -78,7 +78,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <main
         id="main-content"
         className={`relative min-h-screen ${
-          isAuthenticated ? "pb-[calc(4.5rem+var(--sab))] lg:pb-0" : ""
+          isAuthenticated ? "pb-[calc(4.5rem+var(--sab))] md:pb-0" : ""
         }`}
       >
         {children}

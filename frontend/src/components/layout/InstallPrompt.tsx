@@ -68,7 +68,7 @@ const InstallPrompt: React.FC = () => {
     <div
       role="complementary"
       aria-label="Install MacroTrackr"
-      className="fixed inset-x-4 z-80 mx-auto flex max-w-md items-center gap-3 rounded-card border border-border bg-surface px-4 py-3 lg:hidden"
+      className="fixed inset-x-4 z-80 mx-auto flex max-w-md items-center gap-3 rounded-card border border-border bg-surface px-4 py-3 md:hidden"
       style={{ bottom: "calc(5rem + var(--sab))" }}
     >
       <p className="flex-1 text-sm">

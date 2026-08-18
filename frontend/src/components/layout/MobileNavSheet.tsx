@@ -54,7 +54,7 @@ const MobileNavSheet: React.FC<MobileNavSheetProps> = ({
     {isOpen && (
       <>
         <motion.div
-          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs md:hidden"
           onClick={onClose}
           aria-hidden="true"
           initial={shouldReduceMotion ? false : { opacity: 0 }}
@@ -67,7 +67,7 @@ const MobileNavSheet: React.FC<MobileNavSheetProps> = ({
         <motion.div
           role="dialog"
           aria-label={label}
-          className="fixed inset-x-4 z-70 rounded-card border border-border bg-surface p-2.5 lg:hidden"
+          className="fixed inset-x-4 z-70 rounded-card border border-border bg-surface p-2.5 md:hidden"
           style={{ top: "calc(5rem + var(--sat))" }}
           initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}

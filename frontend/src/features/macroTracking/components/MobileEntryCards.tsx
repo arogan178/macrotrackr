@@ -168,7 +168,7 @@ const MobileEntryCards = memo(
       return (
         <div
           ref={containerReference}
-          className="max-h-[70vh] overflow-auto lg:hidden"
+          className="max-h-[70vh] overflow-auto md:hidden"
         >
           <div
             style={{
@@ -211,7 +211,7 @@ const MobileEntryCards = memo(
     }
 
     return (
-      <div className="lg:hidden">
+      <div className="md:hidden">
         <AnimatePresence>
           {groupedEntries.map((group) => (
             <motion.div

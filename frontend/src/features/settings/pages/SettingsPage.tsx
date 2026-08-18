@@ -7,8 +7,10 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import {
   AwardIcon,
+  Button,
   LinkIcon,
   LockIcon,
+  LogoutIcon,
   Modal,
   TabBar,
   UserIcon,
@@ -22,6 +24,7 @@ import {
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
 import { useBeforeUnload, useMutationErrorHandler } from "@/hooks";
+import { useLogout } from "@/hooks/auth/useAuthQueries";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
@@ -50,6 +53,11 @@ export default function SettingsPage() {
     error: settingsQueryError,
   } = useSettings();
   const saveSettingsMutation = useSaveSettings();
+  const logoutMutation = useLogout();
+
+  const handleLogout = useCallback(() => {
+    logoutMutation.mutate();
+  }, [logoutMutation]);
 
   const {
     settings,
@@ -309,6 +317,26 @@ export default function SettingsPage() {
         ) : (
           <SettingsLoadingSkeleton />
         )}
+
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:mt-8 sm:flex-row sm:items-center">
+          <div>
+            <h3 className="text-sm font-medium text-foreground">
+              Account Session
+            </h3>
+            <p className="text-xs text-muted">
+              Sign out of your account on this device
+            </p>
+          </div>
+          <Button
+            variant="danger"
+            buttonSize="sm"
+            onClick={handleLogout}
+            isLoading={logoutMutation.isPending}
+            leftIcon={<LogoutIcon className="h-4 w-4" />}
+            text="Log out"
+          />
+        </div>
+
         <Modal
           isOpen={showConfirmModal}
           onClose={cancelTabChange}
