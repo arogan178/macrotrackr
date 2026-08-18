@@ -24,12 +24,14 @@ import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as AuthReadyRouteImport } from './routes/auth-ready'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as ToolsWeightLossCalculatorRouteImport } from './routes/tools/weight-loss-calculator'
 import { Route as ToolsTdeeCalculatorRouteImport } from './routes/tools/tdee-calculator'
 import { Route as ToolsProteinCalculatorRouteImport } from './routes/tools/protein-calculator'
 import { Route as ToolsMacroCalculatorRouteImport } from './routes/tools/macro-calculator'
 import { Route as ToolsBmrCalculatorRouteImport } from './routes/tools/bmr-calculator'
+import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
 const TermsRoute = TermsRouteImport.update({
@@ -107,6 +109,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareIndexRoute = CompareIndexRouteImport.update({
+  id: '/compare/',
+  path: '/compare/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
@@ -138,6 +145,11 @@ const ToolsBmrCalculatorRoute = ToolsBmrCalculatorRouteImport.update({
   path: '/tools/bmr-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareSlugRoute = CompareSlugRouteImport.update({
+  id: '/compare/$slug',
+  path: '/compare/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
@@ -160,12 +172,14 @@ export interface FileRoutesByFullPath {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog/': typeof BlogIndexRoute
+  '/compare/': typeof CompareIndexRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -184,12 +198,14 @@ export interface FileRoutesByTo {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog': typeof BlogIndexRoute
+  '/compare': typeof CompareIndexRoute
   '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
@@ -209,12 +225,14 @@ export interface FileRoutesById {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog/': typeof BlogIndexRoute
+  '/compare/': typeof CompareIndexRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
@@ -235,12 +253,14 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/blog/$slug'
+    | '/compare/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
     | '/tools/weight-loss-calculator'
     | '/blog/'
+    | '/compare/'
     | '/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -259,12 +279,14 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/blog/$slug'
+    | '/compare/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
     | '/tools/weight-loss-calculator'
     | '/blog'
+    | '/compare'
     | '/tools'
   id:
     | '__root__'
@@ -283,12 +305,14 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/blog/$slug'
+    | '/compare/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
     | '/tools/weight-loss-calculator'
     | '/blog/'
+    | '/compare/'
     | '/tools/'
   fileRoutesById: FileRoutesById
 }
@@ -308,12 +332,14 @@ export interface RootRouteChildren {
   SsoCallbackRoute: typeof SsoCallbackRoute
   TermsRoute: typeof TermsRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  CompareSlugRoute: typeof CompareSlugRoute
   ToolsBmrCalculatorRoute: typeof ToolsBmrCalculatorRoute
   ToolsMacroCalculatorRoute: typeof ToolsMacroCalculatorRoute
   ToolsProteinCalculatorRoute: typeof ToolsProteinCalculatorRoute
   ToolsTdeeCalculatorRoute: typeof ToolsTdeeCalculatorRoute
   ToolsWeightLossCalculatorRoute: typeof ToolsWeightLossCalculatorRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  CompareIndexRoute: typeof CompareIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
@@ -424,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare/': {
+      id: '/compare/'
+      path: '/compare'
+      fullPath: '/compare/'
+      preLoaderRoute: typeof CompareIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/': {
       id: '/blog/'
       path: '/blog'
@@ -466,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsBmrCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare/$slug': {
+      id: '/compare/$slug'
+      path: '/compare/$slug'
+      fullPath: '/compare/$slug'
+      preLoaderRoute: typeof CompareSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/blog/$slug'
@@ -492,12 +532,14 @@ const rootRouteChildren: RootRouteChildren = {
   SsoCallbackRoute: SsoCallbackRoute,
   TermsRoute: TermsRoute,
   BlogSlugRoute: BlogSlugRoute,
+  CompareSlugRoute: CompareSlugRoute,
   ToolsBmrCalculatorRoute: ToolsBmrCalculatorRoute,
   ToolsMacroCalculatorRoute: ToolsMacroCalculatorRoute,
   ToolsProteinCalculatorRoute: ToolsProteinCalculatorRoute,
   ToolsTdeeCalculatorRoute: ToolsTdeeCalculatorRoute,
   ToolsWeightLossCalculatorRoute: ToolsWeightLossCalculatorRoute,
   BlogIndexRoute: BlogIndexRoute,
+  CompareIndexRoute: CompareIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 export const routeTree = rootRouteImport

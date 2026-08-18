@@ -89,6 +89,11 @@ const Footer: React.FC = () => {
                   Free Calculators
                 </Link>
               </li>
+              <li>
+                <Link to="/compare" className={footerLinkClasses}>
+                  Alternatives & Comparisons
+                </Link>
+              </li>
             </ul>
           </div>
 
