@@ -169,6 +169,8 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
 
   return (
     <Modal
+      variant="form"
+      hideDefaultButtons
       isOpen={isOpen}
       onClose={() => {
         stopCamera();

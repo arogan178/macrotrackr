@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { ArrowRightIcon, CheckCircleIcon } from "@/components/ui";
+import { ArrowRightIcon } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -60,45 +60,6 @@ export default function ComparisonIndexPage() {
               tracking applications. No artificial paywalls, no clutter, and 100%
               data privacy.
             </p>
-          </div>
-
-          <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-card border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-primary">
-                <CheckCircleIcon className="h-5 w-5" />
-                <span className="text-sm font-semibold text-foreground">
-                  Free Barcode Scanning
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Scan items instantly using OpenFoodFacts without paying a monthly
-                subscription fee.
-              </p>
-            </div>
-            <div className="rounded-card border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-primary">
-                <CheckCircleIcon className="h-5 w-5" />
-                <span className="text-sm font-semibold text-foreground">
-                  Ad-Free & Fast
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Zero banner ads, video popups, or marketing spam. Designed to log
-                meals in seconds.
-              </p>
-            </div>
-            <div className="rounded-card border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-primary">
-                <CheckCircleIcon className="h-5 w-5" />
-                <span className="text-sm font-semibold text-foreground">
-                  Self-Hostable Freedom
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                AGPLv3 open-source codebase with 1-command Docker deployment for total
-                data ownership.
-              </p>
-            </div>
           </div>
 
           {/* Master Unified Comparison Matrix */}
