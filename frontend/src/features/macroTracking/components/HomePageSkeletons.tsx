@@ -25,7 +25,7 @@ export const AddEntryLoadingSkeleton = () => (
 );
 
 export const DailySummaryLoadingSkeleton = () => (
-  <Panel className="h-full">
+  <Panel className="flex flex-col">
     <div className="mb-6 flex items-center justify-between">
       <Skeleton className="h-6 w-1/3" />
       <Skeleton className="h-8 w-1/4" />

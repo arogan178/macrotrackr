@@ -136,59 +136,61 @@ function MacroSnapshotModalInner({
         {/* Visual Scorecard Preview Card */}
         <div
           data-testid="snapshot-scorecard"
-          className="relative overflow-hidden rounded-card border border-border bg-surface p-4"
+          className="relative overflow-hidden rounded-card border border-border bg-surface p-4 sm:p-5"
         >
           {/* Top Brand Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-control bg-primary text-background">
-                <BrandMark className="h-4 w-4 fill-current text-background" />
+          <div className="flex items-center justify-between gap-3 border-b border-border pb-3.5">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary text-background">
+                <BrandMark className="h-5 w-5 fill-current text-background" />
               </div>
-              <span className="text-sm font-bold tracking-tight text-foreground">
-                MacroTrackr
-              </span>
+              <div>
+                <span className="block text-sm font-bold tracking-tight text-foreground">
+                  MacroTrackr
+                </span>
+                <span className="block text-[10px] font-bold tracking-wider text-primary uppercase">
+                  Precision Nutrition
+                </span>
+              </div>
             </div>
 
             <div
               data-testid="snapshot-badge"
-              className="flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-primary"
+              className="flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-semibold text-primary"
             >
               <span>{badgeText}</span>
             </div>
           </div>
 
           {/* Title & Date */}
-          <div className="mt-3 flex items-baseline justify-between gap-2">
+          <div className="mt-3.5 flex items-baseline justify-between gap-2">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted">
-                {data.title ?? "Daily Summary"}
+              <p className="text-[11px] font-bold tracking-wider text-muted uppercase">
+                {data.title ?? "Daily Nutrition Scorecard"}
               </p>
-              <h4 className="text-base font-bold text-foreground">
-                {data.dateLabel ?? "Today's Nutrition Snapshot"}
+              <h4 className="text-lg font-bold text-foreground">
+                {data.dateLabel ?? "Today's Macro Summary"}
               </h4>
             </div>
-            <span className="text-xs text-muted">
-              {calPercent}% target
-            </span>
           </div>
 
           {/* Calorie Hero Card */}
-          <div className="mt-3 rounded-card border border-border bg-surface-2 p-3.5">
+          <div className="mt-3.5 rounded-card border border-border bg-surface-2 p-4">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted">
-                Total Calories
+              <span className="text-xs font-bold tracking-wider text-muted uppercase">
+                Calories Consumed
               </span>
-              <span className="text-xs text-muted">
-                Goal: {targetCal.toLocaleString()} kcal
+              <span className="text-xs font-medium text-muted">
+                Target: {targetCal.toLocaleString()} kcal
               </span>
             </div>
 
-            <div className="mt-1 flex items-baseline gap-2">
+            <div className="mt-1.5 flex items-baseline gap-2">
               <Value
                 size="hero"
                 unit="kcal"
                 value={cal}
-                suffix={`/ ${targetCal.toLocaleString()}`}
+                suffix={`/ ${targetCal.toLocaleString()} goal`}
               />
             </div>
 
@@ -196,104 +198,123 @@ function MacroSnapshotModalInner({
               progress={calPercent}
               color="accent"
               height="md"
-              className="mt-2.5"
+              className="mt-3"
             />
+
+            <div className="mt-2.5 flex items-center justify-between text-xs">
+              <span className="font-semibold text-primary">
+                ● {calPercent}% of Daily Target
+              </span>
+              <span className="text-muted">
+                {targetCal - cal >= 0
+                  ? `${(targetCal - cal).toLocaleString()} kcal remaining`
+                  : `${Math.abs(targetCal - cal).toLocaleString()} kcal over target`}
+              </span>
+            </div>
           </div>
 
           {/* Macronutrient Breakdown: 3 Columns */}
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3.5 grid grid-cols-3 gap-2.5">
             {/* Protein */}
-            <div className="rounded-card border border-border bg-surface-2 p-2.5">
+            <div className="rounded-card border border-border bg-surface-2 p-3">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-protein" />
-                <span className="text-xs font-semibold text-protein">Protein</span>
-              </div>
-              <div className="mt-1.5">
-                <span className="text-lg font-bold text-foreground tabular-nums">
-                  {proteinG}g
+                <span className="text-[11px] font-bold tracking-wider text-protein uppercase">
+                  Protein
                 </span>
-                <span className="block text-xs text-muted">
-                  of {proteinTargetG}g
+              </div>
+              <div className="mt-2">
+                <span className="text-xl font-bold text-foreground tabular-nums">
+                  {proteinG}
+                </span>
+                <span className="ml-0.5 text-xs font-semibold text-muted">g</span>
+                <span className="block text-[11px] text-muted">
+                  of {proteinTargetG}g ({proteinPercent}%)
                 </span>
               </div>
               <ProgressBar
                 progress={proteinPercent}
                 color="protein"
                 height="sm"
-                className="mt-2"
+                className="mt-2.5"
               />
-              <span className="mt-1 block text-xs text-muted">
-                {macroCalories.pRatio}% kcal
-              </span>
+              <div className="mt-2 flex items-center justify-between text-[11px]">
+                <span className="font-bold text-foreground">{macroCalories.pCals} kcal</span>
+                <span className="text-muted">{macroCalories.pRatio}%</span>
+              </div>
             </div>
 
             {/* Carbs */}
-            <div className="rounded-card border border-border bg-surface-2 p-2.5">
+            <div className="rounded-card border border-border bg-surface-2 p-3">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-carbs" />
-                <span className="text-xs font-semibold text-carbs">Carbs</span>
-              </div>
-              <div className="mt-1.5">
-                <span className="text-lg font-bold text-foreground tabular-nums">
-                  {carbsG}g
+                <span className="text-[11px] font-bold tracking-wider text-carbs uppercase">
+                  Carbs
                 </span>
-                <span className="block text-xs text-muted">
-                  of {carbsTargetG}g
+              </div>
+              <div className="mt-2">
+                <span className="text-xl font-bold text-foreground tabular-nums">
+                  {carbsG}
+                </span>
+                <span className="ml-0.5 text-xs font-semibold text-muted">g</span>
+                <span className="block text-[11px] text-muted">
+                  of {carbsTargetG}g ({carbsPercent}%)
                 </span>
               </div>
               <ProgressBar
                 progress={carbsPercent}
                 color="carbs"
                 height="sm"
-                className="mt-2"
+                className="mt-2.5"
               />
-              <span className="mt-1 block text-xs text-muted">
-                {macroCalories.cRatio}% kcal
-              </span>
+              <div className="mt-2 flex items-center justify-between text-[11px]">
+                <span className="font-bold text-foreground">{macroCalories.cCals} kcal</span>
+                <span className="text-muted">{macroCalories.cRatio}%</span>
+              </div>
             </div>
 
             {/* Fats */}
-            <div className="rounded-card border border-border bg-surface-2 p-2.5">
+            <div className="rounded-card border border-border bg-surface-2 p-3">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-fats" />
-                <span className="text-xs font-semibold text-fats">Fats</span>
-              </div>
-              <div className="mt-1.5">
-                <span className="text-lg font-bold text-foreground tabular-nums">
-                  {fatsG}g
+                <span className="text-[11px] font-bold tracking-wider text-fats uppercase">
+                  Fats
                 </span>
-                <span className="block text-xs text-muted">
-                  of {fatsTargetG}g
+              </div>
+              <div className="mt-2">
+                <span className="text-xl font-bold text-foreground tabular-nums">
+                  {fatsG}
+                </span>
+                <span className="ml-0.5 text-xs font-semibold text-muted">g</span>
+                <span className="block text-[11px] text-muted">
+                  of {fatsTargetG}g ({fatsPercent}%)
                 </span>
               </div>
               <ProgressBar
                 progress={fatsPercent}
                 color="fats"
                 height="sm"
-                className="mt-2"
+                className="mt-2.5"
               />
-              <span className="mt-1 block text-xs text-muted">
-                {macroCalories.fRatio}% kcal
-              </span>
+              <div className="mt-2 flex items-center justify-between text-[11px]">
+                <span className="font-bold text-foreground">{macroCalories.fCals} kcal</span>
+                <span className="text-muted">{macroCalories.fRatio}%</span>
+              </div>
             </div>
           </div>
 
           {/* Calorie Macro Distribution Strip */}
-          <div className="mt-3 rounded-card border border-border bg-surface-2 p-2.5">
+          <div className="mt-3.5 rounded-card border border-border bg-surface-2 p-3">
             <div className="flex items-center justify-between text-xs text-muted">
-              <span className="font-medium uppercase tracking-wider">
-                Distribution Split
+              <span className="font-bold tracking-wider uppercase">
+                Macronutrient Distribution
               </span>
-              <div className="flex items-center gap-2 font-medium text-foreground">
-                <span className="text-protein">{macroCalories.pRatio}% P</span>
-                <span>•</span>
-                <span className="text-carbs">{macroCalories.cRatio}% C</span>
-                <span>•</span>
-                <span className="text-fats">{macroCalories.fRatio}% F</span>
-              </div>
+              <span className="text-[11px] font-medium text-muted">
+                {(macroCalories.pCals + macroCalories.cCals + macroCalories.fCals).toLocaleString()} macro kcal
+              </span>
             </div>
 
-            <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-3">
+            <div className="relative mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-surface-3">
               <div
                 className="absolute top-0 left-0 h-full bg-protein"
                 style={{ width: `${macroCalories.pRatio}%` }}
@@ -313,15 +334,21 @@ function MacroSnapshotModalInner({
                 }}
               />
             </div>
+
+            <div className="mt-2.5 flex items-center gap-4 text-xs font-semibold">
+              <span className="text-protein">● Protein {macroCalories.pRatio}%</span>
+              <span className="text-carbs">● Carbs {macroCalories.cRatio}%</span>
+              <span className="text-fats">● Fats {macroCalories.fRatio}%</span>
+            </div>
           </div>
 
           {/* Scorecard Footer */}
-          <div className="mt-3 flex items-center justify-between pt-1 text-xs text-muted">
-            <span className="flex items-center gap-1">
+          <div className="mt-3.5 flex items-center justify-between rounded-card border border-border bg-surface-2 px-3 py-2 text-xs">
+            <span className="flex items-center gap-1.5 font-semibold text-foreground">
               <SparklesIcon size="sm" className="text-primary" />
-              Verified Nutrition Log
+              Verified MacroTrackr Log
             </span>
-            <span>macrotrackr.com</span>
+            <span className="font-semibold text-primary">macrotrackr.com</span>
           </div>
         </div>
 
