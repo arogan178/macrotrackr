@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useAuth, useSession } from "@clerk/react";
 
-import { setAuthToken, setGetToken } from "@/api/core";
+import { apiClient } from "@/api/core";
 
 export function ClerkTokenSync() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -20,7 +20,7 @@ export function ClerkTokenSync() {
 
   useEffect(() => {
     if (isLoaded) {
-      setGetToken(tokenGetter);
+      apiClient.setGetToken(tokenGetter);
     }
   }, [isLoaded, tokenGetter]);
 
@@ -29,12 +29,12 @@ export function ClerkTokenSync() {
       if (isSignedIn && session) {
         try {
           const token = await session.getToken();
-          setAuthToken(token);
+          apiClient.setAuthToken(token);
         } catch {
-          setAuthToken(null);
+          apiClient.setAuthToken(null);
         }
       } else {
-        setAuthToken(null);
+        apiClient.setAuthToken(null);
       }
     }
 

@@ -2,7 +2,7 @@
  * Secure token storage utilities
  */
 
-export function securelyStoreToken(token: string, expiresAt?: number): void {
+export function setToken(token: string, expiresAt?: number): void {
   if (!isLocalStorageAvailable()) return;
 
   localStorage.setItem("token", token);
@@ -27,10 +27,6 @@ export function getToken(): string | undefined {
   }
 
   return token;
-}
-
-export function setToken(token: string): void {
-  securelyStoreToken(token);
 }
 
 export function removeToken(): void {

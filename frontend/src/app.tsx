@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
-import { initializeNativeAppLifecycle, setupStatusBar } from "./services/native";
+import { initializeNativeAppLifecycle } from "./services/native/appLifecycle";
+import { setupStatusBar } from "./services/native/statusBar";
 import AppRouter from "./AppRouter";
 
 export default function App() {

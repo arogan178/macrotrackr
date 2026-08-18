@@ -64,8 +64,4 @@ export async function sendPasswordResetEmail(to: string, token: string): Promise
   }
 }
 
-export const emailService = { sendPasswordResetEmail };
-export const createEmailService = () => emailService;
-export const getEmailService = () => emailService;
-export const configureEmailService = (_service: unknown) => {};
-export const resetEmailService = () => {};
+export const emailService: EmailService = { sendPasswordResetEmail };

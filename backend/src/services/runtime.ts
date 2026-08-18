@@ -10,8 +10,8 @@ import {
   getStripeClient,
 } from "../modules/billing/stripe-service";
 import {
-  configureEmailService,
-  createEmailService,
+  type EmailService,
+  emailService,
 } from "./email-service";
 import { getConfig } from "../config";
 
@@ -20,7 +20,7 @@ export interface RuntimeServices {
   cacheService: CacheService;
   metrics: MetricsRegistry;
   stripe: ReturnType<typeof getStripeClient> | null;
-  email: ReturnType<typeof createEmailService> | null;
+  email: EmailService | null;
 }
 
 export function createRuntimeServices(db: Database): RuntimeServices {
@@ -28,16 +28,10 @@ export function createRuntimeServices(db: Database): RuntimeServices {
   const cacheService = createCacheService();
   const metrics = createMetricsRegistry();
   const stripe = config.BILLING_MODE === "managed" ? getStripeClient() : null;
-  const email =
-    config.EMAIL_MODE !== "disabled"
-      ? createEmailService()
-      : null;
+  const email = config.EMAIL_MODE !== "disabled" ? emailService : null;
 
   configureMetricsRegistry(metrics);
   configureSubscriptionService({ db, cacheService });
-  if (email) {
-    configureEmailService(email);
-  }
 
   return {
     db,

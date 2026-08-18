@@ -91,17 +91,9 @@ export class MetricsRegistry {
 function registerDefaultMetrics(metrics: MetricsRegistry) {
   metrics.registerCounter("http_requests_total", "Total HTTP requests");
   metrics.registerCounter("http_requests_errors", "Total HTTP errors");
-  metrics.registerCounter("auth_attempts_total", "Total authentication attempts");
-  metrics.registerCounter("auth_failures_total", "Total authentication failures");
-  metrics.registerCounter("webhook_deliveries_total", "Total webhook deliveries");
-  metrics.registerCounter("webhook_failures_total", "Total webhook failures");
   metrics.registerHistogram(
     "http_request_duration_ms",
     "HTTP request duration in milliseconds",
-  );
-  metrics.registerGauge(
-    "health_check_status",
-    "Health check status (1=healthy, 0=unhealthy)",
   );
 }
 
@@ -158,25 +150,4 @@ export function recordRequest(method: string, path: string, status: number, dura
     method,
     path,
   });
-}
-
-export function recordAuthAttempt(success: boolean): void {
-  const metrics = getMetricsRegistry();
-  metrics.incrementCounter("auth_attempts_total");
-  if (!success) {
-    metrics.incrementCounter("auth_failures_total");
-  }
-}
-
-export function recordWebhookDelivery(success: boolean, type: string): void {
-  const metrics = getMetricsRegistry();
-  metrics.incrementCounter("webhook_deliveries_total", { type });
-  if (!success) {
-    metrics.incrementCounter("webhook_failures_total", { type });
-  }
-}
-
-export function setHealthStatus(service: string, healthy: boolean): void {
-  const metrics = getMetricsRegistry();
-  metrics.setGauge("health_check_status", healthy ? 1 : 0, { service });
 }
