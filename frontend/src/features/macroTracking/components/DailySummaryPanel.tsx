@@ -205,7 +205,7 @@ function DailySummaryInner({
   );
 
   return (
-    <Panel padding="none" className="flex h-full flex-col">
+    <Panel padding="none" className="flex flex-col">
       {/* One idea — calories, then its macro breakdown — so one panel, split by
           dividers. It used to be six bordered boxes. */}
       <div className="p-4 sm:p-6">
@@ -261,7 +261,7 @@ function DailySummaryInner({
         />
       </div>
 
-      <div className="flex flex-1 flex-col justify-end">
+      <div className="flex flex-col">
         {macroData.map((macro) => (
           <div
             key={macro.name}

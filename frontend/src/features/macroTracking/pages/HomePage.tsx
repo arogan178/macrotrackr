@@ -330,7 +330,7 @@ export default function HomePage() {
           {/* The day comes first. On a phone the summary is what the user
               opened the app to see; the form used to push it below the fold. */}
           <div className="grid grid-cols-1 gap-3.5 sm:gap-5 md:grid-cols-6 md:items-start">
-            <div className="flex h-full flex-col space-y-3.5 md:order-2 md:col-span-2">
+            <div className="flex flex-col space-y-3.5 md:order-2 md:col-span-2 md:space-y-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
               ) : (
