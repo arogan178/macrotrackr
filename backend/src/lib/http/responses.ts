@@ -75,15 +75,3 @@ export function handleError(
   set.status = 500;
   return createErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
 }
-
-export function withErrorHandling<T extends unknown[], R>(
-  handler: (...args: T) => R | Promise<R>,
-) {
-  return async (...args: T): Promise<R> => handler(...args);
-}
-
-export {
-  toCamelCaseString,
-  transformKeysToCamel,
-  transformArrayToCamel,
-} from "../mappers";

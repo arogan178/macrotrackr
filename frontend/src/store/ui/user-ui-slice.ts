@@ -32,7 +32,6 @@ export interface UserUISlice {
   ) => void;
   validateSettingsForm: () => boolean;
   resetSettings: () => void;
-  clearSettingsMessages: () => void;
 
   // Weight update for other components that might need it
   updateCurrentUserWeight: (newWeight: number) => void;
@@ -130,11 +129,6 @@ export const createUserUISlice: StateCreator<
       hasSettingsChanges: false,
       formErrors: {},
     }));
-  },
-
-  clearSettingsMessages: () => {
-    // This is now a no-op since messages are handled by TanStack Query
-    // Kept for compatibility with existing components
   },
 
   updateCurrentUserWeight: (newWeight: number) => {

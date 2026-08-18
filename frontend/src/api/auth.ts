@@ -1,4 +1,4 @@
-import { apiClient, setAuthToken } from "@/api/core";
+import { apiClient } from "@/api/core";
 import { removeToken, setToken } from "@/utils/tokenStorage";
 
 export interface AuthSuccessResponse {
@@ -57,7 +57,7 @@ export interface LocalSessionResponse {
 export const authApi = {
   register: async (payload: RegisterPayload) => {
     removeToken();
-    setAuthToken(null);
+    apiClient.setAuthToken(null);
     const res = await apiClient.post<AuthSuccessResponse>(
       "/api/auth/register",
       payload,
@@ -65,7 +65,7 @@ export const authApi = {
     );
     if (res.token) {
       setToken(res.token);
-      setAuthToken(res.token);
+      apiClient.setAuthToken(res.token);
     }
 
     return res;
@@ -73,7 +73,7 @@ export const authApi = {
 
   login: async (payload: LoginPayload) => {
     removeToken();
-    setAuthToken(null);
+    apiClient.setAuthToken(null);
     const res = await apiClient.post<AuthSuccessResponse>(
       "/api/auth/login",
       payload,
@@ -81,7 +81,7 @@ export const authApi = {
     );
     if (res.token) {
       setToken(res.token);
-      setAuthToken(res.token);
+      apiClient.setAuthToken(res.token);
     }
 
     return res;
@@ -94,7 +94,7 @@ export const authApi = {
       );
     } finally {
       removeToken();
-      setAuthToken(null);
+      apiClient.setAuthToken(null);
     }
   },
 
@@ -105,7 +105,7 @@ export const authApi = {
       );
     } finally {
       removeToken();
-      setAuthToken(null);
+      apiClient.setAuthToken(null);
     }
   },
 

@@ -36,7 +36,7 @@ const BillingForm: React.FC = () => {
       showNotification(
         "Welcome to Pro! Your subscription is now active.",
         "success",
-        { duration: 8000, context: "billing_success" },
+        { duration: 8000 },
       );
 
       // Clean up URL parameters
@@ -69,7 +69,6 @@ const BillingForm: React.FC = () => {
       // Success notification before redirect
       showNotification("Redirecting to billing portal...", "info", {
         duration: 2000,
-        context: "billing_redirect",
       });
 
       globalThis.location.href = url;

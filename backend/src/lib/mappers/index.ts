@@ -11,9 +11,3 @@ export function transformKeysToCamel<T extends Record<string, unknown> = Record<
   }
   return result as T;
 }
-
-export function transformArrayToCamel<T extends Record<string, unknown>>(
-  arr: Record<string, unknown>[]
-): T[] {
-  return arr.map(item => transformKeysToCamel<T>(item));
-}

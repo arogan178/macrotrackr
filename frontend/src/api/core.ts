@@ -241,23 +241,3 @@ export function initializeAuthTokenProvider(
 ) {
   apiClient.initializeAuthTokenProvider(provider, fallbackToken);
 }
-
-export function setGetToken(function_: () => Promise<string | null>) {
-  apiClient.setGetToken(function_);
-}
-
-export function setAuthToken(token: string | null) {
-  apiClient.setAuthToken(token);
-}
-
-export async function getAuthToken() {
-  return apiClient.getAuthToken();
-}
-
-export async function getHeaders(options: GetHeadersOptions | boolean = true) {
-  return apiClient.getHeaders(options);
-}
-
-export async function handleResponse(response: Response) {
-  return apiClient.handleResponse(response);
-}

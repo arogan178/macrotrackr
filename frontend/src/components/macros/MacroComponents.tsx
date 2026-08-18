@@ -2,11 +2,11 @@ import { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ProgressBar from "@/components/ui/ProgressBar";
+import type { MacroTargetGrams } from "@/types/macro";
 import { calculateCaloriePercentages } from "@/utils/nutritionCalculations";
-import type { MacroNutrients } from "@/utils/nutritionTypes";
 
 interface MacroBarProps {
-  macros: MacroNutrients;
+  macros: MacroTargetGrams;
   className?: string;
 }
 
@@ -48,7 +48,7 @@ export function MacroDistributionBar(properties: MacroBarProps) {
 }
 
 interface MacroLegendProps {
-  macros: MacroNutrients;
+  macros: MacroTargetGrams;
   className?: string;
 }
 

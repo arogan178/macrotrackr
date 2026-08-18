@@ -1,6 +1,6 @@
 import React from "react";
 
-import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
+import Reveal from "@/components/animation/Reveal";
 import type { IconProps } from "@/components/ui/Icons";
 
 import { FEATURES } from "../utils/landingPageConstants";
@@ -40,14 +40,14 @@ const FeaturesSection: React.FC = () => (
     className="relative z-10 overflow-hidden px-4 py-24 sm:px-6 lg:px-8"
   >
     <div className="mx-auto max-w-[85rem]">
-      <ScrollTriggeredDiv className="mb-16 text-center">
+      <Reveal className="mb-16 text-center">
         <h2 className="mb-4 text-4xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl">
           What you get
         </h2>
         <p className="mx-auto max-w-2xl text-lg text-balance text-muted">
           Log a meal, set a target, and see where the week actually went.
         </p>
-      </ScrollTriggeredDiv>
+      </Reveal>
 
       {/* A static grid: the cards are meant to be read, and a marquee that
           pauses only on hover is unreadable on touch. */}

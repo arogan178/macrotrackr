@@ -55,21 +55,47 @@ const codeBlockStyle = {
 };
 
 const LazyCodeHighlighter = React.lazy(async () => {
-  const [{ Prism }, { vscDarkPlus }] = await Promise.all([
-    import("react-syntax-highlighter"),
-    import("react-syntax-highlighter/dist/esm/styles/prism"),
+  const [
+    { default: SyntaxHighlighter },
+    { default: vscDarkPlus },
+    { default: ts },
+    { default: js },
+    { default: json },
+    { default: bash },
+    { default: css },
+    { default: markdown },
+  ] = await Promise.all([
+    import("react-syntax-highlighter/dist/esm/prism-light"),
+    import("react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/typescript"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/javascript"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/json"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/bash"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/css"),
+    import("react-syntax-highlighter/dist/esm/languages/prism/markdown"),
   ]);
+
+  SyntaxHighlighter.registerLanguage("typescript", ts);
+  SyntaxHighlighter.registerLanguage("ts", ts);
+  SyntaxHighlighter.registerLanguage("javascript", js);
+  SyntaxHighlighter.registerLanguage("js", js);
+  SyntaxHighlighter.registerLanguage("json", json);
+  SyntaxHighlighter.registerLanguage("bash", bash);
+  SyntaxHighlighter.registerLanguage("sh", bash);
+  SyntaxHighlighter.registerLanguage("css", css);
+  SyntaxHighlighter.registerLanguage("markdown", markdown);
+  SyntaxHighlighter.registerLanguage("md", markdown);
 
   return {
     default: ({ code, language }: LazyCodeHighlighterProps) => (
-      <Prism
+      <SyntaxHighlighter
         style={vscDarkPlus}
         language={language}
         PreTag="div"
         customStyle={codeBlockStyle}
       >
         {code}
-      </Prism>
+      </SyntaxHighlighter>
     ),
   };
 });
