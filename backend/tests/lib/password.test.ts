@@ -43,7 +43,7 @@ const mockEnv = {
   ANALYTICS_MODE: "disabled",
   EMAIL_MODE: "disabled",
   APP_URL: "http://localhost:5173",
-  PUBLIC_APP_NAME: "Macro Trackr",
+  PUBLIC_APP_NAME: "MacroTrackr",
   SUPPORT_EMAIL: "support@local.invalid",
   ENABLE_METRICS: "false",
   STRIPE_SECRET_KEY: "sk_test_123",
