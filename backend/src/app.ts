@@ -109,7 +109,7 @@ function configureSwaggerDocs(app: Elysia): void {
       path: "/api/docs",
       documentation: {
         info: {
-          title: "Macro Trackr API",
+          title: "MacroTrackr API",
           version: "1.0.0",
           description: "API for tracking macronutrients and user goals.",
         },

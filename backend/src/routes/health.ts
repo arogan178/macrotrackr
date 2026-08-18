@@ -17,7 +17,7 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
      "/",
      ({ store }) => ({
        status: "ok",
-       message: "Macro Trackr API is running!",
+        message: "MacroTrackr API is running!",
        timestamp: store.startedAt,
      }),
      {

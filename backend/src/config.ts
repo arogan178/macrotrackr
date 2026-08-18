@@ -28,7 +28,7 @@ const BaseEnvSchema = z.object({
   ANALYTICS_MODE: z.enum(["posthog", "disabled"]).default("disabled"),
   EMAIL_MODE: z.enum(["resend", "smtp", "disabled"]).default("disabled"),
   APP_URL: z.string().url("APP_URL must be a valid URL").default("http://localhost:5173"),
-  PUBLIC_APP_NAME: z.string().min(1, "PUBLIC_APP_NAME is required").default("Macro Trackr"),
+  PUBLIC_APP_NAME: z.string().min(1, "PUBLIC_APP_NAME is required").default("MacroTrackr"),
   SUPPORT_EMAIL: z.string().email("SUPPORT_EMAIL must be a valid email").default("support@local.invalid"),
   ENABLE_METRICS: z
     .union([z.boolean(), z.literal("true"), z.literal("false")])

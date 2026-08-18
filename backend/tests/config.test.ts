@@ -11,7 +11,7 @@ const requiredEnv: Record<string, string> = {
 	ANALYTICS_MODE: "disabled",
 	EMAIL_MODE: "disabled",
 	APP_URL: "http://localhost:5173",
-	PUBLIC_APP_NAME: "Macro Trackr",
+	PUBLIC_APP_NAME: "MacroTrackr",
 	SUPPORT_EMAIL: "support@local.invalid",
 	ENABLE_METRICS: "false",
 	STRIPE_SECRET_KEY: "sk_test_123",
@@ -111,7 +111,7 @@ describe("config", () => {
 		expect(config.ANALYTICS_MODE).toBe("disabled");
 		expect(config.EMAIL_MODE).toBe("disabled");
 		expect(config.APP_URL).toBe("http://localhost:5173");
-		expect(config.PUBLIC_APP_NAME).toBe("Macro Trackr");
+		expect(config.PUBLIC_APP_NAME).toBe("MacroTrackr");
 		expect(config.SUPPORT_EMAIL).toBe("support@local.invalid");
 		expect(config.ENABLE_METRICS).toBe(false);
 		expect(config.CORS_ORIGIN).toBe("http://localhost:5173");

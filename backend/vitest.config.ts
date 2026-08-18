@@ -14,7 +14,7 @@ process.env.BILLING_MODE = "managed";
 process.env.ANALYTICS_MODE = "disabled";
 process.env.EMAIL_MODE = "disabled";
 process.env.APP_URL = "http://localhost:5173";
-process.env.PUBLIC_APP_NAME = "Macro Trackr";
+process.env.PUBLIC_APP_NAME = "MacroTrackr";
 process.env.SUPPORT_EMAIL = "support@local.invalid";
 process.env.ENABLE_METRICS = "false";
 process.env.NODE_ENV = "test";
@@ -42,7 +42,7 @@ export default defineConfig({
       ANALYTICS_MODE: "disabled",
       EMAIL_MODE: "disabled",
       APP_URL: "http://localhost:5173",
-      PUBLIC_APP_NAME: "Macro Trackr",
+      PUBLIC_APP_NAME: "MacroTrackr",
       SUPPORT_EMAIL: "support@local.invalid",
       ENABLE_METRICS: "false",
       NODE_ENV: "test"
