@@ -22,6 +22,13 @@ describe("openfoodfacts-api-client", () => {
       const client = new OpenFoodFactsApiClient();
       expect(typeof client.search).toBe("function");
     });
+
+    it("has getByBarcode method", async () => {
+      const { OpenFoodFactsApiClient } = await import("../../src/services/openfoodfacts-api-client");
+      
+      const client = new OpenFoodFactsApiClient();
+      expect(typeof client.getByBarcode).toBe("function");
+    });
   });
 
   describe("utility functions", () => {

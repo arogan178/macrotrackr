@@ -5,6 +5,7 @@ import type { FoodSearchResult } from "@/api/macros";
 import { formStyles } from "@/components/form/FormStyles";
 import {
   ArrowRightIcon,
+  BarcodeIcon,
   Button,
   ProgressiveBlur,
   SearchIcon,
@@ -19,6 +20,7 @@ import type { Ingredient, MacroEntry } from "@/types/macro";
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
 
+import BarcodeScannerModal from "./BarcodeScannerModal";
 import SavedMealsList from "./SavedMealsList";
 
 interface CalorieSearchProps {
@@ -55,6 +57,7 @@ const CalorieSearch = memo(function CalorieSearch({
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("recents");
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const wrapperReference = useRef<HTMLDivElement>(null);
 
   const { data: historyData, isLoading: isHistoryLoading } = useMacroHistory(
@@ -352,6 +355,17 @@ const CalorieSearch = memo(function CalorieSearch({
           </div>
           <Button
             type="button"
+            onClick={() => setIsBarcodeScannerOpen(true)}
+            ariaLabel="Scan barcode"
+            buttonSize="md"
+            variant="secondary"
+            leftIcon={<BarcodeIcon className="h-4 w-4 shrink-0" />}
+            className="h-[42px] shrink-0 px-2.5 sm:px-3 font-semibold"
+          >
+            <span className="hidden sm:inline">Scan</span>
+          </Button>
+          <Button
+            type="button"
             onClick={handleSearch}
             isLoading={isSearching}
             disabled={isSearching || trimmedQuery.length < 2}
@@ -542,6 +556,12 @@ const CalorieSearch = memo(function CalorieSearch({
           />
         </div>
       )}
+
+      <BarcodeScannerModal
+        isOpen={isBarcodeScannerOpen}
+        onClose={() => setIsBarcodeScannerOpen(false)}
+        onProductFound={handleSelect}
+      />
     </div>
   );
 });

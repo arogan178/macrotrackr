@@ -7,6 +7,16 @@ export interface ComparisonFeatureRow {
   highlight?: boolean;
 }
 
+export interface MasterComparisonRow {
+  feature: string;
+  macrotrackr: string;
+  myfitnesspal: string;
+  macrofactor: string;
+  cronometer: string;
+  loseIt: string;
+  highlight?: boolean;
+}
+
 export interface ComparisonDetail {
   slug: string;
   competitorName: string;
@@ -27,9 +37,89 @@ export interface ComparisonDetail {
   }>;
 }
 
+export const MASTER_COMPARISON_MATRIX: readonly MasterComparisonRow[] = [
+  {
+    feature: "Pricing Model",
+    macrotrackr: "Free Core & Self-Hosted / $3.99 Cloud",
+    myfitnesspal: "Freemium ($19.99/mo Premium)",
+    macrofactor: "Paid Only ($11.99/mo)",
+    cronometer: "Freemium ($9.99/mo Gold)",
+    loseIt: "Freemium ($39.99/yr Premium)",
+    highlight: true,
+  },
+  {
+    feature: "Barcode Scanner",
+    macrotrackr: "Included Free (OpenFoodFacts)",
+    myfitnesspal: "Paywalled ($19.99/mo)",
+    macrofactor: "Included in Paid Sub",
+    cronometer: "Included Free",
+    loseIt: "Included in Free/Paid",
+    highlight: true,
+  },
+  {
+    feature: "Ad-Free Interface",
+    macrotrackr: "100% Ad-Free (Always)",
+    myfitnesspal: "Heavy banner & interstitial ads",
+    macrofactor: "Ad-Free (Paid Only)",
+    cronometer: "Banner ads on Free tier",
+    loseIt: "Ads & paywall popups on Free",
+    highlight: true,
+  },
+  {
+    feature: "Self-Hostable (Docker + SQLite)",
+    macrotrackr: "Yes (AGPLv3 Open Source)",
+    myfitnesspal: "No (Proprietary Cloud)",
+    macrofactor: "No (Proprietary Cloud)",
+    cronometer: "No (Proprietary Cloud)",
+    loseIt: "No (Proprietary Cloud)",
+    highlight: true,
+  },
+  {
+    feature: "Weekly Rolling Averages & Trends",
+    macrotrackr: "Included Free",
+    myfitnesspal: "Paywalled / Basic",
+    macrofactor: "Algorithmic Focus",
+    cronometer: "Basic on Free, Trends in Gold",
+    loseIt: "Paywalled Insights",
+    highlight: true,
+  },
+  {
+    feature: "Custom Macro Grams & % Splits",
+    macrotrackr: "Included Free",
+    myfitnesspal: "Paywalled / Locked Grams",
+    macrofactor: "Configurable in Paid",
+    cronometer: "Configurable",
+    loseIt: "Paywalled on Free tier",
+  },
+  {
+    feature: "Multi-Ingredient Saved Meals",
+    macrotrackr: "Included Free",
+    myfitnesspal: "Included",
+    macrofactor: "Included",
+    cronometer: "Included",
+    loseIt: "Included",
+  },
+  {
+    feature: "Installable PWA & Offline Access",
+    macrotrackr: "Yes (PWA + Mobile)",
+    myfitnesspal: "Native App Only",
+    macrofactor: "Native App Only",
+    cronometer: "Web + Mobile App",
+    loseIt: "Native App Only",
+  },
+  {
+    feature: "Open Source Codebase",
+    macrotrackr: "Yes (AGPLv3)",
+    myfitnesspal: "No",
+    macrofactor: "No",
+    cronometer: "No",
+    loseIt: "No",
+  },
+];
+
 export const COMPARISONS: readonly ComparisonDetail[] = [
   {
-    slug: "myfitnesspal-alternative",
+    slug: "myfitnesspal",
     competitorName: "MyFitnessPal",
     title: "The Best Free, Open-Source MyFitnessPal Alternative",
     shortTitle: `${APP_NAME} vs MyFitnessPal`,
@@ -98,247 +188,269 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
       },
       {
         feature: "Data Export (JSON / CSV)",
-        macrotrackr: "Unlimited & Free",
-        competitor: "Limited / Paywalled",
+        macrotrackr: "Included Free",
+        competitor: "Premium Only",
       },
     ],
     faqs: [
       {
         question: "Why switch from MyFitnessPal to MacroTrackr?",
         answer:
-          "MacroTrackr removes the artificial paywalls (like barcode scanning and custom macro targets), strips away the ads and tracking cookies, and gives you a much faster daily logging experience.",
+          "MacroTrackr keeps essential nutrition tracking tools—like barcode scanning, gram-accurate macro targets, and rolling averages—completely free and ad-free. Plus, you can self-host your own instance for total privacy.",
       },
       {
-        question: "Is MacroTrackr really free and open source?",
+        question: "Does MacroTrackr have an open food database?",
         answer:
-          "Yes! MacroTrackr is published under the AGPLv3 open-source license. You can inspect the code on GitHub, deploy it to your home server with Docker, or use our fast cloud service.",
+          "Yes. MacroTrackr connects directly to the OpenFoodFacts database with millions of verified global grocery products, along with full support for custom ingredients and saved meals.",
       },
       {
-        question: "Can I use MacroTrackr on mobile?",
+        question: "Is MacroTrackr free?",
         answer:
-          "Yes. MacroTrackr is fully responsive, supports progressive web app (PWA) installation directly to your home screen, and has native iOS/Android builds.",
+          "MacroTrackr is fully open source (AGPLv3) and free to self-host with Docker. We also offer an affordable hosted cloud version with automatic sync and backups.",
       },
     ],
   },
   {
-    slug: "macrofactor-alternative",
+    slug: "macrofactor",
     competitorName: "MacroFactor",
-    title: "Free & Open-Source MacroFactor Alternative",
+    title: "Open-Source MacroFactor Alternative for Calorie & Macro Tracking",
     shortTitle: `${APP_NAME} vs MacroFactor`,
-    badge: "Smart Weekly Averages",
-    tagline: "Smart macro algorithms and trend tracking without a mandatory subscription",
+    badge: "Open-Source & Transparent",
+    tagline: "Weekly average trend tracking without a mandatory monthly subscription",
     subtitle:
-      "Get smart weekly expenditure calculations, dynamic calorie targets, and frictionless logging without the recurring monthly bill.",
+      "Get clear weekly calorie and macro compliance metrics without paying $11.99/month for algorithmic coaching.",
     metaDescription:
-      "Looking for a free MacroFactor alternative? MacroTrackr offers adherence-neutral weekly tracking, TDEE/BMR calculators, custom macro splits, and open-source freedom.",
+      "MacroTrackr vs MacroFactor: Compare features, pricing, and philosophy. Learn how MacroTrackr delivers trend tracking and smooth logging with zero monthly lock-in.",
     keyDifferentiators: [
       {
-        title: "Zero Mandatory Subscriptions",
+        title: "No Mandatory Monthly Subscription",
         description:
-          "MacroFactor requires a paid monthly or annual subscription with no free tier. MacroTrackr gives you complete core tracking and nutrition calculators for free.",
+          "MacroFactor costs $11.99/mo or $71.99/yr with zero free tier. MacroTrackr provides full macro tracking for free self-hosted or $3.99/mo cloud.",
       },
       {
-        title: "Adherence-Neutral Weekly Analytics",
+        title: "Transparent & User-Controlled Targets",
         description:
-          "Like MacroFactor, we focus on weekly trendlines and calorie expenditure rather than judging good vs bad days. Hit your weekly average without guilt.",
+          "You stay in full control of your caloric deficit, surplus, and macronutrient ratios without an opaque black-box algorithm overriding your numbers.",
       },
       {
-        title: "Open Source & Self-Hostable",
+        title: "Self-Hosted & Offline Capable",
         description:
-          "Keep your data on your own infrastructure with simple 1-command Docker deployment, or run directly on SQLite.",
+          "Own your data end-to-end. Run MacroTrackr on your own home server or private VPS with zero telemetry.",
       },
       {
-        title: "Fast, Keyboard & Touch Friendly",
+        title: "Lightweight Web & PWA",
         description:
-          "Log ingredients in seconds with intuitive search, portion scaling, and saved meal templates.",
+          "Use MacroTrackr seamlessly on desktop, tablet, and mobile with lightning-fast keyboard-first meal entry.",
       },
     ],
     matrix: [
       {
-        feature: "Free Tier Available",
-        macrotrackr: "Yes (Full Core App)",
-        competitor: "No (Subscription Only)",
+        feature: "Price",
+        macrotrackr: "Free Core & Self-Hosted / $3.99 Cloud",
+        competitor: "$11.99 / month (No free tier)",
         highlight: true,
       },
       {
-        feature: "Self-Hostable Deployment",
-        macrotrackr: "Yes (Docker & SQLite)",
-        competitor: "No",
+        feature: "Self-Hostable",
+        macrotrackr: "Yes (Docker + SQLite)",
+        competitor: "No (Closed Source)",
         highlight: true,
       },
       {
-        feature: "Weekly Trend Averages",
+        feature: "Weekly Rolling Averages",
         macrotrackr: "Included Free",
-        competitor: "Included in Paid",
+        competitor: "Included in Paid Sub",
       },
       {
-        feature: "Free Nutrition Calculators (TDEE/BMR)",
-        macrotrackr: "Included Free (No Login)",
-        competitor: "In-App Only",
-      },
-      {
-        feature: "Custom Meal Templates & Recipes",
+        feature: "Barcode Scanner",
         macrotrackr: "Included Free",
-        competitor: "Included in Paid",
+        competitor: "Included in Paid Sub",
       },
       {
-        feature: "Open Source License",
-        macrotrackr: "AGPLv3",
-        competitor: "Proprietary",
+        feature: "User Target Control",
+        macrotrackr: "Complete Manual & Percentage Control",
+        competitor: "Algorithm Guided",
+      },
+      {
+        feature: "Open Source Codebase",
+        macrotrackr: "Yes (AGPLv3)",
+        competitor: "No (Proprietary)",
         highlight: true,
       },
     ],
     faqs: [
       {
-        question: "How does MacroTrackr compare to MacroFactor's expenditure algorithm?",
+        question: "How does MacroTrackr differ from MacroFactor?",
         answer:
-          "MacroTrackr combines our free TDEE, BMR, and macro calculator tools with weekly rolling intake and weight metrics, allowing you to monitor real metabolic expenditure without requiring a paid subscription.",
+          "MacroFactor is a proprietary, subscription-only app centered on automated expenditure adjustments. MacroTrackr is an open-source, user-empowering tracker giving you full control of your macro targets with weekly average visibility and self-hosting capabilities.",
       },
       {
-        question: "Can I host MacroTrackr on my own home server?",
+        question: "Can I track weekly averages in MacroTrackr?",
         answer:
-          "Yes. MacroTrackr ships with ready-to-run Docker Compose configurations with local SQLite storage for complete privacy.",
+          "Yes. MacroTrackr calculates weekly rolling averages and visual compliance rings so you can evaluate long-term trends rather than stressing over single-day spikes.",
       },
     ],
   },
   {
-    slug: "cronometer-alternative",
+    slug: "cronometer",
     competitorName: "Cronometer",
-    title: "Clean & Modern Cronometer Alternative",
+    title: "Lightweight, Focused Cronometer Alternative",
     shortTitle: `${APP_NAME} vs Cronometer`,
-    badge: "Frictionless UI",
-    tagline: "Streamlined macro tracking designed for speed, not overwhelming spreadsheet admin",
+    badge: "Clean & Distraction-Free",
+    tagline: "Streamlined macronutrient logging without the dense spreadsheet clutter",
     subtitle:
-      "All the macro precision you need to build muscle or lose fat, with a modern interface that gets out of your way.",
+      "All the macro precision you need to build muscle or lose fat, with an intuitive UI that gets out of your way.",
     metaDescription:
-      "Looking for a modern Cronometer alternative? MacroTrackr provides fast meal logging, accurate macro breakdown, and weekly trend analysis with zero visual bloat.",
+      "Compare MacroTrackr and Cronometer. Discover a streamlined, ad-free macro tracker with instant logging and self-hosted privacy.",
     keyDifferentiators: [
       {
-        title: "Fast, Streamlined Logging",
+        title: "Clean, High-Density Interface",
         description:
-          "Cronometer's interface can feel dense and clinical. MacroTrackr is optimized for 30-second meal logging with instant search and simple portion adjusters.",
+          "Cronometer's UI can feel overwhelming with dozens of micronutrient gauges. MacroTrackr focuses on protein, carbs, fats, and energy with razor-sharp clarity.",
       },
       {
-        title: "Modern Dark-First Design System",
+        title: "Zero Banner Ads on Free",
         description:
-          "Built with Tailwind CSS, clean typography, and a polished dark-mode palette that looks right on modern devices.",
+          "Cronometer Free displays prominent banner advertisements. MacroTrackr is 100% ad-free across all versions.",
       },
       {
-        title: "No Upsell Popups",
+        title: "Instant Multi-Ingredient Composition",
         description:
-          "Track your macros and analyze your week without constant prompts to upgrade to Gold.",
+          "Build and scale multi-ingredient recipes with instant dynamic macro recalculations.",
       },
       {
-        title: "Open Source Core",
+        title: "Open Source Freedom",
         description:
-          "Own your data with complete export options and local Docker self-hosting capabilities.",
+          "Full code transparency under the AGPLv3 license. You own your data and instance forever.",
       },
     ],
     matrix: [
       {
-        feature: "User Interface Speed & Simplicity",
-        macrotrackr: "Minimalist & Fast",
-        competitor: "Complex / Spreadsheet-like",
+        feature: "User Interface",
+        macrotrackr: "Streamlined, High-Density & Modern",
+        competitor: "Dense Spreadsheet / Micronutrient heavy",
         highlight: true,
+      },
+      {
+        feature: "Advertisements",
+        macrotrackr: "Zero Ads (Always)",
+        competitor: "Banner Ads on Free Tier",
+        highlight: true,
+      },
+      {
+        feature: "Barcode Scanner",
+        macrotrackr: "Included Free",
+        competitor: "Included Free",
       },
       {
         feature: "Custom Macro Targets",
         macrotrackr: "Included Free",
-        competitor: "Included Free (Basic)",
+        competitor: "Included Free",
       },
       {
-        feature: "Self-Hosting Freedom",
-        macrotrackr: "Yes (AGPLv3)",
-        competitor: "No",
+        feature: "Self-Hosting",
+        macrotrackr: "Yes (Docker + SQLite)",
+        competitor: "No (Cloud Only)",
         highlight: true,
       },
       {
-        feature: "Weekly Compliance Reporting",
-        macrotrackr: "Included Free",
-        competitor: "Gold Subscription for deep analytics",
-      },
-      {
-        feature: "Mobile Responsive & PWA",
-        macrotrackr: "Yes (Instant PWA)",
-        competitor: "Yes (Native App)",
+        feature: "Cloud Sync Option",
+        macrotrackr: "Available ($3.99/mo)",
+        competitor: "Available ($9.99/mo Gold)",
       },
     ],
     faqs: [
       {
-        question: "Is MacroTrackr good for tracking protein and calories?",
+        question: "When should I choose MacroTrackr over Cronometer?",
         answer:
-          "Yes! MacroTrackr is specifically built around daily and weekly protein, carb, fat, and calorie tracking with high-visibility target rings and compliance stats.",
+          "If you primarily care about hitting calorie and macronutrient targets (protein, carbs, fats) with high speed and zero ads, MacroTrackr provides a faster and cleaner experience than Cronometer's micronutrient-heavy dashboard.",
       },
       {
-        question: "How fast is adding a meal in MacroTrackr?",
+        question: "Can I self-host MacroTrackr at home?",
         answer:
-          "You can search by name, barcode, or quick-add manual calories in seconds, with ingredient scaling and recipe saving built in.",
+          "Yes! MacroTrackr runs in a single lightweight Docker container with an embedded SQLite database, perfect for Raspberry Pi, Unraid, Synology, or any home server.",
       },
     ],
   },
   {
-    slug: "loseit-alternative",
+    slug: "lose-it",
     competitorName: "Lose It!",
-    title: "Ad-Free & Private Lose It! Alternative",
+    title: "The Ad-Free, Privacy-First Lose It! Alternative",
     shortTitle: `${APP_NAME} vs Lose It!`,
-    badge: "Privacy & Precision",
-    tagline: "Track calories and macros without interstitial ads or discount popups",
+    badge: "No Popups or Paywalls",
+    tagline: "Custom macro targets and weekly progress without aggressive premium upsells",
     subtitle:
-      "Accurate macro splitting, custom meal logging, and weekly progress without constant upgrade pitches.",
+      "Track calories and macros with full flexibility, zero annoying discount popups, and complete data ownership.",
     metaDescription:
-      "Looking for a Lose It! alternative? MacroTrackr offers ad-free calorie and macro tracking, flexible target splits, and self-hosted privacy.",
+      "Lose It! alternative: MacroTrackr offers free custom macro goals, ad-free tracking, weekly averages, and open-source self-hosting.",
     keyDifferentiators: [
       {
-        title: "Zero Upgrade Funnels or Interstitial Popups",
+        title: "No Aggressive Upsell Popups",
         description:
-          "Lose It! frequently interrupts your tracking with discount timers and subscription promos. MacroTrackr is clean, quiet, and respects your attention.",
+          "Lose It! frequently interrupts users with subscription popups and lifetime premium offers. MacroTrackr offers a peaceful, distraction-free environment.",
       },
       {
-        title: "Dedicated Macro Split Focus",
+        title: "Gram-Accurate Custom Macros",
         description:
-          "While Lose It! centers primarily on raw calories, MacroTrackr gives equal prominence to protein, carbohydrates, and fats for athletic performance and body composition.",
+          "Customizing individual macronutrient gram targets is unrestricted and free in MacroTrackr.",
       },
       {
-        title: "Complete Data Sovereignty",
+        title: "Weekly Compliance Focus",
         description:
-          "Self-host on your own hardware or use our cloud. Full export of your meal history is always available.",
+          "View your 7-day rolling calories and macronutrient breakdown to stay consistent over the long haul.",
+      },
+      {
+        title: "Open Source & Self-Hostable",
+        description:
+          "Never worry about an app company shutting down or changing terms. Run your own server with Docker.",
       },
     ],
     matrix: [
       {
-        feature: "Ad-Free Experience",
-        macrotrackr: "100% Ad-Free",
-        competitor: "Ad-Supported on Free",
-        highlight: true,
-      },
-      {
-        feature: "Custom Macro Ratio Splits",
+        feature: "Custom Macro Gram Goals",
         macrotrackr: "Included Free",
-        competitor: "Premium Upgrade Required",
+        competitor: "Paywalled ($39.99/yr)",
         highlight: true,
       },
       {
-        feature: "Open Source Codebase",
-        macrotrackr: "AGPLv3",
-        competitor: "Proprietary",
+        feature: "Popups & Upsells",
+        macrotrackr: "None",
+        competitor: "Frequent discount popups",
         highlight: true,
       },
       {
-        feature: "Free Nutrition Calculators",
+        feature: "Barcode Scanner",
         macrotrackr: "Included Free",
-        competitor: "Limited",
+        competitor: "Included Free",
+      },
+      {
+        feature: "Self-Hosting",
+        macrotrackr: "Yes (Docker + SQLite)",
+        competitor: "No",
+        highlight: true,
+      },
+      {
+        feature: "Weekly Rolling Averages",
+        macrotrackr: "Included Free",
+        competitor: "Paywalled Insights",
+      },
+      {
+        feature: "Open Source",
+        macrotrackr: "Yes (AGPLv3)",
+        competitor: "No",
+        highlight: true,
       },
     ],
     faqs: [
       {
-        question: "Can I set custom macro gram goals in MacroTrackr?",
+        question: "Can I set custom macro targets without paying?",
         answer:
-          "Yes. You can set exact gram targets or percentage splits with interactive sliders in your goals settings.",
+          "Yes! In MacroTrackr, setting custom calorie goals and gram/percentage macro splits is 100% free.",
       },
       {
-        question: "Is my personal data safe with MacroTrackr?",
+        question: "Is there a mobile app?",
         answer:
-          "Yes. MacroTrackr has zero ad trackers or data brokers, and our open source codebase allows full auditability.",
+          "MacroTrackr is a Progressive Web App (PWA) that installs directly on iOS and Android with full touch controls and offline support, plus native mobile builds.",
       },
     ],
   },

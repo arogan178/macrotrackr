@@ -10,6 +10,7 @@ import {
   Beef,
   Book,
   Calendar,
+  Camera,
   Check,
   CheckCircle,
   ChevronDown,
@@ -48,6 +49,7 @@ import {
   PlusCircle,
   Scale as BalanceScale,
   Scale,
+  ScanBarcode,
   Search,
   Settings,
   ShieldCheck,
@@ -174,6 +176,8 @@ export const CircleHelpIcon = createIcon(CircleHelp);
 export const SparklesIcon = createIcon(Sparkles);
 export const CopyIcon = createIcon(Copy);
 export const Link2Icon = createIcon(Link2);
+export const BarcodeIcon = createIcon(ScanBarcode);
+export const CameraIcon = createIcon(Camera);
 
 // Social Provider Icons
 const GOOGLE_BRAND_COLORS = {

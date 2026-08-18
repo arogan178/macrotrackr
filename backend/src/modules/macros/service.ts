@@ -22,6 +22,7 @@ export interface MacrosRouteContext
   extends AuthenticatedRouteContextWithUser<Record<string, unknown>> {
   openFoodFactsApiClient?: {
     search: (query: string) => Promise<FoodProductResult[]>;
+    getByBarcode: (barcode: string) => Promise<FoodProductResult | null>;
   };
   cacheService?: CacheService;
 }

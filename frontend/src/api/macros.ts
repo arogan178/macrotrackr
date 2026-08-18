@@ -253,4 +253,22 @@ export const macrosApi = {
 
     return normalizeFoodSearchResults(response);
   },
+
+  /**
+   * @throws {ApiError}
+   */
+  getByBarcode: async (barcode: string): Promise<FoodSearchResult | null> => {
+    const cleanBarcode = barcode.trim();
+    if (!cleanBarcode) {
+      return null;
+    }
+
+    const response = await apiClient.get<unknown>(`/api/macros/barcode/${encodeURIComponent(cleanBarcode)}`);
+
+    if (isFoodSearchResult(response)) {
+      return response;
+    }
+
+    return null;
+  },
 };

@@ -140,4 +140,20 @@ export const MacroSchemas = {
       rawQuantity: t.Optional(t.String()),
     })
   ),
+  foodBarcodeParam: t.Object({
+    barcode: t.String({ minLength: 3, maxLength: 40 }),
+  }),
+  foodBarcodeResponse: t.Nullable(
+    t.Object({
+      name: t.String(),
+      protein: t.Number(),
+      carbs: t.Number(),
+      fats: t.Number(),
+      energyKcal: t.Number(),
+      categories: t.String(),
+      servingQuantity: t.Number(),
+      servingUnit: t.String(),
+      rawQuantity: t.Optional(t.String()),
+    })
+  ),
 };

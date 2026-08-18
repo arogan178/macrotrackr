@@ -9,7 +9,7 @@ import {
 import ComparisonArticlePage from "./ComparisonArticlePage";
 import ComparisonIndexPage from "./ComparisonIndexPage";
 
-let mockParameters: { slug?: string } = { slug: "myfitnesspal-alternative" };
+let mockParameters: { slug?: string } = { slug: "myfitnesspal" };
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to, ...properties }: any) => (
@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-router", () => ({
   useParams: () => mockParameters,
   useNavigate: () => vi.fn(),
   useSearch: () => ({}),
-  useLocation: () => ({ pathname: "/compare/myfitnesspal-alternative" }),
+  useLocation: () => ({ pathname: "/compare/myfitnesspal" }),
 }));
 
 describe("comparisonsCatalog", () => {
@@ -39,7 +39,7 @@ describe("comparisonsCatalog", () => {
   });
 
   it("retrieves comparisons by slug", () => {
-    const mfp = getComparisonBySlug("myfitnesspal-alternative");
+    const mfp = getComparisonBySlug("myfitnesspal");
     expect(mfp).toBeDefined();
     expect(mfp?.competitorName).toBe("MyFitnessPal");
 
@@ -49,22 +49,22 @@ describe("comparisonsCatalog", () => {
 });
 
 describe("ComparisonIndexPage", () => {
-  it("renders all competitor comparison cards", () => {
+  it("renders all competitor comparison cards and master matrix", () => {
     render(<ComparisonIndexPage />);
 
     expect(
       screen.getByRole("heading", { level: 1, name: /compare macrotrackr/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/myfitnesspal/i)).toBeInTheDocument();
-    expect(screen.getByText(/macrofactor/i)).toBeInTheDocument();
-    expect(screen.getByText(/cronometer/i)).toBeInTheDocument();
-    expect(screen.getByText(/lose it!/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/myfitnesspal/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/macrofactor/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/cronometer/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/lose it!/i).length).toBeGreaterThan(0);
   });
 });
 
 describe("ComparisonArticlePage", () => {
   it("renders the comparison details and feature table for a valid competitor", () => {
-    mockParameters = { slug: "myfitnesspal-alternative" };
+    mockParameters = { slug: "myfitnesspal" };
     render(<ComparisonArticlePage />);
 
     expect(
