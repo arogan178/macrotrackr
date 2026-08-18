@@ -9,6 +9,7 @@ import CalorieSearchForm from "./CalorieSearchForm";
 vi.mock("@/api/macros", () => ({
   macrosApi: {
     search: vi.fn(),
+    getByBarcode: vi.fn(),
   },
 }));
 
@@ -32,6 +33,12 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 describe("CalorieSearchForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    let modalRoot = document.querySelector("#modal-root");
+    if (!modalRoot) {
+      modalRoot = document.createElement("div");
+      modalRoot.setAttribute("id", "modal-root");
+      document.body.appendChild(modalRoot);
+    }
   });
 
   it("renders without crashing", () => {
@@ -133,5 +140,52 @@ describe("CalorieSearchForm", () => {
         mealType: "snack",
       }),
     );
+  });
+
+  it("opens barcode scanner and populates food result on scan/manual lookup", async () => {
+    (macrosApi.getByBarcode as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      name: "Oat Milk Barcode Item",
+      protein: 2.0,
+      carbs: 14.0,
+      fats: 3.0,
+      energyKcal: 90,
+      categories: "Beverages",
+      servingQuantity: 240,
+      servingUnit: "ml",
+      rawQuantity: "240ml",
+    });
+
+    const onResultMock = vi.fn();
+
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={onResultMock} onSelectSavedMeal={() => {}} />,
+    );
+
+    const scanButton = screen.getByRole("button", { name: "Scan barcode" });
+    fireEvent.click(scanButton);
+
+    expect(screen.getByText("Barcode Scanner")).toBeInTheDocument();
+
+    const manualTab = screen.getByRole("button", { name: "Enter Barcode Manually" });
+    fireEvent.click(manualTab);
+
+    const barcodeInput = screen.getByLabelText(/barcode number/i);
+    fireEvent.change(barcodeInput, { target: { value: "737628064502" } });
+
+    const lookupButton = screen.getByRole("button", { name: "Look up product barcode" });
+    fireEvent.click(lookupButton);
+
+    await waitFor(() => {
+      expect(onResultMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Oat Milk Barcode Item",
+          protein: "2.0",
+          carbs: "14.0",
+          fats: "3.0",
+          servingQuantity: 240,
+          servingUnit: "ml",
+        }),
+      );
+    });
   });
 });

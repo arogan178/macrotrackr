@@ -7,7 +7,10 @@ import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
 import { APP_NAME, APP_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
-import { COMPARISONS } from "../comparisons/comparisonsCatalog";
+import {
+  COMPARISONS,
+  MASTER_COMPARISON_MATRIX,
+} from "../comparisons/comparisonsCatalog";
 import { calculatorCardClass } from "../tools/calculatorStyles";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
@@ -15,8 +18,8 @@ export default function ComparisonIndexPage() {
   const canonicalUrl = `${APP_URL}/compare`;
 
   usePageMetadata({
-    title: `Best Free Alternatives & Comparisons — ${APP_NAME}`,
-    description: `Compare ${APP_NAME} against MyFitnessPal, MacroFactor, Cronometer, and Lose It. See why users choose our ad-free, open-source nutrition tracker.`,
+    title: `Macro Tracker Comparisons & Alternatives — ${APP_NAME}`,
+    description: `Compare ${APP_NAME} against MyFitnessPal, MacroFactor, Cronometer, and Lose It. See feature tables, pricing models, barcode scanning, and privacy side-by-side.`,
     canonical: canonicalUrl,
   });
 
@@ -98,6 +101,79 @@ export default function ComparisonIndexPage() {
             </div>
           </div>
 
+          {/* Master Unified Comparison Matrix */}
+          <div className="mb-12">
+            <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Feature & Pricing Matrix
+                </h2>
+                <p className="text-sm text-muted">
+                  Side-by-side feature comparison across major macro tracking apps.
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-card border border-border bg-surface">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2">
+                    <th className="py-3.5 pr-4 pl-5 font-semibold text-foreground">
+                      Feature
+                    </th>
+                    <th className="px-4 py-3.5 font-bold text-primary">
+                      {APP_NAME}
+                    </th>
+                    <th className="px-4 py-3.5 font-medium text-muted">
+                      MyFitnessPal
+                    </th>
+                    <th className="px-4 py-3.5 font-medium text-muted">
+                      MacroFactor
+                    </th>
+                    <th className="px-4 py-3.5 font-medium text-muted">
+                      Cronometer
+                    </th>
+                    <th className="py-3.5 pr-5 pl-4 font-medium text-muted">
+                      Lose It!
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {MASTER_COMPARISON_MATRIX.map((row, index) => (
+                    <tr
+                      key={index}
+                      className={
+                        row.highlight
+                          ? "bg-primary/5 transition-colors hover:bg-primary/10"
+                          : "transition-colors hover:bg-surface-2"
+                      }
+                    >
+                      <td className="py-3 pr-4 pl-5 font-medium text-foreground">
+                        {row.feature}
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-primary">
+                        {row.macrotrackr}
+                      </td>
+                      <td className="px-4 py-3 text-muted">{row.myfitnesspal}</td>
+                      <td className="px-4 py-3 text-muted">{row.macrofactor}</td>
+                      <td className="px-4 py-3 text-muted">{row.cronometer}</td>
+                      <td className="py-3 pr-5 pl-4 text-muted">{row.loseIt}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
+              Deep-Dive Comparisons
+            </h2>
+            <p className="text-sm text-muted">
+              Select a tracker for a detailed breakdown, feature differences, and FAQs.
+            </p>
+          </div>
+
           <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {COMPARISONS.map((comp) => (
               <li key={comp.slug}>
@@ -110,9 +186,9 @@ export default function ComparisonIndexPage() {
                     <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-primary uppercase">
                       {comp.badge}
                     </span>
-                    <h2 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                       {comp.shortTitle}
-                    </h2>
+                    </h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted">
                       {comp.tagline}
                     </p>

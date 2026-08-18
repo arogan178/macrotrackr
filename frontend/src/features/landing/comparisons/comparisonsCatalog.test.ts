@@ -22,11 +22,11 @@ describe("comparisonsCatalog", () => {
   });
 
   it("finds a comparison by slug", () => {
-    const mfp = getComparisonBySlug("myfitnesspal-alternative");
+    const mfp = getComparisonBySlug("myfitnesspal");
     expect(mfp).toBeDefined();
     expect(mfp?.competitorName).toBe("MyFitnessPal");
 
-    const nonExistent = getComparisonBySlug("non-existent-alternative");
+    const nonExistent = getComparisonBySlug("non-existent-competitor");
     expect(nonExistent).toBeNull();
   });
 

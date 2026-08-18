@@ -28,7 +28,7 @@ const baseTemplate = fs.readFileSync(templatePath, "utf8");
 // Load comparisons catalog
 const comparisons = [
   {
-    slug: "myfitnesspal-alternative",
+    slug: "myfitnesspal",
     shortTitle: "MyFitnessPal Alternative",
     title: `Best Free MyFitnessPal Alternative Without Ads (2026) — ${APP_NAME}`,
     description: `Looking for a MyFitnessPal alternative? ${APP_NAME} offers 100% free barcode scanning, zero banner ads, rapid logging, and self-hosted privacy.`,
@@ -53,7 +53,7 @@ const comparisons = [
     ],
   },
   {
-    slug: "macrofactor-alternative",
+    slug: "macrofactor",
     shortTitle: "MacroFactor Alternative",
     title: `Free & Open Source MacroFactor Alternative — ${APP_NAME}`,
     description: `Compare ${APP_NAME} with MacroFactor. Get weekly macro trend tracking, responsive smart averages, and clean analytics without a monthly fee.`,
@@ -70,7 +70,7 @@ const comparisons = [
     ],
   },
   {
-    slug: "cronometer-alternative",
+    slug: "cronometer",
     shortTitle: "Cronometer Alternative",
     title: `Lightweight Cronometer Alternative — ${APP_NAME}`,
     description: `A fast, distraction-free alternative to Cronometer. Focus on calories and macros without spreadsheet clutter or bloated menus.`,
@@ -87,7 +87,7 @@ const comparisons = [
     ],
   },
   {
-    slug: "lose-it-alternative",
+    slug: "lose-it",
     shortTitle: "Lose It! Alternative",
     title: `Best Ad-Free Lose It! Alternative — ${APP_NAME}`,
     description: `Compare ${APP_NAME} with Lose It! Track custom protein, carb, and fat gram targets without paywalls, upsells, or intrusive ads.`,

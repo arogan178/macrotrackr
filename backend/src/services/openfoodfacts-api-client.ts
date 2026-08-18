@@ -559,6 +559,70 @@ export class OpenFoodFactsApiClient {
     return this.makeRequest(url, trimmedQuery);
   }
 
+  async getByBarcode(barcode: string): Promise<FoodProductResult | null> {
+    const cleanBarcode = barcode?.trim();
+    if (!cleanBarcode || cleanBarcode.length < 3) {
+      logger.warn({ barcode }, "Invalid barcode provided");
+      return null;
+    }
+
+    const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(
+      cleanBarcode
+    )}.json?fields=product_name,product_name_en,nutriments,categories,quantity`;
+
+    logger.debug({ url, barcode: cleanBarcode }, "Fetching barcode product from OpenFoodFacts");
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": USER_AGENT,
+          "Accept": "application/json",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 404) {
+        return null;
+      }
+
+      if (!response.ok) {
+        this.handleHttpError(response);
+      }
+
+      const data: { status?: number; product?: FoodProduct } = await response.json();
+
+      if (!data.product || data.status === 0) {
+        return null;
+      }
+
+      const product = data.product;
+      const hasName = Boolean(product.product_name || product.product_name_en);
+      if (!hasName) {
+        return null;
+      }
+
+      return mapHitToFoodProduct(product);
+    } catch (error) {
+      if (error instanceof OpenFoodFactsError) {
+        throw error;
+      }
+      if (error instanceof Error && error.name === "AbortError") {
+        logger.warn({ url }, "Barcode request timed out");
+        throw new OpenFoodFactsTimeoutError(REQUEST_TIMEOUT);
+      }
+      loggerHelpers.error(new Error("Failed to fetch product by barcode from OpenFoodFacts API"), {
+        error: error instanceof Error ? { message: error.message } : error,
+        barcode: cleanBarcode,
+      });
+      return null;
+    }
+  }
+
   private async makeRequest(
     url: string,
     normalizedQuery: string,
