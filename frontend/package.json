@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bunx vite",
     "build": "bunx vite build",
-    "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
+    "postbuild": "(bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js) && (bun ./scripts/prerender.mjs || node ./scripts/prerender.mjs)",
     "preview": "bunx vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "eslint src && node ./scripts/check-ui-budgets.mjs",

@@ -3,15 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import BlogArticlePage from "./BlogArticlePage";
 
-let mockParams: { slug?: string } = { slug: "v3-0-0" };
+let mockParameters: { slug?: string } = { slug: "v3-0-0" };
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to, ...props }: any) => (
-    <a href={to} {...props}>
+  Link: ({ children, to, ...properties }: any) => (
+    <a href={to} {...properties}>
       {children}
     </a>
   ),
-  useParams: () => mockParams,
+  useParams: () => mockParameters,
   useNavigate: () => vi.fn(),
   useSearch: () => ({}),
   useLocation: () => ({ pathname: "/blog/v3-0-0" }),
@@ -19,7 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 describe("BlogArticlePage", () => {
   it("renders the article for a valid slug", () => {
-    mockParams = { slug: "v3-0-0" };
+    mockParameters = { slug: "v3-0-0" };
     render(<BlogArticlePage />);
 
     expect(
@@ -29,7 +29,7 @@ describe("BlogArticlePage", () => {
   });
 
   it("retains the article during exit transition when route params detach", () => {
-    mockParams = { slug: "v3-0-0" };
+    mockParameters = { slug: "v3-0-0" };
     const { rerender } = render(<BlogArticlePage />);
 
     expect(
@@ -37,7 +37,7 @@ describe("BlogArticlePage", () => {
     ).toBeGreaterThan(0);
 
     // Simulates router match changing to /blog while AnimatePresence keeps exiting page mounted
-    mockParams = {};
+    mockParameters = {};
     rerender(<BlogArticlePage />);
 
     // Must not crash and must not flash not found
@@ -48,7 +48,7 @@ describe("BlogArticlePage", () => {
   });
 
   it("renders not found state when given an invalid slug", () => {
-    mockParams = { slug: "non-existent-article-slug" };
+    mockParameters = { slug: "non-existent-article-slug" };
     render(<BlogArticlePage />);
 
     expect(screen.getByText(/article not found/i)).toBeInTheDocument();

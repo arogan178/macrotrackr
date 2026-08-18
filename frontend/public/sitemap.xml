@@ -49,6 +49,36 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/compare</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/compare/myfitnesspal-alternative</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/compare/macrofactor-alternative</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/compare/cronometer-alternative</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/compare/lose-it-alternative</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/pricing</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
