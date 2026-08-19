@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
 import { ArrowRightIcon } from "@/components/ui";
+import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -11,6 +12,7 @@ import {
   COMPARISONS,
   MASTER_COMPARISON_MATRIX,
 } from "../comparisons/comparisonsCatalog";
+import ComparisonTable from "../comparisons/ComparisonTable";
 import { calculatorCardClass } from "../tools/calculatorStyles";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
@@ -48,82 +50,44 @@ export default function ComparisonIndexPage() {
       <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-10 text-center">
-            <h1 className="text-3xl font-bold tracking-tight lg:text-5xl">
-              Compare {APP_NAME}
-            </h1>
+            <Heading level="display">Compare {APP_NAME}</Heading>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted">
-              Explore how {APP_NAME} stacks up against popular nutrition and macro
-              tracking applications. No artificial paywalls, no clutter, and 100%
-              data privacy.
+              Feature and pricing tables against four trackers people usually
+              weigh {APP_NAME} against. Prices are the vendors&rsquo; list
+              monthly rates; every row is a statement you can check.
             </p>
           </div>
 
-          {/* Master Unified Comparison Matrix */}
-          <div className="mb-12">
-            <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                  Feature & Pricing Matrix
-                </h2>
-                <p className="text-sm text-muted">
-                  Side-by-side feature comparison across major macro tracking apps.
-                </p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto rounded-card border border-border bg-surface">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-surface-2">
-                    <th className="py-3.5 pr-4 pl-5 font-semibold text-foreground">
-                      Feature
-                    </th>
-                    <th className="px-4 py-3.5 font-bold text-primary">
-                      {APP_NAME}
-                    </th>
-                    <th className="px-4 py-3.5 font-medium text-muted">
-                      MyFitnessPal
-                    </th>
-                    <th className="px-4 py-3.5 font-medium text-muted">
-                      MacroFactor
-                    </th>
-                    <th className="px-4 py-3.5 font-medium text-muted">
-                      Cronometer
-                    </th>
-                    <th className="py-3.5 pr-5 pl-4 font-medium text-muted">
-                      Lose It!
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {MASTER_COMPARISON_MATRIX.map((row, index) => (
-                    <tr
-                      key={index}
-                      className="transition-colors hover:bg-surface-2"
-                    >
-                      <td className="py-3 pr-4 pl-5 font-medium text-foreground">
-                        {row.feature}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-primary">
-                        {row.macrotrackr}
-                      </td>
-                      <td className="px-4 py-3 text-muted">{row.myfitnesspal}</td>
-                      <td className="px-4 py-3 text-muted">{row.macrofactor}</td>
-                      <td className="px-4 py-3 text-muted">{row.cronometer}</td>
-                      <td className="py-3 pr-5 pl-4 text-muted">{row.loseIt}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ComparisonTable
+            caption="Features and pricing"
+            description="Side by side across the major macro trackers."
+            columns={[
+              { key: "feature", label: "Feature" },
+              { key: "macrotrackr", label: APP_NAME, isOwn: true },
+              { key: "myfitnesspal", label: "MyFitnessPal" },
+              { key: "macrofactor", label: "MacroFactor" },
+              { key: "cronometer", label: "Cronometer" },
+              { key: "loseIt", label: "Lose It!" },
+            ]}
+            rows={MASTER_COMPARISON_MATRIX.map((row) => ({
+              feature: row.feature,
+              values: {
+                macrotrackr: row.macrotrackr,
+                myfitnesspal: row.myfitnesspal,
+                macrofactor: row.macrofactor,
+                cronometer: row.cronometer,
+                loseIt: row.loseIt,
+              },
+            }))}
+          />
 
           <div className="mb-4">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Deep-Dive Comparisons
-            </h2>
-            <p className="text-sm text-muted">
-              Select a tracker for a detailed breakdown, feature differences, and FAQs.
+            <Heading level="panel" className="text-xl">
+              One at a time
+            </Heading>
+            <p className="mt-1 text-sm text-muted">
+              Each tracker in full: feature table, what differs, and the
+              questions people ask.
             </p>
           </div>
 
@@ -133,12 +97,16 @@ export default function ComparisonIndexPage() {
                 <Link
                   to="/compare/$slug"
                   params={{ slug: comp.slug }}
-                  className={`group relative flex h-full min-h-40 flex-col justify-between overflow-hidden ${calculatorCardClass} transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`}
+                  className={`group relative flex h-full min-h-40 flex-col justify-between overflow-hidden ${calculatorCardClass} transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`}
                 >
                   <div>
-                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                    <Heading
+                      level="panel"
+                      as="h3"
+                      className="text-xl transition-colors group-hover:text-primary"
+                    >
                       {comp.shortTitle}
-                    </h3>
+                    </Heading>
                     <p className="mt-2 text-sm leading-relaxed text-muted">
                       {comp.tagline}
                     </p>
@@ -159,8 +127,8 @@ export default function ComparisonIndexPage() {
           </ul>
 
           <ToolsCtaBanner
-            heading="Ready for clean, ad-free nutrition tracking?"
-            body="Start tracking with MacroTrackr today or self-host your own instance."
+            heading={`Track with ${APP_NAME}`}
+            body="Use the hosted app or run the same build on your own server."
           />
         </div>
       </main>

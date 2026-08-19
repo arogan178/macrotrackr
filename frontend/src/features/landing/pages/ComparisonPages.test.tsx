@@ -71,7 +71,9 @@ describe("ComparisonArticlePage", () => {
       screen.getAllByRole("heading", { level: 1 }).length
     ).toBeGreaterThan(0);
     expect(screen.getByText(/feature comparison/i)).toBeInTheDocument();
-    expect(screen.getByText(/frequently asked questions/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^questions$/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders not found state when given an invalid slug", () => {
@@ -80,7 +82,7 @@ describe("ComparisonArticlePage", () => {
 
     expect(screen.getByText(/comparison not found/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /back to all comparisons/i })
+      screen.getByRole("link", { name: /all comparisons/i })
     ).toBeInTheDocument();
   });
 });

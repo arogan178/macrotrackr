@@ -1,14 +1,9 @@
 import { Link, useParams } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import {
-  Accordion,
-  BackIcon,
-  CalorieIcon,
-  CheckCircleIcon,
-  CheckIcon,
-  CloseIcon,
-} from "@/components/ui";
+import { Accordion, BackIcon } from "@/components/ui";
+import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
+import Panel from "@/components/ui/Panel";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -18,6 +13,7 @@ import {
   COMPARISONS,
   getComparisonBySlug,
 } from "../comparisons/comparisonsCatalog";
+import ComparisonTable from "../comparisons/ComparisonTable";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
 export default function ComparisonArticlePage() {
@@ -39,7 +35,7 @@ export default function ComparisonArticlePage() {
       <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
         <AppHeader mode="public" />
         <main className="relative z-10 flex min-h-[60vh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
-          <h1 className="text-2xl font-bold">Comparison Not Found</h1>
+          <Heading level="page">Comparison not found</Heading>
           <p className="mt-2 text-sm text-muted">
             The requested comparison does not exist or has moved.
           </p>
@@ -48,7 +44,7 @@ export default function ComparisonArticlePage() {
             className="mt-6 inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-background transition-opacity hover:opacity-90"
           >
             <BackIcon className="h-4 w-4" />
-            Back to All Comparisons
+            All comparisons
           </Link>
         </main>
         <Footer />
@@ -130,7 +126,7 @@ export default function ComparisonArticlePage() {
 
   const faqAccordionItems = comparison.faqs.map((faq, index) => ({
     id: `faq-${index}`,
-    question: <span className="font-semibold">{faq.question}</span>,
+    question: <span className="font-medium">{faq.question}</span>,
     answer: <p className="text-sm leading-relaxed text-muted">{faq.answer}</p>,
   }));
 
@@ -184,155 +180,87 @@ export default function ComparisonArticlePage() {
 
           {/* Hero Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {comparison.title}
-            </h1>
+            <Heading level="display">{comparison.title}</Heading>
             <p className="mt-3 text-lg leading-relaxed text-muted">
               {comparison.tagline}
             </p>
           </div>
 
           {/* Subtitle / Overview */}
-          <div className="mb-10 rounded-card border border-border bg-surface-2 p-6">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary/20 text-primary">
-                <CalorieIcon className="h-4 w-4" />
-              </div>
-              <h2 className="text-lg font-bold tracking-tight text-foreground">
-                Overview
-              </h2>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
+          <Panel raised className="mb-10" title="Overview">
+            <p className="text-sm leading-relaxed text-muted">
               {comparison.subtitle}
             </p>
-          </div>
+          </Panel>
 
-          {/* Feature Comparison Matrix */}
-          <section className="mb-12" aria-labelledby="matrix-heading">
-            <div className="mb-4 flex items-center justify-between">
-              <h2
-                id="matrix-heading"
-                className="text-2xl font-bold tracking-tight text-foreground"
-              >
-                Feature Comparison
-              </h2>
-            </div>
-            <div className="overflow-x-auto rounded-card border border-border bg-surface">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-surface-2 text-xs font-semibold tracking-wider text-muted uppercase">
-                    <th scope="col" className="px-4 py-3.5">
-                      Feature
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3.5 font-bold text-primary"
-                    >
-                      {APP_NAME}
-                    </th>
-                    <th scope="col" className="px-4 py-3.5 text-muted">
-                      {comparison.competitorName}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {comparison.matrix.map((row) => {
-                    const isCompetitorNegative =
-                      row.competitor.toLowerCase().startsWith("no") ||
-                      row.competitor.toLowerCase().includes("paywalled") ||
-                      row.competitor.toLowerCase().includes("ads") ||
-                      row.competitor.toLowerCase().includes("dense") ||
-                      row.competitor.toLowerCase().includes("frequent") ||
-                      row.competitor.toLowerCase() === "none";
-
-                    return (
-                      <tr
-                        key={row.feature}
-                        className="transition-colors hover:bg-surface-2"
-                      >
-                        <td className="px-4 py-3.5 font-medium text-foreground">
-                          {row.feature}
-                        </td>
-                        <td className="px-4 py-3.5 font-semibold text-primary">
-                          <div className="flex items-center gap-1.5">
-                            <CheckIcon className="h-4 w-4 shrink-0 text-primary" />
-                            <span>{row.macrotrackr}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5 text-muted">
-                          <div className="flex items-center gap-1.5">
-                            {isCompetitorNegative ? (
-                              <CloseIcon className="h-4 w-4 shrink-0 text-muted" />
-                            ) : (
-                              <CheckIcon className="h-4 w-4 shrink-0 text-muted" />
-                            )}
-                            <span>{row.competitor}</span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <ComparisonTable
+            caption="Feature comparison"
+            description={`${APP_NAME} against ${comparison.competitorName}, row by row.`}
+            minWidthClass="min-w-[520px]"
+            columns={[
+              { key: "feature", label: "Feature" },
+              { key: "macrotrackr", label: APP_NAME, isOwn: true },
+              { key: "competitor", label: comparison.competitorName },
+            ]}
+            rows={comparison.matrix.map((row) => ({
+              feature: row.feature,
+              values: {
+                macrotrackr: row.macrotrackr,
+                competitor: row.competitor,
+              },
+            }))}
+          />
 
           {/* Key Differentiators */}
           <section className="mb-12" aria-labelledby="differentiators-heading">
-            <h2
+            <Heading
+              level="panel"
               id="differentiators-heading"
-              className="mb-6 text-2xl font-bold tracking-tight text-foreground"
+              className="mb-6 text-xl"
             >
-              Why Users Choose {APP_NAME}
-            </h2>
+              Where {APP_NAME} differs
+            </Heading>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {comparison.keyDifferentiators.map((diff) => (
-                <div
-                  key={diff.title}
-                  className="rounded-card border border-border bg-surface p-5"
-                >
-                  <div className="flex items-center gap-2 text-primary">
-                    <CheckCircleIcon className="h-5 w-5 shrink-0" />
-                    <h3 className="font-bold text-foreground">{diff.title}</h3>
-                  </div>
-                  <p className="mt-2.5 text-sm leading-relaxed text-muted">
+                <Panel key={diff.title} padding="compact">
+                  <Heading level="panel" as="h3">
+                    {diff.title}
+                  </Heading>
+                  <p className="mt-2 text-sm leading-relaxed text-muted">
                     {diff.description}
                   </p>
-                </div>
+                </Panel>
               ))}
             </div>
           </section>
 
           {/* FAQ Section */}
           <section className="mb-12" aria-labelledby="faq-heading">
-            <h2
-              id="faq-heading"
-              className="mb-6 text-2xl font-bold tracking-tight text-foreground"
-            >
-              Frequently Asked Questions
-            </h2>
+            <Heading level="panel" id="faq-heading" className="mb-6 text-xl">
+              Questions
+            </Heading>
             <Accordion items={faqAccordionItems} defaultOpenFirst />
           </section>
 
           {/* CTA Banner */}
           <ToolsCtaBanner
-            heading={`Switch to ${APP_NAME} today`}
-            body="Experience fast, transparent macro tracking without subscriptions, ads, or locked features."
+            heading={`Try ${APP_NAME}`}
+            body="The free tier has no ads and no feature locks. Self-hosting runs the same build."
           />
 
           {/* Other Comparisons Navigation */}
           {otherComparisons.length > 0 && (
             <div className="mt-12 border-t border-border pt-8">
-              <h3 className="text-sm font-semibold tracking-wider text-muted uppercase">
-                Explore Other Comparisons
-              </h3>
+              <p className={`${TYPE_SCALE.micro} text-muted`}>
+                Other comparisons
+              </p>
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                 {otherComparisons.map((other) => (
                   <Link
                     key={other.slug}
                     to="/compare/$slug"
                     params={{ slug: other.slug }}
-                    className="group rounded-card border border-border bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-primary/50"
+                    className="group rounded-card border border-border bg-surface p-4 transition-colors hover:border-border-2 hover:bg-surface-2"
                   >
                     <div className="text-xs font-semibold text-primary">
                       {other.shortTitle}
