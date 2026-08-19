@@ -32,6 +32,10 @@ interface PostHogQueryResponse {
   results?: Array<[string, number]>;
 }
 
+interface ClerkErrorResponse {
+  errors?: Array<{ code?: string; long_message?: string; message?: string }>;
+}
+
 function requireEnvironment(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} is required`);
@@ -47,7 +51,7 @@ async function createManagedUser(label: string): Promise<ManagedUser> {
   const password = requireEnvironment("GROWTH_CANARY_USER_PASSWORD");
   const secretKey = requireEnvironment("CLERK_SECRET_KEY");
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const email = `macrotrackr-${label}+clerk_test_${runId}@${domain}`;
+  const email = `macrotrackr-${label}-clerk-test-${runId}@${domain}`;
   const clerk = createClerkClient({ secretKey });
   const user = await clerk.users.createUser({
     emailAddress: [email],
@@ -87,7 +91,30 @@ async function registerThroughUi(page: Page, user: ManagedUser): Promise<void> {
   await page
     .getByLabel("Password")
     .fill(requireEnvironment("GROWTH_CANARY_USER_PASSWORD"));
+  const signupResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes("/v1/client/sign_ups") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "Create Account" }).click();
+  const signupResponse = await signupResponsePromise;
+  if (!signupResponse.ok()) {
+    const payload = (await signupResponse.json()) as ClerkErrorResponse;
+    const expectedDuplicateCodes = new Set([
+      "form_identifier_exists",
+      "identifier_already_signed_up",
+    ]);
+    const unexpectedError = payload.errors?.find(
+      ({ code }) => !code || !expectedDuplicateCodes.has(code),
+    );
+    if (unexpectedError) {
+      throw new Error(
+        unexpectedError.long_message ??
+          unexpectedError.message ??
+          `Clerk sign-up failed with ${signupResponse.status()}`,
+      );
+    }
+  }
   await expect(page).toHaveURL(/\/profile-setup/u, { timeout: 30_000 });
 }
 

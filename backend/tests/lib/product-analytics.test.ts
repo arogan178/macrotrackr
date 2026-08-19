@@ -17,9 +17,15 @@ describe("product analytics contract", () => {
     ).toEqual({ switching_source: "myfitnesspal" });
   });
 
-  it("classifies Clerk test aliases as synthetic traffic", () => {
+  it("classifies Clerk test addresses as synthetic traffic", () => {
     expect(
       resolveAnalyticsTrafficType("growth+clerk_test@example.com", []),
+    ).toBe("synthetic");
+    expect(
+      resolveAnalyticsTrafficType(
+        "macrotrackr-manual-clerk-test-123@macrotrackr.com",
+        [],
+      ),
     ).toBe("synthetic");
   });
 
