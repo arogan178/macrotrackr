@@ -131,7 +131,12 @@ export function resolveAnalyticsTrafficType(
   const normalizedEmail = email.trim().toLowerCase();
   const localPart = normalizedEmail.split("@", 1)[0] ?? "";
 
-  if (localPart.includes("+clerk_test")) return "synthetic";
+  if (
+    localPart.includes("+clerk_test") ||
+    localPart.includes("-clerk-test-")
+  ) {
+    return "synthetic";
+  }
   if (
     internalEmails.some(
       (internalEmail) => internalEmail.trim().toLowerCase() === normalizedEmail,
