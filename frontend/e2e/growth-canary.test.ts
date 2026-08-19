@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createClerkClient } from "@clerk/backend";
-import { setupClerkTestingToken } from "@clerk/testing/playwright";
+import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
 const MANUAL_EVENTS = [
@@ -26,6 +27,7 @@ const IMPORT_EVENTS = [
 interface ManagedUser {
   email: string;
   clerkUserId: string;
+  password: string;
 }
 
 interface PostHogQueryResponse {
@@ -48,10 +50,10 @@ function escapeHogQlString(value: string): string {
 
 async function createManagedUser(label: string): Promise<ManagedUser> {
   const domain = requireEnvironment("GROWTH_CANARY_EMAIL_DOMAIN");
-  const password = requireEnvironment("GROWTH_CANARY_USER_PASSWORD");
   const secretKey = requireEnvironment("CLERK_SECRET_KEY");
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const email = `macrotrackr-${label}-clerk-test-${runId}@${domain}`;
+  const password = `Canary-${randomUUID()}-9a!`;
   const clerk = createClerkClient({ secretKey });
   const user = await clerk.users.createUser({
     emailAddress: [email],
@@ -61,7 +63,7 @@ async function createManagedUser(label: string): Promise<ManagedUser> {
     skipLegalChecks: true,
   });
 
-  return { clerkUserId: user.id, email };
+  return { clerkUserId: user.id, email, password };
 }
 
 async function deleteManagedUser(user: ManagedUser): Promise<void> {
@@ -88,9 +90,7 @@ async function registerThroughUi(page: Page, user: ManagedUser): Promise<void> {
   await page.getByLabel("First Name").fill("Growth");
   await page.getByLabel("Last Name").fill("Canary");
   await page.getByLabel("Email").fill(user.email);
-  await page
-    .getByLabel("Password")
-    .fill(requireEnvironment("GROWTH_CANARY_USER_PASSWORD"));
+  await page.getByLabel("Password").fill(user.password);
   const signupResponsePromise = page.waitForResponse(
     (response) =>
       response.url().includes("/v1/client/sign_ups") &&
@@ -115,6 +115,8 @@ async function registerThroughUi(page: Page, user: ManagedUser): Promise<void> {
       );
     }
   }
+  await clerk.signIn({ page, emailAddress: user.email });
+  await page.goto("/profile-setup");
   await expect(page).toHaveURL(/\/profile-setup/u, { timeout: 30_000 });
 }
 
