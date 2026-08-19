@@ -3,6 +3,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import AppHeader from "@/components/layout/AppHeader";
 import { ArrowRightIcon, BackIcon, CheckCircleIcon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
+import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -33,7 +34,7 @@ export default function MigrationGuidePage() {
       <div className="min-h-screen bg-background text-foreground">
         <AppHeader mode="public" />
         <main className="flex min-h-[60vh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
-          <h1 className="text-2xl font-bold">Migration guide not found</h1>
+          <Heading level="page">Migration guide not found</Heading>
           <Link
             to="/migrate"
             className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary"
@@ -89,22 +90,22 @@ export default function MigrationGuidePage() {
             <p className="text-xs font-semibold tracking-wider text-primary uppercase">
               Switch from {guide.sourceName}
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight lg:text-5xl">
+            <Heading level="display" className="mt-3">
               {guide.title}
-            </h1>
+            </Heading>
             <p className="mt-4 text-lg leading-relaxed text-muted">
               {guide.summary}
             </p>
           </header>
 
           <section className="mt-10" aria-labelledby="export-heading">
-            <h2 id="export-heading" className="text-2xl font-bold tracking-tight">
+            <Heading level="panel" id="export-heading" className="text-xl">
               Export from {guide.sourceName}
-            </h2>
+            </Heading>
             <ol className="mt-5 space-y-4">
               {guide.exportSteps.map((step, index) => (
                 <li key={step} className="flex gap-4 rounded-card border border-border bg-surface p-5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-background">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-background">
                     {index + 1}
                   </span>
                   <p className="pt-0.5 text-sm leading-relaxed text-muted">{step}</p>
@@ -130,9 +131,9 @@ export default function MigrationGuidePage() {
             <div className="flex items-start gap-3">
               <CheckCircleIcon className="mt-0.5 h-6 w-6 shrink-0 text-primary" />
               <div>
-                <h2 id="import-heading" className="text-2xl font-bold tracking-tight">
+                <Heading level="panel" id="import-heading" className="text-xl">
                   Preview, then import
-                </h2>
+                </Heading>
                 <p className="mt-3 text-sm leading-relaxed text-muted">
                   {guide.fileGuidance} Nothing is written until you confirm the
                   preview.

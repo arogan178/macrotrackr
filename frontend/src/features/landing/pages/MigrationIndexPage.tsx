@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
 import { ArrowRightIcon } from "@/components/ui";
+import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -29,9 +30,9 @@ export default function MigrationIndexPage() {
             <p className="text-xs font-semibold tracking-wider text-primary uppercase">
               Keep your history
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight lg:text-5xl">
+            <Heading level="display" className="mt-3">
               Switch trackers without starting over
-            </h1>
+            </Heading>
             <p className="mt-4 text-base leading-relaxed text-muted">
               Export from your current app, preview the file in {APP_NAME}, and
               import only when the totals look right.
@@ -50,9 +51,9 @@ export default function MigrationIndexPage() {
                     <p className="text-xs font-semibold tracking-wider text-primary uppercase">
                       From {guide.sourceName}
                     </p>
-                    <h2 className="mt-2 text-xl font-bold tracking-tight">
+                    <Heading level="panel" className="mt-2 text-xl">
                       Import your existing logs
-                    </h2>
+                    </Heading>
                     <p className="mt-3 text-sm leading-relaxed text-muted">
                       {guide.summary}
                     </p>
