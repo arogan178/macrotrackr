@@ -1,4 +1,9 @@
 import {
+  BRAND_MARK_PATH,
+  BRAND_MARK_VIEW_BOX,
+} from "@/components/layout/BrandMarkPath";
+
+import {
   buildSnapshotModel,
   type MacroSnapshotData,
   resolveSnapshotPalette,
@@ -227,6 +232,36 @@ export function renderSnapshotToCanvas(
   return canvas;
 }
 
+/**
+ * The pea pod, from the same path the `BrandMark` SVG uses. Drawn rather than
+ * approximated: an earlier version of this file replaced the path with an
+ * ellipse, which shipped a green blob where the logo should be.
+ *
+ * `Path2D` is available in every browser that can export a canvas. Without it
+ * the square is still the brand colour, which reads as the mark at 44px.
+ */
+function drawBrandMark(
+  ctx: CanvasRenderingContext2D,
+  palette: SnapshotPalette,
+  x: number,
+  y: number,
+  size: number,
+) {
+  if (typeof Path2D === "undefined") return;
+
+  const inset = size * 0.16;
+  const scale = (size - inset * 2) / BRAND_MARK_VIEW_BOX.width;
+  const drawnHeight = BRAND_MARK_VIEW_BOX.height * scale;
+
+  ctx.save();
+  ctx.translate(x + inset, y + (size - drawnHeight) / 2);
+  ctx.scale(scale, scale);
+  ctx.translate(-BRAND_MARK_VIEW_BOX.x, -BRAND_MARK_VIEW_BOX.y);
+  ctx.fillStyle = palette.background;
+  ctx.fill(new Path2D(BRAND_MARK_PATH), "evenodd");
+  ctx.restore();
+}
+
 function drawHeader(
   ctx: CanvasRenderingContext2D,
   palette: SnapshotPalette,
@@ -240,18 +275,7 @@ function drawHeader(
   roundedRect(ctx, CONTENT_X, top, markSize, markSize, 12);
   ctx.fill();
 
-  ctx.fillStyle = palette.background;
-  ctx.beginPath();
-  ctx.ellipse(
-    CONTENT_X + markSize / 2,
-    top + markSize / 2,
-    markSize * 0.3,
-    markSize * 0.17,
-    -Math.PI / 5,
-    0,
-    Math.PI * 2,
-  );
-  ctx.fill();
+  drawBrandMark(ctx, palette, CONTENT_X, top, markSize);
 
   setFont(ctx, 700, 30, true);
   ctx.fillStyle = palette.foreground;
