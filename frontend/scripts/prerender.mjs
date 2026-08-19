@@ -110,6 +110,33 @@ const comparisons = [
   },
 ];
 
+const migrations = [
+  {
+    slug: "myfitnesspal",
+    sourceName: "MyFitnessPal",
+    title: `Import MyFitnessPal History into ${APP_NAME}`,
+    description: `Move your MyFitnessPal nutrition CSV into ${APP_NAME}, preview the detected meals, and keep tracking without starting over.`,
+  },
+  {
+    slug: "cronometer",
+    sourceName: "Cronometer",
+    title: `Import Cronometer History into ${APP_NAME}`,
+    description: `Move your Cronometer servings CSV into ${APP_NAME} and verify the detected meals before saving them.`,
+  },
+  {
+    slug: "macrofactor",
+    sourceName: "MacroFactor",
+    title: `Import MacroFactor History into ${APP_NAME}`,
+    description: `Move your MacroFactor granular nutrition export into ${APP_NAME} without losing your existing tracking history.`,
+  },
+  {
+    slug: "lose-it",
+    sourceName: "Lose It!",
+    title: `Import Lose It! History into ${APP_NAME}`,
+    description: `Move your Lose It! food log into ${APP_NAME}, preview the detected entries, and continue tracking without starting over.`,
+  },
+];
+
 // Tools catalog
 const tools = [
   {
@@ -245,6 +272,22 @@ const pages = [
     `,
   },
   {
+    route: "migrate",
+    title: `Import Your Nutrition History — ${APP_NAME}`,
+    description: `Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into ${APP_NAME} with a preview before anything is saved.`,
+    canonical: `${APP_URL}/migrate`,
+    type: "website",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <h1>Switch Trackers Without Starting Over</h1>
+        <p>Export from your current nutrition app, preview the file in ${APP_NAME}, and import only when the totals look right.</p>
+        <ul>
+          ${migrations.map((migration) => `<li><a href="/migrate/${migration.slug}">${migration.title}</a></li>`).join("")}
+        </ul>
+      </main>
+    `,
+  },
+  {
     route: "blog",
     title: `Blog & Product Updates — ${APP_NAME}`,
     description: "Nutrition guides, macro tracking strategies, product release notes, and updates from the MacroTrackr team.",
@@ -326,6 +369,24 @@ for (const comp of comparisons) {
         <h2>Frequently Asked Questions</h2>
         ${comp.faqs.map((f) => `<div><h3>${f.q}</h3><p>${f.a}</p></div>`).join("")}
         <p><a href="/register">Get Started Free with ${APP_NAME}</a></p>
+      </main>
+    `,
+  });
+}
+
+for (const migration of migrations) {
+  pages.push({
+    route: `migrate/${migration.slug}`,
+    title: migration.title,
+    description: migration.description,
+    canonical: `${APP_URL}/migrate/${migration.slug}`,
+    type: "article",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <nav><a href="/">Home</a> / <a href="/migrate">Migration guides</a> / <span>${migration.sourceName}</span></nav>
+        <h1>${migration.title}</h1>
+        <p>${migration.description}</p>
+        <p><a href="/register?returnTo=%2Fsettings%3Ftab%3Ddata%26from%3Dmigration">Create an account and open the importer</a></p>
       </main>
     `,
   });

@@ -1,6 +1,6 @@
 import type { ImportFormat } from "./importer";
 
-export const PRODUCT_ANALYTICS_SCHEMA_VERSION = 2;
+export const PRODUCT_ANALYTICS_SCHEMA_VERSION = 3;
 
 export type AppMode = "managed" | "self-hosted";
 export type BillingPlan = "monthly" | "yearly";
@@ -38,6 +38,7 @@ export type SignupSource =
   | "blog"
   | "calculator"
   | "direct"
+  | "migration"
   | "pricing"
   | "unknown";
 
@@ -51,6 +52,7 @@ export type ProductEvent =
           | "footer"
           | "header"
           | "hero"
+          | "migration_banner"
           | "pricing_free"
           | "pricing_pro"
           | "pricing_section"
@@ -150,6 +152,7 @@ export function resolveAnalyticsTrafficType(
 
 export function resolveSignupSource(redirectTo?: string): SignupSource {
   if (!redirectTo || redirectTo === "/home") return "direct";
+  if (redirectTo.includes("from=migration")) return "migration";
   if (redirectTo.startsWith("/pricing")) return "pricing";
   if (redirectTo.startsWith("/tools")) return "calculator";
   if (redirectTo.startsWith("/blog")) return "blog";

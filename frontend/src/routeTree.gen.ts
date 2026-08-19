@@ -24,6 +24,7 @@ import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as AuthReadyRouteImport } from './routes/auth-ready'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as MigrateIndexRouteImport } from './routes/migrate/index'
 import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as ToolsWeightLossCalculatorRouteImport } from './routes/tools/weight-loss-calculator'
@@ -31,6 +32,7 @@ import { Route as ToolsTdeeCalculatorRouteImport } from './routes/tools/tdee-cal
 import { Route as ToolsProteinCalculatorRouteImport } from './routes/tools/protein-calculator'
 import { Route as ToolsMacroCalculatorRouteImport } from './routes/tools/macro-calculator'
 import { Route as ToolsBmrCalculatorRouteImport } from './routes/tools/bmr-calculator'
+import { Route as MigrateSlugRouteImport } from './routes/migrate/$slug'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
@@ -109,6 +111,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MigrateIndexRoute = MigrateIndexRouteImport.update({
+  id: '/migrate/',
+  path: '/migrate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompareIndexRoute = CompareIndexRouteImport.update({
   id: '/compare/',
   path: '/compare/',
@@ -145,6 +152,11 @@ const ToolsBmrCalculatorRoute = ToolsBmrCalculatorRouteImport.update({
   path: '/tools/bmr-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MigrateSlugRoute = MigrateSlugRouteImport.update({
+  id: '/migrate/$slug',
+  path: '/migrate/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompareSlugRoute = CompareSlugRouteImport.update({
   id: '/compare/$slug',
   path: '/compare/$slug',
@@ -173,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
@@ -180,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
+  '/migrate/': typeof MigrateIndexRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -199,6 +213,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
@@ -206,6 +221,7 @@ export interface FileRoutesByTo {
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog': typeof BlogIndexRoute
   '/compare': typeof CompareIndexRoute
+  '/migrate': typeof MigrateIndexRoute
   '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
@@ -226,6 +242,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
@@ -233,6 +250,7 @@ export interface FileRoutesById {
   '/tools/weight-loss-calculator': typeof ToolsWeightLossCalculatorRoute
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
+  '/migrate/': typeof MigrateIndexRoute
   '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
@@ -254,6 +272,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/$slug'
     | '/compare/$slug'
+    | '/migrate/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
@@ -261,6 +280,7 @@ export interface FileRouteTypes {
     | '/tools/weight-loss-calculator'
     | '/blog/'
     | '/compare/'
+    | '/migrate/'
     | '/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -280,6 +300,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/$slug'
     | '/compare/$slug'
+    | '/migrate/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
@@ -287,6 +308,7 @@ export interface FileRouteTypes {
     | '/tools/weight-loss-calculator'
     | '/blog'
     | '/compare'
+    | '/migrate'
     | '/tools'
   id:
     | '__root__'
@@ -306,6 +328,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/$slug'
     | '/compare/$slug'
+    | '/migrate/$slug'
     | '/tools/bmr-calculator'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
@@ -313,6 +336,7 @@ export interface FileRouteTypes {
     | '/tools/weight-loss-calculator'
     | '/blog/'
     | '/compare/'
+    | '/migrate/'
     | '/tools/'
   fileRoutesById: FileRoutesById
 }
@@ -333,6 +357,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CompareSlugRoute: typeof CompareSlugRoute
+  MigrateSlugRoute: typeof MigrateSlugRoute
   ToolsBmrCalculatorRoute: typeof ToolsBmrCalculatorRoute
   ToolsMacroCalculatorRoute: typeof ToolsMacroCalculatorRoute
   ToolsProteinCalculatorRoute: typeof ToolsProteinCalculatorRoute
@@ -340,6 +365,7 @@ export interface RootRouteChildren {
   ToolsWeightLossCalculatorRoute: typeof ToolsWeightLossCalculatorRoute
   BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
+  MigrateIndexRoute: typeof MigrateIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
@@ -450,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/migrate/': {
+      id: '/migrate/'
+      path: '/migrate'
+      fullPath: '/migrate/'
+      preLoaderRoute: typeof MigrateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compare/': {
       id: '/compare/'
       path: '/compare'
@@ -499,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsBmrCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/migrate/$slug': {
+      id: '/migrate/$slug'
+      path: '/migrate/$slug'
+      fullPath: '/migrate/$slug'
+      preLoaderRoute: typeof MigrateSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compare/$slug': {
       id: '/compare/$slug'
       path: '/compare/$slug'
@@ -533,6 +573,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BlogSlugRoute: BlogSlugRoute,
   CompareSlugRoute: CompareSlugRoute,
+  MigrateSlugRoute: MigrateSlugRoute,
   ToolsBmrCalculatorRoute: ToolsBmrCalculatorRoute,
   ToolsMacroCalculatorRoute: ToolsMacroCalculatorRoute,
   ToolsProteinCalculatorRoute: ToolsProteinCalculatorRoute,
@@ -540,6 +581,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsWeightLossCalculatorRoute: ToolsWeightLossCalculatorRoute,
   BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
+  MigrateIndexRoute: MigrateIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 export const routeTree = rootRouteImport

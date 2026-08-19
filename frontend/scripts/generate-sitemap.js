@@ -18,6 +18,36 @@ const routes = [
   { path: "/compare/macrofactor", changefreq: "weekly", priority: 0.7 },
   { path: "/compare/cronometer", changefreq: "weekly", priority: 0.7 },
   { path: "/compare/lose-it", changefreq: "weekly", priority: 0.7 },
+  {
+    path: "/migrate",
+    changefreq: "monthly",
+    priority: 0.8,
+    lastmod: "2026-08-19",
+  },
+  {
+    path: "/migrate/myfitnesspal",
+    changefreq: "monthly",
+    priority: 0.8,
+    lastmod: "2026-08-19",
+  },
+  {
+    path: "/migrate/cronometer",
+    changefreq: "monthly",
+    priority: 0.7,
+    lastmod: "2026-08-19",
+  },
+  {
+    path: "/migrate/macrofactor",
+    changefreq: "monthly",
+    priority: 0.7,
+    lastmod: "2026-08-19",
+  },
+  {
+    path: "/migrate/lose-it",
+    changefreq: "monthly",
+    priority: 0.7,
+    lastmod: "2026-08-19",
+  },
   { path: "/pricing", changefreq: "monthly", priority: 0.6 },
   { path: "/privacy", changefreq: "yearly", priority: 0.2 },
   { path: "/terms", changefreq: "yearly", priority: 0.2 },
@@ -41,7 +71,10 @@ function buildSitemap(hostname) {
     new Date().toISOString().slice(0, 10);
 
   const allRoutes = [
-    ...routes.map((r) => ({ ...r, lastmod: newestPostDate })),
+    ...routes.map((route) => ({
+      ...route,
+      lastmod: route.lastmod ?? newestPostDate,
+    })),
     ...blogPosts.map((post) => ({
       path: `/blog/${post.slug}`,
       changefreq: "weekly",
