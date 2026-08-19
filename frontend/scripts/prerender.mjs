@@ -23,7 +23,12 @@ if (!fs.existsSync(templatePath)) {
   process.exit(1);
 }
 
-const baseTemplate = fs.readFileSync(templatePath, "utf8");
+const baseTemplate = fs
+  .readFileSync(templatePath, "utf8")
+  .replace(
+    /<script(?![^>]*\bdata-cfasync=)([^>]*\btype=["']module["'])/i,
+    '<script data-cfasync="false"$1'
+  );
 
 // Load comparisons catalog
 const comparisons = [
@@ -427,11 +432,12 @@ for (const page of pages) {
     html = html.replace("</head>", `${page.extraHead}\n</head>`);
   }
 
-  // Inject Pre-rendered Body into #root for crawlers
+  // Keep crawler copy available when JavaScript is disabled without letting it
+  // flash before the client-rendered app mounts.
   if (page.bodyHtml) {
     html = html.replace(
-      '<div id="root"></div>',
-      `<div id="root">${page.bodyHtml}</div>`
+      "</noscript>",
+      `${page.bodyHtml}\n    </noscript>`
     );
   }
 
