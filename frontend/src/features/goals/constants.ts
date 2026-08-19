@@ -53,10 +53,13 @@ export const WEIGHT_GOAL_OPTIONS = [
 
 // Chart configuration (semantic hex colors are acceptable centralization)
 export const CHART_COLORS = {
-  weight: "#3B82F6", // blue
-  target: "#EF4444", // red
-  trend: "#10B981", // green
-  progress: "#8B5CF6", // purple
+  // Four weight-chart series that only need to be told apart. They were
+  // tailwind-default hexes from before the palette moved; they now name declared
+  // tokens, and no series takes the error red, which means an error.
+  weight: "var(--color-carbs)",
+  target: "var(--color-warning)",
+  trend: "var(--color-protein)",
+  progress: "var(--color-primary)"
 } as const;
 
 /**

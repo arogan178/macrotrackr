@@ -99,12 +99,17 @@ describe("goals constants", () => {
   });
 
   describe("CHART_COLORS", () => {
-    it("should have weight color", () => {
-      expect(CHART_COLORS.weight).toBe("#3B82F6");
-    });
+    // Asserting the hex is what let these sit on the pre-Phase-9 palette. Each
+    // series must name a declared token.
+    it.each(Object.entries(CHART_COLORS))(
+      "%s names a token",
+      (_series, value) => {
+        expect(value).toMatch(/^var\(--color-[a-z\d-]+\)$/);
+      },
+    );
 
-    it("should have target color", () => {
-      expect(CHART_COLORS.target).toBe("#EF4444");
+    it("keeps the error red for errors", () => {
+      expect(Object.values(CHART_COLORS)).not.toContain("var(--color-error)");
     });
   });
 

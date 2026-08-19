@@ -16,38 +16,57 @@ export interface ColorPalette {
 // two collisions worth breaking were protein being byte-identical to the brand
 // green and fats being byte-identical to the error red. Convention is kept; the
 // double meanings are not.
+/**
+ * Chart series colours, named as custom properties rather than transcribed.
+ *
+ * `var()` resolves at paint time in the SVG attributes recharts writes, so this
+ * follows `style.css` with no import-order problem and nothing to keep in step
+ * by hand. The `base` values used to be hex copies annotated with the token they
+ * were copied from, which is the exact shape the snapshot canvas and the Clerk
+ * theme were in before both went stale.
+ *
+ * Protein is green because that is what every tracker's users already read it
+ * as, but it is emerald (158°) rather than the brand's yellow-green (112°): the
+ * two collisions worth breaking were protein being byte-identical to the brand
+ * green and fats being byte-identical to the error red. Convention is kept; the
+ * double meanings are not.
+ */
 export const MACRO_COLORS: ColorPalette = {
   protein: {
-    base: "#34d399", // --color-protein
-    gradient: ["#10b981", "#34d399"],
+    base: "var(--color-protein)",
+    gradient: ["var(--color-protein)", "var(--color-protein)"],
   },
   carbs: {
-    base: "#60a5fa", // --color-carbs
-    gradient: ["#3b82f6", "#60a5fa"],
+    base: "var(--color-carbs)",
+    gradient: ["var(--color-carbs)", "var(--color-carbs)"],
   },
   fats: {
-    base: "#facc15", // --color-fats
-    gradient: ["#eab308", "#facc15"],
+    base: "var(--color-fats)",
+    gradient: ["var(--color-fats)", "var(--color-fats)"],
   },
 };
 
-// Meal type color palette
+/**
+ * Meal types are four series that only need to be told apart, so they are not
+ * macro tokens. They are still declared once, here, and reuse the declared hues
+ * where one fits rather than inventing a fifth and sixth.
+ */
 export const MEAL_COLORS: ColorPalette = {
   breakfast: {
-    base: "#60a5fa", // blue-400
-    gradient: ["#3b82f6", "#60a5fa"],
+    base: "var(--color-carbs)",
+    gradient: ["var(--color-carbs)", "var(--color-carbs)"],
   },
   lunch: {
-    base: "#34d399", // green-400
-    gradient: ["#10b981", "#34d399"],
+    base: "var(--color-protein)",
+    gradient: ["var(--color-protein)", "var(--color-protein)"],
   },
   dinner: {
-    base: "#f87171", // red-400
-    gradient: ["#ef4444", "#f87171"],
+    base: "var(--color-fats)",
+    gradient: ["var(--color-fats)", "var(--color-fats)"],
   },
   snack: {
-    base: "#a78bfa", // purple-400 — a meal type, unrelated to the macro tokens
-    gradient: ["#8b5cf6", "#a78bfa"],
+    base: "var(--color-muted)",
+    gradient: ["var(--color-muted)", "var(--color-muted)"],
   },
 };
 

@@ -125,7 +125,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   }
 
   return (
-    <div className="group relative my-6 overflow-hidden rounded-control bg-[#1e1e1e] border border-border-2">
+    <div className="group relative my-6 overflow-hidden rounded-control border border-border-2 bg-surface-2">
       <div className="flex items-center justify-between border-b border-border bg-black/30 px-4 py-2">
         <span className="text-xs font-medium text-white/60 uppercase">
           {language || "text"}
