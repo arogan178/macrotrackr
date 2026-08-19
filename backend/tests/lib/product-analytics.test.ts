@@ -2,6 +2,41 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { setConfigOverrides } from "../../src/config";
 import { captureProductEvent } from "../../src/lib/analytics/product-analytics";
+import {
+  resolveAnalyticsTrafficType,
+  serializeProductProperties,
+} from "../../../shared/product-analytics";
+
+describe("product analytics contract", () => {
+  it("serializes the switching source without health details", () => {
+    expect(
+      serializeProductProperties({
+        event: "profile_completed",
+        properties: { switchingSource: "myfitnesspal" },
+      }),
+    ).toEqual({ switching_source: "myfitnesspal" });
+  });
+
+  it("classifies Clerk test aliases as synthetic traffic", () => {
+    expect(
+      resolveAnalyticsTrafficType("growth+clerk_test@example.com", []),
+    ).toBe("synthetic");
+  });
+
+  it("classifies configured team addresses as internal traffic", () => {
+    expect(
+      resolveAnalyticsTrafficType("Owner@Example.com", [" owner@example.com "]),
+    ).toBe("internal");
+  });
+
+  it("treats every other address as customer traffic", () => {
+    expect(
+      resolveAnalyticsTrafficType("customer@example.com", [
+        "owner@example.com",
+      ]),
+    ).toBe("customer");
+  });
+});
 
 describe("captureProductEvent", () => {
   afterEach(() => {
@@ -17,7 +52,7 @@ describe("captureProductEvent", () => {
     await captureProductEvent({
       distinctId: 42,
       event: "profile_completed",
-      properties: {},
+      properties: { switchingSource: "unknown" },
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
@@ -72,7 +107,7 @@ describe("captureProductEvent", () => {
         $distinct_id: "42",
         app_mode: "managed",
         plan: "yearly",
-        schema_version: 1,
+        schema_version: 2,
         source: "pricing_page",
       },
     });

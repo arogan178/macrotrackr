@@ -1,9 +1,39 @@
 import type { ImportFormat } from "./importer";
 
-export const PRODUCT_ANALYTICS_SCHEMA_VERSION = 1;
+export const PRODUCT_ANALYTICS_SCHEMA_VERSION = 2;
 
 export type AppMode = "managed" | "self-hosted";
 export type BillingPlan = "monthly" | "yearly";
+export type AnalyticsTrafficType = "customer" | "internal" | "synthetic";
+export const SWITCHING_SOURCES = [
+  "cronometer",
+  "loseit",
+  "macrofactor",
+  "myfitnesspal",
+  "new_to_tracking",
+  "other",
+  "spreadsheet",
+  "unknown",
+] as const;
+export type SwitchingSource = (typeof SWITCHING_SOURCES)[number];
+
+export const SWITCHING_SOURCE_OPTIONS: ReadonlyArray<{
+  label: string;
+  value: Exclude<SwitchingSource, "unknown">;
+}> = [
+  { label: "I'm new to macro tracking", value: "new_to_tracking" },
+  { label: "MyFitnessPal", value: "myfitnesspal" },
+  { label: "Cronometer", value: "cronometer" },
+  { label: "MacroFactor", value: "macrofactor" },
+  { label: "Lose It!", value: "loseit" },
+  { label: "A spreadsheet", value: "spreadsheet" },
+  { label: "Another app", value: "other" },
+];
+
+export function isSwitchingSource(value: unknown): value is SwitchingSource {
+  return SWITCHING_SOURCES.some((source) => source === value);
+}
+
 export type SignupSource =
   | "blog"
   | "calculator"
@@ -42,7 +72,7 @@ export type ProductEvent =
     }
   | {
       event: "profile_completed";
-      properties: Record<string, never>;
+      properties: { switchingSource: SwitchingSource };
     }
   | {
       event: "first_meal_logged";
@@ -94,6 +124,25 @@ export type SerializedProductProperties = Record<
   boolean | number | string
 >;
 
+export function resolveAnalyticsTrafficType(
+  email: string,
+  internalEmails: readonly string[],
+): AnalyticsTrafficType {
+  const normalizedEmail = email.trim().toLowerCase();
+  const localPart = normalizedEmail.split("@", 1)[0] ?? "";
+
+  if (localPart.includes("+clerk_test")) return "synthetic";
+  if (
+    internalEmails.some(
+      (internalEmail) => internalEmail.trim().toLowerCase() === normalizedEmail,
+    )
+  ) {
+    return "internal";
+  }
+
+  return "customer";
+}
+
 export function resolveSignupSource(redirectTo?: string): SignupSource {
   if (!redirectTo || redirectTo === "/home") return "direct";
   if (redirectTo.startsWith("/pricing")) return "pricing";
@@ -117,7 +166,7 @@ export function serializeProductProperties(
     case "signup_completed":
       return { auth_method: productEvent.properties.authMethod };
     case "profile_completed":
-      return {};
+      return { switching_source: productEvent.properties.switchingSource };
     case "first_meal_logged":
       return productEvent.properties.entryMethod === "import"
         ? {

@@ -10,6 +10,9 @@ const FUNNEL_STAGES = [
   "subscription_started",
 ] as const;
 
+const CUSTOMER_TRAFFIC_FILTER =
+  "coalesce(person.properties.traffic_type, 'customer') = 'customer'";
+
 interface QueryResponse {
   columns?: string[];
   results?: unknown[][];
@@ -106,35 +109,46 @@ async function main(): Promise<void> {
 
   const [funnel, acquisition, monetization, imports] = await Promise.all([
     runHogQl(`
-      SELECT event, count(DISTINCT distinct_id) AS users, count() AS events
+      SELECT event, uniq(person_id) AS users, count() AS events
       FROM events
-      WHERE ${dateFilter} AND event IN (${events})
+      WHERE ${dateFilter}
+        AND ${CUSTOMER_TRAFFIC_FILTER}
+        AND event IN (${events})
       GROUP BY event
       ORDER BY event
     `),
     runHogQl(`
-      SELECT event, coalesce(properties.source, 'unknown') AS segment,
-             count(DISTINCT distinct_id) AS users
+      SELECT event,
+             coalesce(
+               person.properties['$initial_utm_source'],
+               properties.source,
+               'direct'
+             ) AS segment,
+             uniq(person_id) AS users
       FROM events
-      WHERE ${dateFilter} AND event IN ('landing_cta_clicked', 'signup_started')
+      WHERE ${dateFilter}
+        AND ${CUSTOMER_TRAFFIC_FILTER}
+        AND event IN ('landing_cta_clicked', 'signup_started')
       GROUP BY event, segment
       ORDER BY event, users DESC
     `),
     runHogQl(`
       SELECT event,
              coalesce(properties.plan, properties.feature_name, properties.source, 'unknown') AS segment,
-             count(DISTINCT distinct_id) AS users
+             uniq(person_id) AS users
       FROM events
       WHERE ${dateFilter}
+        AND ${CUSTOMER_TRAFFIC_FILTER}
         AND event IN ('paywall_viewed', 'checkout_started', 'subscription_started')
       GROUP BY event, segment
       ORDER BY event, users DESC
     `),
     runHogQl(`
       SELECT event, coalesce(properties.import_source, 'unknown') AS segment,
-             count(DISTINCT distinct_id) AS users
+             uniq(person_id) AS users
       FROM events
       WHERE ${dateFilter}
+        AND ${CUSTOMER_TRAFFIC_FILTER}
         AND (event IN ('import_previewed', 'import_completed')
              OR (event = 'first_meal_logged' AND properties.entry_method = 'import'))
       GROUP BY event, segment
@@ -148,7 +162,7 @@ async function main(): Promise<void> {
   printBreakdown("Monetization", monetization);
   printBreakdown("Imports", imports);
   console.log(
-    "\nNote: stage volume is not an ordered cohort funnel. Build the saved PostHog funnel after the new events reach production.",
+    "\nNote: customer traffic only. Stage volume is directional, not an ordered cohort funnel; use the saved PostHog dashboard for ordered conversion.",
   );
 }
 

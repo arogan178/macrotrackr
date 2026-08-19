@@ -5,17 +5,27 @@ import { EmailSchema } from "../../lib/http/schemas";
 
 // Reusable optional types for updates
 const OptionalDateString = t.Optional(
-  t.Union([t.String({ format: "date" }), t.Null()])
+  t.Union([t.String({ format: "date" }), t.Null()]),
 );
 const OptionalPositiveNumber = t.Optional(
-  t.Union([t.Numeric({ minimum: 0 }), t.Null()])
+  t.Union([t.Numeric({ minimum: 0 }), t.Null()]),
 );
 const OptionalGender = t.Optional(
-  t.Union([t.Literal("male"), t.Literal("female"), t.Null()])
+  t.Union([t.Literal("male"), t.Literal("female"), t.Null()]),
 );
 const OptionalActivityLevel = t.Optional(
-  t.Union([t.Numeric({ minimum: 1, maximum: 5 }), t.Null()])
+  t.Union([t.Numeric({ minimum: 1, maximum: 5 }), t.Null()]),
 );
+const SwitchingSource = t.Union([
+  t.Literal("cronometer"),
+  t.Literal("loseit"),
+  t.Literal("macrofactor"),
+  t.Literal("myfitnesspal"),
+  t.Literal("new_to_tracking"),
+  t.Literal("other"),
+  t.Literal("spreadsheet"),
+  t.Literal("unknown"),
+]);
 
 export const UserSchemas = {
   userDetailsResponse: t.Object({
@@ -29,6 +39,12 @@ export const UserSchemas = {
     weight: t.Nullable(t.Number()),
     gender: t.Nullable(t.Union([t.Literal("male"), t.Literal("female")])),
     activityLevel: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
+    switchingSource: t.Nullable(SwitchingSource),
+    analyticsTrafficType: t.Union([
+      t.Literal("customer"),
+      t.Literal("internal"),
+      t.Literal("synthetic"),
+    ]),
     isProfileComplete: t.Boolean(),
     subscription: t.Object({
       status: t.Union([
@@ -60,6 +76,7 @@ export const UserSchemas = {
     weight: OptionalPositiveNumber,
     gender: OptionalGender,
     activityLevel: OptionalActivityLevel,
+    switchingSource: t.Optional(SwitchingSource),
   }),
 
   // Schema for changing a user's password

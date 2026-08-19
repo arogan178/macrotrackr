@@ -15,6 +15,7 @@
     "test:e2e:ui": "playwright test --config ./playwright.config.ts --ui",
     "test:e2e:debug": "playwright test --config ./playwright.config.ts --debug",
     "test:e2e:headed": "playwright test --config ./playwright.config.ts --headed",
+    "test:growth-canary": "playwright test --config ./e2e/growth-canary.config.ts",
     "cap:sync": "CAPACITOR=true bun run build && bunx cap sync",
     "cap:sync:local": "CAPACITOR_HOSTNAME=\"localhost\" VITE_API_URL=\"http://192.168.0.166:3000\" CAPACITOR=true bun run build && bunx cap sync",
     "cap:sync:prod": "CAPACITOR_HOSTNAME=\"app.macrotrackr.com\" VITE_API_URL=\"https://macrotrackr.com\" CAPACITOR=true bun run build && bunx cap sync",
@@ -66,6 +67,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.2",
+    "@clerk/backend": "3.16.4",
     "@clerk/testing": "^2.2.22",
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.59.1",

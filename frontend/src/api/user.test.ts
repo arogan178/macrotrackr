@@ -42,6 +42,7 @@ describe("userApi", () => {
         weight: 77,
         gender: "male",
         activity_level: 4,
+        analyticsTrafficType: "internal",
         isProfileComplete: true,
         subscription: {
           status: "pro",
@@ -60,6 +61,7 @@ describe("userApi", () => {
       weight: 77,
       gender: "male",
       activityLevel: 4,
+      analyticsTrafficType: "internal",
       isProfileComplete: true,
       subscription: {
         status: "pro",
@@ -135,6 +137,27 @@ describe("userApi", () => {
         body: JSON.stringify({
           firstName: "Ari",
           activityLevel: 3,
+        }),
+      }),
+    );
+  });
+
+  it("sends the fixed switching source with profile completion", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse({ success: true, message: "Profile updated" }),
+    );
+
+    await userApi.completeProfile({
+      dateOfBirth: "1990-01-01",
+      switchingSource: "macrofactor",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3000/api/user/complete-profile",
+      expect.objectContaining({
+        body: JSON.stringify({
+          dateOfBirth: "1990-01-01",
+          switchingSource: "macrofactor",
         }),
       }),
     );

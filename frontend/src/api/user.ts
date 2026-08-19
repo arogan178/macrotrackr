@@ -1,5 +1,11 @@
+import {
+  type AnalyticsTrafficType,
+  isSwitchingSource,
+  type SwitchingSource,
+} from "@shared/product-analytics";
+
 import { authApi } from "@/api/auth";
-import { apiClient,ApiError } from "@/api/core";
+import { apiClient, ApiError } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
@@ -14,6 +20,8 @@ export interface UserDetailsResponse {
   weight?: number;
   gender?: string;
   activityLevel?: number;
+  switchingSource?: SwitchingSource;
+  analyticsTrafficType: AnalyticsTrafficType;
   isProfileComplete: boolean;
   subscription: {
     status: "free" | "pro" | "canceled";
@@ -34,7 +42,9 @@ function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
   );
 }
 
-function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | null {
+function normalizeUserDetailsResponse(
+  value: unknown,
+): UserDetailsResponse | null {
   if (!value || typeof value !== "object") {
     return null;
   }
@@ -48,6 +58,8 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
     createdAt: candidateRaw.createdAt ?? candidateRaw.created_at,
     dateOfBirth: candidateRaw.dateOfBirth ?? candidateRaw.date_of_birth,
     activityLevel: candidateRaw.activityLevel ?? candidateRaw.activity_level,
+    switchingSource:
+      candidateRaw.switchingSource ?? candidateRaw.switching_source,
   };
 
   if (!isUserDetailsResponse(candidate)) {
@@ -72,6 +84,14 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
       typeof candidate.activityLevel === "number"
         ? candidate.activityLevel
         : undefined,
+    switchingSource: isSwitchingSource(candidate.switchingSource)
+      ? candidate.switchingSource
+      : undefined,
+    analyticsTrafficType:
+      candidate.analyticsTrafficType === "internal" ||
+      candidate.analyticsTrafficType === "synthetic"
+        ? candidate.analyticsTrafficType
+        : "customer",
     isProfileComplete:
       typeof candidate.isProfileComplete === "boolean"
         ? candidate.isProfileComplete
@@ -92,6 +112,7 @@ export type UserSettingsPayload = Partial<{
   weight: number;
   gender: string;
   activityLevel: string | number;
+  switchingSource: SwitchingSource;
 }>;
 
 export const userApi = {
@@ -116,7 +137,9 @@ export const userApi = {
   /**
    * @throws {ApiError}
    */
-  syncAndGetUserDetails: async ({ token }: { token?: string } = {}): Promise<UserDetailsResponse> => {
+  syncAndGetUserDetails: async ({
+    token,
+  }: { token?: string } = {}): Promise<UserDetailsResponse> => {
     await authApi.syncUser({ token });
 
     return userApi.getUserDetails();
@@ -157,7 +180,12 @@ export const userApi = {
     profileData: Partial<
       Pick<
         UserSettingsPayload,
-        "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
+        | "dateOfBirth"
+        | "height"
+        | "weight"
+        | "gender"
+        | "activityLevel"
+        | "switchingSource"
       >
     >,
   ): Promise<{ success: boolean; message: string }> => {
@@ -170,7 +198,9 @@ export const userApi = {
     return {
       success: result.data?.success ?? result.success ?? false,
       message:
-        result.data?.message ?? result.message ?? "Profile updated successfully.",
+        result.data?.message ??
+        result.message ??
+        "Profile updated successfully.",
     };
   },
 };
