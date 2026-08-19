@@ -478,9 +478,9 @@ export default function DataImporter() {
             <InfoIcon className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-foreground">
-              Export Instructions for External Apps
-            </h4>
+            <Heading level="body" as="h4" className="font-medium">
+              Exporting from another app
+            </Heading>
             <ul className="mt-2 space-y-1.5 text-xs text-muted">
               <li>
                 <strong className="text-foreground">MyFitnessPal:</strong> Go to

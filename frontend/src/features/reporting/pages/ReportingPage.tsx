@@ -195,7 +195,7 @@ export default function ReportingPage() {
       fats: averages.fats,
       fatsTarget: fTarget,
       complianceScore: compliance,
-      badgeLabel: `⚡ ${compliance}% Consistency`,
+      badgeLabel: `${compliance}% consistency`,
     };
   }, [
     weightGoals,

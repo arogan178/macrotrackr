@@ -232,7 +232,8 @@ export function StackedBarPercentageTooltip({
 }: {
   active?: boolean;
   payload?: Array<{ payload: StackedBarPayloadData }>;
-  colors?: Record<string, string>; // e.g., { protein: '#34d399', carbs: '#60a5fa', fats: '#f87171' }
+  /** Series colours, named as tokens: `{ protein: "var(--color-protein)" }`. */
+  colors?: Record<string, string>;
   labelKey?: string;
 }) {
   if (!active || !payload || payload.length === 0) return;

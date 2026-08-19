@@ -379,7 +379,7 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
       {
         question: "Can I self-host MacroTrackr at home?",
         answer:
-          "Yes! MacroTrackr runs in a single lightweight Docker container with an embedded SQLite database, perfect for Raspberry Pi, Unraid, Synology, or any home server.",
+          "Yes. MacroTrackr runs as a single Docker container with an embedded SQLite database, which is enough for a Raspberry Pi, Unraid, Synology or any home server.",
       },
     ],
   },
@@ -462,7 +462,7 @@ export const COMPARISONS: readonly ComparisonDetail[] = [
       {
         question: "Can I set custom macro targets without paying?",
         answer:
-          "Yes! In MacroTrackr, setting custom calorie goals and gram/percentage macro splits is 100% free.",
+          "Yes. Custom calorie goals and gram or percentage macro splits are on the free tier.",
       },
       {
         question: "Is there a mobile app?",

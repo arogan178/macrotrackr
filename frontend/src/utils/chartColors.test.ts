@@ -9,19 +9,20 @@ import {
 
 describe("chartColors", () => {
   describe("MACRO_COLORS", () => {
-    it("should have protein color defined", () => {
-      expect(MACRO_COLORS.protein).toBeDefined();
-      expect(MACRO_COLORS.protein.base).toBe("#34d399");
-    });
+    // These used to assert the hex. That is the shape of assertion that let the
+    // Clerk theme and the snapshot canvas sit on a stale palette for months: it
+    // pins a copy instead of the link to the source. Each series must name a
+    // token the stylesheet declares.
+    it.each(["protein", "carbs", "fats"] as const)(
+      "names the %s token rather than copying its value",
+      (macro) => {
+        expect(MACRO_COLORS[macro]).toBeDefined();
+        expect(MACRO_COLORS[macro].base).toBe(`var(--color-${macro})`);
+      },
+    );
 
-    it("should have carbs color defined", () => {
-      expect(MACRO_COLORS.carbs).toBeDefined();
-      expect(MACRO_COLORS.carbs.base).toBe("#60a5fa");
-    });
-
-    it("should have fats color defined", () => {
-      expect(MACRO_COLORS.fats).toBeDefined();
-      expect(MACRO_COLORS.fats.base).toBe("#facc15");
+    it("holds no hex of its own", () => {
+      expect(JSON.stringify(MACRO_COLORS)).not.toMatch(/#[\dA-Fa-f]{3,8}/);
     });
   });
 

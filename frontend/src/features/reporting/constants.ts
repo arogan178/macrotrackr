@@ -16,10 +16,12 @@ export const DATE_RANGE_MAPPING = {
 
 // Chart configuration constants
 export const CHART_COLORS = {
-  calories: "#57c04a", // --color-primary: calories are the live value
-  protein: "#34d399", // --color-protein
-  carbs: "#60a5fa", // --color-carbs
-  fats: "#facc15", // --color-fats
+  // Named, not copied: `var()` resolves at paint time in the SVG attributes
+  // recharts writes, so these follow style.css with nothing to keep in step.
+  calories: "var(--color-primary)", // calories are the live value
+  protein: "var(--color-protein)",
+  carbs: "var(--color-carbs)",
+  fats: "var(--color-fats)"
 } as const;
 
 export const CHART_DEFAULTS = {
