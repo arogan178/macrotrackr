@@ -19,7 +19,7 @@ export default defineConfig({
     ...devices["Desktop Chrome"],
     baseURL,
     screenshot: "only-on-failure",
-    trace: "retain-on-failure",
-    video: "retain-on-failure",
+    trace: "off",
+    video: "off",
   },
 });

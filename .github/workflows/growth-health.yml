@@ -76,7 +76,6 @@ jobs:
           CLERK_PUBLISHABLE_KEY: ${{ secrets.GROWTH_CANARY_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.GROWTH_CANARY_CLERK_SECRET_KEY }}
           GROWTH_CANARY_EMAIL_DOMAIN: ${{ secrets.GROWTH_CANARY_EMAIL_DOMAIN }}
-          GROWTH_CANARY_USER_PASSWORD: ${{ secrets.GROWTH_CANARY_USER_PASSWORD }}
           FRONTEND_URL: https://macrotrackr.com
           GROWTH_CANARY: "true"
           POSTHOG_API_HOST: https://eu.posthog.com
