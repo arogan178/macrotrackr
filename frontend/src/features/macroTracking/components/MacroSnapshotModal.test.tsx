@@ -52,10 +52,10 @@ describe("MacroSnapshotModal", () => {
       />,
     );
 
-    expect(screen.getByText("Share Macro Snapshot")).toBeInTheDocument();
+    expect(screen.getByText("Share snapshot")).toBeInTheDocument();
     expect(screen.getByText("Today's Macros")).toBeInTheDocument();
     expect(screen.getByText("Oct 24, 2026")).toBeInTheDocument();
-    expect(screen.getByText("Calories Consumed")).toBeInTheDocument();
+    expect(screen.getByText("Calories")).toBeInTheDocument();
     expect(screen.getByText("2,150")).toBeInTheDocument();
     expect(screen.getByText("165")).toBeInTheDocument();
     expect(screen.getByText("220")).toBeInTheDocument();
@@ -72,7 +72,11 @@ describe("MacroSnapshotModal", () => {
     );
 
     const badge = screen.getByTestId("snapshot-badge");
-    expect(badge).toHaveTextContent("🔥 7-Day Streak");
+    expect(badge).toHaveTextContent("7-day streak");
+    // Emoji are not part of the UI vocabulary.
+    expect(badge.textContent).not.toMatch(
+      /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u,
+    );
   });
 
   it("displays compliance badge when custom badgeLabel is provided", () => {
@@ -83,13 +87,13 @@ describe("MacroSnapshotModal", () => {
         data={{
           ...mockSnapshotData,
           streakDays: undefined,
-          badgeLabel: "⚡ 95% Weekly Compliance",
+          badgeLabel: "95% weekly compliance",
         }}
       />,
     );
 
     const badge = screen.getByTestId("snapshot-badge");
-    expect(badge).toHaveTextContent("⚡ 95% Weekly Compliance");
+    expect(badge).toHaveTextContent("95% weekly compliance");
   });
 
   it("calls downloadSnapshotImage when Download PNG button is clicked", async () => {
@@ -113,7 +117,7 @@ describe("MacroSnapshotModal", () => {
     await waitFor(() => {
       expect(downloadSpy).toHaveBeenCalledWith(mockSnapshotData);
       expect(showNotificationMock).toHaveBeenCalledWith(
-        "Scorecard downloaded successfully!",
+        "Image saved.",
         "success",
       );
     });
@@ -147,7 +151,7 @@ describe("MacroSnapshotModal", () => {
     await waitFor(() => {
       expect(copySpy).toHaveBeenCalledWith(mockSnapshotData);
       expect(showNotificationMock).toHaveBeenCalledWith(
-        "Scorecard copied to clipboard!",
+        "Image copied.",
         "success",
       );
     });

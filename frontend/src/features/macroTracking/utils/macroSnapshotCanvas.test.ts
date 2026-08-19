@@ -7,6 +7,8 @@ import {
   MacroSnapshotData,
   renderSnapshotToCanvas,
   shareSnapshot,
+  SNAPSHOT_HEIGHT,
+  SNAPSHOT_WIDTH,
 } from "./macroSnapshotCanvas";
 
 const mockSnapshotData: MacroSnapshotData = {
@@ -73,10 +75,15 @@ describe("macroSnapshotCanvas", () => {
   });
 
   describe("renderSnapshotToCanvas", () => {
-    it("creates a canvas with correct dimensions (1080x1350)", () => {
+    it("sizes the canvas to its content, leaving no dead space", () => {
       const canvas = renderSnapshotToCanvas(mockSnapshotData);
-      expect(canvas.width).toBe(1080);
-      expect(canvas.height).toBe(1350);
+
+      // The height was a declared 1350 while the blocks were placed at
+      // hand-tuned offsets that stopped ~220px short, so every export carried a
+      // band of empty card at the bottom. It is now summed from the blocks.
+      expect(canvas.width).toBe(SNAPSHOT_WIDTH);
+      expect(canvas.height).toBe(SNAPSHOT_HEIGHT);
+      expect(SNAPSHOT_HEIGHT).toBeLessThan(1350);
     });
 
     it("handles zero total calories and missing targets gracefully", () => {
@@ -91,8 +98,8 @@ describe("macroSnapshotCanvas", () => {
         fatsTarget: 0,
       };
       const canvas = renderSnapshotToCanvas(emptyData);
-      expect(canvas.width).toBe(1080);
-      expect(canvas.height).toBe(1350);
+      expect(canvas.width).toBe(SNAPSHOT_WIDTH);
+      expect(canvas.height).toBe(SNAPSHOT_HEIGHT);
     });
   });
 
@@ -221,7 +228,7 @@ describe("macroSnapshotCanvas", () => {
       expect(shareSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Today's Macros",
-          text: expect.stringContaining("Calories: 2150 / 2400 kcal"),
+          text: expect.stringContaining("2,150 of 2,400 kcal"),
         }),
       );
     });

@@ -195,17 +195,24 @@ export const useAppStore = create<AppState>((set) => ({
 
 ## UI Components
 
-Follow design system in [`.github/design-system.md`](./design-system.md). Key rules:
+**[`.github/design-system.md`](./design-system.md) is required reading before you
+write or change any UI.** It carries the component inventory (there is one panel,
+one type scale, one number treatment), the reasons behind each rule, and the
+checkable list to run before calling UI work done.
 
-- No emojis, no accent colors, monochromatic palette
-- Use `text-neutral-*` opacity levels for hierarchy
-- Animate with Framer Motion using blur-to-clear transitions
+The two rules most often broken:
+
+- Reach for the existing primitive — `Panel`, `Heading`, `Value`, `StateCard` —
+  rather than assembling a card or heading out of raw classes.
+- Write token classes (`bg-surface-2`, `text-muted`, `rounded-card`). A hex
+  literal or an off-token colour in a component will fail `bun run lint`, which
+  runs the UI budgets.
 
 ### Component Patterns
 
 ```typescript
 // Use cn() for conditional classes
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/classnameUtilities";
 
 interface ButtonProps {
   variant?: "primary" | "secondary";

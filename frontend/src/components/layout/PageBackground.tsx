@@ -30,7 +30,7 @@ const PageBackground: React.FC<PageBackgroundProps> = ({
       <div
         className="pointer-events-none fixed inset-0 z-[-1] opacity-[0.02]"
         style={{
-          backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(to right, var(--color-foreground) 1px, transparent 1px), linear-gradient(to bottom, var(--color-foreground) 1px, transparent 1px)`,
           backgroundSize: "32px 32px",
         }}
       />

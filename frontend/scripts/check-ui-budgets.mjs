@@ -38,7 +38,23 @@ const files = listFiles(SOURCE);
 const sources = files.map((file) => readFileSync(file, "utf8"));
 const all = sources.join("\n");
 
+/**
+ * Comments stripped, so a budget measures colour the browser paints rather than
+ * prose about colour. Several of these files explain in a doc comment which hex
+ * they used to hold and why it was wrong, which is worth keeping and is not
+ * drift. Block comments go first, then whole-line `//` comments — a trailing
+ * comment after code is left alone rather than risk eating a `https://` URL.
+ */
+const code = sources
+  .map((source) =>
+    source
+      .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+      .replaceAll(/^\s*\/\/.*$/gm, ""),
+  )
+  .join("\n");
+
 const countMatches = (pattern) => (all.match(pattern) ?? []).length;
+const countCode = (pattern) => (code.match(pattern) ?? []).length;
 const countDistinct = (pattern) =>
   new Set(all.match(pattern) ?? []).size;
 const countFiles = (needle) =>
@@ -80,8 +96,31 @@ const measurements = {
   // Blur costs a compositing layer per element and samples an opaque page
   // everywhere except a genuine overlay.
   backdropBlur: countMatches(/\bbackdrop-blur-/g),
-  // Shadows cannot render on #000; only the modal keeps one.
-  shadows: countMatches(/\bshadow-(?:sm|md|lg|xl|2xl)\b/g),
+  // Shadows cannot render on #000; only the modal keeps one. The arbitrary form
+  // is counted too: 95 hex literals of Clerk theming hid a drop shadow behind
+  // `shadow-[0_25px_50px_...]`, which the keyword-only pattern missed.
+  shadows: countMatches(/\bshadow-(?:sm|md|lg|xl|2xl)\b|\bshadow-\[/g),
+  // A colour written as a literal cannot follow a token change. Two files
+  // transcribed the whole palette by hand and both were still on the
+  // pre-Phase-9 values: the snapshot PNG drew rose fats against the app's
+  // yellow, and Clerk themed the auth screens in the old green over cool greys.
+  // What remains is the floor: the 15-value fallback in designTokens.ts, which
+  // a test holds equal to style.css, and Google's six brand colours, which are
+  // theirs and not ours to tokenise. Comments are stripped before counting, so
+  // a doc comment naming the hex a file used to hold does not count against it.
+  hexLiterals: countCode(/#[\dA-Fa-f]{6}\b/g),
+  // Emoji are not part of the UI vocabulary. Badges shipped with 🔥, 🎯 and ⚡.
+  emoji: countMatches(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu),
+  // TYPE_SCALE stops at font-semibold except for its two display steps, so
+  // font-bold outside Heading/Value is a call site inventing a weight. Heading
+  // and Value are excluded because they define the scale.
+  boldOutsideScale: files.reduce(
+    (total, file, index) =>
+      /components[/\\]ui[/\\](?:Heading|Value)\.tsx$/.test(file)
+        ? total
+        : total + (sources[index].match(/\bfont-bold\b/g) ?? []).length,
+    0,
+  ),
 };
 
 let failed = false;

@@ -37,7 +37,7 @@ export const formStyles = {
   // The chevron is a real element, not a background image. It was a data URI
   // whose xmlns read `http://www.w3.org/svg` — a namespace that does not exist.
   // Chrome renders it anyway, Firefox refuses, so every select lost its arrow
-  // there. It also hardcoded #9ca3af rather than taking the muted token.
+  // there. It also hardcoded a grey rather than taking the muted token.
   select: {
     container: "relative",
     base: "appearance-none pr-10",

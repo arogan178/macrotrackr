@@ -159,7 +159,7 @@ function MealTimeBreakdown({
             {mealTypeDistribution.map((entry, index) => {
               // Ensure we map back to the key for colors
               const typeKey = entry.name.toLowerCase() as keyof typeof MEAL_COLORS;
-              const color = MEAL_COLORS[typeKey]?.base || "#8884d8";
+              const color = MEAL_COLORS[typeKey]?.base ?? "var(--color-muted)";
 
               return <Cell key={`cell-${index}`} fill={color} />;
             })}

@@ -14,7 +14,7 @@ Quick reference for AI agents working in this codebase.
 | ------------------------------------------- | -------------------------------------------------- |
 | [Backend Patterns](./backend-patterns.md)   | Route modules, error handling, logging, auth       |
 | [Frontend Patterns](./frontend-patterns.md) | Feature architecture, state management, components |
-| [Design System](./design-system.md)         | UI styling, color palette, animation patterns      |
+| [UI rules](./design-system.md)              | **Read before any UI change.** Component inventory, type scale, voice, budgets |
 
 ## Quick Start
 

@@ -14,10 +14,13 @@ export default function TrendDisplay({
   iconBgColor = "bg-primary/10",
   unit = "g",
 }: TrendDisplayProps) {
+  // `--text-muted` does not exist — the token is `--color-muted` — so "stable"
+  // was always falling through to a literal that happened to match it. The
+  // fallbacks are gone with it: a hex here is a transcription that can drift.
   const colorMap: Record<string, string> = {
-    up: "var(--color-success, #57c04a)",
-    down: "var(--color-error, #e91429)",
-    stable: "var(--text-muted, #aba49c)",
+    up: "var(--color-success)",
+    down: "var(--color-error)",
+    stable: "var(--color-muted)",
   };
   const strokeColor = colorMap[trend.direction] ?? colorMap.stable;
 
