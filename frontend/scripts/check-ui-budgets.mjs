@@ -80,8 +80,29 @@ const measurements = {
   // Blur costs a compositing layer per element and samples an opaque page
   // everywhere except a genuine overlay.
   backdropBlur: countMatches(/\bbackdrop-blur-/g),
-  // Shadows cannot render on #000; only the modal keeps one.
-  shadows: countMatches(/\bshadow-(?:sm|md|lg|xl|2xl)\b/g),
+  // Shadows cannot render on #000; only the modal keeps one. The arbitrary form
+  // is counted too: 95 hex literals of Clerk theming hid a drop shadow behind
+  // `shadow-[0_25px_50px_...]`, which the keyword-only pattern missed.
+  shadows: countMatches(/\bshadow-(?:sm|md|lg|xl|2xl)\b|\bshadow-\[/g),
+  // A colour written as a literal cannot follow a token change. Two files
+  // transcribed the whole palette by hand and both were still on the
+  // pre-Phase-9 values: the snapshot PNG drew rose fats against the app's
+  // yellow, and Clerk themed the auth screens in the old green over cool greys.
+  // What remains is chart series, the native status bar, and third-party brand
+  // colours (Google's four) — legitimate, but the number should only fall.
+  hexLiterals: countMatches(/#[\dA-Fa-f]{6}\b/g),
+  // Emoji are not part of the UI vocabulary. Badges shipped with 🔥, 🎯 and ⚡.
+  emoji: countMatches(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu),
+  // TYPE_SCALE stops at font-semibold except for its two display steps, so
+  // font-bold outside Heading/Value is a call site inventing a weight. Heading
+  // and Value are excluded because they define the scale.
+  boldOutsideScale: files.reduce(
+    (total, file, index) =>
+      /components[/\\]ui[/\\](?:Heading|Value)\.tsx$/.test(file)
+        ? total
+        : total + (sources[index].match(/\bfont-bold\b/g) ?? []).length,
+    0,
+  ),
 };
 
 let failed = false;

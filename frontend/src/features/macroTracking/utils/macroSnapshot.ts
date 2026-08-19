@@ -1,3 +1,9 @@
+import {
+  type DesignTokens,
+  resolveTokens,
+  TOKEN_FALLBACK,
+} from "@/lib/designTokens";
+
 /**
  * One model for the share snapshot, read by both renderers.
  *
@@ -173,74 +179,12 @@ export function buildSnapshotModel(data: MacroSnapshotData): SnapshotModel {
   };
 }
 
-export interface SnapshotPalette {
-  background: string;
-  surface: string;
-  surface2: string;
-  surface3: string;
-  border: string;
-  border2: string;
-  foreground: string;
-  muted: string;
-  primary: string;
-  protein: string;
-  carbs: string;
-  fats: string;
-}
+export type SnapshotPalette = DesignTokens;
 
 /**
- * The values in `style.css`, so the export cannot drift from the app. Read from
- * the live custom properties rather than copied, which is what let the canvas
- * ship a rose `#f43f5e` for fats against the app's yellow `#facc15`.
- *
- * The fallbacks are only reached without a document (tests, SSR); they mirror
- * the same declarations.
+ * The app's own tokens, so the export cannot drift from the screen. Previously
+ * transcribed into the canvas by hand, which is how it shipped a rose fats
+ * against the app's yellow.
  */
-export const SNAPSHOT_PALETTE_FALLBACK: SnapshotPalette = {
-  background: "#0c0a09",
-  surface: "#141211",
-  surface2: "#1b1917",
-  surface3: "#2b2724",
-  border: "#2b2724",
-  border2: "#55504a",
-  foreground: "#ffffff",
-  muted: "#aba49c",
-  primary: "#57c04a",
-  protein: "#34d399",
-  carbs: "#60a5fa",
-  fats: "#facc15",
-};
-
-const TOKEN_NAME: Record<keyof SnapshotPalette, string> = {
-  background: "--color-background",
-  surface: "--color-surface",
-  surface2: "--color-surface-2",
-  surface3: "--color-surface-3",
-  border: "--color-border",
-  border2: "--color-border-2",
-  foreground: "--color-foreground",
-  muted: "--color-muted",
-  primary: "--color-primary",
-  protein: "--color-protein",
-  carbs: "--color-carbs",
-  fats: "--color-fats",
-};
-
-export function resolveSnapshotPalette(): SnapshotPalette {
-  if (typeof document === "undefined" || !document.documentElement) {
-    return SNAPSHOT_PALETTE_FALLBACK;
-  }
-
-  const computed = getComputedStyle(document.documentElement);
-  const entries = Object.entries(TOKEN_NAME) as [
-    keyof SnapshotPalette,
-    string,
-  ][];
-
-  return entries.reduce((palette, [key, token]) => {
-    const value = computed.getPropertyValue(token).trim();
-    palette[key] = value || SNAPSHOT_PALETTE_FALLBACK[key];
-
-    return palette;
-  }, { ...SNAPSHOT_PALETTE_FALLBACK });
-}
+export const resolveSnapshotPalette = resolveTokens;
+export const SNAPSHOT_PALETTE_FALLBACK = TOKEN_FALLBACK;

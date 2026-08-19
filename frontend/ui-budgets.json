@@ -13,7 +13,10 @@
     "motionFiles": 43,
     "smOverrides": 270,
     "backdropBlur": 3,
-    "shadows": 0
+    "shadows": 0,
+    "hexLiterals": 71,
+    "emoji": 0,
+    "boldOutsideScale": 63
   },
   "history": {
     "beforeThePlan": {
