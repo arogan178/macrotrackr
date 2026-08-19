@@ -16,7 +16,6 @@ import {
   FREE_TIER_LIMITS,
   checkFeatureLimit,
   checkProStatus,
-  type FeatureLimitKey,
 } from "../../src/middleware/clerk-guards";
 
 describe("clerk-guards", () => {
@@ -36,20 +35,8 @@ describe("clerk-guards", () => {
   });
 
   describe("FREE_TIER_LIMITS", () => {
-    it("should have MAX_GOALS defined as 3", () => {
-      expect(FREE_TIER_LIMITS.MAX_GOALS).toBe(3);
-    });
-
     it("should have MAX_HABITS defined as 5", () => {
       expect(FREE_TIER_LIMITS.MAX_HABITS).toBe(5);
-    });
-
-    it("should have MAX_MACRO_ENTRIES_PER_DAY defined as 20", () => {
-      expect(FREE_TIER_LIMITS.MAX_MACRO_ENTRIES_PER_DAY).toBe(20);
-    });
-
-    it("should have MAX_WEIGHT_ENTRIES_PER_MONTH defined as 10", () => {
-      expect(FREE_TIER_LIMITS.MAX_WEIGHT_ENTRIES_PER_MONTH).toBe(10);
     });
 
     it("should have DATA_RETENTION_DAYS defined as 60", () => {
@@ -102,33 +89,33 @@ describe("clerk-guards", () => {
     });
 
     it("should return a promise", () => {
-      const result = checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 2);
+      const result = checkFeatureLimit(1, "MAX_HABITS", 2);
       expect(result).toBeInstanceOf(Promise);
     });
 
     it("should return allowed true when under limit", async () => {
       hasActiveProSubscriptionMock.mockResolvedValue(false);
 
-      const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 2);
+      const result = await checkFeatureLimit(1, "MAX_HABITS", 4);
       expect(result.allowed).toBe(true);
       expect(result.isProUser).toBe(false);
-      expect(result.limit).toBe(3);
+      expect(result.limit).toBe(5);
     });
 
     it("should return allowed false when at limit", async () => {
       hasActiveProSubscriptionMock.mockResolvedValue(false);
 
-      const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 3);
+      const result = await checkFeatureLimit(1, "MAX_HABITS", 5);
       expect(result.allowed).toBe(false);
       expect(result.isProUser).toBe(false);
-      expect(result.limit).toBe(3);
-      expect(result.message).toContain("goals");
+      expect(result.limit).toBe(5);
+      expect(result.message).toContain("habits");
     });
 
     it("should return allowed true for Pro users regardless of count", async () => {
       hasActiveProSubscriptionMock.mockResolvedValue(true);
 
-      const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 100);
+      const result = await checkFeatureLimit(1, "MAX_HABITS", 100);
       expect(result.allowed).toBe(true);
       expect(result.isProUser).toBe(true);
     });
@@ -140,7 +127,7 @@ describe("clerk-guards", () => {
       process.env.BILLING_MODE = "disabled";
       resetConfigCache();
 
-      const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 999);
+      const result = await checkFeatureLimit(1, "MAX_HABITS", 999);
       expect(result.allowed).toBe(true);
       expect(result.isProUser).toBe(true);
       expect(hasActiveProSubscriptionMock).not.toHaveBeenCalled();

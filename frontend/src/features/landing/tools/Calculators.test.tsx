@@ -22,7 +22,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   };
 });
 
-vi.mock("posthog-js/react", () => ({
+vi.mock("@posthog/react", () => ({
   usePostHog: () => ({ capture: vi.fn() }),
 }));
 
@@ -152,8 +152,12 @@ describe("Free Calculators", () => {
       expect(
         screen.getByText(/you're at your goal weight/i),
       ).toBeInTheDocument();
-      const deficitRow = screen.getByText(/daily calorie deficit/i).parentElement;
-      expect(within(deficitRow as HTMLElement).getByText(/^0 kcal$/)).toBeInTheDocument();
+      const deficitRow = screen.getByText(
+        /daily calorie deficit/i,
+      ).parentElement;
+      expect(
+        within(deficitRow as HTMLElement).getByText(/^0 kcal$/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -213,7 +217,9 @@ describe("Free Calculators", () => {
     it("links back to the hub from the breadcrumb", () => {
       render(<MacroCalculatorPage />);
 
-      const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+      const breadcrumb = screen.getByRole("navigation", {
+        name: /breadcrumb/i,
+      });
       expect(
         within(breadcrumb).getByRole("link", { name: /free calculators/i }),
       ).toHaveAttribute("href", "/tools");

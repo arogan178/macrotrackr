@@ -18,9 +18,11 @@ import { handleError } from "../../lib/http/responses";
 import { loggerHelpers, logger } from "../../lib/observability/logger";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { getConfig } from "../../config";
+import { captureProductEvent } from "../../lib/analytics/product-analytics";
 
-type UserRouteContext =
-  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
+type UserRouteContext = AuthenticatedRouteContextWithUser<
+  Record<string, unknown>
+>;
 
 const ErrorResponseSchema = t.Object({
   code: t.String(),
@@ -69,11 +71,16 @@ export const userRoutes = (app: Elysia) =>
           const context = rawContext as UserRouteContext;
           try {
             const { db } = context;
-            const { userId: internalUserId, authProvider, providerUserId } =
-              context.authenticatedUser;
+            const {
+              userId: internalUserId,
+              authProvider,
+              providerUserId,
+            } = context.authenticatedUser;
 
             if (internalUserId === null) {
-              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+              throw new AccountNotSyncedError(
+                "Unable to resolve internal user ID.",
+              );
             }
 
             logger.info(
@@ -84,14 +91,14 @@ export const userRoutes = (app: Elysia) =>
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
               db,
-                  `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
+              `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                     u.subscription_status,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
                WHERE u.id = ?
                LIMIT 1`,
-              [internalUserId]
+              [internalUserId],
             );
 
             if (!dbResult) {
@@ -111,7 +118,9 @@ export const userRoutes = (app: Elysia) =>
               activityLevel: dbResult.activity_level,
               isProfileComplete: !!dbResult.date_of_birth,
               subscription: {
-                status: normalizeSubscriptionStatus(dbResult.subscription_status),
+                status: normalizeSubscriptionStatus(
+                  dbResult.subscription_status,
+                ),
               },
             };
           } catch (error) {
@@ -135,7 +144,7 @@ export const userRoutes = (app: Elysia) =>
             summary: "Get current authenticated user's profile and settings",
             tags: ["User"],
           },
-        }
+        },
       )
 
       // PUT /settings Handler - Update user settings
@@ -148,7 +157,9 @@ export const userRoutes = (app: Elysia) =>
             const { userId: internalUserId } = context.authenticatedUser;
 
             if (internalUserId === null) {
-              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+              throw new AccountNotSyncedError(
+                "Unable to resolve internal user ID.",
+              );
             }
 
             if (!body) {
@@ -189,7 +200,7 @@ export const userRoutes = (app: Elysia) =>
               const currentDetails = safeQuery<{ weight: number | null }>(
                 db,
                 "SELECT weight FROM user_details WHERE user_id = ?",
-                [internalUserId]
+                [internalUserId],
               );
               if (currentDetails) {
                 currentWeight = currentDetails.weight;
@@ -200,11 +211,11 @@ export const userRoutes = (app: Elysia) =>
                 const existingEmail = safeQuery<{ id: number }>(
                   db,
                   "SELECT id FROM users WHERE email = ? AND id != ?",
-                  [email, internalUserId]
+                  [email, internalUserId],
                 );
                 if (existingEmail) {
                   throw new ConflictError(
-                    "Email address is already in use by another account."
+                    "Email address is already in use by another account.",
                   );
                 }
               }
@@ -231,9 +242,9 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   `UPDATE users SET ${userUpdateFields.join(
-                    ", "
+                    ", ",
                   )} WHERE id = ?`,
-                  userParams
+                  userParams,
                 );
               }
 
@@ -258,7 +269,7 @@ export const userRoutes = (app: Elysia) =>
                   nullify(weight),
                   nullify(gender),
                   nullify(activityLevel),
-                ]
+                ],
               );
 
               // Log weight change if weight is provided and different
@@ -273,10 +284,15 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
-                  [logId, internalUserId, logTimestamp, weight]
+                  [logId, internalUserId, logTimestamp, weight],
                 );
 
-                loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
+                loggerHelpers.dbQuery(
+                  "INSERT",
+                  "weight_log",
+                  internalUserId,
+                  1,
+                );
               }
 
               publishUserSyncEvent(internalUserId, "user");
@@ -300,7 +316,7 @@ export const userRoutes = (app: Elysia) =>
             summary: "Update user profile and settings",
             tags: ["User"],
           },
-        }
+        },
       )
 
       // POST /complete-profile Handler - Complete user profile
@@ -313,7 +329,9 @@ export const userRoutes = (app: Elysia) =>
             const { userId: internalUserId } = context.authenticatedUser;
 
             if (internalUserId === null) {
-              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+              throw new AccountNotSyncedError(
+                "Unable to resolve internal user ID.",
+              );
             }
 
             if (!body) {
@@ -330,22 +348,33 @@ export const userRoutes = (app: Elysia) =>
               internalUserId,
               {
                 correlationId,
-              }
+              },
             );
 
-            const { dateOfBirth, height, weight, gender, activityLevel } = body as {
-              dateOfBirth?: string;
-              height?: number;
-              weight?: number;
-              gender?: "male" | "female";
-              activityLevel?: number;
-            };
+            const { dateOfBirth, height, weight, gender, activityLevel } =
+              body as {
+                dateOfBirth?: string;
+                height?: number;
+                weight?: number;
+                gender?: "male" | "female";
+                activityLevel?: number;
+              };
 
-            return await withTransactionAsync(db, async () => {
-              // Upsert user_details
-              safeExecute(
-                db,
-                `INSERT INTO user_details (
+            const { profileCompleted, response } = await withTransactionAsync(
+              db,
+              async () => {
+                const existingDetails = safeQuery<{
+                  date_of_birth: string | null;
+                }>(
+                  db,
+                  "SELECT date_of_birth FROM user_details WHERE user_id = ?",
+                  [internalUserId],
+                );
+
+                // Upsert user_details
+                safeExecute(
+                  db,
+                  `INSERT INTO user_details (
                    user_id, date_of_birth, height, weight, gender, activity_level, updated_at
                  )
                  VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -356,37 +385,57 @@ export const userRoutes = (app: Elysia) =>
                    gender = COALESCE(excluded.gender, user_details.gender),
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
                    updated_at = CURRENT_TIMESTAMP`,
-                [
-                  internalUserId,
-                  nullify(dateOfBirth),
-                  nullify(height),
-                  nullify(weight),
-                  nullify(gender),
-                  nullify(activityLevel),
-                ]
-              );
-
-              // Always insert weight log if weight is provided
-              if (weight != null) {
-                const logTimestamp = new Date().toISOString(); // Use full timestamp
-                const logId = generateId();
-
-                safeExecute(
-                  db,
-                  "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
-                  [logId, internalUserId, logTimestamp, weight]
+                  [
+                    internalUserId,
+                    nullify(dateOfBirth),
+                    nullify(height),
+                    nullify(weight),
+                    nullify(gender),
+                    nullify(activityLevel),
+                  ],
                 );
 
-                loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
-              }
+                // Always insert weight log if weight is provided
+                if (weight != null) {
+                  const logTimestamp = new Date().toISOString(); // Use full timestamp
+                  const logId = generateId();
 
-              publishUserSyncEvent(internalUserId, "user");
+                  safeExecute(
+                    db,
+                    "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
+                    [logId, internalUserId, logTimestamp, weight],
+                  );
 
-              return {
-                success: true,
-                message: "Profile details updated.",
-              };
-            });
+                  loggerHelpers.dbQuery(
+                    "INSERT",
+                    "weight_log",
+                    internalUserId,
+                    1,
+                  );
+                }
+
+                publishUserSyncEvent(internalUserId, "user");
+
+                return {
+                  profileCompleted:
+                    !existingDetails?.date_of_birth && Boolean(dateOfBirth),
+                  response: {
+                    success: true,
+                    message: "Profile details updated.",
+                  },
+                };
+              },
+            );
+
+            if (profileCompleted) {
+              void captureProductEvent({
+                distinctId: internalUserId,
+                event: "profile_completed",
+                properties: {},
+              });
+            }
+
+            return response;
           } catch (error) {
             return handleError(error, context.set);
           }
@@ -401,7 +450,6 @@ export const userRoutes = (app: Elysia) =>
               "Add or update specific user details (e.g., during onboarding)",
             tags: ["User"],
           },
-        }
-      )
-
+        },
+      ),
   );

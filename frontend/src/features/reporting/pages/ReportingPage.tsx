@@ -7,7 +7,6 @@ import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { StateCard } from "@/components/ui";
-import { isLocalAuthMode } from "@/config/runtime";
 import { MacroSnapshotModal } from "@/features/macroTracking/components";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -17,9 +16,9 @@ import {
   useMacroTargetQuery,
 } from "@/hooks/queries/useMacroQueries";
 import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
-import { useStore } from "@/store/store";
 import {
   formatDateShort,
   getDateRangeData,
@@ -39,9 +38,7 @@ import { useReportingLogic } from "../hooks/useReportingLogic";
 export default function ReportingPage() {
   const queryClient = useQueryClient();
 
-  // Get subscription status from store
-  const { subscriptionStatus } = useStore();
-  const isProUser = isLocalAuthMode || subscriptionStatus === "pro";
+  const { hasProAccess } = useEntitlements();
 
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
@@ -49,7 +46,7 @@ export default function ReportingPage() {
 
   // Redirect to week view if free user tries to access Pro ranges
   const handleRangeChange = (range: string) => {
-    if (!isProUser && range !== "week") {
+    if (!hasProAccess && range !== "week") {
       return; // Don't allow free users to select Pro ranges
     }
     setDateRange(range);
@@ -181,7 +178,7 @@ export default function ReportingPage() {
       totalDays > 0 ? Math.round((trackedDays / totalDays) * 100) : 0;
     const rangeLabel =
       dateRange === "week"
-        ? "Weekly Compliance"
+        ? "Weekly Summary"
         : dateRange === "month"
           ? "Monthly Summary"
           : "90-Day Overview";
@@ -198,7 +195,7 @@ export default function ReportingPage() {
       fats: averages.fats,
       fatsTarget: fTarget,
       complianceScore: compliance,
-      badgeLabel: `⚡ ${compliance}% Compliance`,
+      badgeLabel: `⚡ ${compliance}% Consistency`,
     };
   }, [
     weightGoals,
@@ -226,11 +223,9 @@ export default function ReportingPage() {
               onRangeChange={handleRangeChange}
               onExportClick={handleDownloadCSV}
               onShareClick={() => setIsSnapshotOpen(true)}
-              isExportDisabled={
-                aggregatedData.length === 0 || isHistoryLoading
-              }
-              disabledRanges={isProUser ? [] : ["month", "3months"]}
-              isPro={isProUser}
+              isExportDisabled={aggregatedData.length === 0 || isHistoryLoading}
+              disabledRanges={hasProAccess ? [] : ["month", "3months"]}
+              isPro={hasProAccess}
             />
 
             {showNoDataMessage ? (
@@ -244,8 +239,7 @@ export default function ReportingPage() {
             ) : (
               <>
                 {(() => {
-                  const calorieTarget =
-                    weightGoals?.calorieTarget ?? 2000;
+                  const calorieTarget = weightGoals?.calorieTarget ?? 2000;
 
                   return (
                     <MacroSummaryStats

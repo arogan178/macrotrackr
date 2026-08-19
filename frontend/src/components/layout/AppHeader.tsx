@@ -19,6 +19,7 @@ import {
   CALCULATOR_TOOLS,
   TOOLS_HUB_PATH,
 } from "@/features/landing/tools/toolsCatalog";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import { DOCS_URL, GITHUB_REPO_URL } from "@/utils/appConstants";
 
 import LogoButton from "./LogoButton";
@@ -278,8 +279,15 @@ const AppModeHeader: React.FC = () => {
 };
 
 const PublicModeHeader: React.FC = () => {
-  const { pathname, navigate, isActiveRoute, goTo, isSheetOpen, setIsSheetOpen } =
-    useHeaderNavigation();
+  const productAnalytics = useProductAnalytics();
+  const {
+    pathname,
+    navigate,
+    isActiveRoute,
+    goTo,
+    isSheetOpen,
+    setIsSheetOpen,
+  } = useHeaderNavigation();
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   const openExternal = useCallback(
@@ -332,11 +340,20 @@ const PublicModeHeader: React.FC = () => {
       {
         key: "register",
         label: "Start free",
-        onSelect: () => goTo("/register"),
+        onSelect: () => {
+          productAnalytics.capture({
+            event: "landing_cta_clicked",
+            properties: {
+              destination: "register",
+              source: "header",
+            },
+          });
+          goTo("/register");
+        },
         tone: "primary",
       },
     ],
-    [goTo],
+    [goTo, productAnalytics],
   );
 
   return (
@@ -396,6 +413,15 @@ const PublicModeHeader: React.FC = () => {
           <Link
             to="/register"
             search={{ returnTo: undefined }}
+            onClick={() =>
+              productAnalytics.capture({
+                event: "landing_cta_clicked",
+                properties: {
+                  destination: "register",
+                  source: "header",
+                },
+              })
+            }
             className={getButtonClasses(
               "primary",
               "sm",

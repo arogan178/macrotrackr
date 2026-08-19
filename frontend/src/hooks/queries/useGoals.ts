@@ -1,6 +1,15 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import { type AddWeightLogPayload, goalsApi, type WeightLogEntry } from "@/api/goals";
+import {
+  type AddWeightLogPayload,
+  goalsApi,
+  type WeightLogEntry,
+} from "@/api/goals";
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
@@ -8,7 +17,6 @@ import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
-import { todayISO } from "@/utils/dateUtilities";
 
 export const weightGoalsQueryOptions = () =>
   queryOptions({
@@ -54,30 +62,8 @@ export function useCreateWeightGoal() {
       goals: WeightGoalFormValues;
       tdee: number;
     }) => {
-      // Start both operations in parallel to avoid waterfall
-      const createPromise = goalsApi.createWeightGoal({ goals, tdee });
-      const weightLogPromise = goalsApi.getWeightLog();
-
       try {
-        const [result, weightLog] = await Promise.all([
-          createPromise,
-          weightLogPromise,
-        ]);
-
-        const today = todayISO();
-        const hasEntryForToday = weightLog.some((entry) =>
-          entry.timestamp.startsWith(today),
-        );
-
-        // If no entry for today, add the starting weight
-        if (!hasEntryForToday && goals.startingWeight) {
-          await goalsApi.addWeightLogEntry({
-            weight: goals.startingWeight,
-            timestamp: new Date().toISOString(),
-          });
-        }
-
-        return result;
+        return await goalsApi.createWeightGoal({ goals, tdee });
       } catch (error) {
         // If create fails because goal already exists, try to update instead
         const apiError = error as { status?: number; message?: string };
@@ -127,7 +113,10 @@ export function useUpdateWeightGoal() {
       }
     },
     onSuccess: (data) => {
-      const updatedGoals = normalizeWeightGoals(data as WeightGoalsResponse, undefined);
+      const updatedGoals = normalizeWeightGoals(
+        data as WeightGoalsResponse,
+        undefined,
+      );
       if (updatedGoals) {
         queryClient.setQueryData<WeightGoals>(
           queryKeys.goals.weight(),
@@ -244,15 +233,26 @@ export function useAddWeightLogEntry() {
         },
       );
 
-      return { optimisticEntry, previousWeightLog, previousWeightGoals, previousUser };
+      return {
+        optimisticEntry,
+        previousWeightLog,
+        previousWeightGoals,
+        previousUser,
+      };
     },
     onError: (error, _variables, context) => {
       // Rollback all optimistic updates on error
       if (context?.previousWeightLog) {
-        queryClient.setQueryData(queryKeys.goals.weightLog(), context.previousWeightLog);
+        queryClient.setQueryData(
+          queryKeys.goals.weightLog(),
+          context.previousWeightLog,
+        );
       }
       if (context?.previousWeightGoals) {
-        queryClient.setQueryData(queryKeys.goals.weight(), context.previousWeightGoals);
+        queryClient.setQueryData(
+          queryKeys.goals.weight(),
+          context.previousWeightGoals,
+        );
       }
       if (context?.previousUser) {
         queryClient.setQueryData(queryKeys.auth.user(), context.previousUser);

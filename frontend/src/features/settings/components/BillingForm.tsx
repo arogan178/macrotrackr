@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
-import { isLocalAuthMode } from "@/config/runtime";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/classnameUtilities";
 import { useStore } from "@/store/store";
 
@@ -17,6 +17,7 @@ function handleUpgradeRedirect() {
 
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
+  const { hasProAccess } = useEntitlements();
   // Get billing details from TanStack Query
   const { data: billingDetails } = useBillingDetails();
   const [isLoading, setIsLoading] = useState(false);
@@ -79,8 +80,6 @@ const BillingForm: React.FC = () => {
     }
   }, [subscriptionStatus, showNotification, handleMutationError]);
 
-  const isPro = isLocalAuthMode || subscriptionStatus === "pro";
-
   return (
     <CardContainer className="p-3.5 sm:p-6">
       {/* Current plan status bar */}
@@ -91,19 +90,19 @@ const BillingForm: React.FC = () => {
         <div
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-semibold",
-            isPro
+            hasProAccess
               ? "border-warning/30 bg-warning/10 text-warning"
               : "border-border bg-surface-2 text-muted",
           )}
           role="status"
-          aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}
+          aria-label={`Current plan: ${hasProAccess ? "Pro" : "Free"}`}
         >
-          {isPro ? "Pro Plan" : "Free Plan"}
+          {hasProAccess ? "Pro Plan" : "Free Plan"}
         </div>
       </div>
 
       {/* Conditional rendering based on subscription status */}
-      {isPro ? (
+      {hasProAccess ? (
         <ProBillingView
           onManage={handleManage}
           isLoading={isLoading}

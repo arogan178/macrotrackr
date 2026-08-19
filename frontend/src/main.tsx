@@ -1,14 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { PostHogProvider } from "@posthog/react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { PostHogProvider } from "posthog-js/react";
+import posthog from "posthog-js";
 
 import { ClerkAppShell } from "@/components/auth/ClerkAppShell";
 
 import { initializeAuthTokenProvider } from "./api/core";
 import { isClerkAuthMode, runtimeConfig } from "./config/runtime";
 import PostHogUserSync from "./lib/posthogIntegration";
+import { ProductAnalyticsProvider } from "./lib/productAnalytics";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
 import { registerStaleChunkRecovery } from "./lib/staleChunkRecovery";
 import AppRouter from "./AppRouter";
@@ -19,14 +21,27 @@ import "./style.css";
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST;
+const posthogConfig =
+  posthogApiKey && posthogHost
+    ? { apiKey: posthogApiKey, host: posthogHost }
+    : null;
 const posthogEnabledInDevelopment =
   import.meta.env.VITE_ENABLE_POSTHOG === "true";
 const shouldEnablePostHog =
   runtimeConfig.ANALYTICS_MODE === "posthog" &&
-  Boolean(posthogApiKey && posthogHost) &&
+  posthogConfig !== null &&
   (import.meta.env.MODE !== "development" || posthogEnabledInDevelopment);
 
 const hasRequiredClerkConfig = !isClerkAuthMode || Boolean(clerkPublishableKey);
+
+if (shouldEnablePostHog && posthogConfig) {
+  posthog.init(posthogConfig.apiKey, {
+    api_host: posthogConfig.host,
+    capture_exceptions: true,
+    debug: import.meta.env.MODE === "development",
+    defaults: "2026-01-30",
+  });
+}
 
 // Explicitly initialize auth token provider state before any API call path can run.
 initializeAuthTokenProvider();
@@ -92,32 +107,20 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
         {isClerkAuthMode ? (
           <ClerkAppShell publishableKey={clerkPublishableKey!}>
             {shouldEnablePostHog ? (
-              <PostHogProvider
-                apiKey={posthogApiKey}
-                options={{
-                  api_host: posthogHost,
-                  defaults: "2025-05-24",
-                  capture_exceptions: true,
-                  debug: import.meta.env.MODE === "development",
-                }}
-              >
-                <AppContent includePostHogSync />
+              <PostHogProvider client={posthog}>
+                <ProductAnalyticsProvider>
+                  <AppContent includePostHogSync />
+                </ProductAnalyticsProvider>
               </PostHogProvider>
             ) : (
               <AppContent includePostHogSync={false} />
             )}
           </ClerkAppShell>
         ) : shouldEnablePostHog ? (
-          <PostHogProvider
-            apiKey={posthogApiKey}
-            options={{
-              api_host: posthogHost,
-              defaults: "2025-05-24",
-              capture_exceptions: true,
-              debug: import.meta.env.MODE === "development",
-            }}
-          >
-            <AppContent includePostHogSync />
+          <PostHogProvider client={posthog}>
+            <ProductAnalyticsProvider>
+              <AppContent includePostHogSync />
+            </ProductAnalyticsProvider>
           </PostHogProvider>
         ) : (
           <AppContent includePostHogSync={false} />

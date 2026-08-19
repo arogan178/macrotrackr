@@ -3,6 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import UpgradeModal from "./UpgradeModal";
 
+const { captureMock } = vi.hoisted(() => ({ captureMock: vi.fn() }));
+
+vi.mock("@/lib/productAnalytics", () => ({
+  useProductAnalytics: () => ({ capture: captureMock }),
+}));
+
 describe("UpgradeModal", () => {
   it("renders nothing when open is false", () => {
     const { container } = render(
@@ -17,6 +23,13 @@ describe("UpgradeModal", () => {
     );
     // Component renders (even if Modal doesn't show in test environment)
     expect(container).toBeTruthy();
+    expect(captureMock).toHaveBeenCalledWith({
+      event: "paywall_viewed",
+      properties: {
+        featureName: "Pro",
+        surface: "upgrade_modal",
+      },
+    });
   });
 
   it("accepts custom featureName prop", () => {

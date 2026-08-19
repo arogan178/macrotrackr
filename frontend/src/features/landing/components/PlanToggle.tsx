@@ -1,4 +1,5 @@
 import React from "react";
+import { PRICING } from "@shared/pricing";
 
 import { Button } from "@/components/ui";
 
@@ -6,6 +7,10 @@ interface PlanToggleProps {
   selectedPlan: "monthly" | "yearly";
   onSelect: (plan: "monthly" | "yearly") => void;
 }
+
+const yearlyDiscount = Math.round(
+  (1 - PRICING.yearly / (PRICING.monthly * 12)) * 100,
+);
 
 /**
  * PlanToggle renders the monthly/yearly plan switch for pricing cards.
@@ -34,7 +39,7 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
     >
       Yearly
       <span className="absolute -top-2.5 -right-3 rounded-control bg-success px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-background uppercase">
-        -30%
+        Save {yearlyDiscount}%
       </span>
     </Button>
   </div>

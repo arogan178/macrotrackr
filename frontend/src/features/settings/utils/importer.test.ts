@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import {
   detectImportFormat,
   normalizeDate,
@@ -7,7 +5,8 @@ import {
   normalizeTime,
   parseCsv,
   parseImportFile,
-} from "./importer";
+} from "@shared/importer";
+import { describe, expect, it } from "vitest";
 
 describe("Frontend Importer CSV Tokenizer and Normalizers", () => {
   it("parses CSV with quoted strings correctly", () => {
@@ -15,7 +14,12 @@ describe("Frontend Importer CSV Tokenizer and Normalizers", () => {
     const rows = parseCsv(csv);
     expect(rows.length).toBe(2);
     expect(rows[0]).toEqual(["Date", "Meal", "Food, Name", "Calories"]);
-    expect(rows[1]).toEqual(["2026-05-01", "Breakfast", "Oatmeal, rolled", "300"]);
+    expect(rows[1]).toEqual([
+      "2026-05-01",
+      "Breakfast",
+      "Oatmeal, rolled",
+      "300",
+    ]);
   });
 
   it("normalizes date formats to YYYY-MM-DD", () => {

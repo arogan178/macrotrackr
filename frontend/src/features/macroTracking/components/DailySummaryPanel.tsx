@@ -189,7 +189,7 @@ function DailySummaryInner({
       carbsTarget: targetGrams.carbs,
       fats: safeTotal.fats,
       fatsTarget: targetGrams.fats,
-      complianceScore: completionPercentages.calories,
+      badgeLabel: `${completionPercentages.calories}% of Goal`,
     }),
     [
       macroCalories.total,

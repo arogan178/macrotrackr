@@ -1,4 +1,11 @@
 import { useCallback, useRef, useState } from "react";
+import {
+  detectImportFormat,
+  type ImportFormat,
+  type ImportResult,
+  isImportFormat,
+  parseImportFile,
+} from "@shared/importer";
 
 import Dropdown from "@/components/form/Dropdown";
 import {
@@ -11,13 +18,8 @@ import {
 } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
-import {
-  detectImportFormat,
-  type ImportFormat,
-  type ImportResult,
-  parseImportFile,
-} from "@/features/settings/utils/importer";
 import { useImportMacros } from "@/hooks/queries/useMacroQueries";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import { useStore } from "@/store/store";
 
 const FORMAT_OPTIONS = [
@@ -40,6 +42,7 @@ const PLATFORM_NAMES: Record<ImportFormat, string> = {
 };
 
 export default function DataImporter() {
+  const productAnalytics = useProductAnalytics();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,18 +74,27 @@ export default function DataImporter() {
               "No valid meal or weight records could be extracted from this file.",
           );
           setParsedData(null);
+
           return;
         }
 
         setParsedData(result);
+        productAnalytics.capture({
+          event: "import_previewed",
+          properties: {
+            importSource: result.format,
+            mealCount: result.entries.length,
+            weightLogCount: result.weightLogs.length,
+          },
+        });
       } catch (error) {
-        const msg =
+        const message =
           error instanceof Error ? error.message : "Failed to parse file.";
-        setParseError(msg);
+        setParseError(message);
         setParsedData(null);
       }
     },
-    [selectedFormat],
+    [productAnalytics, selectedFormat],
   );
 
   const handleFileSelected = useCallback(
@@ -135,7 +147,8 @@ export default function DataImporter() {
   };
 
   const handleFormatChange = (newFormat: string | number) => {
-    const format = String(newFormat) as ImportFormat;
+    const value = String(newFormat);
+    const format = isImportFormat(value) ? value : "auto";
     setSelectedFormat(format);
     if (selectedFile && fileContent) {
       handleFileProcess(selectedFile, fileContent, format);
@@ -172,9 +185,9 @@ export default function DataImporter() {
 
       showNotification(response.message, "success");
     } catch (error) {
-      const msg =
+      const message =
         error instanceof Error ? error.message : "Failed to import data.";
-      showNotification(`Import failed: ${msg}`, "error");
+      showNotification(`Import failed: ${message}`, "error");
     }
   };
 
@@ -354,7 +367,9 @@ export default function DataImporter() {
                   </div>
                 </div>
                 <div className="rounded-card border border-border bg-surface-2 p-3">
-                  <span className="text-xs text-muted">Daily Macros (P/C/F)</span>
+                  <span className="text-xs text-muted">
+                    Daily Macros (P/C/F)
+                  </span>
                   <div className="mt-1 text-sm font-semibold text-foreground">
                     <span className="text-protein">
                       {parsedData.summary.macroSummary.avgDailyProtein}p
@@ -379,7 +394,8 @@ export default function DataImporter() {
                     entries)
                   </span>
                   <span className="text-xs text-muted">
-                    Total calories: {parsedData.summary.macroSummary.totalCalories} kcal
+                    Total calories:{" "}
+                    {parsedData.summary.macroSummary.totalCalories} kcal
                   </span>
                 </div>
                 <div className="overflow-x-auto rounded-card border border-border bg-surface-2">
@@ -400,6 +416,7 @@ export default function DataImporter() {
                         const calories = Math.round(
                           entry.protein * 4 + entry.carbs * 4 + entry.fats * 9,
                         );
+
                         return (
                           <tr key={index} className="hover:bg-surface">
                             <td className="px-3 py-2 text-muted">

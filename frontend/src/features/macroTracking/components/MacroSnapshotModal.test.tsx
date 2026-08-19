@@ -55,11 +55,11 @@ describe("MacroSnapshotModal", () => {
     expect(screen.getByText("Share Macro Snapshot")).toBeInTheDocument();
     expect(screen.getByText("Today's Macros")).toBeInTheDocument();
     expect(screen.getByText("Oct 24, 2026")).toBeInTheDocument();
-    expect(screen.getByText("Total Calories")).toBeInTheDocument();
+    expect(screen.getByText("Calories Consumed")).toBeInTheDocument();
     expect(screen.getByText("2,150")).toBeInTheDocument();
-    expect(screen.getByText("165g")).toBeInTheDocument();
-    expect(screen.getByText("220g")).toBeInTheDocument();
-    expect(screen.getByText("60g")).toBeInTheDocument();
+    expect(screen.getByText("165")).toBeInTheDocument();
+    expect(screen.getByText("220")).toBeInTheDocument();
+    expect(screen.getByText("60")).toBeInTheDocument();
   });
 
   it("displays streak badge when streakDays is provided", () => {

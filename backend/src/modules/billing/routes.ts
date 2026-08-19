@@ -8,6 +8,7 @@ import { SubscriptionService } from "./subscription-service";
 import { PLANS } from "../../config/pricing";
 import { t } from "elysia";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
+import { captureProductEvent } from "../../lib/analytics/product-analytics";
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -24,7 +25,7 @@ const BillingDetailsResponseSchema = t.Object({
     t.Object({
       brand: t.String(),
       last4: t.String(),
-    })
+    }),
   ),
   stripeDetails: t.Nullable(t.Unknown()),
 });
@@ -65,20 +66,24 @@ const PlansResponseSchema = t.Object({
 
 // Helper for consistent error logging and user-friendly error throwing
 // Returns `never` to indicate it always throws
-function handleRouteError(error: unknown, operation: string, userId?: number): never {
+function handleRouteError(
+  error: unknown,
+  operation: string,
+  userId?: number,
+): never {
   logger.error(
     {
       error: error instanceof Error ? error : new Error(String(error)),
       operation,
       userId,
     },
-    `Failed to ${operation.replace(/_/g, " ")}`
+    `Failed to ${operation.replace(/_/g, " ")}`,
   );
   if (error instanceof BadRequestError || error instanceof NotFoundError) {
     throw error;
   }
   throw new BadRequestError(
-    "An unexpected error occurred. Please try again later."
+    "An unexpected error occurred. Please try again later.",
   );
 }
 
@@ -126,9 +131,8 @@ export const billingRoutes = (app: Elysia) =>
               await SubscriptionService.getUserSubscription(user.userId);
             // Compose response as per the plan
             return {
-              subscription:
-                subscriptionInfo.subscription ?
-                  {
+              subscription: subscriptionInfo.subscription
+                ? {
                     id: subscriptionInfo.subscription.id,
                     status: subscriptionInfo.subscription.status,
                     currentPeriodEnd:
@@ -152,7 +156,7 @@ export const billingRoutes = (app: Elysia) =>
               "Get detailed billing and subscription info for the current user",
             tags: ["Billing"],
           },
-        }
+        },
       )
 
       // Cancel current subscription
@@ -173,7 +177,7 @@ export const billingRoutes = (app: Elysia) =>
             // Update local DB
             await SubscriptionService.cancelSubscription(
               user.userId,
-              sub.stripe_subscription_id
+              sub.stripe_subscription_id,
             );
             logger.info(
               {
@@ -181,7 +185,7 @@ export const billingRoutes = (app: Elysia) =>
                 userId: user.userId,
                 subscriptionId: sub.stripe_subscription_id,
               },
-              "Canceled user subscription via API"
+              "Canceled user subscription via API",
             );
             return {
               success: true,
@@ -198,12 +202,13 @@ export const billingRoutes = (app: Elysia) =>
             summary: "Cancel the current user's subscription",
             tags: ["Billing"],
           },
-        }
+        },
       )
       .post(
         "/checkout",
         async (rawContext: unknown) => {
-          const context = rawContext as BillingRouteContext<CheckoutRequestBody>;
+          const context =
+            rawContext as BillingRouteContext<CheckoutRequestBody>;
           const { body } = context;
           const user = resolveBillingUser(context);
           try {
@@ -215,7 +220,7 @@ export const billingRoutes = (app: Elysia) =>
               await SubscriptionService.getUserSubscription(user.userId);
             if (userSubscription.subscription_status === "pro") {
               throw new BadRequestError(
-                "User already has an active Pro subscription"
+                "User already has an active Pro subscription",
               );
             }
             let customerId = userSubscription.stripe_customer_id;
@@ -228,29 +233,29 @@ export const billingRoutes = (app: Elysia) =>
               customerId = customer.id;
               await SubscriptionService.updateStripeCustomerId(
                 user.userId,
-                customerId
+                customerId,
               );
             }
 
             // Determine price ID based on plan
             const plan = body.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
-              plan === "yearly" ?
-                process.env.STRIPE_PRICE_ID_YEARLY ?? ""
-              : process.env.STRIPE_PRICE_ID_MONTHLY ?? "";
+              plan === "yearly"
+                ? (process.env.STRIPE_PRICE_ID_YEARLY ?? "")
+                : (process.env.STRIPE_PRICE_ID_MONTHLY ?? "");
             if (!priceId)
               throw new BadRequestError(
-                "Stripe price ID not configured for selected plan"
+                "Stripe price ID not configured for selected plan",
               );
             const session = await StripeService.createCheckoutSession({
               customerId,
-                successUrl: body.successUrl,
-                cancelUrl: body.cancelUrl,
+              successUrl: body.successUrl,
+              cancelUrl: body.cancelUrl,
               priceId,
               metadata: {
                 userId: user.userId.toString(),
                 plan,
-                  ...body.metadata,
+                ...body.metadata,
               },
             });
             logger.info(
@@ -261,8 +266,13 @@ export const billingRoutes = (app: Elysia) =>
                 customerId,
                 plan,
               },
-              "Created checkout session for user"
+              "Created checkout session for user",
             );
+            void captureProductEvent({
+              distinctId: user.userId,
+              event: "checkout_started",
+              properties: { plan, source: "pricing_page" },
+            });
             return { sessionId: session.id, url: session.url! };
           } catch (error) {
             handleRouteError(error, "create_checkout_session", user.userId);
@@ -271,7 +281,7 @@ export const billingRoutes = (app: Elysia) =>
         {
           body: t.Object({
             plan: t.Optional(
-              t.Union([t.Literal("monthly"), t.Literal("yearly")])
+              t.Union([t.Literal("monthly"), t.Literal("yearly")]),
             ),
             successUrl: t.String({ format: "uri" }),
             cancelUrl: t.String({ format: "uri" }),
@@ -283,7 +293,7 @@ export const billingRoutes = (app: Elysia) =>
               "Create Stripe checkout session for Pro subscription (monthly or yearly)",
             tags: ["Billing"],
           },
-        }
+        },
       )
 
       // Create customer portal session
@@ -312,7 +322,7 @@ export const billingRoutes = (app: Elysia) =>
             const portalSession =
               await StripeService.createCustomerPortalSession(
                 userSubscription.stripe_customer_id,
-                returnUrl
+                returnUrl,
               );
             logger.info(
               {
@@ -320,7 +330,7 @@ export const billingRoutes = (app: Elysia) =>
                 userId: user.userId,
                 customerId: userSubscription.stripe_customer_id,
               },
-              "Created customer portal session"
+              "Created customer portal session",
             );
             return { url: portalSession.url };
           } catch (error) {
@@ -336,7 +346,7 @@ export const billingRoutes = (app: Elysia) =>
             summary: "Create Stripe customer portal session",
             tags: ["Billing"],
           },
-        }
+        },
       )
 
       // Get current subscription status
@@ -351,12 +361,16 @@ export const billingRoutes = (app: Elysia) =>
             return {
               status: subscriptionInfo.subscription_status,
               hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
-              subscription: subscriptionInfo.subscription ? {
-                id: subscriptionInfo.subscription.id,
-                status: subscriptionInfo.subscription.status,
-                currentPeriodEnd: subscriptionInfo.subscription.current_period_end,
-                stripeSubscriptionId: subscriptionInfo.subscription.stripe_subscription_id,
-              } : null,
+              subscription: subscriptionInfo.subscription
+                ? {
+                    id: subscriptionInfo.subscription.id,
+                    status: subscriptionInfo.subscription.status,
+                    currentPeriodEnd:
+                      subscriptionInfo.subscription.current_period_end,
+                    stripeSubscriptionId:
+                      subscriptionInfo.subscription.stripe_subscription_id,
+                  }
+                : null,
             };
           } catch (error) {
             handleRouteError(error, "get_subscription_status", user.userId);
@@ -368,7 +382,7 @@ export const billingRoutes = (app: Elysia) =>
             summary: "Get the current user's subscription status",
             tags: ["Billing"],
           },
-        }
+        },
       )
 
       // Get available plans
@@ -376,9 +390,9 @@ export const billingRoutes = (app: Elysia) =>
         "/plans",
         async () => {
           try {
-            const plans = PLANS.map(plan => ({
+            const plans = PLANS.map((plan) => ({
               ...plan,
-              features: [...plan.features]
+              features: [...plan.features],
             }));
             return { plans };
           } catch (error) {
@@ -391,6 +405,6 @@ export const billingRoutes = (app: Elysia) =>
             summary: "Get available subscription plans",
             tags: ["Billing"],
           },
-        }
-      )
+        },
+      ),
   );

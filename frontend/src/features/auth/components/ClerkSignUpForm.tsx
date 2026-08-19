@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
 import { useClerk } from "@clerk/react";
 import { useSignIn, useSignUp } from "@clerk/react/legacy";
+import { resolveSignupSource } from "@shared/product-analytics";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -21,6 +22,7 @@ import {
 } from "@/features/auth/utils/redirect";
 import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import {
   exchangeNativeGoogleTokenWithClerk,
   nativeGoogleSignIn,
@@ -37,6 +39,7 @@ export function ClerkSignUpForm({
   onSwitchToSignIn,
   redirectTo,
 }: ClerkSignUpFormProps) {
+  const productAnalytics = useProductAnalytics();
   const navigate = useNavigate();
   const clerk = useClerk();
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -52,7 +55,8 @@ export function ClerkSignUpForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
+  const [loadingStrategy, setLoadingStrategy] =
+    useState<SocialAuthStrategy | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const [isEmailMode, setIsEmailMode] = useState(false);
@@ -68,6 +72,13 @@ export function ClerkSignUpForm({
       return;
     }
 
+    productAnalytics.capture({
+      event: "signup_started",
+      properties: {
+        authMethod: strategy,
+        source: resolveSignupSource(normalizedRedirect),
+      },
+    });
     setLoadingStrategy(strategy);
 
     try {
@@ -78,15 +89,23 @@ export function ClerkSignUpForm({
           googleAuthRes = await Promise.race([
             nativeGoogleSignIn(),
             new Promise<null>((_, reject) =>
-              setTimeout(() => reject(new Error("Native Google Sign-In timed out")), 10000)
+              setTimeout(
+                () => reject(new Error("Native Google Sign-In timed out")),
+                10000,
+              ),
             ),
           ]);
         } catch (nativeError) {
-          logger.warn("Native Google Sign-In failed or timed out:", nativeError);
+          logger.warn(
+            "Native Google Sign-In failed or timed out:",
+            nativeError,
+          );
         }
 
         if (googleAuthRes?.idToken) {
-          logger.info("Native Google Sign-In obtained idToken, exchanging with Clerk...");
+          logger.info(
+            "Native Google Sign-In obtained idToken, exchanging with Clerk...",
+          );
           const success = await exchangeNativeGoogleTokenWithClerk({
             idToken: googleAuthRes.idToken,
             clerk,
@@ -105,11 +124,16 @@ export function ClerkSignUpForm({
             return;
           }
           logger.warn("Native Google token exchange returned false.");
-          showNotification("Google sign-in could not be completed. Please try again in a moment.", "warning");
+          showNotification(
+            "Google sign-in could not be completed. Please try again in a moment.",
+            "warning",
+          );
 
           return;
         } else {
-          logger.info("Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...");
+          logger.info(
+            "Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...",
+          );
         }
       }
 
@@ -130,7 +154,9 @@ export function ClerkSignUpForm({
 
           externalUrl =
             res.verifications?.externalAccount?.externalVerificationRedirectURL?.toString() ||
-            (res as any)?.firstFactorVerification?.externalVerificationRedirectURL?.toString();
+            (
+              res as any
+            )?.firstFactorVerification?.externalVerificationRedirectURL?.toString();
         } catch (createError) {
           logger.warn(
             "signUp.create externalUrl unavailable, trying signIn.create fallback:",
@@ -148,7 +174,9 @@ export function ClerkSignUpForm({
 
             externalUrl =
               signInRes.firstFactorVerification?.externalVerificationRedirectURL?.toString() ||
-              (signInRes as any)?.verifications?.externalVerificationRedirectURL?.toString();
+              (
+                signInRes as any
+              )?.verifications?.externalVerificationRedirectURL?.toString();
           } catch (signInError) {
             logger.warn(
               "signIn.create externalUrl also unavailable on sign-up:",
@@ -221,6 +249,13 @@ export function ClerkSignUpForm({
       return;
     }
 
+    productAnalytics.capture({
+      event: "signup_started",
+      properties: {
+        authMethod: "email",
+        source: resolveSignupSource(normalizedRedirect),
+      },
+    });
     setIsLoading(true);
 
     try {

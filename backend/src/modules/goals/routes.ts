@@ -11,14 +11,22 @@ import {
   type WeightGoalRow,
   type WeightLogRow,
 } from "../../lib/data/database";
-import { BadRequestError, ConflictError, NotFoundError } from "../../lib/http/errors";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from "../../lib/http/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/observability/logger";
-import { mutationSuccess, mutationSuccessWithId } from "../../lib/http/mutation-contract";
+import {
+  mutationSuccess,
+  mutationSuccessWithId,
+} from "../../lib/http/mutation-contract";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 
-type GoalsRouteContext =
-  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
+type GoalsRouteContext = AuthenticatedRouteContextWithUser<
+  Record<string, unknown>
+>;
 
 /**
  * Helper function to get the current weight from the latest weight log entry
@@ -27,12 +35,12 @@ type GoalsRouteContext =
 function getCurrentWeight(
   db: Database,
   userId: number,
-  startingWeight: number | null
+  startingWeight: number | null,
 ): number | null {
   const latestLogEntry = safeQuery<{ weight: number }>(
     db,
     "SELECT weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1",
-    [userId]
+    [userId],
   );
 
   if (latestLogEntry) {
@@ -55,20 +63,31 @@ export const goalRoutes = (app: Elysia) =>
           const internalUserId = context.authenticatedUser.userId;
 
           // Get correlation ID from request headers if available
-          const correlationId = request.headers.get("x-correlation-id") ?? undefined;
+          const correlationId =
+            request.headers.get("x-correlation-id") ?? undefined;
 
-          loggerHelpers.apiRequest("GET", "/goals/weight", internalUserId ?? undefined, {
-            correlationId,
-          });
+          loggerHelpers.apiRequest(
+            "GET",
+            "/goals/weight",
+            internalUserId ?? undefined,
+            {
+              correlationId,
+            },
+          );
 
           const weightGoalsResult = safeQuery<WeightGoalRow>(
             db,
             "SELECT id, user_id, starting_weight, target_weight, weight_goal, start_date, target_date, calorie_target, calculated_weeks, weekly_change, daily_change, created_at, updated_at FROM weight_goals WHERE user_id = ?",
-            [internalUserId]
+            [internalUserId],
           );
 
           if (!weightGoalsResult) {
-            loggerHelpers.dbQuery("SELECT", "weight_goals", internalUserId ?? undefined, 0);
+            loggerHelpers.dbQuery(
+              "SELECT",
+              "weight_goals",
+              internalUserId ?? undefined,
+              0,
+            );
             return null; // Return null if not found (matches schema)
           }
 
@@ -76,7 +95,7 @@ export const goalRoutes = (app: Elysia) =>
           const currentWeight = getCurrentWeight(
             db,
             internalUserId!,
-            weightGoalsResult.starting_weight
+            weightGoalsResult.starting_weight,
           );
 
           // Map snake_case from DB to camelCase for API response
@@ -93,7 +112,12 @@ export const goalRoutes = (app: Elysia) =>
             dailyChange: weightGoalsResult.daily_change,
           };
 
-          loggerHelpers.dbQuery("SELECT", "weight_goals", internalUserId ?? undefined, 1);
+          loggerHelpers.dbQuery(
+            "SELECT",
+            "weight_goals",
+            internalUserId ?? undefined,
+            1,
+          );
           return apiResponse;
         },
         {
@@ -102,7 +126,7 @@ export const goalRoutes = (app: Elysia) =>
             summary: "Get the user's weight goals",
             tags: ["Goals"],
           },
-        }
+        },
       )
 
       // --- CREATE Weight Goals ---
@@ -118,18 +142,19 @@ export const goalRoutes = (app: Elysia) =>
           }
 
           context.set.status = 201;
+          const initialWeightTimestamp = new Date().toISOString();
 
           const savedGoal = withTransaction(db, () => {
             // Check if a goal already exists
             const existingGoal = safeQuery<{ id: number }>(
               db,
               "SELECT id FROM weight_goals WHERE user_id = ?",
-              [internalUserId]
+              [internalUserId],
             );
 
             if (existingGoal) {
               throw new ConflictError(
-                "Weight goal already exists for this user. Use PUT to update."
+                "Weight goal already exists for this user. Use PUT to update.",
               );
             }
 
@@ -157,7 +182,8 @@ export const goalRoutes = (app: Elysia) =>
             };
 
             // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") ?? undefined;
+            const correlationId =
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest(
               "POST",
@@ -165,7 +191,7 @@ export const goalRoutes = (app: Elysia) =>
               internalUserId ?? undefined,
               {
                 correlationId,
-              }
+              },
             );
 
             const savedGoalResult = safeQuery<WeightGoalRow>(
@@ -186,11 +212,40 @@ export const goalRoutes = (app: Elysia) =>
                 calculatedWeeks,
                 weeklyChange,
                 dailyChange,
-              ]
+              ],
             );
 
             if (!savedGoalResult) {
               throw new Error("Failed to create weight goals.");
+            }
+
+            const hasWeightLogToday = safeQuery<{ id: string }>(
+              db,
+              `SELECT id FROM weight_log
+               WHERE user_id = ? AND substr(timestamp, 1, 10) = ?
+               LIMIT 1`,
+              [internalUserId, initialWeightTimestamp.slice(0, 10)],
+            );
+
+            if (!hasWeightLogToday) {
+              safeExecute(
+                db,
+                `INSERT INTO weight_log (id, user_id, timestamp, weight)
+                 VALUES (?, ?, ?, ?)`,
+                [
+                  generateId(),
+                  internalUserId,
+                  initialWeightTimestamp,
+                  startingWeight,
+                ],
+              );
+              safeExecute(
+                db,
+                `UPDATE user_details
+                 SET weight = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE user_id = ?`,
+                [startingWeight, internalUserId],
+              );
             }
 
             return savedGoalResult;
@@ -200,7 +255,7 @@ export const goalRoutes = (app: Elysia) =>
           const currentWeight = getCurrentWeight(
             db,
             internalUserId!,
-            savedGoal.starting_weight
+            savedGoal.starting_weight,
           );
 
           publishUserSyncEvent(internalUserId!, "goals");
@@ -232,7 +287,7 @@ export const goalRoutes = (app: Elysia) =>
               "Create a new weight goal for the user. Requires 'startingWeight' in the body.",
             tags: ["Goals"],
           },
-        }
+        },
       )
 
       // --- UPDATE Weight Goals ---
@@ -276,19 +331,20 @@ export const goalRoutes = (app: Elysia) =>
             }>(
               db,
               "SELECT id, starting_weight FROM weight_goals WHERE user_id = ?",
-              [internalUserId]
+              [internalUserId],
             );
 
             if (!existingGoal) {
               throw new NotFoundError(
-                "Weight goal not found for this user. Use POST to create."
+                "Weight goal not found for this user. Use POST to create.",
               );
             }
 
             const effectiveStartingWeight = existingGoal.starting_weight;
 
             // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") ?? undefined;
+            const correlationId =
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest(
               "PUT",
@@ -296,7 +352,7 @@ export const goalRoutes = (app: Elysia) =>
               internalUserId ?? undefined,
               {
                 correlationId,
-              }
+              },
             );
 
             // IMPORTANT: Do NOT update starting_weight
@@ -318,12 +374,12 @@ export const goalRoutes = (app: Elysia) =>
                 weeklyChange,
                 dailyChange,
                 internalUserId,
-              ]
+              ],
             );
 
             if (!savedGoalResult) {
               throw new Error(
-                "Failed to update weight goals or retrieve result."
+                "Failed to update weight goals or retrieve result.",
               );
             }
 
@@ -337,7 +393,7 @@ export const goalRoutes = (app: Elysia) =>
           const currentWeight = getCurrentWeight(
             db,
             internalUserId!,
-            savedGoal.starting_weight
+            savedGoal.starting_weight,
           );
 
           publishUserSyncEvent(internalUserId!, "goals");
@@ -369,7 +425,7 @@ export const goalRoutes = (app: Elysia) =>
               "Update the user's existing weight goal. Does not change starting weight.",
             tags: ["Goals"],
           },
-        }
+        },
       )
 
       // --- Reset Goals (DELETE /weight) ---
@@ -396,7 +452,7 @@ export const goalRoutes = (app: Elysia) =>
             summary: "Reset all goals (weight & macro) for the user",
             tags: ["Goals"],
           },
-        }
+        },
       )
 
       // --- Get Weight Log History ---
@@ -410,11 +466,9 @@ export const goalRoutes = (app: Elysia) =>
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
 
-          const logs = safeQueryAll<Pick<WeightLogRow, "id" | "timestamp" | "weight">>(
-            db,
-            query,
-            [internalUserId]
-          );
+          const logs = safeQueryAll<
+            Pick<WeightLogRow, "id" | "timestamp" | "weight">
+          >(db, query, [internalUserId]);
 
           return logs;
         },
@@ -424,7 +478,7 @@ export const goalRoutes = (app: Elysia) =>
             summary: "Get the user's weight log history",
             tags: ["Goals", "Weight Log"],
           },
-        }
+        },
       )
 
       // --- Add Weight Log Entry ---
@@ -480,7 +534,7 @@ export const goalRoutes = (app: Elysia) =>
             summary: "Add/Update a weight log entry and update user details",
             tags: ["Goals", "Weight Log"],
           },
-        }
+        },
       )
 
       // --- Delete Weight Log Entry ---
@@ -503,13 +557,13 @@ export const goalRoutes = (app: Elysia) =>
             const deletedEntryResult = safeQueryAll<{ id: string }>(
               db,
               findEntryQuery,
-              [entryIdToDelete, internalUserId]
+              [entryIdToDelete, internalUserId],
             );
             const deletedEntry = deletedEntryResult[0];
 
             if (!deletedEntry) {
               throw new NotFoundError(
-                "Weight log entry not found or access denied."
+                "Weight log entry not found or access denied.",
               );
             }
 
@@ -520,7 +574,7 @@ export const goalRoutes = (app: Elysia) =>
 
             if (deleteResult.changes === 0) {
               throw new NotFoundError(
-                "Failed to delete entry, might have been deleted already."
+                "Failed to delete entry, might have been deleted already.",
               );
             }
 
@@ -530,11 +584,10 @@ export const goalRoutes = (app: Elysia) =>
               ORDER BY timestamp DESC, id DESC
               LIMIT 1
             `;
-            const latestEntryResult = safeQueryAll<{ weight: number; timestamp: string }>(
-              db,
-              findLatestQuery,
-              [internalUserId]
-            );
+            const latestEntryResult = safeQueryAll<{
+              weight: number;
+              timestamp: string;
+            }>(db, findLatestQuery, [internalUserId]);
             const latestEntry = latestEntryResult[0];
 
             if (latestEntry) {
@@ -565,6 +618,6 @@ export const goalRoutes = (app: Elysia) =>
               "Delete a specific weight log entry and update user details",
             tags: ["Goals", "Weight Log"],
           },
-        }
-      )
+        },
+      ),
   );

@@ -13,17 +13,20 @@ import {
   DatabaseError,
   NotFoundError,
 } from "../../lib/http/errors";
-import {
-  mutationSuccessWithId,
-} from "../../lib/http/mutation-contract";
+import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
-import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
+import { captureProductEvent } from "../../lib/analytics/product-analytics";
+import {
+  checkProStatus,
+  FREE_TIER_LIMITS,
+} from "../../middleware/clerk-guards";
 import { generateId } from "../../utils/id-generator";
 import {
+  isImportFormat,
   normalizeDate,
   normalizeTime,
   parseImportFile,
-} from "./importer";
+} from "@shared/importer";
 import { MacroSchemas } from "./schemas";
 import {
   type MacroEntryResponse,
@@ -37,6 +40,12 @@ type MacroRouteGroup = {
   delete: (path: string, ...args: unknown[]) => MacroRouteGroup;
   put: (path: string, ...args: unknown[]) => MacroRouteGroup;
 };
+
+interface TrackingProgress {
+  distinctDays: number;
+  entryCount: number;
+  hasEntryForDate?: number;
+}
 
 export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
   group
@@ -77,7 +86,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
 
         return {
           ...result,
-          calories: Math.round(result.protein * 4 + result.carbs * 4 + result.fats * 9),
+          calories: Math.round(
+            result.protein * 4 + result.carbs * 4 + result.fats * 9,
+          ),
         };
       },
       {
@@ -87,7 +98,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         }),
         response: MacroSchemas.macroTotals,
         detail: {
-          summary: "Get total macros consumed by the user for a date range (or today)",
+          summary:
+            "Get total macros consumed by the user for a date range (or today)",
           tags: ["Macros"],
         },
       },
@@ -112,7 +124,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         const retentionDays = FREE_TIER_LIMITS.DATA_RETENTION_DAYS;
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-        const cutoffDateString = cutoffDate.toISOString().split("T")[0] as string;
+        const cutoffDateString = cutoffDate
+          .toISOString()
+          .split("T")[0] as string;
 
         const buildWhereClause = (includeRetentionCutoff: boolean) => {
           const clauses = ["user_id = ?"];
@@ -163,11 +177,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
            LIMIT ? OFFSET ?`;
         const historyParams = [...visibleWhere.parameters, limit, offset];
 
-        const historyResult = safeQueryAll<MacroEntryRow & { ingredients: string }>(
-          db,
-          historyQuery,
-          historyParams,
-        );
+        const historyResult = safeQueryAll<
+          MacroEntryRow & { ingredients: string }
+        >(db, historyQuery, historyParams);
 
         const response: {
           entries: MacroEntryResponse[];
@@ -235,6 +247,10 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         const { db, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
+        if (internalUserId === null) {
+          throw new AuthenticationError("Authentication required.");
+        }
+
         if (!body) {
           throw new BadRequestError("Request body is required");
         }
@@ -259,31 +275,72 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           ingredients?: unknown[];
         };
 
-        const ingredientsJson = ingredients ? JSON.stringify(ingredients) : null;
+        const ingredientsJson = ingredients
+          ? JSON.stringify(ingredients)
+          : null;
 
-        const result = safeQuery<MacroEntryRow>(
+        const { result, trackedThirdDay, wasFirstMeal } = withTransaction(
           db,
-          `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-           RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
-          [
-            internalUserId,
-            protein,
-            carbs,
-            fats,
-            mealType,
-            mealName ?? "",
-            entryDate,
-            entryTime,
-            ingredientsJson,
-          ],
+          () => {
+            const progress = safeQuery<TrackingProgress>(
+              db,
+              `SELECT COUNT(*) AS entryCount,
+                      COUNT(DISTINCT entry_date) AS distinctDays,
+                      MAX(CASE WHEN entry_date = ? THEN 1 ELSE 0 END) AS hasEntryForDate
+                 FROM macro_entries
+                WHERE user_id = ?`,
+              [entryDate, internalUserId],
+            ) ?? { distinctDays: 0, entryCount: 0, hasEntryForDate: 0 };
+
+            const inserted = safeQuery<MacroEntryRow>(
+              db,
+              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+               RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
+              [
+                internalUserId,
+                protein,
+                carbs,
+                fats,
+                mealType,
+                mealName ?? "",
+                entryDate,
+                entryTime,
+                ingredientsJson,
+              ],
+            );
+
+            return {
+              result: inserted,
+              trackedThirdDay:
+                progress.distinctDays === 2 && progress.hasEntryForDate !== 1,
+              wasFirstMeal: progress.entryCount === 0,
+            };
+          },
         );
 
         if (!result) {
-          throw new DatabaseError("Failed to create macro entry or retrieve confirmation.");
+          throw new DatabaseError(
+            "Failed to create macro entry or retrieve confirmation.",
+          );
         }
 
         publishUserSyncEvent(internalUserId, "macros");
+
+        if (wasFirstMeal) {
+          void captureProductEvent({
+            distinctId: internalUserId,
+            event: "first_meal_logged",
+            properties: { entryMethod: "manual" },
+          });
+        }
+        if (trackedThirdDay) {
+          void captureProductEvent({
+            distinctId: internalUserId,
+            event: "third_tracked_day",
+            properties: { distinctDays: 3 },
+          });
+        }
 
         return normalizeMacroEntryRow(result);
       },
@@ -329,14 +386,22 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           rawData?: string;
         };
 
+        let importSource = isImportFormat(payload.source)
+          ? payload.source
+          : "unknown";
         let entries = payload.entries ?? [];
         let weightLogs = payload.weightLogs ?? [];
 
-        if (entries.length === 0 && weightLogs.length === 0 && payload.rawData) {
+        if (
+          entries.length === 0 &&
+          weightLogs.length === 0 &&
+          payload.rawData
+        ) {
           const parsed = parseImportFile(
             payload.rawData,
-            payload.source as any,
+            isImportFormat(payload.source) ? payload.source : undefined,
           );
+          importSource = parsed.format;
           entries = parsed.entries;
           weightLogs = parsed.weightLogs;
         }
@@ -349,7 +414,16 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
 
         const dates = new Set<string>();
 
-        withTransaction(db, () => {
+        const activation = withTransaction(db, () => {
+          const progressBefore = safeQuery<TrackingProgress>(
+            db,
+            `SELECT COUNT(*) AS entryCount,
+                    COUNT(DISTINCT entry_date) AS distinctDays
+               FROM macro_entries
+              WHERE user_id = ?`,
+            [internalUserId],
+          ) ?? { distinctDays: 0, entryCount: 0 };
+
           if (entries.length > 0) {
             const insertMacroStmt = db.prepare(
               `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
@@ -393,6 +467,24 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
               insertWeightStmt.run(id, internalUserId, date, wl.weight);
             }
           }
+
+          const progressAfter =
+            safeQuery<TrackingProgress>(
+              db,
+              `SELECT COUNT(*) AS entryCount,
+                    COUNT(DISTINCT entry_date) AS distinctDays
+               FROM macro_entries
+              WHERE user_id = ?`,
+              [internalUserId],
+            ) ?? progressBefore;
+
+          return {
+            trackedThirdDay:
+              progressBefore.distinctDays < 3 &&
+              progressAfter.distinctDays >= 3,
+            wasFirstMeal:
+              progressBefore.entryCount === 0 && progressAfter.entryCount > 0,
+          };
         });
 
         publishUserSyncEvent(internalUserId, "macros");
@@ -400,9 +492,35 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           publishUserSyncEvent(internalUserId, "goals");
         }
 
+        void captureProductEvent({
+          distinctId: internalUserId,
+          event: "import_completed",
+          properties: {
+            importSource,
+            mealCount: entries.length,
+            weightLogCount: weightLogs.length,
+          },
+        });
+        if (activation.wasFirstMeal) {
+          void captureProductEvent({
+            distinctId: internalUserId,
+            event: "first_meal_logged",
+            properties: { entryMethod: "import", importSource },
+          });
+        }
+        if (activation.trackedThirdDay) {
+          void captureProductEvent({
+            distinctId: internalUserId,
+            event: "third_tracked_day",
+            properties: { distinctDays: 3 },
+          });
+        }
+
         const sortedDates = Array.from(dates).sort();
         const dateRange =
-          sortedDates.length > 0 && sortedDates[0] && sortedDates[sortedDates.length - 1]
+          sortedDates.length > 0 &&
+          sortedDates[0] &&
+          sortedDates[sortedDates.length - 1]
             ? {
                 start: sortedDates[0],
                 end: sortedDates[sortedDates.length - 1]!,
@@ -506,8 +624,12 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           throw new BadRequestError("No valid fields provided for update.");
         }
 
-        const setClause = fieldsToUpdate.map((field) => `${field} = ?`).join(", ");
-        const updateValues = Object.values(updates) as Array<string | number | null>;
+        const setClause = fieldsToUpdate
+          .map((field) => `${field} = ?`)
+          .join(", ");
+        const updateValues = Object.values(updates) as Array<
+          string | number | null
+        >;
         const queryParams = [...updateValues, Number(entryId), internalUserId];
 
         const result = safeQuery<MacroEntryRow>(
@@ -531,7 +653,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
             );
           }
 
-          throw new DatabaseError("Failed to update macro entry (update returned no data).");
+          throw new DatabaseError(
+            "Failed to update macro entry (update returned no data).",
+          );
         }
 
         publishUserSyncEvent(internalUserId, "macros");

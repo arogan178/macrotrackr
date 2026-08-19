@@ -2,6 +2,7 @@ FROM docker.io/oven/bun:1.2.13-alpine AS build
 
 WORKDIR /app
 
+COPY bun.lock ./bun.lock
 COPY frontend/package.json ./package.json
 COPY frontend/tsconfig.json ./tsconfig.json
 COPY frontend/tsconfig.app.json ./tsconfig.app.json
