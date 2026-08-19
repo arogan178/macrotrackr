@@ -2,7 +2,7 @@
 
 MacroTrackr is a privacy-respecting macro tracker you can use as a managed app or run on your own infrastructure. Log meals, set macro goals, follow weight trends, and import history from popular nutrition trackers without being locked into one host.
 
-[Use MacroTrackr](https://macrotrackr.com/register) · [Try the free calculators](https://macrotrackr.com/tools) · [View pricing](https://macrotrackr.com/pricing) · [Self-host](docs/self-hosting.md)
+[Use MacroTrackr](https://macrotrackr.com/register) · [Import your history](https://macrotrackr.com/migrate) · [Try the free calculators](https://macrotrackr.com/tools) · [View pricing](https://macrotrackr.com/pricing) · [Self-host](docs/self-hosting.md)
 
 ## Why MacroTrackr
 

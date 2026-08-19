@@ -79,6 +79,36 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/migrate</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/migrate/myfitnesspal</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/migrate/cronometer</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/migrate/macrofactor</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/migrate/lose-it</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/pricing</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>

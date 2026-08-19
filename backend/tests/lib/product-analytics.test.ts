@@ -4,6 +4,7 @@ import { setConfigOverrides } from "../../src/config";
 import { captureProductEvent } from "../../src/lib/analytics/product-analytics";
 import {
   resolveAnalyticsTrafficType,
+  resolveSignupSource,
   serializeProductProperties,
 } from "../../../shared/product-analytics";
 
@@ -41,6 +42,12 @@ describe("product analytics contract", () => {
         "owner@example.com",
       ]),
     ).toBe("customer");
+  });
+
+  it("attributes importer-directed signups to migration guides", () => {
+    expect(
+      resolveSignupSource("/settings?tab=data&from=migration"),
+    ).toBe("migration");
   });
 });
 
@@ -113,7 +120,7 @@ describe("captureProductEvent", () => {
         $distinct_id: "42",
         app_mode: "managed",
         plan: "yearly",
-        schema_version: 2,
+        schema_version: 3,
         source: "pricing_page",
       },
     });

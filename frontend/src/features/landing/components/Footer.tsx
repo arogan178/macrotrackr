@@ -94,6 +94,11 @@ const Footer: React.FC = () => {
                   Alternatives & Comparisons
                 </Link>
               </li>
+              <li>
+                <Link to="/migrate" className={footerLinkClasses}>
+                  Import Your History
+                </Link>
+              </li>
             </ul>
           </div>
 
