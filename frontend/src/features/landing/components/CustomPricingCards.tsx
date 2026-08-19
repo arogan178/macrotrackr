@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { usePostHog } from "posthog-js/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ExternalLinkIcon, GithubIcon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
-import { isLocalAuthMode } from "@/config/runtime";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
-import { useStore } from "@/store/store";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import { GITHUB_REPO_URL, SETUP_DOCS_URL } from "@/utils/appConstants";
 
 import PlanToggle from "./PlanToggle";
@@ -24,35 +23,29 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   onUpgrade,
   showUpgradeButtons = false,
 }) => {
+  const productAnalytics = useProductAnalytics();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
     "monthly",
   );
   const navigate = useNavigate();
   const { isSignedIn } = useAppAuthState();
   const isAuthenticated = !!isSignedIn;
-  const subscriptionStatus = useStore((s) => s.subscriptionStatus);
-  const isProUser =
-    isLocalAuthMode ||
-    subscriptionStatus === "pro" ||
-    subscriptionStatus === "canceled";
-  const posthog = usePostHog();
-
-  const trackClick = (source: string) => {
-    posthog.capture("clicked_pricing_nav", {
-      location: "pricing_cards",
-      source,
-    });
-  };
+  const { hasPaidPlan: isProUser } = useEntitlements();
 
   const handleGetPro = () => {
     if (isAuthenticated) {
       // If user is logged in, go to pricing page
-      trackClick("pricing_card_pro");
       navigate({ to: "/pricing" });
     } else {
       // If user is not logged in, go to register and include a returnTo so
       // after signup/login the user can be redirected back to /pricing.
-      trackClick("pricing_card_pro_unauth");
+      productAnalytics.capture({
+        event: "landing_cta_clicked",
+        properties: {
+          destination: "register",
+          source: "pricing_pro",
+        },
+      });
       try {
         navigate({ to: "/register", search: { returnTo: "/pricing" } });
       } catch {
@@ -92,7 +85,11 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           suffix={PRICING_PLANS.free.suffix}
           features={features.free}
           buttonText={
-            isProUser ? "Free Plan" : isAuthenticated ? "Current Plan" : "Create Free Account"
+            isProUser
+              ? "Free Plan"
+              : isAuthenticated
+                ? "Current Plan"
+                : "Create Free Account"
           }
           buttonVariant="ghost"
           buttonSize="lg"
@@ -105,13 +102,23 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             isAuthenticated
               ? undefined
               : () => {
-                  trackClick("pricing_card_free");
-                  navigate({ to: "/register", search: { returnTo: undefined } });
+                  productAnalytics.capture({
+                    event: "landing_cta_clicked",
+                    properties: {
+                      destination: "register",
+                      source: "pricing_free",
+                    },
+                  });
+                  navigate({
+                    to: "/register",
+                    search: { returnTo: undefined },
+                  });
                 }
           }
         >
           <p className="mt-2 text-balance text-muted">
-            Everything you need to start tracking and build lasting healthy habits.
+            Everything you need to start tracking and build lasting healthy
+            habits.
           </p>
         </PricingCard>
 
@@ -153,7 +160,8 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           }
         >
           <p className="mt-2 text-balance text-muted">
-            Unlock advanced analytics, custom insights, and tools to accelerate your results.
+            Unlock advanced analytics, custom insights, and tools to accelerate
+            your results.
           </p>
         </PricingCard>
       </div>
@@ -201,7 +209,15 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
                 true,
                 "min-w-[220px] rounded-full border-border bg-surface text-foreground hover:bg-surface-2",
               )}
-              onClick={() => trackClick("self_hosted_github")}
+              onClick={() =>
+                productAnalytics.capture({
+                  event: "landing_cta_clicked",
+                  properties: {
+                    destination: "github",
+                    source: "self_hosted_github",
+                  },
+                })
+              }
             >
               <GithubIcon className="h-4 w-4" aria-hidden="true" />
               <span>View GitHub Repo</span>
@@ -216,7 +232,15 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
                 true,
                 "min-w-[220px] rounded-full border border-border bg-surface-2 text-foreground hover:bg-surface-3",
               )}
-              onClick={() => trackClick("self_hosted_docs")}
+              onClick={() =>
+                productAnalytics.capture({
+                  event: "landing_cta_clicked",
+                  properties: {
+                    destination: "docs",
+                    source: "self_hosted_docs",
+                  },
+                })
+              }
             >
               <ExternalLinkIcon className="h-4 w-4" aria-hidden="true" />
               <span>Read Setup Docs</span>

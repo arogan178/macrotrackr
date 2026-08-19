@@ -143,13 +143,17 @@ describe("AddEntryForm", () => {
     expect(submit).toBeEnabled();
   });
 
-  it("keeps date and time collapsed until asked for", () => {
+  it("keeps date and time collapsed until asked for and expands on click", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 
-    const disclosure = screen.getByText(/^Logged/).closest("details");
+    const summary = screen.getByText(/^Logged/);
+    const disclosure = summary.closest("details");
     expect(disclosure).not.toBeNull();
     expect(disclosure).not.toHaveAttribute("open");
-    expect(screen.getByText(/^Logged/).textContent).toContain("now");
+    expect(summary.textContent).toContain("now");
+
+    fireEvent.click(summary);
+    expect(disclosure).toHaveAttribute("open");
   });
 
   it("uses parsed serving units from selected food search results", () => {

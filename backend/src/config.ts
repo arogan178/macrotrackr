@@ -8,14 +8,18 @@ const BaseEnvSchema = z.object({
     .string()
     .default(process.env.NODE_ENV === "test" ? ":memory:" : "./macrotrackr.db")
     .transform((path) =>
-      path === ":memory:" ? path : isAbsolute(path) ? path : resolve(process.cwd(), path)
+      path === ":memory:"
+        ? path
+        : isAbsolute(path)
+          ? path
+          : resolve(process.cwd(), path),
     ),
 
   CORS_ORIGIN: z
     .string()
     .default("http://localhost:5173")
     .transform((val) =>
-      val.includes(",") ? val.split(",").map((v) => v.trim()) : val
+      val.includes(",") ? val.split(",").map((v) => v.trim()) : val,
     ),
 
   NODE_ENV: z
@@ -27,9 +31,18 @@ const BaseEnvSchema = z.object({
   BILLING_MODE: z.enum(["managed", "disabled"]).default("disabled"),
   ANALYTICS_MODE: z.enum(["posthog", "disabled"]).default("disabled"),
   EMAIL_MODE: z.enum(["resend", "smtp", "disabled"]).default("disabled"),
-  APP_URL: z.string().url("APP_URL must be a valid URL").default("http://localhost:5173"),
-  PUBLIC_APP_NAME: z.string().min(1, "PUBLIC_APP_NAME is required").default("MacroTrackr"),
-  SUPPORT_EMAIL: z.string().email("SUPPORT_EMAIL must be a valid email").default("support@local.invalid"),
+  APP_URL: z
+    .string()
+    .url("APP_URL must be a valid URL")
+    .default("http://localhost:5173"),
+  PUBLIC_APP_NAME: z
+    .string()
+    .min(1, "PUBLIC_APP_NAME is required")
+    .default("MacroTrackr"),
+  SUPPORT_EMAIL: z
+    .string()
+    .email("SUPPORT_EMAIL must be a valid email")
+    .default("support@local.invalid"),
   ENABLE_METRICS: z
     .union([z.boolean(), z.literal("true"), z.literal("false")])
     .transform((value) => value === true || value === "true")
@@ -116,6 +129,12 @@ function validateModeCombinations(config: BaseConfig): ConfigValidationIssue[] {
         message: "APP_MODE=self-hosted requires BILLING_MODE=disabled",
       });
     }
+    if (config.ANALYTICS_MODE !== "disabled") {
+      errors.push({
+        path: "APP_MODE",
+        message: "APP_MODE=self-hosted requires ANALYTICS_MODE=disabled",
+      });
+    }
   }
 
   return errors;
@@ -134,8 +153,16 @@ function validateProviderRequirements(
   if (config.BILLING_MODE === "managed") {
     requireValue("STRIPE_SECRET_KEY", config.STRIPE_SECRET_KEY, errors);
     requireValue("STRIPE_WEBHOOK_SECRET", config.STRIPE_WEBHOOK_SECRET, errors);
-    requireValue("STRIPE_PRICE_ID_MONTHLY", config.STRIPE_PRICE_ID_MONTHLY, errors);
-    requireValue("STRIPE_PRICE_ID_YEARLY", config.STRIPE_PRICE_ID_YEARLY, errors);
+    requireValue(
+      "STRIPE_PRICE_ID_MONTHLY",
+      config.STRIPE_PRICE_ID_MONTHLY,
+      errors,
+    );
+    requireValue(
+      "STRIPE_PRICE_ID_YEARLY",
+      config.STRIPE_PRICE_ID_YEARLY,
+      errors,
+    );
   }
 
   if (config.ANALYTICS_MODE === "posthog") {
@@ -182,7 +209,7 @@ function parseConfigFromEnvironment(): Config {
   if (!parsedEnv.success) {
     console.error(
       "Invalid environment variables:",
-      parsedEnv.error.flatten().fieldErrors
+      parsedEnv.error.flatten().fieldErrors,
     );
     throw new Error("Invalid environment variables");
   }

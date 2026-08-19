@@ -1,13 +1,22 @@
-// src/features/settings/utils/importer.ts
+// Shared by the browser preview and the server-side import fallback. Keeping
+// one parser makes both sides accept the same formats and produce the same
+// normalized records.
 
-export type ImportFormat =
-  | "myfitnesspal"
-  | "cronometer"
-  | "macrofactor"
-  | "loseit"
-  | "macrotrackr"
-  | "auto"
-  | "unknown";
+export const IMPORT_FORMATS = [
+  "myfitnesspal",
+  "cronometer",
+  "macrofactor",
+  "loseit",
+  "macrotrackr",
+  "auto",
+  "unknown",
+] as const;
+
+export type ImportFormat = (typeof IMPORT_FORMATS)[number];
+
+export function isImportFormat(value: unknown): value is ImportFormat {
+  return IMPORT_FORMATS.some((format) => format === value);
+}
 
 export interface ParsedMacroEntry {
   protein: number;
@@ -46,6 +55,30 @@ export interface ImportResult {
     };
   };
   errors?: string[];
+}
+
+type JsonRecord = Record<string, unknown>;
+
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function firstPresent(record: JsonRecord, keys: readonly string[]): unknown {
+  for (const key of keys) {
+    const value = record[key];
+    if (value) return value;
+  }
+
+  return undefined;
+}
+
+function firstArray(record: JsonRecord, keys: readonly string[]): unknown[] {
+  for (const key of keys) {
+    const value = record[key];
+    if (Array.isArray(value)) return value;
+  }
+
+  return [];
 }
 
 export function parseCsv(text: string): string[][] {
@@ -217,7 +250,10 @@ export function parseNumber(val: unknown, fallback = 0): number {
   }
   if (typeof val !== "string") return fallback;
 
-  const cleaned = val.replace(/,/g, "").replace(/[^\d.-]/g, "").trim();
+  const cleaned = val
+    .replace(/,/g, "")
+    .replace(/[^\d.-]/g, "")
+    .trim();
   const num = parseFloat(cleaned);
   return isNaN(num) ? fallback : Math.max(0, Math.round(num * 10) / 10);
 }
@@ -231,23 +267,25 @@ export function detectImportFormat(
   // 1. Check if JSON
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
     try {
-      const parsed = JSON.parse(trimmed);
-      if (
-        parsed.source === "macrotrackr" ||
-        parsed.version === "1.0" ||
-        (Array.isArray(parsed) && parsed[0]?.mealType)
-      ) {
+      const parsed: unknown = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return "macrotrackr";
+      }
+
+      if (!isJsonRecord(parsed)) return "unknown";
+
+      if (parsed.source === "macrotrackr" || parsed.version === "1.0") {
         return "macrotrackr";
       }
       if (
         parsed.source === "macrofactor" ||
-        parsed.foods ||
-        parsed.weights ||
-        parsed.macrofactor
+        Array.isArray(parsed.foods) ||
+        Array.isArray(parsed.weights) ||
+        parsed.macrofactor !== undefined
       ) {
         return "macrofactor";
       }
-      if (Array.isArray(parsed.entries) || Array.isArray(parsed)) {
+      if (Array.isArray(parsed.entries)) {
         return "macrotrackr";
       }
     } catch {
@@ -348,7 +386,9 @@ function computeSummary(
 
   const sortedDates = Array.from(dates).sort();
   const dateRange =
-    sortedDates.length > 0 && sortedDates[0] && sortedDates[sortedDates.length - 1]
+    sortedDates.length > 0 &&
+    sortedDates[0] &&
+    sortedDates[sortedDates.length - 1]
       ? {
           start: sortedDates[0],
           end: sortedDates[sortedDates.length - 1]!,
@@ -388,7 +428,7 @@ export function parseImportFile(
   // Try JSON first if format is JSON or content starts with { or [
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
     try {
-      const parsed = JSON.parse(trimmed);
+      const parsed: unknown = JSON.parse(trimmed);
       return parseJsonImport(parsed, format);
     } catch {
       // fallback to CSV
@@ -398,60 +438,65 @@ export function parseImportFile(
   return parseCsvImport(content, format);
 }
 
-function parseJsonImport(parsed: any, format: ImportFormat): ImportResult {
+function parseJsonImport(parsed: unknown, format: ImportFormat): ImportResult {
   const entries: ParsedMacroEntry[] = [];
   const weightLogs: ParsedWeightLog[] = [];
-  const errors: string[] = [];
 
   // MacroTrackr JSON structure or top-level array
   const rawEntries = Array.isArray(parsed)
     ? parsed
-    : parsed.entries || parsed.foods || parsed.nutrition || parsed.meals || [];
+    : isJsonRecord(parsed)
+      ? firstArray(parsed, ["entries", "foods", "nutrition", "meals"])
+      : [];
 
-  const rawWeights = parsed.weightLogs || parsed.weights || parsed.weight || [];
+  const rawWeights = isJsonRecord(parsed)
+    ? firstArray(parsed, ["weightLogs", "weights", "weight"])
+    : [];
 
-  if (Array.isArray(rawEntries)) {
-    for (const item of rawEntries) {
-      const entryDate = normalizeDate(item.entryDate || item.date || item.day);
-      if (!entryDate) continue;
+  for (const item of rawEntries) {
+    if (!isJsonRecord(item)) continue;
 
-      const protein = parseNumber(item.protein);
-      const carbs = parseNumber(item.carbs ?? item.carbohydrates);
-      const fats = parseNumber(item.fats ?? item.fat);
-      const mealType = normalizeMealType(
-        item.mealType || item.meal || item.type || item.group,
-      );
-      const mealName = String(
-        item.mealName || item.name || item.foodName || item.title || "",
-      ).trim();
-      const entryTime = normalizeTime(item.entryTime || item.time, mealType);
-      const ingredients = Array.isArray(item.ingredients)
-        ? item.ingredients
-        : undefined;
+    const entryDate = normalizeDate(
+      firstPresent(item, ["entryDate", "date", "day"]),
+    );
+    if (!entryDate) continue;
 
-      entries.push({
-        protein,
-        carbs,
-        fats,
-        mealType,
-        mealName: mealName || undefined,
-        entryDate,
-        entryTime,
-        ingredients,
-      });
-    }
+    const protein = parseNumber(item.protein);
+    const carbs = parseNumber(item.carbs ?? item.carbohydrates);
+    const fats = parseNumber(item.fats ?? item.fat);
+    const mealType = normalizeMealType(
+      firstPresent(item, ["mealType", "meal", "type", "group"]),
+    );
+    const mealName = String(
+      firstPresent(item, ["mealName", "name", "foodName", "title"]) ?? "",
+    ).trim();
+    const entryTime = normalizeTime(
+      firstPresent(item, ["entryTime", "time"]),
+      mealType,
+    );
+    const ingredients = Array.isArray(item.ingredients)
+      ? item.ingredients
+      : undefined;
+
+    entries.push({
+      protein,
+      carbs,
+      fats,
+      mealType,
+      mealName: mealName || undefined,
+      entryDate,
+      entryTime,
+      ingredients,
+    });
   }
 
-  if (Array.isArray(rawWeights)) {
-    for (const item of rawWeights) {
-      const ts = normalizeDate(item.timestamp || item.date);
-      const w = parseNumber(item.weight || item.value);
-      if (ts && w > 0) {
-        weightLogs.push({
-          timestamp: ts,
-          weight: w,
-        });
-      }
+  for (const item of rawWeights) {
+    if (!isJsonRecord(item)) continue;
+
+    const timestamp = normalizeDate(firstPresent(item, ["timestamp", "date"]));
+    const weight = parseNumber(firstPresent(item, ["weight", "value"]));
+    if (timestamp && weight > 0) {
+      weightLogs.push({ timestamp, weight });
     }
   }
 
@@ -460,7 +505,6 @@ function parseJsonImport(parsed: any, format: ImportFormat): ImportResult {
     entries,
     weightLogs,
     summary: computeSummary(entries, weightLogs),
-    errors: errors.length > 0 ? errors : undefined,
   };
 }
 
@@ -515,22 +559,36 @@ function parseCsvImport(content: string, format: ImportFormat): ImportResult {
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    if (!row || row.length === 0 || row.every((cell) => cell.trim() === "")) continue;
+    if (!row || row.length === 0 || row.every((cell) => cell.trim() === ""))
+      continue;
 
-    const rawDate = dateIdx !== -1 && row[dateIdx] !== undefined ? row[dateIdx] : undefined;
+    const rawDate =
+      dateIdx !== -1 && row[dateIdx] !== undefined ? row[dateIdx] : undefined;
     const entryDate = normalizeDate(rawDate);
     if (!entryDate) continue;
 
-    const rawMeal = mealIdx !== -1 && row[mealIdx] !== undefined ? row[mealIdx] : undefined;
+    const rawMeal =
+      mealIdx !== -1 && row[mealIdx] !== undefined ? row[mealIdx] : undefined;
     const mealType = normalizeMealType(rawMeal);
 
-    const mealName = (nameIdx !== -1 && row[nameIdx] !== undefined ? row[nameIdx] : "") || rawMeal || "";
-    const rawTime = timeIdx !== -1 && row[timeIdx] !== undefined ? row[timeIdx] : undefined;
+    const mealName =
+      (nameIdx !== -1 && row[nameIdx] !== undefined ? row[nameIdx] : "") ||
+      rawMeal ||
+      "";
+    const rawTime =
+      timeIdx !== -1 && row[timeIdx] !== undefined ? row[timeIdx] : undefined;
     const entryTime = normalizeTime(rawTime, mealType);
 
-    const protein = proteinIdx !== -1 && row[proteinIdx] !== undefined ? parseNumber(row[proteinIdx]) : 0;
-    const carbs = carbsIdx !== -1 && row[carbsIdx] !== undefined ? parseNumber(row[carbsIdx]) : 0;
-    const fats = fatIdx !== -1 && row[fatIdx] !== undefined ? parseNumber(row[fatIdx]) : 0;
+    const protein =
+      proteinIdx !== -1 && row[proteinIdx] !== undefined
+        ? parseNumber(row[proteinIdx])
+        : 0;
+    const carbs =
+      carbsIdx !== -1 && row[carbsIdx] !== undefined
+        ? parseNumber(row[carbsIdx])
+        : 0;
+    const fats =
+      fatIdx !== -1 && row[fatIdx] !== undefined ? parseNumber(row[fatIdx]) : 0;
 
     // Check if row is purely a weight log entry
     if (weightIdx !== -1 && row[weightIdx]) {

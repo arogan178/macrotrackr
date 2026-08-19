@@ -1,6 +1,7 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 
 import { AwardIcon, CheckCircleIcon, Modal } from "@/components/ui";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -17,6 +18,20 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
   featureName = "Pro",
   description = "Upgrade to Pro to unlock these powerful features:",
 }) => {
+  const productAnalytics = useProductAnalytics();
+
+  useEffect(() => {
+    if (!open) return;
+
+    productAnalytics.capture({
+      event: "paywall_viewed",
+      properties: {
+        featureName,
+        surface: "upgrade_modal",
+      },
+    });
+  }, [featureName, open, productAnalytics]);
+
   if (!open) return;
 
   const proFeatures = [

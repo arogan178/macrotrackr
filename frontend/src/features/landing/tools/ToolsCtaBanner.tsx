@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 
 import { getButtonClasses } from "@/components/ui/Button";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import { GITHUB_REPO_URL } from "@/utils/appConstants";
 
 interface ToolsCtaBannerProps {
@@ -24,6 +25,8 @@ interface ToolsCtaBannerProps {
  * it is an exit, so it drops to a quiet text link.
  */
 function ToolsCtaBanner({ heading, body, result }: ToolsCtaBannerProps) {
+  const productAnalytics = useProductAnalytics();
+
   return (
     <section className="mt-12 overflow-hidden rounded-card border border-border bg-surface text-center">
       {result ? (
@@ -49,6 +52,15 @@ function ToolsCtaBanner({ heading, body, result }: ToolsCtaBannerProps) {
           <Link
             to="/register"
             search={{ returnTo: undefined }}
+            onClick={() =>
+              productAnalytics.capture({
+                event: "landing_cta_clicked",
+                properties: {
+                  destination: "register",
+                  source: "tools_banner",
+                },
+              })
+            }
             className={getButtonClasses("primary", "lg", false, "px-6")}
           >
             {result ? "Start tracking against it" : "Start tracking free"}

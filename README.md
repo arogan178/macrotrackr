@@ -1,8 +1,17 @@
 # MacroTrackr
 
-MacroTrackr is an AGPLv3 nutrition and macro tracking application designed for self-hosting.
+MacroTrackr is a privacy-respecting macro tracker you can use as a managed app or run on your own infrastructure. Log meals, set macro goals, follow weight trends, and import history from popular nutrition trackers without being locked into one host.
 
-The backend uses SQLite with local authentication and billing disabled by default.
+[Use MacroTrackr](https://macrotrackr.com/register) · [Try the free calculators](https://macrotrackr.com/tools) · [View pricing](https://macrotrackr.com/pricing) · [Self-host](docs/self-hosting.md)
+
+## Why MacroTrackr
+
+- Start fresh or import existing tracking history.
+- Keep everyday logging focused on macros instead of unnecessary complexity.
+- Use the managed service for convenience or self-host the AGPLv3 code with local authentication.
+- Keep self-hosted analytics and billing disabled by default.
+
+The self-hosted backend uses SQLite with local authentication. Managed hosting infrastructure is maintained separately.
 
 ## License
 

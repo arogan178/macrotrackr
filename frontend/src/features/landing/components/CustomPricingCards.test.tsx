@@ -1,40 +1,37 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 import CustomPricingCards from "./CustomPricingCards";
 
-let authMode: "clerk" | "local" = "clerk";
-
-vi.mock("@/config/runtime", () => ({
-  get isLocalAuthMode() {
-    return authMode === "local";
-  },
+const mocks = vi.hoisted(() => ({
+  authMode: "clerk" as "clerk" | "local",
+  capture: vi.fn(),
+  navigate: vi.fn(),
 }));
 
-const navigateMock = vi.fn();
+vi.mock("@/hooks/useEntitlements", () => ({
+  useEntitlements: () => ({
+    hasPaidPlan: mocks.authMode === "local",
+  }),
+}));
 
 vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => navigateMock,
+  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock("@/hooks/auth/useAuthState", () => ({
   useAppAuthState: vi.fn(),
 }));
 
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
-
-vi.mock("@/store/store", () => ({
-  useStore: (selector: (state: { subscriptionStatus: string }) => unknown) =>
-    selector({ subscriptionStatus: "free" }),
+vi.mock("@/lib/productAnalytics", () => ({
+  useProductAnalytics: () => ({ capture: mocks.capture }),
 }));
 
 describe("CustomPricingCards", () => {
   beforeEach(() => {
-    authMode = "clerk";
+    mocks.authMode = "clerk";
     vi.clearAllMocks();
     vi.mocked(useAppAuthState).mockReturnValue({
       isLoaded: true,
@@ -43,7 +40,7 @@ describe("CustomPricingCards", () => {
   });
 
   it("renders in local mode without Clerk provider", () => {
-    authMode = "local";
+    mocks.authMode = "local";
 
     render(<CustomPricingCards showUpgradeButtons={false} />);
 
@@ -53,6 +50,28 @@ describe("CustomPricingCards", () => {
     expect(
       screen.getByRole("button", { name: /current plan/i }),
     ).toBeInTheDocument();
-    expect(navigateMock).not.toHaveBeenCalled();
+    expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+
+  it("shows the discount implied by the configured prices", () => {
+    render(<CustomPricingCards showUpgradeButtons={false} />);
+
+    expect(screen.getByText("Save 37%")).toBeInTheDocument();
+  });
+
+  it("captures the free pricing call to action", () => {
+    render(<CustomPricingCards showUpgradeButtons={false} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /create free account/i }),
+    );
+
+    expect(mocks.capture).toHaveBeenCalledWith({
+      event: "landing_cta_clicked",
+      properties: {
+        destination: "register",
+        source: "pricing_free",
+      },
+    });
   });
 });

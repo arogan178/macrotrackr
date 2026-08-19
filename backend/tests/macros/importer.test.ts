@@ -6,7 +6,7 @@ import {
   normalizeTime,
   parseCsv,
   parseImportFile,
-} from "../../src/modules/macros/importer";
+} from "@shared/importer";
 
 describe("Importer CSV Tokenizer and Normalizers", () => {
   it("parses CSV with quoted strings containing commas and newlines", () => {
@@ -14,7 +14,12 @@ describe("Importer CSV Tokenizer and Normalizers", () => {
     const rows = parseCsv(csv);
     expect(rows.length).toBe(2);
     expect(rows[0]).toEqual(["Date", "Meal", "Food, Name", "Calories"]);
-    expect(rows[1]).toEqual(["2026-05-01", "Breakfast", "Oatmeal, rolled", "300"]);
+    expect(rows[1]).toEqual([
+      "2026-05-01",
+      "Breakfast",
+      "Oatmeal, rolled",
+      "300",
+    ]);
   });
 
   it("normalizes various date formats to YYYY-MM-DD", () => {
@@ -172,5 +177,20 @@ describe("Format Auto-detection & Parsing", () => {
     expect(result.entries.length).toBe(1);
     expect(result.weightLogs.length).toBe(1);
     expect(result.entries[0].mealName).toBe("Salmon Bowl");
+  });
+
+  it("skips malformed JSON records instead of trusting external data", () => {
+    const result = parseImportFile(
+      JSON.stringify({
+        entries: [null, "invalid", { date: "2026-06-06", protein: 20 }],
+        weightLogs: [false, { date: "2026-06-06", weight: 75 }],
+      }),
+    );
+
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0]?.entryTime).toBe("15:00:00");
+    expect(result.weightLogs).toEqual([
+      { timestamp: "2026-06-06", weight: 75 },
+    ]);
   });
 });

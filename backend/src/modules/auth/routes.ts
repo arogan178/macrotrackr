@@ -31,6 +31,7 @@ import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { emailService } from "../../services/email-service";
 import { generateId } from "../../utils/id-generator";
 import { getConfig } from "../../config";
+import { captureProductEvent } from "../../lib/analytics/product-analytics";
 import { AuthSchemas } from "./schemas";
 
 interface ClerkUserRecord {
@@ -40,7 +41,9 @@ interface ClerkUserRecord {
   lastName?: string;
 }
 
-function getPrimaryClerkEmail(user: ClerkUserRecord | undefined): string | undefined {
+function getPrimaryClerkEmail(
+  user: ClerkUserRecord | undefined,
+): string | undefined {
   if (!user?.emailAddresses || user.emailAddresses.length === 0) {
     return undefined;
   }
@@ -138,7 +141,10 @@ type ChangePasswordRequestBody = {
 
 const SESSION_SLIDING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-function setSessionCookie(context: { set: { headers?: unknown } }, token: string): void {
+function setSessionCookie(
+  context: { set: { headers?: unknown } },
+  token: string,
+): void {
   const headers = (context.set.headers ?? {}) as Record<string, string>;
   headers["Set-Cookie"] = createSessionCookieValue(token);
   context.set.headers = headers;
@@ -162,7 +168,10 @@ function hashResetToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-function createPasswordResetTokenPair(): { rawToken: string; tokenHash: string } {
+function createPasswordResetTokenPair(): {
+  rawToken: string;
+  tokenHash: string;
+} {
   const rawToken = randomBytes(32).toString("base64url");
   return {
     rawToken,
@@ -236,7 +245,9 @@ export const authRoutes = (app: Elysia) =>
             [email],
           );
           if (existing) {
-            throw new ConflictError("An account with this email already exists.");
+            throw new ConflictError(
+              "An account with this email already exists.",
+            );
           }
 
           const passwordHash = await hashPassword(body.password);
@@ -245,7 +256,12 @@ export const authRoutes = (app: Elysia) =>
             const result = safeExecute(
               db,
               "INSERT INTO users (email, first_name, last_name, password) VALUES (?, ?, ?, ?)",
-              [email, body.firstName.trim(), body.lastName.trim(), passwordHash],
+              [
+                email,
+                body.firstName.trim(),
+                body.lastName.trim(),
+                passwordHash,
+              ],
             );
             const insertedId = Number(result.lastInsertRowid);
 
@@ -321,11 +337,17 @@ export const authRoutes = (app: Elysia) =>
 
           if (!user || !userHasLocalCredential(user)) {
             // Mitigate timing attack by always executing a hash comparison
-            await verifyPassword(body.password, "$2b$10$w8.1tL.aW1jX2KkG5XoFmOUB41yM8s0d7dK6A9dK6A9dK6A9dK6A9");
+            await verifyPassword(
+              body.password,
+              "$2b$10$w8.1tL.aW1jX2KkG5XoFmOUB41yM8s0d7dK6A9dK6A9dK6A9dK6A9",
+            );
             throw new AuthenticationError("Invalid email or password.");
           }
 
-          const validPassword = await verifyPassword(body.password, user.password);
+          const validPassword = await verifyPassword(
+            body.password,
+            user.password,
+          );
           if (!validPassword) {
             throw new AuthenticationError("Invalid email or password.");
           }
@@ -361,10 +383,14 @@ export const authRoutes = (app: Elysia) =>
         "/logout",
         async (context) => {
           const { db } = context as unknown as AuthRouteContext;
-          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          const auth = assertLocalRouteAccess(
+            context as unknown as AuthRouteContext,
+          );
           if (!auth.sessionId || !auth.userId) {
             context.set.status = 401;
-            throw new AuthenticationError("Authentication required. Please sign in.");
+            throw new AuthenticationError(
+              "Authentication required. Please sign in.",
+            );
           }
 
           deleteSession(db, auth.sessionId);
@@ -387,10 +413,14 @@ export const authRoutes = (app: Elysia) =>
         "/logout-all",
         async (context) => {
           const { db } = context as unknown as AuthRouteContext;
-          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          const auth = assertLocalRouteAccess(
+            context as unknown as AuthRouteContext,
+          );
           if (!auth.userId || !auth.sessionId) {
             context.set.status = 401;
-            throw new AuthenticationError("Authentication required. Please sign in.");
+            throw new AuthenticationError(
+              "Authentication required. Please sign in.",
+            );
           }
 
           deleteAllUserSessions(db, auth.userId);
@@ -555,22 +585,25 @@ export const authRoutes = (app: Elysia) =>
           );
 
           if (!tokenRecord || tokenRecord.used_at) {
-            throw new AuthenticationError("Invalid or expired password reset token.");
+            throw new AuthenticationError(
+              "Invalid or expired password reset token.",
+            );
           }
 
           const expiresAt = new Date(tokenRecord.expires_at);
           if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
-            throw new AuthenticationError("Invalid or expired password reset token.");
+            throw new AuthenticationError(
+              "Invalid or expired password reset token.",
+            );
           }
 
           const newPasswordHash = await hashPassword(body.newPassword);
 
           withTransaction(db, () => {
-            safeExecute(
-              db,
-              "UPDATE users SET password = ? WHERE id = ?",
-              [newPasswordHash, tokenRecord.user_id],
-            );
+            safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
+              newPasswordHash,
+              tokenRecord.user_id,
+            ]);
             safeExecute(
               db,
               "UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -604,10 +637,14 @@ export const authRoutes = (app: Elysia) =>
               body: ChangePasswordRequestBody;
             };
 
-          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          const auth = assertLocalRouteAccess(
+            context as unknown as AuthRouteContext,
+          );
           if (!auth.userId || !auth.sessionId) {
             context.set.status = 401;
-            throw new AuthenticationError("Authentication required. Please sign in.");
+            throw new AuthenticationError(
+              "Authentication required. Please sign in.",
+            );
           }
 
           const userId = auth.userId;
@@ -622,7 +659,10 @@ export const authRoutes = (app: Elysia) =>
             throw new AuthenticationError("Current password is incorrect.");
           }
 
-          const validPassword = await verifyPassword(body.currentPassword, currentUser.password);
+          const validPassword = await verifyPassword(
+            body.currentPassword,
+            currentUser.password,
+          );
           if (!validPassword) {
             throw new AuthenticationError("Current password is incorrect.");
           }
@@ -630,7 +670,10 @@ export const authRoutes = (app: Elysia) =>
           const nextPasswordHash = await hashPassword(body.newPassword);
 
           withTransaction(db, () => {
-            safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [nextPasswordHash, userId]);
+            safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
+              nextPasswordHash,
+              userId,
+            ]);
             deleteAllUserSessions(db, userId);
           });
 
@@ -687,7 +730,8 @@ export const authRoutes = (app: Elysia) =>
 
           if (!email || !firstName || !lastName) {
             try {
-              const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
+              const clerkUser =
+                await clerkClient?.users?.getUser?.(clerkUserId);
               email = email ?? getPrimaryClerkEmail(clerkUser);
               firstName = firstName || (clerkUser?.firstName ?? "");
               lastName = lastName || (clerkUser?.lastName ?? "");
@@ -711,7 +755,9 @@ export const authRoutes = (app: Elysia) =>
             [clerkUserId],
           );
 
-          const existingByEmail = safeQuery<UserRow & { clerk_id: string | null; email: string }>(
+          const existingByEmail = safeQuery<
+            UserRow & { clerk_id: string | null; email: string }
+          >(
             db,
             "SELECT id, clerk_id, email FROM users WHERE LOWER(email) = LOWER(?)",
             [email],
@@ -721,7 +767,10 @@ export const authRoutes = (app: Elysia) =>
             const currentEmail = existingByClerkId.email;
             let emailToUpdate = email;
 
-            const emailOwner = safeQuery<{ id: number; clerk_id: string | null }>(
+            const emailOwner = safeQuery<{
+              id: number;
+              clerk_id: string | null;
+            }>(
               db,
               "SELECT id, clerk_id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
               [email, existingByClerkId.id],
@@ -734,7 +783,13 @@ export const authRoutes = (app: Elysia) =>
             safeExecute(
               db,
               "UPDATE users SET clerk_id = ?, email = ?, first_name = ?, last_name = ? WHERE id = ?",
-              [clerkUserId, emailToUpdate, firstName, lastName, existingByClerkId.id],
+              [
+                clerkUserId,
+                emailToUpdate,
+                firstName,
+                lastName,
+                existingByClerkId.id,
+              ],
             );
 
             return {
@@ -783,6 +838,12 @@ export const authRoutes = (app: Elysia) =>
             return { userId };
           });
 
+          void captureProductEvent({
+            distinctId: userData.userId,
+            event: "signup_completed",
+            properties: { authMethod: "clerk" },
+          });
+
           return {
             id: userData.userId,
             clerkId: clerkUserId,
@@ -795,7 +856,8 @@ export const authRoutes = (app: Elysia) =>
         {
           detail: {
             summary: "Sync Clerk user with database",
-            description: "Creates or updates a user in our database based on Clerk authentication",
+            description:
+              "Creates or updates a user in our database based on Clerk authentication",
             tags: ["Auth"],
           },
         },

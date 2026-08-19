@@ -2,8 +2,7 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import StateCard from "@/components/ui/StateCard";
-import { isLocalAuthMode } from "@/config/runtime";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { HabitGoal } from "@/types/habit";
 
 import HabitCard from "./HabitCard";
@@ -27,9 +26,8 @@ function HabitTracker({
   onEditHabit,
   onDeleteHabit,
 }: HabitTrackerProps) {
-  const { subscriptionStatus } = useSubscriptionStatus();
-  const isPro = isLocalAuthMode || subscriptionStatus === "pro";
-  const canAddHabit = isPro || habits.length < 2;
+  const { habitLimit } = useEntitlements();
+  const canAddHabit = habitLimit === null || habits.length < habitLimit;
 
   return (
     <CardContainer>
@@ -44,15 +42,23 @@ function HabitTracker({
           {/* Only show Add button in header if NOT showing empty state */}
           {onAddHabit && habits.length > 0 && (
             <div className={canAddHabit ? "" : "relative"}>
-              <ProFeature>
+              {canAddHabit ? (
                 <Button
                   variant="ghost"
                   onClick={onAddHabit}
-                  disabled={!canAddHabit}
                   text="Add Habit"
                   leftIcon={<PlusIcon />}
                 />
-              </ProFeature>
+              ) : (
+                <ProFeature>
+                  <Button
+                    variant="ghost"
+                    onClick={onAddHabit}
+                    text="Add Habit"
+                    leftIcon={<PlusIcon />}
+                  />
+                </ProFeature>
+              )}
             </div>
           )}
         </div>

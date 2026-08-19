@@ -48,6 +48,22 @@ describe("HabitTracker", () => {
     expect(getByRole("button", { name: /add habit/i })).toBeInTheDocument();
   });
 
+  it("lets free users add habits until the server's five-habit limit", () => {
+    const habits = Array.from({ length: 4 }, (_, index) => ({
+      ...baseHabit,
+      id: `h${index + 1}`,
+    }));
+
+    const { container, getByRole } = render(
+      <HabitTracker habits={habits} onAddHabit={() => undefined} />,
+    );
+
+    expect(getByRole("button", { name: /add habit/i })).toBeEnabled();
+    expect(
+      container.querySelector('[aria-label="Pro feature"]'),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders without crashing", () => {
     const { container } = render(<HabitTracker habits={[]} />);
     expect(container).toBeDefined();

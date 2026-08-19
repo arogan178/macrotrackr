@@ -115,6 +115,20 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   }));
   const [entryDate, setEntryDate] = useState<string>(loggedNow.date);
   const [entryTime, setEntryTime] = useState<string>(loggedNow.time);
+  const [isDateTimeExpanded, setIsDateTimeExpanded] = useState(false);
+  const [isDateTimeRendered, setIsDateTimeRendered] = useState(false);
+
+  const toggleDateTime = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    setIsDateTimeExpanded((open) => {
+      if (open) return false;
+
+      setIsDateTimeRendered(true);
+
+      return true;
+    });
+  }, []);
+
   const isLoggedNow =
     entryDate === loggedNow.date && entryTime === loggedNow.time;
 
@@ -585,26 +599,52 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
 
           {/* Date and time default to now and are rarely changed, so they stay
               out of the way until asked for. */}
-          <details className="mb-3.5 sm:mb-5 group">
-            <summary className="cursor-pointer list-none text-xs text-muted transition-colors hover:text-foreground">
+          <details
+            open={isDateTimeRendered}
+            onToggle={(event) => {
+              if (event.currentTarget.open && !isDateTimeExpanded) {
+                setIsDateTimeExpanded(true);
+              }
+            }}
+            className="mb-3.5 sm:mb-5 group"
+          >
+            <summary
+              onClick={toggleDateTime}
+              className="cursor-pointer list-none text-xs text-muted transition-colors hover:text-foreground select-none"
+            >
               Logged {isLoggedNow ? "now" : `${entryDate} at ${entryTime}`}
-              <span className="ml-1.5 underline decoration-border underline-offset-4 group-open:hidden">
+              <span
+                className={cn(
+                  "ml-1.5 underline decoration-border underline-offset-4",
+                  isDateTimeExpanded && "hidden",
+                )}
+              >
                 change
               </span>
             </summary>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
-              <DateField
-                label="Date"
-                value={entryDate}
-                onChange={setEntryDate}
-                required
-              />
-              <TimeField
-                label="Time"
-                value={entryTime}
-                onChange={setEntryTime}
-                required
-              />
+            <div
+              className="grid transition-[grid-template-rows] duration-200 ease-out"
+              style={{ gridTemplateRows: isDateTimeExpanded ? "1fr" : "0fr" }}
+              onTransitionEnd={() => {
+                if (!isDateTimeExpanded) setIsDateTimeRendered(false);
+              }}
+            >
+              <div className="overflow-hidden">
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
+                  <DateField
+                    label="Date"
+                    value={entryDate}
+                    onChange={setEntryDate}
+                    required
+                  />
+                  <TimeField
+                    label="Time"
+                    value={entryTime}
+                    onChange={setEntryTime}
+                    required
+                  />
+                </div>
+              </div>
             </div>
           </details>
 

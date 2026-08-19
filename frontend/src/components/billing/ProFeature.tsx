@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 
-import { isLocalAuthMode } from "@/config/runtime";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useEntitlements } from "@/hooks/useEntitlements";
 
 import ProBadge from "./ProBadge";
 import UpgradeModal from "./UpgradeModal";
@@ -9,9 +8,8 @@ import UpgradeModal from "./UpgradeModal";
 export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { subscriptionStatus } = useSubscriptionStatus();
+  const { hasProAccess } = useEntitlements();
   const [modalOpen, setModalOpen] = React.useState(false);
-  const hasProAccess = isLocalAuthMode || subscriptionStatus === "pro";
 
   if (hasProAccess) return children;
 

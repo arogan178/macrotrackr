@@ -6,7 +6,10 @@ function resolveAuthMode(rawValue: string | undefined): AuthMode {
   return rawValue === "clerk" ? "clerk" : "local";
 }
 
-function resolveBillingMode(rawValue: string | undefined, authMode: AuthMode): BillingMode {
+function resolveBillingMode(
+  rawValue: string | undefined,
+  authMode: AuthMode,
+): BillingMode {
   if (rawValue === "disabled") {
     return "disabled";
   }
@@ -18,21 +21,26 @@ function resolveBillingMode(rawValue: string | undefined, authMode: AuthMode): B
   return "managed";
 }
 
-function resolveAnalyticsMode(rawValue: string | undefined, authMode: AuthMode): AnalyticsMode {
-  if (rawValue === "posthog") {
-    return "posthog";
-  }
-
+export function resolveAnalyticsMode(
+  rawValue: string | undefined,
+  authMode: AuthMode,
+): AnalyticsMode {
   if (authMode === "local") {
     return "disabled";
   }
 
-  return "disabled";
+  return rawValue === "posthog" ? "posthog" : "disabled";
 }
 
 const authMode = resolveAuthMode(import.meta.env.VITE_AUTH_MODE);
-const billingMode = resolveBillingMode(import.meta.env.VITE_BILLING_MODE, authMode);
-const analyticsMode = resolveAnalyticsMode(import.meta.env.VITE_ANALYTICS_MODE, authMode);
+const billingMode = resolveBillingMode(
+  import.meta.env.VITE_BILLING_MODE,
+  authMode,
+);
+const analyticsMode = resolveAnalyticsMode(
+  import.meta.env.VITE_ANALYTICS_MODE,
+  authMode,
+);
 
 export const runtimeConfig = {
   AUTH_MODE: authMode,
