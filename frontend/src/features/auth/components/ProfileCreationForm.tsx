@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { useAuth, useUser } from "@clerk/react";
+import {
+  isSwitchingSource,
+  SWITCHING_SOURCE_OPTIONS,
+  type SwitchingSource,
+} from "@shared/product-analytics";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
@@ -91,6 +96,9 @@ export function ProfileCreationForm() {
   // Goal data
   const [weightGoal, setWeightGoal] = useState<WeightGoalChoice | "">("");
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
+  const [switchingSource, setSwitchingSource] = useState<
+    Exclude<SwitchingSource, "unknown"> | ""
+  >("");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -110,7 +118,12 @@ export function ProfileCreationForm() {
   };
 
   const validateGoalStep = (): Record<string, string> => {
-    const newErrors = checkGoalStep(weightGoal, targetWeight, weight);
+    const newErrors = {
+      ...checkGoalStep(weightGoal, targetWeight, weight),
+      ...(switchingSource
+        ? {}
+        : { switchingSource: "Choose the option that fits best" }),
+    };
     setErrors(newErrors);
 
     return newErrors;
@@ -208,11 +221,12 @@ export function ProfileCreationForm() {
         weight: weight ?? undefined,
         gender,
         activityLevel: activityLevel ?? undefined,
+        switchingSource: switchingSource || undefined,
       });
 
       // Step 3: Record the weight goal so the dashboard opens with a real
       // calorie target instead of falling back to bare TDEE. A failure here
-      // must not strand the user mid-onboarding — the goal is editable later.
+      // must not strand the user mid-onboarding. The goal is editable later.
       if (goalCalculations) {
         try {
           await goalsApi.createWeightGoal({
@@ -276,9 +290,7 @@ export function ProfileCreationForm() {
       <div className="space-y-6">
         <StepIndicator step={1} />
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground">
-            About you
-          </h2>
+          <h2 className="text-2xl font-bold text-foreground">About you</h2>
           <p className="mt-2 text-muted">
             Hi {displayName} — these details set your calorie baseline.
           </p>
@@ -444,6 +456,31 @@ export function ProfileCreationForm() {
       </div>
 
       <div className="space-y-4">
+        <div>
+          <Dropdown
+            label="What are you switching from?"
+            value={switchingSource}
+            onChange={(value: string | number) => {
+              const source = String(value);
+              setSwitchingSource(
+                isSwitchingSource(source) && source !== "unknown" ? source : "",
+              );
+              if (errors.switchingSource) {
+                setErrors((previous) => ({
+                  ...previous,
+                  switchingSource: "",
+                }));
+              }
+            }}
+            options={[
+              { value: "", label: "Choose one" },
+              ...SWITCHING_SOURCE_OPTIONS,
+            ]}
+            required
+          />
+          <FieldError message={errors.switchingSource} />
+        </div>
+
         <div
           className="grid grid-cols-1 gap-2 sm:grid-cols-3"
           role="radiogroup"

@@ -68,6 +68,15 @@ const BaseEnvSchema = z.object({
 
   POSTHOG_KEY: z.string().optional(),
   POSTHOG_HOST: z.string().url("POSTHOG_HOST must be a valid URL").optional(),
+  ANALYTICS_INTERNAL_EMAILS: z
+    .string()
+    .default("")
+    .transform((value) =>
+      value
+        .split(",")
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean),
+    ),
 
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().optional(),

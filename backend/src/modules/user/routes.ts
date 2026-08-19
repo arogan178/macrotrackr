@@ -19,6 +19,10 @@ import { loggerHelpers, logger } from "../../lib/observability/logger";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { getConfig } from "../../config";
 import { captureProductEvent } from "../../lib/analytics/product-analytics";
+import {
+  resolveAnalyticsTrafficType,
+  type SwitchingSource,
+} from "@shared/product-analytics";
 
 type UserRouteContext = AuthenticatedRouteContextWithUser<
   Record<string, unknown>
@@ -46,6 +50,7 @@ interface UserDetailsResult {
   weight: number | null;
   gender: "male" | "female" | null;
   activity_level: number | null;
+  switching_source: SwitchingSource | null;
 }
 
 function normalizeSubscriptionStatus(
@@ -93,7 +98,8 @@ export const userRoutes = (app: Elysia) =>
               db,
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                     u.subscription_status,
-                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
+                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
+                      ud.switching_source
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
                WHERE u.id = ?
@@ -116,6 +122,11 @@ export const userRoutes = (app: Elysia) =>
               weight: dbResult.weight,
               gender: dbResult.gender,
               activityLevel: dbResult.activity_level,
+              switchingSource: dbResult.switching_source ?? null,
+              analyticsTrafficType: resolveAnalyticsTrafficType(
+                dbResult.email,
+                getConfig().ANALYTICS_INTERNAL_EMAILS,
+              ),
               isProfileComplete: !!dbResult.date_of_birth,
               subscription: {
                 status: normalizeSubscriptionStatus(
@@ -351,14 +362,21 @@ export const userRoutes = (app: Elysia) =>
               },
             );
 
-            const { dateOfBirth, height, weight, gender, activityLevel } =
-              body as {
-                dateOfBirth?: string;
-                height?: number;
-                weight?: number;
-                gender?: "male" | "female";
-                activityLevel?: number;
-              };
+            const {
+              dateOfBirth,
+              height,
+              weight,
+              gender,
+              activityLevel,
+              switchingSource,
+            } = body as {
+              dateOfBirth?: string;
+              height?: number;
+              weight?: number;
+              gender?: "male" | "female";
+              activityLevel?: number;
+              switchingSource?: SwitchingSource;
+            };
 
             const { profileCompleted, response } = await withTransactionAsync(
               db,
@@ -375,15 +393,16 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   `INSERT INTO user_details (
-                   user_id, date_of_birth, height, weight, gender, activity_level, updated_at
+                   user_id, date_of_birth, height, weight, gender, activity_level, switching_source, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(user_id) DO UPDATE SET
                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
                    height = COALESCE(excluded.height, user_details.height),
                    weight = COALESCE(excluded.weight, user_details.weight),
                    gender = COALESCE(excluded.gender, user_details.gender),
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
+                   switching_source = COALESCE(excluded.switching_source, user_details.switching_source),
                    updated_at = CURRENT_TIMESTAMP`,
                   [
                     internalUserId,
@@ -392,6 +411,7 @@ export const userRoutes = (app: Elysia) =>
                     nullify(weight),
                     nullify(gender),
                     nullify(activityLevel),
+                    nullify(switchingSource),
                   ],
                 );
 
@@ -431,7 +451,7 @@ export const userRoutes = (app: Elysia) =>
               void captureProductEvent({
                 distinctId: internalUserId,
                 event: "profile_completed",
-                properties: {},
+                properties: { switchingSource: switchingSource ?? "unknown" },
               });
             }
 

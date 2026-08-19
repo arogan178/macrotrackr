@@ -1,0 +1,94 @@
+name: Growth Health
+
+concurrency:
+  group: growth-health
+  cancel-in-progress: false
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      run_canary:
+        description: Run the managed UI journey before the report
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    if: vars.GROWTH_REPORT_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Capture 30-day customer baseline
+        env:
+          POSTHOG_API_HOST: https://eu.posthog.com
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          POSTHOG_PROJECT_ID: "83196"
+        run: |
+          bun run growth:report --days 30 | tee growth-report.txt
+          {
+            echo '## 30-day customer growth report'
+            echo '```text'
+            cat growth-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload baseline
+        uses: actions/upload-artifact@v6
+        with:
+          name: growth-report-${{ github.run_id }}
+          path: growth-report.txt
+          retention-days: 90
+
+  managed-canary:
+    if: >-
+      vars.GROWTH_CANARY_ENABLED == 'true' &&
+      (github.event_name == 'schedule' || inputs.run_canary)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install browser
+        run: bunx playwright install --with-deps chromium
+
+      - name: Drive managed growth journey
+        env:
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.GROWTH_CANARY_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.GROWTH_CANARY_CLERK_SECRET_KEY }}
+          GROWTH_CANARY_EMAIL_DOMAIN: ${{ secrets.GROWTH_CANARY_EMAIL_DOMAIN }}
+          GROWTH_CANARY_USER_PASSWORD: ${{ secrets.GROWTH_CANARY_USER_PASSWORD }}
+          FRONTEND_URL: https://macrotrackr.com
+          GROWTH_CANARY: "true"
+          POSTHOG_API_HOST: https://eu.posthog.com
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          POSTHOG_PROJECT_ID: "83196"
+        run: bun run test:growth-canary
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: growth-canary-${{ github.run_id }}
+          path: frontend/test-results/growth-canary/
+          if-no-files-found: warn
+          retention-days: 30

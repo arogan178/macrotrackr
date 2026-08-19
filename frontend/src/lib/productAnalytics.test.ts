@@ -41,7 +41,7 @@ describe("createBrowserProductAnalytics", () => {
     expect(capture).toHaveBeenCalledWith("signup_started", {
       app_mode: "managed",
       auth_method: "email",
-      schema_version: 1,
+      schema_version: 2,
       source: "pricing",
     });
   });

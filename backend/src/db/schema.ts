@@ -28,6 +28,7 @@ const SCHEMA_SQL = `
             weight REAL,
             gender TEXT CHECK(gender IN ('male', 'female')),
             activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5),
+            switching_source TEXT CHECK(switching_source IN ('cronometer', 'loseit', 'macrofactor', 'myfitnesspal', 'new_to_tracking', 'other', 'spreadsheet', 'unknown')),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -169,25 +170,23 @@ function checkAndAddColumn(
   tableName: string,
   columnName: string,
   columnDefinition: string,
-  updateLogic?: string
+  updateLogic?: string,
 ) {
   const columnExists = db
     .prepare(
-      `SELECT COUNT(*) as count FROM pragma_table_info(?) WHERE name = ?`
+      `SELECT COUNT(*) as count FROM pragma_table_info(?) WHERE name = ?`,
     )
     .get(tableName, columnName) as { count: number };
 
   if (columnExists.count === 0) {
-    logger.info(
-      `    Adding column '${columnName}' to table '${tableName}'...`
-    );
+    logger.info(`    Adding column '${columnName}' to table '${tableName}'...`);
     try {
       db.exec(
-        `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`
+        `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`,
       );
       if (updateLogic) {
         logger.info(
-          `       Running update logic for new column '${columnName}'...`
+          `       Running update logic for new column '${columnName}'...`,
         );
         db.exec(updateLogic);
       }
@@ -199,7 +198,7 @@ function checkAndAddColumn(
           tableName,
           columnName,
         },
-        `Failed to add column '${columnName}' to '${tableName}'`
+        `Failed to add column '${columnName}' to '${tableName}'`,
       );
     }
   }
@@ -212,9 +211,15 @@ function applyMigrations(db: Database) {
   checkAndAddColumn(db, "users", "clerk_id", "TEXT");
   checkAndAddColumn(
     db,
+    "user_details",
+    "switching_source",
+    "TEXT CHECK(switching_source IN ('cronometer', 'loseit', 'macrofactor', 'myfitnesspal', 'new_to_tracking', 'other', 'spreadsheet', 'unknown'))",
+  );
+  checkAndAddColumn(
+    db,
     "macro_entries",
     "meal_type",
-    "TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack'))"
+    "TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack'))",
   );
   checkAndAddColumn(db, "macro_entries", "meal_name", "TEXT DEFAULT ''");
   checkAndAddColumn(
@@ -222,14 +227,14 @@ function applyMigrations(db: Database) {
     "macro_entries",
     "entry_date",
     "TEXT",
-    "UPDATE macro_entries SET entry_date = DATE(created_at) WHERE entry_date IS NULL"
+    "UPDATE macro_entries SET entry_date = DATE(created_at) WHERE entry_date IS NULL",
   );
   checkAndAddColumn(
     db,
     "macro_entries",
     "entry_time",
     "TEXT",
-    "UPDATE macro_entries SET entry_time = '12:00:00' WHERE entry_time IS NULL"
+    "UPDATE macro_entries SET entry_time = '12:00:00' WHERE entry_time IS NULL",
   );
 
   // Apply subscription-related column additions to users table
@@ -237,9 +242,14 @@ function applyMigrations(db: Database) {
     db,
     "users",
     "subscription_status",
-    "subscription_status TEXT DEFAULT 'free'"
+    "subscription_status TEXT DEFAULT 'free'",
   );
-  checkAndAddColumn(db, "users", "stripe_customer_id", "stripe_customer_id TEXT");
+  checkAndAddColumn(
+    db,
+    "users",
+    "stripe_customer_id",
+    "stripe_customer_id TEXT",
+  );
   checkAndAddColumn(db, "users", "updated_at", "updated_at DATETIME");
   // Backfill updated_at for existing rows
   try {
@@ -263,16 +273,20 @@ function applyMigrations(db: Database) {
   // Habits migration
   try {
     const habitsCreate = db
-      .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'habits'")
+      .prepare(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'habits'",
+      )
       .get() as { sql?: string } | undefined;
 
     const hasOldCheck =
       habitsCreate?.sql?.includes(
-        "accent_color TEXT CHECK(accent_color IN ('indigo', 'blue', 'green', 'purple'))"
+        "accent_color TEXT CHECK(accent_color IN ('indigo', 'blue', 'green', 'purple'))",
       ) ?? false;
 
     if (hasOldCheck) {
-      logger.info("    Migrating habits table to remove accent_color CHECK constraint...");
+      logger.info(
+        "    Migrating habits table to remove accent_color CHECK constraint...",
+      );
       db.exec("BEGIN IMMEDIATE TRANSACTION;");
       db.exec(`
         CREATE TABLE IF NOT EXISTS habits_new (
@@ -303,7 +317,10 @@ function applyMigrations(db: Database) {
       logger.info("    habits table migrated successfully.");
     }
   } catch (error) {
-    logger.error({ error }, "    Failed migrating habits table; continuing with initialization");
+    logger.error(
+      { error },
+      "    Failed migrating habits table; continuing with initialization",
+    );
     try {
       db.exec("ROLLBACK;");
     } catch {
@@ -318,38 +335,94 @@ function applyMigrations(db: Database) {
 
 function createIndexes(db: Database) {
   logger.info("    Creating indexes...");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)",
+  );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
-  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)");
+  db.exec(
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)",
+  );
   db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)",
+  );
 
   logger.info("    Creating compound performance indexes...");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_meal ON macro_entries(user_id, entry_date, meal_type)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_desc ON macro_entries(user_id, entry_date DESC, created_at DESC)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp_desc ON weight_log(user_id, timestamp DESC)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_complete ON habits(user_id, is_complete)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_created ON habits(user_id, created_at DESC)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)");
-  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash)");
-  db.exec("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at)");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_meal ON macro_entries(user_id, entry_date, meal_type)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_desc ON macro_entries(user_id, entry_date DESC, created_at DESC)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp_desc ON weight_log(user_id, timestamp DESC)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_complete ON habits(user_id, is_complete)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_created ON habits(user_id, created_at DESC)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)",
+  );
+  db.exec(
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash)",
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at)",
+  );
 }
 
 /**

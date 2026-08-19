@@ -31,6 +31,8 @@ export default function PostHogUserSync(): undefined {
             last_name: user.lastName,
             subscription_status: user.subscription.status,
             created_at: user.createdAt,
+            traffic_type: user.analyticsTrafficType,
+            switching_source: user.switchingSource ?? "unknown",
           });
         } catch (error) {
           // Don't throw in UI if analytics fails

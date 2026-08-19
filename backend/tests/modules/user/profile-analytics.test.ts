@@ -44,7 +44,10 @@ function createApp() {
 async function completeProfile(app: ReturnType<typeof createApp>) {
   return app.handle(
     new Request("http://localhost/api/user/complete-profile", {
-      body: JSON.stringify({ dateOfBirth: "1990-01-01" }),
+      body: JSON.stringify({
+        dateOfBirth: "1990-01-01",
+        switchingSource: "cronometer",
+      }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     }),
@@ -71,8 +74,13 @@ describe("profile completion analytics", () => {
     expect(captureProductEventMock).toHaveBeenCalledWith({
       distinctId: 7,
       event: "profile_completed",
-      properties: {},
+      properties: { switchingSource: "cronometer" },
     });
+    expect(safeExecuteMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining("switching_source"),
+      expect.arrayContaining(["cronometer"]),
+    );
   });
 
   it("does not recapture an already complete profile", async () => {
