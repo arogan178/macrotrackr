@@ -147,6 +147,17 @@
   );
 }
 
+/* Signed in on a phone there is no top bar — MobileTabBar carries navigation —
+   so pages must not reserve a band for a header that is not rendered. Set on
+   the MainLayout root by the authenticated branch. */
+@media (width < 48rem) {
+  .app-shell-headerless {
+    --header-offset: calc(1rem + var(--sat));
+    /* Toasts cleared a bar that is no longer there. */
+    --floating-notification-top: calc(1rem + var(--sat));
+  }
+}
+
 .safe-area-pt {
   padding-top: var(--sat);
 }
