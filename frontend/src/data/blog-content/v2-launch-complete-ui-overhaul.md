@@ -1,5 +1,3 @@
-# MacroTrackr v2.0: Faster Search, Better Editing, Cleaner Reporting
-
 MacroTrackr v2.0 is the release where the app starts feeling coherent from search to logging to review.
 
 This version is less about one flashy feature and more about removing the small trust-breaking moments that make tracking feel clumsy: search results that feel noisy, quick-add flows that linger after you have already made a choice, grouped meals that are hard to edit confidently, and reporting screens that feel more assembled than designed.

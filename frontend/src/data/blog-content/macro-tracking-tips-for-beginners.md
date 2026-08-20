@@ -1,5 +1,3 @@
-# The Beginner's Guide to Macro Tracking: Start Simple, Stay Consistent
-
 Macro tracking can feel overwhelming at first. The numbers, the ratios, the fear of getting it "wrong". It is enough to make many people quit before they start seeing results.
 
 But here's the truth: you don't need to be perfect. You need to be consistent.

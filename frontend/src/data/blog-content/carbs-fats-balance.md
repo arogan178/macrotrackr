@@ -1,5 +1,3 @@
-# Carbs vs. Fats: Finding Your Optimal Balance for Performance and Body Composition
-
 The internet loves a good macro war.
 
 Team Keto says carbs are the enemy. Team High-Carb says fat is outdated. Meanwhile, the average person just wants to know: *How much of each should I actually eat?*

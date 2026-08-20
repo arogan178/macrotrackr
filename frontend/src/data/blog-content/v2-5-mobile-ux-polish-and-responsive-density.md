@@ -1,5 +1,3 @@
-# MacroTrackr v2.5: Compact Mobile Layouts, Sleeker Navigation, and Search Improvements
-
 MacroTrackr v2.5 delivers a major mobile UX upgrade, reducing vertical scrolling by up to 50% across key screens, refining form inputs, polishing navigation, and ensuring seamless infrastructure routing.
 
 ## What's New in v2.5

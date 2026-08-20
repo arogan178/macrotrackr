@@ -1,5 +1,3 @@
-# How to Estimate Restaurant Meals Without Guessing Blind
-
 Restaurant meals are one of the first places people give up on tracking.
 
 That is understandable. You did not cook the meal, you cannot see every ingredient, and the menu description usually hides the things that matter most: oils, sauces, butter, dressings, and portion sizes that are much larger than they look in a quick glance.
