@@ -68,6 +68,28 @@ describe("BarcodeScannerModal", () => {
     });
   });
 
+  it("falls back to manual entry when the browser has no BarcodeDetector", async () => {
+    // Safari/iOS: getUserMedia exists but there is nothing to decode frames with.
+    const getUserMedia = vi.fn();
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      mediaDevices: { getUserMedia },
+    });
+
+    render(
+      <BarcodeScannerModal isOpen onClose={vi.fn()} onProductFound={vi.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/cannot scan barcodes/i)).toBeInTheDocument();
+    });
+    // The camera is never opened, so no preview streams that could not scan.
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(screen.getByLabelText(/barcode number/i)).toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+  });
+
   it("shows error status when barcode is not found", async () => {
     (macrosApi.getByBarcode as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 

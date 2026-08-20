@@ -12,6 +12,27 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/classnameUtilities";
 
+interface BarcodeDetectorLike {
+  detect(
+    source: HTMLVideoElement | ImageBitmap | HTMLCanvasElement
+  ): Promise<Array<{ rawValue: string }>>;
+}
+
+type BarcodeDetectorConstructor = new (options?: { formats: string[] }) => BarcodeDetectorLike;
+
+/**
+ * Safari (iOS, and therefore every browser on iOS) ships no BarcodeDetector, so
+ * there is nothing to decode frames with. Opening the camera anyway would show a
+ * live preview that silently never scans, so we check first and say so instead.
+ */
+const getBarcodeDetectorConstructor = (): BarcodeDetectorConstructor | null => {
+  if (typeof window === "undefined") return null;
+
+  return (
+    (window as unknown as { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector ?? null
+  );
+};
+
 interface BarcodeScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -94,6 +115,17 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
       return;
     }
 
+    const BarcodeDetectorConstructor = getBarcodeDetectorConstructor();
+    if (!BarcodeDetectorConstructor) {
+      setHasCamera(false);
+      setMode("manual");
+      setErrorMessage(
+        "This browser cannot scan barcodes (Safari and every iOS browser lack the detector). Enter the barcode numbers below instead."
+      );
+
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -112,35 +144,24 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         await videoRef.current.play().catch(() => {});
       }
 
-      // Check if native BarcodeDetector is available
-      const WindowWithBarcode = window as unknown as {
-        BarcodeDetector?: {
-          new (options?: { formats: string[] }): {
-            detect(source: HTMLVideoElement | ImageBitmap | HTMLCanvasElement): Promise<Array<{ rawValue: string }>>;
-          };
-        };
-      };
+      const barcodeDetector = new BarcodeDetectorConstructor({
+        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
+      });
 
-      if (WindowWithBarcode.BarcodeDetector) {
-        const barcodeDetector = new WindowWithBarcode.BarcodeDetector({
-          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
-        });
-
-        scanIntervalRef.current = window.setInterval(async () => {
-          if (!videoRef.current || videoRef.current.readyState < 2 || isLookupInProgressRef.current) {
-            return;
+      scanIntervalRef.current = window.setInterval(async () => {
+        if (!videoRef.current || videoRef.current.readyState < 2 || isLookupInProgressRef.current) {
+          return;
+        }
+        try {
+          const barcodes = await barcodeDetector.detect(videoRef.current);
+          if (barcodes && barcodes.length > 0 && barcodes[0]?.rawValue) {
+            const detected = barcodes[0].rawValue;
+            handleLookup(detected);
           }
-          try {
-            const barcodes = await barcodeDetector.detect(videoRef.current);
-            if (barcodes && barcodes.length > 0 && barcodes[0]?.rawValue) {
-              const detected = barcodes[0].rawValue;
-              handleLookup(detected);
-            }
-          } catch {
-            // Ignore detection errors in animation loop
-          }
-        }, 300);
-      }
+        } catch {
+          // Ignore detection errors in animation loop
+        }
+      }, 300);
     } catch {
       setHasCamera(false);
       setMode("manual");
