@@ -64,7 +64,11 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className={`min-h-screen bg-background text-foreground ${
+        isAuthenticated ? "app-shell-headerless" : ""
+      }`}
+    >
       {/* One instance for the app, rather than a full-viewport mix-blend-overlay
           that re-mounts on every navigation. */}
       <PageBackground />
@@ -74,7 +78,14 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       >
         Skip to content
       </a>
-      {isAuthenticated && <AppHeader mode="app" />}
+      {/* Phone-sized, the app header held nothing but the wordmark: its nav is
+          `hidden md:flex` and MobileTabBar already carries all four
+          destinations. Hidden rather than removed so the desktop bar stays. */}
+      {isAuthenticated && (
+        <div className="hidden md:block">
+          <AppHeader mode="app" />
+        </div>
+      )}
       <main
         id="main-content"
         className={`relative min-h-screen ${

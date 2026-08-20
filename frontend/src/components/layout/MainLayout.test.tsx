@@ -73,6 +73,25 @@ describe("MainLayout", () => {
     );
   });
 
+  it("keeps the app header off phone viewports, where it held only the wordmark", () => {
+    render(<MainLayout>
+      <div />
+    </MainLayout>);
+
+    expect(screen.getByTestId("app-navbar").parentElement).toHaveClass(
+      "hidden",
+      "md:block",
+    );
+  });
+
+  it("drops the header offset on phones, so nothing reserves a band for it", () => {
+    const { container } = render(<MainLayout>
+      <div />
+    </MainLayout>);
+
+    expect(container.firstElementChild).toHaveClass("app-shell-headerless");
+  });
+
   it("gives the signed-in app a bottom tab bar for the four destinations", () => {
     render(<MainLayout>
       <div />
