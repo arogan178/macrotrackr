@@ -1,5 +1,3 @@
-# The Complete Guide to Protein Intake: How Much, What Kind, and When
-
 Protein is the most discussed macronutrient in fitness, and for good reason. It's the building block of muscle, essential for recovery, and the most satiating nutrient you can eat.
 
 But walk into any gym or scroll through fitness forums and you'll hear conflicting advice:

@@ -1,5 +1,3 @@
-# Why Weekly Averages Beat Perfect Days
-
 A lot of macro tracking frustration comes from treating each day like a verdict.
 
 If breakfast goes off plan, the day feels ruined. If dinner runs heavy, the week feels lost. If Saturday is social, Sunday suddenly becomes a punishment day. That pattern is emotionally intense and analytically weak.

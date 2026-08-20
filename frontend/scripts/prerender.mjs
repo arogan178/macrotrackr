@@ -185,6 +185,38 @@ try {
   console.warn("Could not read blog-posts.json:", e.message);
 }
 
+// Render post bodies with the same markdown pipeline as BlogArticlePage, so
+// crawlers get the article instead of just the excerpt. Loaded lazily because
+// the script also runs in fixtures that have no node_modules.
+let renderMarkdownBody = () => "";
+
+if (blogPosts.length > 0) {
+  const [React, { renderToStaticMarkup }, { default: ReactMarkdown }, { default: remarkGfm }, { default: rehypeSlug }, { default: rehypeAutolinkHeadings }] =
+    await Promise.all([
+      import("react").then((m) => m.default ?? m),
+      import("react-dom/server"),
+      import("react-markdown"),
+      import("remark-gfm"),
+      import("rehype-slug"),
+      import("rehype-autolink-headings"),
+    ]);
+
+  renderMarkdownBody = (slug) => {
+    const mdPath = path.join(srcDir, "data/blog-content", `${slug}.md`);
+    if (!fs.existsSync(mdPath)) return "";
+    return renderToStaticMarkup(
+      React.createElement(
+        ReactMarkdown,
+        {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
+        },
+        fs.readFileSync(mdPath, "utf8")
+      )
+    );
+  };
+}
+
 // Build all pages to pre-render
 const pages = [
   {
@@ -425,6 +457,7 @@ for (const post of blogPosts) {
         <h1>${post.title}</h1>
         <p>Published on ${post.date} by ${post.author || APP_NAME}</p>
         <p>${post.excerpt}</p>
+        <article>${renderMarkdownBody(post.slug)}</article>
       </main>
     `,
   });
