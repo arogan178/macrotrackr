@@ -31,7 +31,13 @@ android {
             if (System.getenv("KEYSTORE_FILE") != null) {
                 signingConfig signingConfigs.release
             }
+            // Keep rules for R8 are already written in proguard-rules.pro.
+            // Flipping this to true needs a signed build smoke-tested on a
+            // device first — R8 breakage in a Capacitor app shows up at
+            // runtime as a silently missing plugin, never at build time.
+            // See docs/android-release-build.md.
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
