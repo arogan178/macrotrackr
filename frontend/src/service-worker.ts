@@ -25,13 +25,6 @@ interface ServiceWorkerRuntime {
       type: "message",
       listener: (event: { data?: { type?: string } }) => void,
     ): void;
-    (
-      type: "fetch",
-      listener: (event: {
-        request: Request;
-        respondWith: (response: Promise<Response> | Response) => void;
-      }) => void,
-    ): void;
   };
   clients: {
     matchAll: () => Promise<Array<{ postMessage: (message: { type: string }) => void }>>;
@@ -59,7 +52,7 @@ const sw = globalThis as unknown as ServiceWorkerRuntime;
 const injectedManifest = globalThis.__WB_MANIFEST;
 precacheAndRoute(injectedManifest);
 
-// Serve the cached shell for any navigation the precache does not match.
+// The precached shell answers a navigation only when the network does not.
 //
 // `_redirects` gives the SPA fallback (`/* /index.html 200`), but that is the
 // host's job and the host needs the network. Offline, `precacheAndRoute` only
@@ -67,10 +60,43 @@ precacheAndRoute(injectedManifest);
 // cold launch at `start_url` worked and a refresh on /home or /goals did not.
 // The API routes are excluded: those should fail as requests rather than be
 // answered with an HTML document.
+//
+// Network first, though, because Permissions-Policy and CSP travel on the
+// document response: answering a navigation from the precache pins both to
+// whatever the server sent when the shell was captured. That is how
+// `camera=()` outlived the deploy that changed it to `camera=(self)` — an
+// installed app went on serving its captured shell, so getUserMedia stayed
+// blocked by policy and the scanner reported the camera as denied, with no
+// site setting able to grant it back. A header-only deploy has to be able to
+// reach an installed app; nginx already marks /index.html `no-store` on the
+// same reasoning.
+const precachedShell = createHandlerBoundToURL("index.html");
+
+// Without a bound, a cold launch on a bad connection waits on the document for
+// as long as the network takes to give up. The shell is already on disk.
+const SHELL_NETWORK_TIMEOUT_MS = 3000;
+
 registerRoute(
-  new NavigationRoute(createHandlerBoundToURL("index.html"), {
-    denylist: [/^\/api\//],
-  }),
+  new NavigationRoute(
+    async (options) => {
+      try {
+        const response = await Promise.race([
+          fetch(options.request),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error("shell network timeout")), SHELL_NETWORK_TIMEOUT_MS);
+          }),
+        ]);
+
+        // A 5xx or a captive-portal redirect is not a shell. Prefer the real one.
+        if (response.ok) return response;
+      } catch {
+        // Offline, or slower than it is worth waiting for.
+      }
+
+      return precachedShell(options);
+    },
+    { denylist: [/^\/api\//] },
+  ),
 );
 
 sw.addEventListener("activate", (event) => {
@@ -96,14 +122,6 @@ sw.addEventListener("activate", (event) => {
   );
 });
 
-// SPA navigations: precacheAndRoute only matches precached URLs, so offline a
-// refresh worked at / and nowhere else - /home, /goals and every article
-// 404'd. The _redirects SPA fallback lives on the server and needs the
-// network, which is exactly what is missing. Serve the precached shell for any
-// navigation instead, and let the router take it from there.
-sw.addEventListener("fetch", (event) => {
-  if (event.request.mode !== "navigate") return;
-});
 
 // Handle messages from the main thread
 sw.addEventListener("message", (event) => {
