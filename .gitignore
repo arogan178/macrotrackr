@@ -73,3 +73,7 @@ ui-polish-plan.html
 
 # Local founder operating plan
 docs/growth-analytics.md
+
+# Marketing/reference captures: derived artefacts, regenerate with
+# backend/scripts/seed-demo.ts + frontend/scripts/capture-device.mjs
+assets/
