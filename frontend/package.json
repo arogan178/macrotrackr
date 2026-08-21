@@ -26,6 +26,7 @@
     "build:analyze": "bunx vite build --mode analyze",
     "bundle:size": "node scripts/analyze-bundle.js",
     "ui:budgets": "node ./scripts/check-ui-budgets.mjs",
+    "verify:assetlinks": "node ./scripts/check-assetlinks.mjs",
     "release:blog": "node ./scripts/release-note-to-blog.mjs"
   },
   "dependencies": {
