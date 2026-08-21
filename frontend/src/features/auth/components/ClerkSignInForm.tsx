@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
 import {
@@ -110,6 +111,7 @@ export function ClerkSignInForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [enableBiometrics, setEnableBiometrics] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [isEmailMode, setIsEmailMode] = useState(false);
@@ -159,7 +161,10 @@ export function ClerkSignInForm({
     }
 
     await setActive({ session: createdSessionId });
-    await saveBiometricCredentials(email.trim().toLowerCase(), password);
+    // Only store the password when the user explicitly opted in
+    if (enableBiometrics && password) {
+      await saveBiometricCredentials(email.trim().toLowerCase(), password);
+    }
     showNotification("Signed in successfully!", "success");
     navigate({
       to: "/auth-ready",
@@ -683,6 +688,11 @@ export function ClerkSignInForm({
                       placeholder="••••••••"
                       name="password"
                       autoComplete="current-password"
+                    />
+
+                    <BiometricOptInCheckbox
+                      checked={enableBiometrics}
+                      onChange={setEnableBiometrics}
                     />
 
                     <div className="flex justify-end">

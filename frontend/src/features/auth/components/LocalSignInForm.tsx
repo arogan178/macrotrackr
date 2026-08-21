@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { authApi } from "@/api/auth";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { queryKeys } from "@/lib/queryKeys";
@@ -26,6 +27,7 @@ export function LocalSignInForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [enableBiometrics, setEnableBiometrics] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
 
@@ -42,8 +44,11 @@ export function LocalSignInForm({
       await queryClient.invalidateQueries({
         queryKey: queryKeys.auth.session(),
       });
-      // Save credentials for Biometric sign-in on future app launches
-      await saveBiometricCredentials(normalizedEmail, password);
+      // Save credentials for Biometric sign-in on future app launches,
+      // only when the user explicitly opted in
+      if (enableBiometrics) {
+        await saveBiometricCredentials(normalizedEmail, password);
+      }
       showNotification("Signed in successfully!", "success");
 
       const destination = normalizeAuthRedirect(redirectTo);
@@ -122,6 +127,11 @@ export function LocalSignInForm({
           placeholder="••••••••"
           name="password"
           autoComplete="current-password"
+        />
+
+        <BiometricOptInCheckbox
+          checked={enableBiometrics}
+          onChange={setEnableBiometrics}
         />
 
         <div className="flex justify-end">

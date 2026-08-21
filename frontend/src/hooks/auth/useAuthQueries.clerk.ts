@@ -8,6 +8,7 @@ import { userApi, type UserDetailsResponse } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
+import { clearBiometricCredentials } from "@/services/biometrics";
 import { removeToken } from "@/utils/tokenStorage";
 
 interface ResetPasswordData {
@@ -64,6 +65,8 @@ export function useLogout() {
       // Remove token from storage
       removeToken();
       apiClient.setAuthToken(null);
+      // Drop any opt-in biometric credentials from the KeyStore/Keychain
+      await clearBiometricCredentials();
 
       // Sign out from Clerk to clear session cookies
       await signOut();
