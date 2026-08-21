@@ -61,6 +61,21 @@ const BaseEnvSchema = z.object({
   STRIPE_PRICE_ID_MONTHLY: z.string().optional(),
   STRIPE_PRICE_ID_YEARLY: z.string().optional(),
 
+  // Google Play billing. Independent of BILLING_MODE on purpose: the web app
+  // can sell through Stripe with no Android build in the world, and a Play
+  // release needs its own switch.
+  PLAY_BILLING_MODE: z.enum(["enabled", "disabled"]).default("disabled"),
+  GOOGLE_PLAY_PACKAGE_NAME: z.string().optional(),
+  // Service account JSON, as a single-line string. Needs the
+  // androidpublisher scope and Financial data access in the Play Console.
+  GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  // Shared secret in the Pub/Sub push endpoint URL. Pub/Sub cannot sign its
+  // payloads the way Stripe does, so the secret in the path is what proves
+  // the request came from our subscription.
+  GOOGLE_PLAY_RTDN_SECRET: z.string().optional(),
+  GOOGLE_PLAY_PRODUCT_ID_MONTHLY: z.string().optional(),
+  GOOGLE_PLAY_PRODUCT_ID_YEARLY: z.string().optional(),
+
   RESEND_API_KEY: z.string().optional(),
   CLERK_PUBLISHABLE_KEY: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
@@ -170,6 +185,34 @@ function validateProviderRequirements(
     requireValue(
       "STRIPE_PRICE_ID_YEARLY",
       config.STRIPE_PRICE_ID_YEARLY,
+      errors,
+    );
+  }
+
+  if (config.PLAY_BILLING_MODE === "enabled") {
+    requireValue(
+      "GOOGLE_PLAY_PACKAGE_NAME",
+      config.GOOGLE_PLAY_PACKAGE_NAME,
+      errors,
+    );
+    requireValue(
+      "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+      config.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON,
+      errors,
+    );
+    requireValue(
+      "GOOGLE_PLAY_RTDN_SECRET",
+      config.GOOGLE_PLAY_RTDN_SECRET,
+      errors,
+    );
+    requireValue(
+      "GOOGLE_PLAY_PRODUCT_ID_MONTHLY",
+      config.GOOGLE_PLAY_PRODUCT_ID_MONTHLY,
+      errors,
+    );
+    requireValue(
+      "GOOGLE_PLAY_PRODUCT_ID_YEARLY",
+      config.GOOGLE_PLAY_PRODUCT_ID_YEARLY,
       errors,
     );
   }

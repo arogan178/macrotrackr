@@ -39,8 +39,8 @@ describe("clerk-guards", () => {
       expect(FREE_TIER_LIMITS.MAX_HABITS).toBe(5);
     });
 
-    it("should have DATA_RETENTION_DAYS defined as 60", () => {
-      expect(FREE_TIER_LIMITS.DATA_RETENTION_DAYS).toBe(60);
+    it("should have FREE_VISIBLE_HISTORY_DAYS defined as 7", () => {
+      expect(FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS).toBe(7);
     });
 
     it("should have MAX_SAVED_MEALS defined as 5", () => {

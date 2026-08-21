@@ -1,0 +1,6 @@
+<!-- Release builds never speak cleartext, regardless of what library
+     manifests merge in (capacitor-cordova-android-plugins sets
+     usesCleartextTraffic="true"). Debug builds keep Capacitor's default. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="false" />
+</manifest>

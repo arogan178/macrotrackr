@@ -18,7 +18,11 @@ import { logger } from "./lib/observability/logger";
 
 // Import route modules
 import { authRoutes, clerkWebhookHandler } from "./modules/auth";
-import { billingRoutes, webhookHandler } from "./modules/billing";
+import {
+  billingRoutes,
+  webhookHandler,
+  playWebhookHandler,
+} from "./modules/billing";
 import { goalRoutes } from "./modules/goals";
 import { habitRoutes } from "./modules/habits";
 import { macroRoutes } from "./modules/macros";
@@ -36,6 +40,10 @@ function isClerkAuthMode(): boolean {
 
 function isManagedBillingMode(): boolean {
   return config.BILLING_MODE === "managed";
+}
+
+function isPlayBillingEnabled(): boolean {
+  return config.PLAY_BILLING_MODE === "enabled";
 }
 
 interface TimingContext {
@@ -250,6 +258,13 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
   if (withManagedBilling) {
     // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
     core.use(webhookHandler);
+  }
+
+  if (isPlayBillingEnabled()) {
+    // Play notifications have their own switch: an Android release does not
+    // require Stripe to be configured, and mounting this under the Stripe
+    // flag would silently drop every renewal and cancellation.
+    core.use(playWebhookHandler);
   }
 
   if (withClerk) {

@@ -10,6 +10,8 @@ interface ImportMetaEnvironment {
 	readonly VITE_AUTH_MODE?: "clerk" | "local";
 	readonly VITE_BILLING_MODE?: "managed" | "disabled";
 	readonly VITE_ANALYTICS_MODE?: "posthog" | "disabled";
+	readonly VITE_GOOGLE_PLAY_PRODUCT_ID_MONTHLY?: string;
+	readonly VITE_GOOGLE_PLAY_PRODUCT_ID_YEARLY?: string;
 	readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 	readonly VITE_PUBLIC_POSTHOG_KEY?: string;
 	readonly VITE_PUBLIC_POSTHOG_HOST?: string;

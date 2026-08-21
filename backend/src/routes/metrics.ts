@@ -35,8 +35,8 @@ function isDiagnosticsAuthorized(request: Request): boolean {
 export const metricsRoutes = new Elysia()
   .get("/metrics", ({ request, set }) => {
     // The registry exposes the full route inventory and traffic volumes.
-    // Require the diagnostics key whenever one is configured.
-    if (config.METRICS_API_KEY?.trim() && !isDiagnosticsAuthorized(request)) {
+    // Deny unless the diagnostics key is configured and presented.
+    if (!isDiagnosticsAuthorized(request)) {
       set.status = 403;
       return {
         code: "FORBIDDEN",

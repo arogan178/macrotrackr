@@ -8,12 +8,20 @@ import { NotFoundError } from "../../lib/http/errors";
 import { generateId } from "../../utils/id-generator";
 import { handleServiceError } from "../../lib/http/error-handler";
 import type { CacheService } from "../../services/cache-service";
+import type { BillingProvider } from "@shared/entitlements";
+
+export type ProviderSubscriptionStatus =
+  | "active"
+  | "canceled"
+  | "past_due"
+  | "unpaid";
 
 export interface SubscriptionRecord {
   id: string;
   user_id: number;
-  stripe_subscription_id: string;
-  status: "active" | "canceled" | "past_due" | "unpaid";
+  provider: BillingProvider;
+  provider_subscription_id: string;
+  status: ProviderSubscriptionStatus;
   current_period_end: string;
   created_at: string;
   updated_at: string;
@@ -67,8 +75,9 @@ export class SubscriptionService {
    */
   static async upsertSubscription(
     userId: number,
-    stripeSubscriptionId: string,
-    status: "active" | "canceled" | "past_due" | "unpaid",
+    provider: BillingProvider,
+    providerSubscriptionId: string,
+    status: ProviderSubscriptionStatus,
     currentPeriodEnd: string
   ): Promise<SubscriptionRecord> {
     const db = getDb();
@@ -76,22 +85,23 @@ export class SubscriptionService {
       try {
         const existing = safeQuery<SubscriptionRecord>(
           db,
-          "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
-          [stripeSubscriptionId]
+          "SELECT * FROM subscriptions WHERE provider = ? AND provider_subscription_id = ?",
+          [provider, providerSubscriptionId]
         );
         if (existing) {
           safeExecute(
             db,
             `UPDATE subscriptions 
              SET status = ?, current_period_end = ?, updated_at = CURRENT_TIMESTAMP 
-             WHERE stripe_subscription_id = ?`,
-            [status, currentPeriodEnd, stripeSubscriptionId]
+             WHERE provider = ? AND provider_subscription_id = ?`,
+            [status, currentPeriodEnd, provider, providerSubscriptionId]
           );
           logger.info(
             {
               operation: "update_subscription",
               userId,
-              subscriptionId: stripeSubscriptionId,
+              provider,
+              subscriptionId: providerSubscriptionId,
               status,
             },
             "Updated subscription record"
@@ -100,12 +110,13 @@ export class SubscriptionService {
           const subscriptionId = generateId();
           safeExecute(
             db,
-            `INSERT INTO subscriptions (id, user_id, stripe_subscription_id, status, current_period_end)
-             VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO subscriptions (id, user_id, provider, provider_subscription_id, status, current_period_end)
+             VALUES (?, ?, ?, ?, ?, ?)`,
             [
               subscriptionId,
               userId,
-              stripeSubscriptionId,
+              provider,
+              providerSubscriptionId,
               status,
               currentPeriodEnd,
             ]
@@ -114,7 +125,8 @@ export class SubscriptionService {
             {
               operation: "create_subscription",
               userId,
-              subscriptionId: stripeSubscriptionId,
+              provider,
+              subscriptionId: providerSubscriptionId,
               status,
             },
             "Created subscription record"
@@ -131,8 +143,8 @@ export class SubscriptionService {
         );
         const updated = safeQuery<SubscriptionRecord>(
           db,
-          "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
-          [stripeSubscriptionId]
+          "SELECT * FROM subscriptions WHERE provider = ? AND provider_subscription_id = ?",
+          [provider, providerSubscriptionId]
         );
         if (!updated) {
           throw new NotFoundError("Failed to retrieve updated subscription");
@@ -142,7 +154,7 @@ export class SubscriptionService {
         handleServiceError(
           error,
           "upsert_subscription",
-          { userId, subscriptionId: stripeSubscriptionId },
+          { userId, provider, subscriptionId: providerSubscriptionId },
           [NotFoundError]
         );
       }
@@ -184,8 +196,11 @@ export class SubscriptionService {
 
       // Use cache for Stripe details if available
       let cacheKey: string | undefined = undefined;
-      if (subscription?.stripe_subscription_id) {
-        cacheKey = `stripe-details:${subscription.stripe_subscription_id}`;
+      if (
+        subscription?.provider === "stripe" &&
+        subscription.provider_subscription_id
+      ) {
+        cacheKey = `stripe-details:${subscription.provider_subscription_id}`;
         const cached = cacheService.get<CachedStripeDetails>(cacheKey);
         if (cached) {
           price = cached.price;
@@ -196,7 +211,7 @@ export class SubscriptionService {
             const details = await (
               await import("./stripe-service")
             ).StripeService.getSubscriptionWithDetails(
-              subscription.stripe_subscription_id
+              subscription.provider_subscription_id
             );
             price = details.price;
             paymentMethod = details.paymentMethod ?? undefined;
@@ -266,7 +281,8 @@ export class SubscriptionService {
    */
   static async cancelSubscription(
     userId: number,
-    stripeSubscriptionId: string
+    provider: BillingProvider,
+    providerSubscriptionId: string
   ): Promise<void> {
     const db = getDb();
     return withTransaction(db, () => {
@@ -275,8 +291,8 @@ export class SubscriptionService {
           db,
           `UPDATE subscriptions 
            SET status = 'canceled', updated_at = CURRENT_TIMESTAMP 
-           WHERE user_id = ? AND stripe_subscription_id = ?`,
-          [userId, stripeSubscriptionId]
+           WHERE user_id = ? AND provider = ? AND provider_subscription_id = ?`,
+          [userId, provider, providerSubscriptionId]
         );
         if (result.changes === 0) {
           throw new NotFoundError("Subscription not found");
@@ -290,7 +306,8 @@ export class SubscriptionService {
           {
             operation: "cancel_subscription",
             userId,
-            subscriptionId: stripeSubscriptionId,
+            provider,
+              subscriptionId: providerSubscriptionId,
           },
           "Canceled user subscription"
         );
@@ -298,11 +315,133 @@ export class SubscriptionService {
         handleServiceError(
           error,
           "cancel_subscription",
-          { userId, subscriptionId: stripeSubscriptionId },
+          { userId, provider, subscriptionId: providerSubscriptionId },
           [NotFoundError]
         );
       }
     });
+  }
+
+  /**
+   * The opaque token this account presents to Google Play at purchase time.
+   *
+   * Play echoes it back on every notification about that purchase, which is
+   * what lets an expiry or cancellation find its account even if the app never
+   * reached /play/verify. Random rather than derived from the user id, so it
+   * carries nothing about the account and cannot be guessed from one.
+   *
+   * Created on first use and stable afterwards, because a rotating value would
+   * orphan purchases made under the old one.
+   */
+  static async getOrCreatePlayAccountToken(userId: number): Promise<string> {
+    const db = getDb();
+    try {
+      const existing = safeQuery<{ play_obfuscated_account_id: string | null }>(
+        db,
+        "SELECT play_obfuscated_account_id FROM users WHERE id = ?",
+        [userId]
+      );
+
+      if (!existing) {
+        throw new NotFoundError("User not found");
+      }
+
+      if (existing.play_obfuscated_account_id) {
+        return existing.play_obfuscated_account_id;
+      }
+
+      // 24 bytes as hex is 48 characters, inside Play's 64 character limit.
+      const bytes = new Uint8Array(24);
+      crypto.getRandomValues(bytes);
+      const token = [...bytes]
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      safeExecute(
+        db,
+        `UPDATE users SET play_obfuscated_account_id = ?, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ? AND play_obfuscated_account_id IS NULL`,
+        [token, userId]
+      );
+
+      // Re-read rather than returning the generated value: a concurrent call
+      // may have won, and both callers must end up with the same token.
+      const stored = safeQuery<{ play_obfuscated_account_id: string | null }>(
+        db,
+        "SELECT play_obfuscated_account_id FROM users WHERE id = ?",
+        [userId]
+      );
+
+      if (!stored?.play_obfuscated_account_id) {
+        throw new NotFoundError("Could not assign a Play account token");
+      }
+
+      return stored.play_obfuscated_account_id;
+    } catch (error) {
+      handleServiceError(error, "get_or_create_play_account_token", { userId }, [
+        NotFoundError,
+      ]);
+    }
+  }
+
+  /**
+   * The account a Play notification belongs to, found by the token the app
+   * passed at purchase time.
+   */
+  static async findUserByPlayAccountToken(
+    accountToken: string
+  ): Promise<number | null> {
+    const db = getDb();
+    try {
+      const row = safeQuery<{ id: number }>(
+        db,
+        "SELECT id FROM users WHERE play_obfuscated_account_id = ?",
+        [accountToken]
+      );
+
+      return row?.id ?? null;
+    } catch (error) {
+      logger.error(
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          operation: "find_user_by_play_account_token",
+        },
+        "Failed to look up a user by Play account token"
+      );
+      return null;
+    }
+  }
+
+  /**
+   * The subscription currently paying for this account, whichever provider
+   * took the money. Used to stop someone buying Pro twice: if they already
+   * pay through Play, web checkout must refuse, and the other way round.
+   */
+  static async getActiveSubscription(
+    userId: number
+  ): Promise<SubscriptionRecord | null> {
+    const db = getDb();
+    try {
+      const subscription = safeQuery<SubscriptionRecord>(
+        db,
+        `SELECT * FROM subscriptions
+         WHERE user_id = ? AND status IN ('active', 'past_due')
+         ORDER BY created_at DESC LIMIT 1`,
+        [userId]
+      );
+
+      return subscription ?? null;
+    } catch (error) {
+      logger.error(
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          operation: "get_active_subscription",
+          userId,
+        },
+        "Failed to look up active subscription"
+      );
+      return null;
+    }
   }
 
   /**

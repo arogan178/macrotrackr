@@ -11,6 +11,19 @@ import {
 } from "@/components/ui";
 import { useStore } from "@/store/store";
 
+const PLAY_PACKAGE_NAME = "com.macrotrackr.app";
+
+/**
+ * Open the Play Store subscription screen. We store the purchase token rather
+ * than the SKU, so there is no sku to deep link with and the user lands on
+ * their subscription list filtered to this app.
+ */
+function openPlaySubscriptions() {
+  const url = new URL("https://play.google.com/store/account/subscriptions");
+  url.searchParams.set("package", PLAY_PACKAGE_NAME);
+  globalThis.open(url.toString(), "_blank", "noopener");
+}
+
 const ProBillingView: React.FC<{
   onManage: () => void;
   isLoading: boolean;
@@ -30,6 +43,10 @@ const ProBillingView: React.FC<{
       ).toLocaleDateString()
     : undefined;
   const status = billingDetails?.subscription?.status ?? "unknown";
+  // Google owns the billing relationship for Play purchases. The Stripe
+  // portal cannot show it and our cancel endpoint refuses it, so offering
+  // either button here would just produce an error the user cannot act on.
+  const isPlayBilled = billingDetails?.subscription?.provider === "play";
   const isCanceled = status === "canceled";
   const isActionRequired = status === "past_due" || status === "unpaid";
   const statusLabel =
@@ -122,30 +139,49 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          onClick={() => setShow(true)}
-          isLoading={isLoading}
-          loadingText="Opening Portal..."
-          fullWidth
-          variant="primary"
-          className={isActionRequired ? "animate-pulse" : ""}
-          leftIcon={<ExternalLinkIcon />}
-          ariaLabel="Manage your Pro subscription"
-        >
-          {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
-        </Button>
-        {!isCanceled && (
+      {isPlayBilled ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted">
+            This subscription is billed by Google Play. Changing the plan,
+            updating the payment method or cancelling all happen in the Play
+            Store.
+          </p>
           <Button
-            onClick={() => setShowCancel(true)}
-            variant="danger"
+            onClick={openPlaySubscriptions}
             fullWidth
-            ariaLabel="Cancel your Pro subscription"
+            variant="primary"
+            leftIcon={<ExternalLinkIcon />}
+            ariaLabel="Manage your subscription in Google Play"
           >
-            Cancel Subscription
+            Manage in Google Play
           </Button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            onClick={() => setShow(true)}
+            isLoading={isLoading}
+            loadingText="Opening Portal..."
+            fullWidth
+            variant="primary"
+            className={isActionRequired ? "animate-pulse" : ""}
+            leftIcon={<ExternalLinkIcon />}
+            ariaLabel="Manage your Pro subscription"
+          >
+            {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
+          </Button>
+          {!isCanceled && (
+            <Button
+              onClick={() => setShowCancel(true)}
+              variant="danger"
+              fullWidth
+              ariaLabel="Cancel your Pro subscription"
+            >
+              Cancel Subscription
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Cancel Subscription Modal */}
       <Modal

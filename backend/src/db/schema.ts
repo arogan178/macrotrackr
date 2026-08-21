@@ -16,7 +16,11 @@ const SCHEMA_SQL = `
             stripe_customer_id TEXT UNIQUE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             password_reset_token TEXT,
-            password_reset_expires DATETIME
+            password_reset_expires DATETIME,
+            -- Opaque per-account token handed to Play at purchase time and
+            -- echoed back in notifications. Lets a Play notification find its
+            -- account even when the app never got to claim the purchase.
+            play_obfuscated_account_id TEXT
         );
 
         -- User Details Table --
@@ -112,16 +116,30 @@ const SCHEMA_SQL = `
         CREATE TABLE IF NOT EXISTS subscriptions (
           id TEXT PRIMARY KEY,
           user_id INTEGER NOT NULL,
-          stripe_subscription_id TEXT UNIQUE NOT NULL,
+          -- Who took the money. Web checkout is 'stripe', the Android app is
+          -- 'play'. Entitlement does not care which: both write the same
+          -- status and current_period_end, so Pro bought on either surface
+          -- unlocks the other.
+          provider TEXT NOT NULL DEFAULT 'stripe' CHECK(provider IN ('stripe', 'play')),
+          -- Stripe subscription id, or the Play purchase token.
+          provider_subscription_id TEXT NOT NULL,
           status TEXT NOT NULL CHECK(status IN ('active', 'canceled', 'past_due', 'unpaid')),
           current_period_end TEXT NOT NULL, -- Store as ISO string
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          UNIQUE(provider, provider_subscription_id)
         );
 
         -- Stripe Events Table for Deduplication --
         CREATE TABLE IF NOT EXISTS stripe_events (
+          id TEXT PRIMARY KEY,
+          received_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Play Real-time Developer Notification dedupe. Pub/Sub delivers at
+        -- least once, so the same message id can arrive more than once.
+        CREATE TABLE IF NOT EXISTS play_billing_events (
           id TEXT PRIMARY KEY,
           received_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -209,6 +227,7 @@ function applyMigrations(db: Database) {
   checkAndAddColumn(db, "users", "password_reset_token", "TEXT");
   checkAndAddColumn(db, "users", "password_reset_expires", "DATETIME");
   checkAndAddColumn(db, "users", "clerk_id", "TEXT");
+  checkAndAddColumn(db, "users", "play_obfuscated_account_id", "TEXT");
   checkAndAddColumn(
     db,
     "user_details",
@@ -268,6 +287,67 @@ function applyMigrations(db: Database) {
     `);
   } catch {
     // Intentionally ignored
+  }
+
+  // Subscriptions migration: one table, two payment providers.
+  // The original table hard-coded Stripe in a UNIQUE NOT NULL column, so a
+  // Play purchase token had nowhere to live. Rebuild it with provider and
+  // provider_subscription_id, tagging every existing row as Stripe.
+  try {
+    const subscriptionsCreate = db
+      .prepare(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'subscriptions'",
+      )
+      .get() as { sql?: string } | undefined;
+
+    const needsProviderColumns =
+      (subscriptionsCreate?.sql?.includes("stripe_subscription_id") ?? false) &&
+      !(subscriptionsCreate?.sql?.includes("provider_subscription_id") ?? false);
+
+    if (needsProviderColumns) {
+      logger.info(
+        "    Migrating subscriptions table to support multiple billing providers...",
+      );
+      db.exec("BEGIN IMMEDIATE TRANSACTION;");
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS subscriptions_new (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          provider TEXT NOT NULL DEFAULT 'stripe' CHECK(provider IN ('stripe', 'play')),
+          provider_subscription_id TEXT NOT NULL,
+          status TEXT NOT NULL CHECK(status IN ('active', 'canceled', 'past_due', 'unpaid')),
+          current_period_end TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          UNIQUE(provider, provider_subscription_id)
+        );
+      `);
+      db.exec(`
+        INSERT INTO subscriptions_new (
+          id, user_id, provider, provider_subscription_id, status,
+          current_period_end, created_at, updated_at
+        )
+        SELECT
+          id, user_id, 'stripe', stripe_subscription_id, status,
+          current_period_end, created_at, updated_at
+        FROM subscriptions;
+      `);
+      db.exec("DROP TABLE subscriptions;");
+      db.exec("ALTER TABLE subscriptions_new RENAME TO subscriptions;");
+      db.exec("COMMIT;");
+      logger.info("    subscriptions table migrated successfully.");
+    }
+  } catch (error) {
+    logger.error(
+      { error },
+      "    Failed migrating subscriptions table; continuing with initialization",
+    );
+    try {
+      db.exec("ROLLBACK;");
+    } catch {
+      // no-op: rollback can fail if no transaction is active
+    }
   }
 
   // Habits migration
@@ -394,10 +474,13 @@ function createIndexes(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)",
   );
   db.exec(
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_play_obfuscated_account_id ON users(play_obfuscated_account_id)",
+  );
+  db.exec(
     "CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)",
   );
   db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)",
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_provider_subscription_id ON subscriptions(provider, provider_subscription_id)",
   );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)",

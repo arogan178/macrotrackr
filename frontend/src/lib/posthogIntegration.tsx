@@ -25,10 +25,8 @@ export default function PostHogUserSync(): undefined {
       // Avoid calling identify repeatedly for the same id
       if (lastDistinctIdReference.current !== distinctId) {
         try {
+          // Identify by internal id only — no email or name leaves the app.
           posthog.identify(distinctId, {
-            email: user.email,
-            first_name: user.firstName,
-            last_name: user.lastName,
             subscription_status: user.subscription.status,
             created_at: user.createdAt,
             traffic_type: user.analyticsTrafficType,

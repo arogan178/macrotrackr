@@ -291,7 +291,6 @@ export const authRoutes = (app: Elysia) =>
           return {
             success: true,
             message: "Account created successfully",
-            token,
             user: {
               id: userId,
               email,
@@ -361,7 +360,6 @@ export const authRoutes = (app: Elysia) =>
           return {
             success: true,
             message: "Signed in successfully",
-            token,
             user: {
               id: user.id,
               email: user.email,

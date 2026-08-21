@@ -17,11 +17,19 @@ import TrustIndicators from "./TrustIndicators";
 interface CustomPricingCardsProps {
   onUpgrade?: (plan: "monthly" | "yearly") => void;
   showUpgradeButtons?: boolean;
+  /**
+   * False when Pro cannot be bought from this build, which draws the Pro card
+   * with no call to action. Distinct from showUpgradeButtons: that one picks
+   * between upgrading here and sending the reader to the pricing page, and
+   * both of those assume a purchase is possible somewhere.
+   */
+  canPurchase?: boolean;
 }
 
 const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   onUpgrade,
   showUpgradeButtons = false,
+  canPurchase = true,
 }) => {
   const productAnalytics = useProductAnalytics();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
@@ -138,11 +146,10 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           features={features.pro}
           isPopular
           buttonText={
-            isProUser
-              ? "Current Plan"
-              : showUpgradeButtons
-                ? "Upgrade to Pro"
-                : "Unlock Pro"
+            isProUser ? "Current Plan"
+            : !canPurchase ? undefined
+            : showUpgradeButtons ? "Upgrade to Pro"
+            : "Unlock Pro"
           }
           buttonVariant="primary"
           buttonSize="lg"
@@ -152,11 +159,9 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           cardClassName="border-border-2 bg-surface-2 hover:border-primary/50"
           buttonDisabled={isProUser}
           onButtonClick={
-            isProUser
-              ? undefined
-              : showUpgradeButtons
-                ? () => onUpgrade?.(selectedPlan)
-                : handleGetPro
+            isProUser || !canPurchase ? undefined
+            : showUpgradeButtons ? () => onUpgrade?.(selectedPlan)
+            : handleGetPro
           }
         >
           <p className="mt-2 text-balance text-muted">

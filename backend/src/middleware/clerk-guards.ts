@@ -104,7 +104,7 @@ export const checkFeatureLimit = async (
   if (currentCount >= limit) {
     const featureMessages: Record<FeatureLimitKey, string> = {
       MAX_HABITS: `You've reached the limit of ${limit} habits on the Free plan. Upgrade to Pro for unlimited habits.`,
-      DATA_RETENTION_DAYS: `Data older than ${limit} days is not available on the Free plan. Upgrade to Pro for unlimited data retention.`,
+      FREE_VISIBLE_HISTORY_DAYS: `The Free plan shows the last ${limit} days. Your older entries are still saved and reappear when you upgrade to Pro.`,
       MAX_SAVED_MEALS: `You've reached the limit of ${limit} saved meals on the Free plan. Upgrade to Pro for unlimited saved meals.`,
     };
 

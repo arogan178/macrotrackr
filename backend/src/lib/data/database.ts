@@ -230,7 +230,8 @@ export interface HabitRow {
 export interface SubscriptionRow {
   id: string;
   user_id: number;
-  stripe_subscription_id: string;
+  provider: "stripe" | "play";
+  provider_subscription_id: string;
   status: "active" | "canceled" | "past_due" | "unpaid";
   current_period_end: string;
   created_at: string;

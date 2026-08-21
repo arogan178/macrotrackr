@@ -4,6 +4,8 @@ import { Elysia } from "elysia";
 import { logger } from "../../lib/observability/logger";
 import { BadRequestError, NotFoundError } from "../../lib/http/errors";
 import { StripeService } from "./stripe-service";
+import { PlayService } from "./play-service";
+import { config } from "../../config";
 import { SubscriptionService } from "./subscription-service";
 import { PLANS } from "../../config/pricing";
 import { t } from "elysia";
@@ -15,7 +17,8 @@ const SubscriptionInfoSchema = t.Object({
   id: t.String(),
   status: t.String(),
   currentPeriodEnd: t.Nullable(t.String()),
-  stripeSubscriptionId: t.Nullable(t.String()),
+  provider: t.Union([t.Literal("stripe"), t.Literal("play")]),
+  providerSubscriptionId: t.Nullable(t.String()),
 });
 
 const BillingDetailsResponseSchema = t.Object({
@@ -48,6 +51,60 @@ const SubscriptionStatusResponseSchema = t.Object({
   status: t.String(),
   hasStripeCustomer: t.Boolean(),
   subscription: t.Nullable(SubscriptionInfoSchema),
+});
+
+const CapabilitiesResponseSchema = t.Object({
+  web: t.Boolean(),
+  play: t.Boolean(),
+});
+
+// Stripe hands the browser back to whatever URL we hand it, so an
+// attacker-chosen URL turns the payment flow into a phishing asset. Only
+// same-app destinations are allowed.
+function isAllowedRedirectUrl(rawUrl: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return false;
+  }
+
+  const appHostname = new URL(config.APP_URL).hostname;
+  if (parsed.hostname === appHostname) {
+    return true;
+  }
+
+  // ponytail: last-two-labels apex match so the Capacitor webview host
+  // (app.macrotrackr.com) passes; swap for a public-suffix lookup if the
+  // domain ever moves under a multi-part TLD.
+  const labels = appHostname.split(".");
+  const apex = labels.slice(-2).join(".");
+  return labels.length > 2 && parsed.hostname.endsWith(`.${apex}`);
+}
+
+function assertAllowedRedirectUrl(url: string): void {
+  if (!isAllowedRedirectUrl(url)) {
+    throw new BadRequestError("Redirect URL must point to the application");
+  }
+}
+
+const PlayAccountTokenResponseSchema = t.Object({
+  accountToken: t.String(),
+});
+
+const PlayVerifyResponseSchema = t.Object({
+  status: t.String(),
+  currentPeriodEnd: t.String(),
+  entitled: t.Boolean(),
+  plan: t.Union([
+    t.Literal("monthly"),
+    t.Literal("yearly"),
+    t.Literal("unknown"),
+  ]),
 });
 
 const PlanSchema = t.Object({
@@ -101,6 +158,10 @@ type PortalRequestBody = {
   returnUrl: string;
 };
 
+type PlayVerifyRequestBody = {
+  purchaseToken: string;
+};
+
 function resolveBillingUser(context: BillingRouteContext) {
   const authenticatedUser = context.authenticatedUser;
   const userId = authenticatedUser.userId;
@@ -137,8 +198,9 @@ export const billingRoutes = (app: Elysia) =>
                     status: subscriptionInfo.subscription.status,
                     currentPeriodEnd:
                       subscriptionInfo.subscription.current_period_end,
-                    stripeSubscriptionId:
-                      subscriptionInfo.subscription.stripe_subscription_id,
+                    provider: subscriptionInfo.subscription.provider,
+                    providerSubscriptionId:
+                      subscriptionInfo.subscription.provider_subscription_id,
                   }
                 : null,
               price: subscriptionInfo.price ?? null,
@@ -169,21 +231,32 @@ export const billingRoutes = (app: Elysia) =>
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             const sub = userSubscription.subscription;
-            if (!sub?.stripe_subscription_id) {
+            if (!sub?.provider_subscription_id) {
               throw new BadRequestError("No active subscription to cancel");
             }
+            // Google owns the billing relationship for Play purchases, so
+            // there is nothing we can cancel server-side. Send the user to
+            // the Play subscription screen instead of failing silently.
+            if (sub.provider === "play") {
+              throw new BadRequestError(
+                "This subscription is billed by Google Play. Cancel it in the Play Store under Payments and subscriptions.",
+              );
+            }
             // Cancel in Stripe
-            await StripeService.cancelSubscription(sub.stripe_subscription_id);
+            await StripeService.cancelSubscription(
+              sub.provider_subscription_id,
+            );
             // Update local DB
             await SubscriptionService.cancelSubscription(
               user.userId,
-              sub.stripe_subscription_id,
+              "stripe",
+              sub.provider_subscription_id,
             );
             logger.info(
               {
                 operation: "cancel_subscription",
                 userId: user.userId,
-                subscriptionId: sub.stripe_subscription_id,
+                subscriptionId: sub.provider_subscription_id,
               },
               "Canceled user subscription via API",
             );
@@ -219,6 +292,14 @@ export const billingRoutes = (app: Elysia) =>
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (userSubscription.subscription_status === "pro") {
+              // Naming the provider matters here: someone who bought Pro in
+              // the Android app cannot cancel it on the web, and a generic
+              // "you already have Pro" leaves them with nowhere to go.
+              if (userSubscription.subscription?.provider === "play") {
+                throw new BadRequestError(
+                  "This account already has Pro through Google Play. Manage it in the Play Store under Payments and subscriptions.",
+                );
+              }
               throw new BadRequestError(
                 "User already has an active Pro subscription",
               );
@@ -247,6 +328,8 @@ export const billingRoutes = (app: Elysia) =>
               throw new BadRequestError(
                 "Stripe price ID not configured for selected plan",
               );
+            assertAllowedRedirectUrl(body.successUrl);
+            assertAllowedRedirectUrl(body.cancelUrl);
             const session = await StripeService.createCheckoutSession({
               customerId,
               successUrl: body.successUrl,
@@ -318,6 +401,7 @@ export const billingRoutes = (app: Elysia) =>
             if (!returnUrl) {
               throw new BadRequestError("Return URL is required");
             }
+            assertAllowedRedirectUrl(returnUrl);
 
             const portalSession =
               await StripeService.createCustomerPortalSession(
@@ -367,8 +451,9 @@ export const billingRoutes = (app: Elysia) =>
                     status: subscriptionInfo.subscription.status,
                     currentPeriodEnd:
                       subscriptionInfo.subscription.current_period_end,
-                    stripeSubscriptionId:
-                      subscriptionInfo.subscription.stripe_subscription_id,
+                    provider: subscriptionInfo.subscription.provider,
+                    providerSubscriptionId:
+                      subscriptionInfo.subscription.provider_subscription_id,
                   }
                 : null,
             };
@@ -380,6 +465,172 @@ export const billingRoutes = (app: Elysia) =>
           response: SubscriptionStatusResponseSchema,
           detail: {
             summary: "Get the current user's subscription status",
+            tags: ["Billing"],
+          },
+        },
+      )
+
+      // The token this account presents to Play when buying.
+      //
+      // Play echoes it back on every notification about the purchase, so a
+      // renewal or cancellation can find its account even if the app never
+      // reached /play/verify. Fetched before opening the purchase sheet.
+      .get(
+        "/play/account-token",
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
+          const user = resolveBillingUser(context);
+          try {
+            if (!PlayService.isEnabled()) {
+              throw new BadRequestError("Google Play billing is not enabled");
+            }
+
+            const accountToken =
+              await SubscriptionService.getOrCreatePlayAccountToken(
+                user.userId,
+              );
+
+            return { accountToken };
+          } catch (error) {
+            handleRouteError(error, "get_play_account_token", user.userId);
+          }
+        },
+        {
+          response: PlayAccountTokenResponseSchema,
+          detail: {
+            summary: "Get this account's Google Play account token",
+            tags: ["Billing"],
+          },
+        },
+      )
+
+      // Claim a Google Play purchase for the signed-in account.
+      //
+      // The app sends the purchase token it got from Play Billing and nothing
+      // else. Everything that decides entitlement comes from Google, so a
+      // forged or replayed body buys nobody anything.
+      .post(
+        "/play/verify",
+        async (rawContext: unknown) => {
+          const context =
+            rawContext as BillingRouteContext<PlayVerifyRequestBody>;
+          const { body } = context;
+          const user = resolveBillingUser(context);
+          try {
+            if (!PlayService.isEnabled()) {
+              throw new BadRequestError("Google Play billing is not enabled");
+            }
+
+            const purchaseToken = body?.purchaseToken;
+            if (!purchaseToken) {
+              throw new BadRequestError("purchaseToken is required");
+            }
+
+            // Refuse to sell Pro twice. Someone already paying through Stripe
+            // must cancel there first, otherwise they are billed on both.
+            const existing = await SubscriptionService.getActiveSubscription(
+              user.userId,
+            );
+            if (existing?.provider === "stripe") {
+              throw new BadRequestError(
+                "This account already has a Pro subscription billed on the web. Cancel that first to move billing to Google Play.",
+              );
+            }
+
+            // One purchase, one account. Without this a token could be passed
+            // around to unlock any number of accounts.
+            const claimedBy = context.db
+              .prepare(
+                "SELECT user_id FROM subscriptions WHERE provider = 'play' AND provider_subscription_id = ?",
+              )
+              .get(purchaseToken) as { user_id: number } | undefined;
+            if (claimedBy && claimedBy.user_id !== user.userId) {
+              logger.warn(
+                {
+                  operation: "play_verify",
+                  userId: user.userId,
+                  claimedBy: claimedBy.user_id,
+                },
+                "Play purchase token is already attached to another account",
+              );
+              throw new BadRequestError(
+                "That Google Play purchase is already linked to a different account.",
+              );
+            }
+
+            const purchase = await PlayService.getSubscription(purchaseToken);
+
+            await SubscriptionService.upsertSubscription(
+              user.userId,
+              "play",
+              purchaseToken,
+              purchase.status,
+              purchase.currentPeriodEnd,
+            );
+
+            // Google refunds unacknowledged purchases after three days.
+            if (purchase.needsAcknowledgement && purchase.productId) {
+              await PlayService.acknowledge(purchaseToken, purchase.productId);
+            }
+
+            const entitled = purchase.status === "active";
+            if (entitled) {
+              void captureProductEvent({
+                distinctId: user.userId,
+                event: "subscription_started",
+                properties: { plan: purchase.plan },
+              });
+            }
+
+            logger.info(
+              {
+                operation: "play_verify",
+                userId: user.userId,
+                status: purchase.status,
+                plan: purchase.plan,
+                isTestPurchase: purchase.isTestPurchase,
+              },
+              "Verified Google Play purchase",
+            );
+
+            return {
+              status: purchase.status,
+              currentPeriodEnd: purchase.currentPeriodEnd,
+              entitled,
+              plan: purchase.plan,
+            };
+          } catch (error) {
+            handleRouteError(error, "play_verify", user.userId);
+          }
+        },
+        {
+          response: PlayVerifyResponseSchema,
+          detail: {
+            summary: "Verify a Google Play purchase and grant Pro",
+            tags: ["Billing"],
+          },
+        },
+      )
+
+      // What this deployment can actually sell, and where.
+      //
+      // The client cannot work this out alone: it knows which store it is
+      // running in, but not whether the server is configured to honour a
+      // purchase from it. Selling without asking is how a user pays Google
+      // and then gets refused by /play/verify, which is money taken for
+      // nothing. No auth, because the pricing page is public.
+      .get(
+        "/capabilities",
+        async () => {
+          return {
+            web: config.BILLING_MODE === "managed",
+            play: config.PLAY_BILLING_MODE === "enabled",
+          };
+        },
+        {
+          response: CapabilitiesResponseSchema,
+          detail: {
+            summary: "Which billing providers this deployment can sell through",
             tags: ["Billing"],
           },
         },
