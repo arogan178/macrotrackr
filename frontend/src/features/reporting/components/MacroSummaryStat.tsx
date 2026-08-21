@@ -128,9 +128,9 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
       {/* Average Intake vs Target */}
       <div className="mb-2 space-y-1">
         {/* Average Intake Display */}
-        <div className="flex items-baseline justify-between gap-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
           <span className="mr-1 text-xs text-muted shrink-0">Average Intake:</span>
-          <div className="text-right min-w-0">
+          <div className="ml-auto text-right min-w-0">
             <span className="text-lg leading-none font-bold text-foreground">
               <AnimatedNumber
                 value={avgGrams}
@@ -152,9 +152,9 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
           </div>
         </div>
         {/* Your Target Display */}
-        <div className="flex items-baseline justify-between gap-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
           <span className="mr-1 text-xs text-muted shrink-0">Your Target:</span>
-          <div className="text-right min-w-0">
+          <div className="ml-auto text-right min-w-0">
             <span className="text-sm font-medium text-foreground">
               <AnimatedNumber
                 value={targetGrams}
@@ -289,9 +289,9 @@ export default function MacroSummaryStats({
             )}
           </div>
           <div className="mb-2 space-y-1">
-            <div className="flex items-baseline justify-between">
-              <span className="mr-1 text-xs text-muted">Average Intake:</span>
-              <span className="text-lg leading-none font-bold text-foreground">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+              <span className="mr-1 text-xs text-muted shrink-0">Average Intake:</span>
+              <span className="ml-auto text-lg leading-none font-bold whitespace-nowrap text-foreground">
                 <AnimatedNumber
                   value={avgCalories}
                   toFixedValue={0}
@@ -300,9 +300,9 @@ export default function MacroSummaryStats({
                 />
               </span>
             </div>
-            <div className="flex items-baseline justify-between">
-              <span className="mr-1 text-xs text-muted">Your Target:</span>
-              <span className="text-sm font-medium text-foreground">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+              <span className="mr-1 text-xs text-muted shrink-0">Your Target:</span>
+              <span className="ml-auto text-sm font-medium whitespace-nowrap text-foreground">
                 <AnimatedNumber
                   value={effectiveCalorieTarget}
                   toFixedValue={0}
@@ -312,10 +312,10 @@ export default function MacroSummaryStats({
               </span>
             </div>
           </div>
-          <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
-            <span className="mr-1.5 text-xs text-muted">Difference:</span>
+          <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 border-t border-border pt-1">
+            <span className="mr-1.5 text-xs text-muted shrink-0">Difference:</span>
             <span
-              className={`text-sm font-semibold ${
+              className={`ml-auto text-sm font-semibold whitespace-nowrap ${
                 avgCalories - effectiveCalorieTarget >= 0
                   ? "text-success"
                   : "text-error"
