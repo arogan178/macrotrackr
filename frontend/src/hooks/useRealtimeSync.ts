@@ -1,8 +1,27 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getFullUrl } from "@/api/core";
+import { apiClient, getFullUrl } from "@/api/core";
 import { getToken } from "@/utils/tokenStorage";
+
+/**
+ * EventSource cannot send an Authorization header, so the stream has to carry
+ * its credential in the URL. Trade the session token for a single-use ticket
+ * first — query strings end up in proxy logs, history and Referer headers.
+ * Clerk mode authenticates the stream with cookies and never needs one.
+ */
+async function requestSyncTicket(): Promise<string | null> {
+  try {
+    const response = await apiClient.post<{ ticket?: string }>(
+      "/api/sync/ticket",
+    );
+
+    return response?.ticket ?? null;
+  } catch {
+    // Fall back to a cookie-authenticated stream rather than dropping sync.
+    return null;
+  }
+}
 
 export type SyncTopic =
   | "macros"
@@ -79,7 +98,8 @@ export function useRealtimeSync(isAuthenticated: boolean) {
 
   // 1. Inter-tab synchronization via BroadcastChannel
   useEffect(() => {
-    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+    if (typeof window === "undefined" || !("BroadcastChannel" in window))
+      return;
 
     let channel: BroadcastChannel | null = null;
     try {
@@ -130,8 +150,11 @@ export function useRealtimeSync(isAuthenticated: boolean) {
       }
     }
 
-    function connectSSE() {
-      if (isCancelled || (typeof navigator !== "undefined" && !navigator.onLine)) {
+    async function connectSSE() {
+      if (
+        isCancelled ||
+        (typeof navigator !== "undefined" && !navigator.onLine)
+      ) {
         return;
       }
       if (typeof document !== "undefined" && document.hidden) {
@@ -141,9 +164,15 @@ export function useRealtimeSync(isAuthenticated: boolean) {
       cleanupSSE();
 
       const baseUrl = getFullUrl("/api/sync/events");
-      const token = getToken();
-      const sseUrl = token
-        ? `${baseUrl}?token=${encodeURIComponent(token)}`
+      // Only local sessions authenticate through the URL; Clerk mode uses the
+      // cookie, exactly as before.
+      const ticket = getToken() ? await requestSyncTicket() : null;
+      if (isCancelled) {
+        return;
+      }
+
+      const sseUrl = ticket
+        ? `${baseUrl}?ticket=${encodeURIComponent(ticket)}`
         : baseUrl;
 
       eventSource = new EventSource(sseUrl, { withCredentials: true });
@@ -167,20 +196,23 @@ export function useRealtimeSync(isAuthenticated: boolean) {
       eventSource.onerror = () => {
         cleanupSSE();
 
-        if (!isCancelled && (typeof navigator === "undefined" || navigator.onLine)) {
+        if (
+          !isCancelled &&
+          (typeof navigator === "undefined" || navigator.onLine)
+        ) {
           const backoffDelay = Math.min(
             1000 * 2 ** retryCount + Math.random() * 1000,
             30000,
           );
           retryCount++;
-          reconnectTimeout = setTimeout(connectSSE, backoffDelay);
+          reconnectTimeout = setTimeout(() => void connectSSE(), backoffDelay);
         }
       };
     }
 
     function handleOnline() {
       retryCount = 0;
-      connectSSE();
+      void connectSSE();
     }
 
     function handleVisibilityChange() {
@@ -188,14 +220,14 @@ export function useRealtimeSync(isAuthenticated: boolean) {
         cleanupSSE();
       } else {
         retryCount = 0;
-        connectSSE();
+        void connectSSE();
       }
     }
 
     window.addEventListener("online", handleOnline);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    connectSSE();
+    void connectSSE();
 
     return () => {
       isCancelled = true;
