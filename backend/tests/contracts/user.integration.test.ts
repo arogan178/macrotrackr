@@ -5,6 +5,7 @@ import { mock } from "bun:test";
 import { Elysia } from "elysia";
 
 import * as originalClerkGuards from "../../src/middleware/clerk-guards";
+import * as originalSubscriptionService from "../../src/modules/billing/subscription-service";
 
 mock.module("../../src/middleware/clerk-guards", () => {
   return {
@@ -21,12 +22,16 @@ mock.module("../../src/middleware/clerk-guards", () => {
   };
 });
 
+// Only getUserSubscription is stubbed. Bun's mock.module is process-global and
+// never unwound, so replacing the whole module strips every other static from
+// any test file that happens to run after this one.
 mock.module("../../src/modules/billing/subscription-service", () => ({
-  SubscriptionService: {
-    getUserSubscription: async () => ({
-      subscription_status: "free",
-    })
-  }
+  ...originalSubscriptionService,
+  SubscriptionService: class extends originalSubscriptionService.SubscriptionService {
+    static async getUserSubscription() {
+      return { subscription_status: "free" };
+    }
+  },
 }));
 
 import { userRoutes } from "../../src/modules/user/routes";

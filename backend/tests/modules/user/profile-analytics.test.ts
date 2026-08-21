@@ -18,10 +18,6 @@ vi.mock("../../../src/lib/data/database", () => ({
     withTransactionAsyncMock(...arguments_),
 }));
 
-vi.mock("../../../src/lib/sync/eventBus", () => ({
-  publishUserSyncEvent: vi.fn(),
-}));
-
 import { userRoutes } from "../../../src/modules/user/routes";
 
 function createApp() {
