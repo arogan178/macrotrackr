@@ -53,9 +53,11 @@ tasks.register("verifyReleaseCapacitorConfig") {
             throw new GradleException("capacitor.config.json missing — run 'bunx cap sync' first.")
         }
         def capConfig = new groovy.json.JsonSlurper().parse(capConfigFile)
-        if (capConfig.hostname != "app.macrotrackr.com" || capConfig.cleartext) {
+        def hostname = capConfig.server?.hostname
+        def cleartext = capConfig.server?.cleartext
+        if (hostname != "app.macrotrackr.com" || cleartext) {
             throw new GradleException(
-                "capacitor.config.json is a dev profile (hostname=${capConfig.hostname}, cleartext=${capConfig.cleartext}). " +
+                "capacitor.config.json is a dev profile (hostname=${hostname}, cleartext=${cleartext}). " +
                 "Run 'bun run cap:sync:prod' before building a release.")
         }
     }
