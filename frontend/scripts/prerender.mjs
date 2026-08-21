@@ -542,9 +542,16 @@ for (const page of pages) {
 
   fs.writeFileSync(targetFile, html, "utf8");
 
-  // Also compress to gzip for static server speed
-  const gzipped = zlib.gzipSync(Buffer.from(html, "utf8"));
-  fs.writeFileSync(`${targetFile}.gz`, gzipped);
+  // Also compress to gzip for static server speed. Skipped for Capacitor:
+  // assets are read out of the APK rather than served over HTTP, so the .gz is
+  // dead weight there — and worse, Android's asset merger treats
+  // `index.html.gz` as a duplicate of `index.html` and fails the build with
+  // "Duplicate resources". vite.config.ts skips viteCompression() for the same
+  // reason; this path was missed.
+  if (process.env.CAPACITOR !== "true") {
+    const gzipped = zlib.gzipSync(Buffer.from(html, "utf8"));
+    fs.writeFileSync(`${targetFile}.gz`, gzipped);
+  }
 
   createdCount++;
 }
