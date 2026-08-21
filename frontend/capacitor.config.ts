@@ -7,8 +7,12 @@ const config: CapacitorConfig = {
   appId: "com.macrotrackr.app",
   appName: "MacroTrackr",
   webDir: "dist",
-  overrideUserAgent:
-    "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
+  // No overrideUserAgent here on purpose. It used to claim this webview was
+  // Chrome, which reads as evading Google's rule that OAuth must not run in an
+  // embedded webview, and risks the Google account rather than just a review.
+  // Nothing needs it: native Google sign-in goes through the GoogleAuth plugin
+  // and every other provider opens in a Custom Tab via Browser.open, so no
+  // provider ever sees the webview's user agent.
   server: {
     hostname,
     androidScheme: "https",
@@ -23,9 +27,6 @@ const config: CapacitorConfig = {
       "clerk.macrotrackr.com",
       "macrotrackr.com",
       "*.macrotrackr.com",
-      "accounts.google.com",
-      "*.google.com",
-      "appleid.apple.com",
       "challenges.cloudflare.com",
     ],
   },

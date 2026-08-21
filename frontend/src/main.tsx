@@ -11,7 +11,11 @@ import { initializeAuthTokenProvider } from "./api/core";
 import { isClerkAuthMode, runtimeConfig } from "./config/runtime";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { ProductAnalyticsProvider } from "./lib/productAnalytics";
-import { localStoragePersister, queryClient } from "./lib/queryClient";
+import {
+  localStoragePersister,
+  queryClient,
+  shouldPersistQuery,
+} from "./lib/queryClient";
 import { registerStaleChunkRecovery } from "./lib/staleChunkRecovery";
 import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
@@ -90,16 +94,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
         persistOptions={{
           persister: localStoragePersister,
           dehydrateOptions: {
-            shouldDehydrateQuery: (query) => {
-              const queryKey = query.queryKey;
-              if (queryKey[0] === "auth") return false;
-              if (queryKey[0] === "settings" && queryKey[1] === "user")
-                return false;
-              if (queryKey[0] === "settings" && queryKey[1] === "billing")
-                return false;
-
-              return true;
-            },
+            shouldDehydrateQuery: (query) => shouldPersistQuery(query.queryKey),
           },
           buster: "macrotrackr-v1",
         }}

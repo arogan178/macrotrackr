@@ -97,8 +97,22 @@ export const localStoragePersister = createAsyncStoragePersister({
   },
 });
 
+// Health data (macro logs, goals, habits) is sensitive under Play's data
+// policy — keep it out of plaintext localStorage entirely.
 export const doNotPersistKeys = [
   ["auth"],
   ["settings", "user"],
   ["settings", "billing"],
+  ["habits"],
+  ["goals"],
+  ["macros"],
+  ["saved-meals"],
 ] as const;
+
+export function shouldPersistQuery(queryKey: readonly unknown[]): boolean {
+  return !doNotPersistKeys.some(
+    (prefix) =>
+      queryKey[0] === prefix[0] &&
+      (prefix.length < 2 || queryKey[1] === prefix[1]),
+  );
+}

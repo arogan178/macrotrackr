@@ -9,7 +9,8 @@ interface PricingCardProps {
   equivalent?: string;
   features: string[];
   isPopular?: boolean;
-  buttonText: string;
+  /** Omit to render the card with no call to action at all. */
+  buttonText?: string;
   buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
   buttonSize?: "sm" | "md" | "lg";
   buttonClassName?: string;
@@ -96,16 +97,18 @@ const PricingCard: React.FC<PricingCardProps> = ({
         </li>
       ))}
     </ul>
-    <div className="mt-auto">
-      <Button
-        text={buttonText}
-        variant={buttonVariant}
-        buttonSize={buttonSize}
-        className={buttonClassName}
-        onClick={onButtonClick}
-        disabled={buttonDisabled}
-      />
-    </div>
+    {buttonText ? (
+      <div className="mt-auto">
+        <Button
+          text={buttonText}
+          variant={buttonVariant}
+          buttonSize={buttonSize}
+          className={buttonClassName}
+          onClick={onButtonClick}
+          disabled={buttonDisabled}
+        />
+      </div>
+    ) : null}
   </div>
 );
 

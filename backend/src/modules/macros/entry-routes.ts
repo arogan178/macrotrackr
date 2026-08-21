@@ -121,9 +121,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         const endDate = query.endDate;
 
         const isProUser = await checkProStatus(userId);
-        const retentionDays = FREE_TIER_LIMITS.DATA_RETENTION_DAYS;
+        const visibleDays = FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS;
         const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+        cutoffDate.setDate(cutoffDate.getDate() - visibleDays);
         const cutoffDateString = cutoffDate
           .toISOString()
           .split("T")[0] as string;

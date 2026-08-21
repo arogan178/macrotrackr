@@ -42,12 +42,28 @@ const analyticsMode = resolveAnalyticsMode(
   authMode,
 );
 
+/**
+ * Play product ids. The Android build needs these to open the right purchase
+ * sheet. They are not secrets, they are the SKU names from the Play Console.
+ */
+const playProductIds = {
+  monthly: import.meta.env.VITE_GOOGLE_PLAY_PRODUCT_ID_MONTHLY ?? "",
+  yearly: import.meta.env.VITE_GOOGLE_PLAY_PRODUCT_ID_YEARLY ?? "",
+} as const;
+
 export const runtimeConfig = {
   AUTH_MODE: authMode,
   BILLING_MODE: billingMode,
   ANALYTICS_MODE: analyticsMode,
+  PLAY_PRODUCT_IDS: playProductIds,
 } as const;
 
 export const isClerkAuthMode = runtimeConfig.AUTH_MODE === "clerk";
 export const isLocalAuthMode = runtimeConfig.AUTH_MODE === "local";
 export const isManagedBillingMode = runtimeConfig.BILLING_MODE === "managed";
+
+export function playProductIdFor(plan: "monthly" | "yearly"): string | null {
+  const productId = runtimeConfig.PLAY_PRODUCT_IDS[plan];
+
+  return productId.length > 0 ? productId : null;
+}

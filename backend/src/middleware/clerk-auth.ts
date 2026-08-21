@@ -35,6 +35,8 @@ const AUTH_EXEMPT_PATHS = new Set([
   // Note: /api/auth/clerk-sync is NOT exempt - it needs auth to know which user to sync
   "/api/webhooks/clerk",
   "/api/billing/webhook",
+  // Public: the pricing page has to know what it may sell before sign-in.
+  "/api/billing/capabilities",
   "/api/docs",
   "/api/docs/json",
   "/",
@@ -60,6 +62,12 @@ export function isExemptPath(path: string): boolean {
   
   // Check for webhook paths (they handle their own auth)
   if (path.startsWith("/api/webhooks/")) {
+    return true;
+  }
+
+  // Google Play notifications arrive from Pub/Sub with no bearer token. The
+  // secret in the path is what authenticates them, checked by the handler.
+  if (path.startsWith("/api/billing/play/rtdn/")) {
     return true;
   }
   

@@ -293,7 +293,11 @@ async function handleSubscriptionEvent(
     status === "canceled" ||
     normalizedEvent.type === "customer.subscription.deleted"
   ) {
-    await SubscriptionService.cancelSubscription(user.id, subscriptionId);
+    await SubscriptionService.cancelSubscription(
+      user.id,
+      "stripe",
+      subscriptionId,
+    );
     void captureProductEvent({
       distinctId: user.id,
       event: "subscription_canceled",
@@ -321,6 +325,7 @@ async function handleSubscriptionEvent(
 
     await SubscriptionService.upsertSubscription(
       user.id,
+      "stripe",
       subscriptionId,
       status,
       currentPeriodEnd,

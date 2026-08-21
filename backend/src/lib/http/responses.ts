@@ -1,5 +1,6 @@
 import { isAppError } from "./errors";
 import { loggerHelpers } from "../observability/logger";
+import { config } from "../../config";
 
 export interface SuccessResponse<T = unknown> {
   success: true;
@@ -58,7 +59,14 @@ export function handleError(
 
   if (isAppError(error)) {
     set.status = error.statusCode;
-    return createErrorResponse(error.code, error.message, getErrorDetails(error));
+    // Mirror app.ts: raw 5xx messages carry internals (SQL fragments, paths).
+    const shouldRedactMessage =
+      config.NODE_ENV === "production" && error.statusCode >= 500;
+    return createErrorResponse(
+      error.code,
+      shouldRedactMessage ? "An unexpected error occurred" : error.message,
+      getErrorDetails(error)
+    );
   }
 
   // Handle Elysia validation errors
