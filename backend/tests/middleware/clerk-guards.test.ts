@@ -1,19 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import * as originalSubscriptionService from "../../src/modules/billing/subscription-service";
-
 const hasActiveProSubscriptionMock = vi.fn();
 let appMode: "managed" | "self-hosted" = "managed";
 
-// Only hasActiveProSubscription is stubbed. Bun's mock.module is process-global
-// and never unwound, so replacing the whole module strips every other static
-// from any test file that happens to run after this one.
 vi.mock("../../src/modules/billing/subscription-service", () => ({
-  ...originalSubscriptionService,
-  SubscriptionService: class extends originalSubscriptionService.SubscriptionService {
-    static hasActiveProSubscription(...arguments_: unknown[]) {
-      return hasActiveProSubscriptionMock(...arguments_);
-    }
+  SubscriptionService: {
+    hasActiveProSubscription: (...arguments_: unknown[]) =>
+      hasActiveProSubscriptionMock(...arguments_),
   },
 }));
 

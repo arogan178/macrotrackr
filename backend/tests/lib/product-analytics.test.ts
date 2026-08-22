@@ -52,17 +52,14 @@ describe("product analytics contract", () => {
 });
 
 describe("captureProductEvent", () => {
-  // Bun's vitest shim has no stubGlobal/unstubAllGlobals, so swap fetch by hand.
-  const originalFetch = globalThis.fetch;
-
   afterEach(() => {
     setConfigOverrides(null);
-    globalThis.fetch = originalFetch;
+    vi.unstubAllGlobals();
   });
 
   it("does not make a request when analytics is disabled", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
     setConfigOverrides({ ANALYTICS_MODE: "disabled" });
 
     await captureProductEvent({
@@ -76,7 +73,7 @@ describe("captureProductEvent", () => {
 
   it("never captures from self-hosted mode", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
     setConfigOverrides({
       ANALYTICS_MODE: "posthog",
       APP_MODE: "self-hosted",
@@ -99,7 +96,7 @@ describe("captureProductEvent", () => {
       .mockResolvedValue(
         new Response(JSON.stringify({ status: 1 }), { status: 200 }),
       );
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
     setConfigOverrides({
       ANALYTICS_MODE: "posthog",
       APP_MODE: "managed",
