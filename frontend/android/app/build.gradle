@@ -31,7 +31,13 @@ android {
             if (System.getenv("KEYSTORE_FILE") != null) {
                 signingConfig signingConfigs.release
             }
+            // Keep rules for R8 are already written in proguard-rules.pro.
+            // Flipping this to true needs a signed build smoke-tested on a
+            // device first — R8 breakage in a Capacitor app shows up at
+            // runtime as a silently missing plugin, never at build time.
+            // See docs/android-release-build.md.
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -53,9 +59,11 @@ tasks.register("verifyReleaseCapacitorConfig") {
             throw new GradleException("capacitor.config.json missing — run 'bunx cap sync' first.")
         }
         def capConfig = new groovy.json.JsonSlurper().parse(capConfigFile)
-        if (capConfig.hostname != "app.macrotrackr.com" || capConfig.cleartext) {
+        def hostname = capConfig.server?.hostname
+        def cleartext = capConfig.server?.cleartext
+        if (hostname != "app.macrotrackr.com" || cleartext) {
             throw new GradleException(
-                "capacitor.config.json is a dev profile (hostname=${capConfig.hostname}, cleartext=${capConfig.cleartext}). " +
+                "capacitor.config.json is a dev profile (hostname=${hostname}, cleartext=${cleartext}). " +
                 "Run 'bun run cap:sync:prod' before building a release.")
         }
     }

@@ -1,6 +1,7 @@
 import type { Database } from "bun:sqlite";
 import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
 import { generateId } from "../../utils/id-generator";
+import { consumeSyncTicket } from "./sync-ticket";
 
 const SESSION_COOKIE_NAME = "mt_session";
 const SESSION_TTL_DAYS = 30;
@@ -91,14 +92,16 @@ export function createExpiredSessionCookieValue(): string {
 }
 
 /**
- * Endpoints where the session token may travel in the query string.
+ * Endpoints that may authenticate with a one-time ticket in the query string.
  *
- * Query strings leak into proxy access logs, browser history and Referer
- * headers, so this is limited to the SSE stream: EventSource cannot set an
- * Authorization header, and cookies are unavailable on cross-origin native
- * (Capacitor) builds.
+ * EventSource cannot set an Authorization header, and cookies are unavailable
+ * on cross-origin native (Capacitor) builds, so the SSE stream has to put its
+ * credential in the URL. It carries a single-use ticket rather than the
+ * session token itself — query strings end up in proxy logs, browser history
+ * and Referer headers, and a ticket that is dead after one connect is worth
+ * far less there than a token that lives for days.
  */
-const QUERY_TOKEN_ALLOWED_PATHS = new Set(["/api/sync/events"]);
+const QUERY_TICKET_ALLOWED_PATHS = new Set(["/api/sync/events"]);
 
 function isClerkToken(token: string): boolean {
   return token.startsWith("pk_") || token.startsWith("sess_");
@@ -114,10 +117,13 @@ export function readSessionTokenFromRequest(request: Request): string | null {
   }
 
   const url = new URL(request.url);
-  if (QUERY_TOKEN_ALLOWED_PATHS.has(url.pathname)) {
-    const queryToken = url.searchParams.get("token");
-    if (queryToken && !isClerkToken(queryToken)) {
-      return queryToken;
+  if (QUERY_TICKET_ALLOWED_PATHS.has(url.pathname)) {
+    const ticket = url.searchParams.get("ticket");
+    if (ticket) {
+      const ticketToken = consumeSyncTicket(ticket);
+      if (ticketToken) {
+        return ticketToken;
+      }
     }
   }
 
@@ -138,7 +144,14 @@ export function createSession(
   db.prepare(
     `INSERT INTO sessions (id, user_id, secret_hash, expires_at, last_used_at, ip, user_agent)
      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)`,
-  ).run(sessionId, userId, secretHash, expiresAt, options.ip ?? null, options.userAgent ?? null);
+  ).run(
+    sessionId,
+    userId,
+    secretHash,
+    expiresAt,
+    options.ip ?? null,
+    options.userAgent ?? null,
+  );
 
   return {
     token: `${sessionId}.${rawSecret}`,
