@@ -50,14 +50,16 @@ export const hasPostFor = (version, posts) => {
 export const readingTimeFor = (markdown) =>
   `${Math.max(1, Math.round(markdown.split(/\s+/).length / 200))} min`;
 
+// No h1. BlogArticlePage renders post.title as the page heading, so one here
+// gives every release article two — which is what the markdown in this
+// directory was stripped of, while this script went on emitting it.
 export function markdownFor(note) {
-  const heading = `# MacroTrackr ${note.version}: ${note.title}`;
   const intro =
     note.summary ??
     `Version ${note.version} is out. Here is what changed and why.`;
   const bullets = note.highlights.map((line) => `- ${line}`).join("\n");
 
-  return `${heading}\n\n${intro}\n\n## What changed\n\n${bullets}\n\nAs always, everything here is in the open-source repository, and your data stays exportable.\n\nThe MacroTrackr Team\n`;
+  return `${intro}\n\n## What changed\n\n${bullets}\n\nAs always, everything here is in the open-source repository, and your data stays exportable.\n\nThe MacroTrackr Team\n`;
 }
 
 export function postFor(note, markdown) {
