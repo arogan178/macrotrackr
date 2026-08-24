@@ -3,6 +3,7 @@ import { m, useReducedMotion } from "motion/react";
 
 import AppHeader from "@/components/layout/AppHeader";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { usePageMetadata } from "@/hooks";
 import {
   APP_ICON_URL,
@@ -27,7 +28,7 @@ const sectionRevealVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: DURATIONS.base, ease: EASINGS.out },
   },
 } as const;
 

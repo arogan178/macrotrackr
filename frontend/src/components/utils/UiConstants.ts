@@ -195,8 +195,16 @@ export const DURATIONS = {
   value: 0.45,
 } as const;
 
-// Mirrors --ease-out / --ease-modal in style.css. `modal` is the sheet curve
-// and belongs to the sheet; everything else entering uses `out`.
+// `modal` is the sheet curve and belongs to the sheet; everything else entering
+// uses `out`.
+//
+// These are the JS curves, and they live here rather than in style.css because
+// motion takes a control-point array and a CSS variable cannot supply one. The
+// comment here used to claim they mirrored `--ease-out` / `--ease-modal`;
+// `--ease-out` has never existed, and adding it to the `@theme` block would
+// redefine Tailwind's own `ease-out` utility under all ~16 call sites that use
+// it. `--ease-modal` does exist and holds the same control points as `modal`,
+// so keep the two in step by hand if either moves.
 export const EASINGS = {
   out: [0.16, 1, 0.3, 1],
   modal: [0.32, 0.72, 0, 1],

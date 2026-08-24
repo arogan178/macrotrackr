@@ -66,7 +66,15 @@ const measurements = {
   // Only class strings: `rounded="card"` is the Skeleton prop, not a utility.
   legacyRadii: countMatches(/\brounded-(?:sm|md|lg|xl|2xl|3xl)\b/g),
   // Four opaque surface steps, no alpha.
-  surfaces: countDistinct(/\bbg-(?:background|surface|surface-2|surface-3)\b/g),
+  //
+  // Longest alternative first, and the reason is not style. `-` is a word
+  // boundary, so with `surface` listed ahead of `surface-2` the engine matches
+  // `bg-surface-2` as `bg-surface` and stops. Three of the four steps collapsed
+  // into one, the distinct count could not exceed 2 against a budget of 4, and
+  // the line printed `ratchet this down` for a counter measuring nothing — a
+  // `bg-surface-4` would have entered the codebase silently. Any alternation
+  // here whose branches share a prefix has to run longest-first.
+  surfaces: countDistinct(/\bbg-(?:background|surface-2|surface-3|surface)\b/g),
   surfaceAlpha: countMatches(/\bbg-(?:surface|surface-2|surface-3)\/\d+\b/g),
   // Two hairlines.
   hairlineAlpha: countMatches(/\bborder-(?:border|border-2|white)\/\d+\b/g),

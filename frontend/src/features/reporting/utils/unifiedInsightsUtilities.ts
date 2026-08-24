@@ -1,11 +1,15 @@
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+
 /**
  * Local utilities for UnifiedInsights and its subcomponents.
- * Uses existing design tokens only.
  */
- 
+
+// This file's header claimed it used existing tokens only while holding a
+// duration and a cubic-bezier that appeared nowhere else in the system. It
+// reads them now.
 export const TRANSITIONS = {
-  duration: 0.3,
-  ease: [0.22, 1, 0.36, 1] as const,
+  duration: DURATIONS.base,
+  ease: EASINGS.out,
 };
 
 export const STAGGER = {
@@ -22,7 +26,8 @@ export const BAR_BASE_CLASSES =
 export const CARD_BASE_CLASSES =
   "rounded-card border border-border bg-surface p-6";
 
-export const SECTION_HEADING_CLASSES = "text-lg font-semibold tracking-tight text-foreground/90";
+export const SECTION_HEADING_CLASSES =
+  "text-lg font-semibold tracking-tight text-foreground/90";
 
 export const SUBTEXT_MUTED_CLASSES = "text-xs text-foreground";
 
