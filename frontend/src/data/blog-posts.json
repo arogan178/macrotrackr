@@ -1,5 +1,19 @@
 [
   {
+    "slug": "v3-1-0",
+    "title": "MacroTrackr 3.1.0: Barcode Scanning, One-Click Imports, and a Faster Way In",
+    "excerpt": "Version 3.1 is mostly about the phone: barcode scanning that works inside an installed app, importers so switching trackers does not mean starting from an empty log, and an Android build with in-app Pro. Plus the launch and sign-in path, which had been dropping people on the marketing page and making them think they had been signed out.",
+    "date": "2026-08-24",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "2 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v0-8-0",
     "title": "MacroTrackr 0.8.0: Core Features Complete",
     "excerpt": "Calorie and macro tracking",
