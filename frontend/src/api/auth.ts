@@ -14,8 +14,14 @@ export interface AuthSuccessResponse {
 }
 
 export interface AuthSyncResponse {
-  user: unknown;
+  id: number;
+  clerkId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  /** True when this call inserted the row, so the profile is known to be empty. */
   isNewUser: boolean;
+  message?: string;
 }
 
 export interface ResetPasswordPayload {

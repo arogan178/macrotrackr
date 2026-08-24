@@ -796,6 +796,9 @@ export const authRoutes = (app: Elysia) =>
               email: emailToUpdate,
               firstName,
               lastName,
+              // Already linked, so the caller's profile is whatever is on
+              // record and it has to go and read it.
+              isNewUser: false,
               message: "User synced successfully",
             };
           }
@@ -848,6 +851,10 @@ export const authRoutes = (app: Elysia) =>
             email,
             firstName,
             lastName,
+            // The rows above were just inserted with NULL details, so the
+            // caller already knows the profile is empty and can skip a round
+            // trip to /api/user/me to find that out.
+            isNewUser: true,
             message: "User created and synced successfully",
           };
         },
