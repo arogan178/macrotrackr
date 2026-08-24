@@ -46,6 +46,14 @@ There is one of each. Adding a second is drift.
 | A comparison table | `ComparisonTable` | `frontend/src/features/landing/comparisons/ComparisonTable.tsx` |
 | Page chrome and header offset | `PageShell`, `AppHeader` | `frontend/src/components/layout/` |
 
+One exception you will meet immediately: `CardContainer`
+(`frontend/src/components/form/CardContainer.tsx`) has 19 call sites to
+`Panel`'s 18, and the auth screens are among them. It is not a second card —
+its `default` variant *is* `PANEL_CLASS` — but it is a second front door, with
+no header, footer or divider grading behind it. Reach for `Panel` in new work.
+Its `transparent` variant is the part that genuinely drifted: own radius, own
+two durations, and it belongs in `Panel` as a prop or nowhere.
+
 Colour, radius, surface and motion values come from `frontend/src/style.css` and
 `frontend/src/styles/global.css`. Write the Tailwind token class (`bg-surface-2`,
 `text-muted`, `rounded-card`); a hex literal in a component is drift by
@@ -76,10 +84,26 @@ actions, and live values. Macros have their own three tokens; check
 `style.css` for which — do not assume, and do not reuse the brand green for a
 macro.
 
-**Animate what changes.** Opacity-only, three durations, two curves, all in
-`Reveal`. A static number counting up from zero on every mount is decoration:
-`AnimatedNumber` is for the value that actually moves, at most one per screen.
-Every animation honours `prefers-reduced-motion`.
+**Animate what changes.** Entrances are opacity-only and go through `Reveal`,
+which is the whole vocabulary: three durations and two curves, in `DURATIONS`
+and `EASINGS` (`frontend/src/components/utils/UiConstants.ts`). A static number
+counting up from zero on every mount is decoration: `AnimatedNumber` is for the
+value that actually moves, at most one per screen.
+
+That describes `Reveal`, not yet the whole app: the tree still holds 17 distinct
+durations across transitions, timers and one-off variants. The budgets below
+carry the real figure, and it is the one to trust.
+
+**Reduced motion has two halves, and CSS is only one of them.** The block at
+`frontend/src/styles/global.css:119` zeroes every CSS animation and transition,
+which covers each `transition-*` utility for free. It cannot touch motion driven
+from JS — `animate()` writing `textContent`, or a `motion` element's inline
+transform — because neither is a CSS animation. Anything in that second half
+asks for itself, via `usePrefersReducedMotion`. `Reveal`, `PageTransition` and
+`AnimatedNumber` do. `AnimatedNumber` did not until its figures were found still
+counting under the preference, and the test that now holds it there asserts the
+timer never starts, not the value it lands on — the animation lands on the same
+figure either way, which is how it went unnoticed.
 
 **Icons carry meaning or they go.** An icon beside a heading that repeats the
 heading is decoration. Icon-only controls need `aria-label`.
@@ -111,10 +135,44 @@ budget is blind to it.
 
 Three of them are the residue of drift already found, and are expected to keep
 falling: `hexLiterals` (chart series, the native status bar, Google's brand
-colours), `boldOutsideScale`, and `smOverrides`. `emoji` is pinned at 0.
+colours), `boldOutsideScale`, and `smOverrides`. `emoji` is pinned at 0. Two of
+those three currently sit *on* their ceiling rather than under it, so the next
+call site that adds one fails the build — which is the ratchet working, but read
+it as a queue of work rather than as headroom.
 
 The numbers may fall freely. Raising one is a design decision and belongs in the
 same commit as the change that needs it, so the trade-off appears in the diff.
+
+**A counter that cannot rise is worse than no counter.** `surfaces` read 2
+against a budget of 4 for its whole life, and printed `ratchet this down` the
+entire time. Its alternation listed `surface` ahead of `surface-2`, and `-` is a
+word boundary, so `bg-surface-2` and `bg-surface-3` both matched as
+`bg-surface`: three of the four steps collapsed into one and a fifth surface
+would have entered silently. Any alternation whose branches share a prefix runs
+longest-first, and a budget sitting well under its ceiling with no memory of
+falling is the thing to go and verify.
+
+## What has not moved yet
+
+The rules above are the target, not a description of every file. Knowing where
+the system does *not* reach yet matters, because the largest risk to it is a
+reader opening a screen that predates it, seeing 24px bold headings and a
+hand-rolled card, and copying that as house style. It is not. Counted today:
+
+- **59 hand-rolled `<h1>`–`<h3>` with a `text-Nxl` class, across 30 files**,
+  against 14 files on `Heading`. `/compare` and the calculators are migrated;
+  most of auth, goals and billing are not.
+- **`CardContainer` over `Panel`** in 19 places, including `AuthPageShell` and
+  so the whole onboarding flow.
+- **83 motion variants that animate `x` or `y`.** Entrances are meant to be
+  opacity-only — travel reflows the text underneath it — and `Reveal` is the
+  way in. `LandingPage`'s section reveal is one of these.
+
+Two rules for touching any of it. If you are editing a file for another reason,
+migrate what you touch and leave the rest; a half-migrated file is fine, an
+unattributed restyle in the middle of a bugfix is not. And check the diff for
+what it *ratchets*: these three all feed budgets, so real migration shows up as
+a number falling in `ui-budgets.json`.
 
 ## Before you call UI work done
 
@@ -145,6 +203,6 @@ deciding for itself again.
 
 ## History
 
-`docs/ui-changelog.md` records the nine passes that built this system and why
-each decision was made. Read it when a rule here looks arbitrary — the reason is
-almost certainly there.
+`docs/ui-changelog.md` records the passes that built this system, Phase 0
+through Phase 9, and why each decision was made. Read it when a rule here looks
+arbitrary — the reason is almost certainly there.

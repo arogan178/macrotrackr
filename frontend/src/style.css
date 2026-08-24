@@ -100,10 +100,12 @@
   /* Shadows – only the modal casts one; nothing is darker than the page */
   --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 
-  /* Design system easing curves */
+  /* The sheet curve. `--ease-drawer` sat here holding the same four control
+     points under a second name, and `--ease-spring` held an overshoot no call
+     site ever asked for; both are gone. The paired JS array lives in
+     `components/utils/UiConstants.ts`, because motion takes control points and
+     a variable cannot supply them. */
   --ease-modal: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* Letter spacing tokens for labels */
   --tracking-label: 0.025em;

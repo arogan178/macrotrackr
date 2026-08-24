@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+
 import {
   CARD_BASE_CLASSES,
   getColorByScore,
@@ -11,9 +13,12 @@ import {
 
 describe("unifiedInsightsUtilities", () => {
   describe("TRANSITIONS", () => {
-    it("has expected values", () => {
-      expect(TRANSITIONS.duration).toBe(0.3);
-      expect(TRANSITIONS.ease).toHaveLength(4);
+    // Assert the source, not the figure. This file held 0.3 and its own
+    // cubic-bezier while its header claimed it used existing tokens only; a
+    // test that copies the number cannot tell the two apart.
+    it("reads the motion tokens rather than holding its own", () => {
+      expect(TRANSITIONS.duration).toBe(DURATIONS.base);
+      expect(TRANSITIONS.ease).toBe(EASINGS.out);
     });
   });
 

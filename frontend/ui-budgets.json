@@ -7,7 +7,7 @@
     "surfaceAlpha": 0,
     "hairlineAlpha": 0,
     "motionDurations": 20,
-    "motionEasings": 5,
+    "motionEasings": 4,
     "motionCallSites": 27,
     "layoutProjection": 12,
     "motionFiles": 43,
@@ -30,6 +30,8 @@
       "motionEasings": 9,
       "motionCallSites": 27,
       "layoutProjection": 15
-    }
+    },
+    "$surfacesNote": "surfaces read 2 for as long as it existed and no UI changed to make it 4. The counter was broken: its alternation listed `surface` ahead of `surface-2`, and `-` is a word boundary, so bg-surface-2 and bg-surface-3 both matched as bg-surface. Three steps collapsed into one, the measurement could not exceed 2 against a budget of 4, and it printed `ratchet this down` while catching nothing — a bg-surface-4 would have entered silently. Fixed by ordering the alternation longest-first; 4 is the closed set, measured for real.",
+    "$easingNote": "motionEasings fell 5 -> 4 when UnifiedInsights and LandingPage stopped holding their own cubic-bezier. The remaining four are EASINGS.out, EASINGS.modal, and the easeIn/easeInOut/easeOut keywords."
   }
 }
