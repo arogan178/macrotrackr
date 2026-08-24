@@ -25,7 +25,7 @@ Code of Conduct.
 
 ## Reporting
 
-Report issues to `support@local.invalid`. Include links, screenshots, and
+Report issues to `support@macrotrackr.com`. Include links, screenshots, and
 context when possible.
 
 All reports will be reviewed and handled in a timely manner.

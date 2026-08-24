@@ -15,4 +15,4 @@ You may not:
 - Use project trademarks or logos in a way that implies endorsement.
 - Rebrand a modified service as the official hosted service.
 
-For permission requests, contact `support@local.invalid`.
+For permission requests, contact `support@macrotrackr.com`.

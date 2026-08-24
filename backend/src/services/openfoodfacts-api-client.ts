@@ -1,10 +1,18 @@
 // src/services/openfoodfacts-api-client.ts
 
+import { getConfig } from "../config";
 import { logger, loggerHelpers } from "../lib/observability/logger";
 
 // Use the search-a-licious API for full-text search
 const API_URL = "https://search.openfoodfacts.org/search";
-const USER_AGENT = "MacroTrackr/1.0 (contact: support@local.invalid)";
+
+// Open Food Facts asks for a reachable contact and throttles or blocks clients
+// that do not give one. This was pinned to the placeholder address, so every
+// barcode lookup identified itself with a mailbox that cannot be written to.
+// Reading it from config means it follows the deployment.
+function userAgent(): string {
+  return `MacroTrackr/1.0 (contact: ${getConfig().SUPPORT_EMAIL})`;
+}
 
 // Configuration constants
 const MAX_RESULTS = 10;
@@ -578,7 +586,7 @@ export class OpenFoodFactsApiClient {
 
       const response = await fetch(url, {
         headers: {
-          "User-Agent": USER_AGENT,
+          "User-Agent": userAgent(),
           "Accept": "application/json",
         },
         signal: controller.signal,
@@ -634,7 +642,7 @@ export class OpenFoodFactsApiClient {
 
       const response = await fetch(url, {
         headers: {
-          "User-Agent": USER_AGENT,
+          "User-Agent": userAgent(),
           "Accept": "application/json",
         },
         signal: controller.signal,

@@ -31,7 +31,12 @@ export const APP_URL = trimTrailingSlash(rawAppUrl);
 // One spelling in this deployment: the title, the manifest and the README
 // disagreed ("MacroTrackr", "Macro Tracker", "MacroTracker").
 export const APP_NAME = import.meta.env.VITE_PUBLIC_APP_NAME ?? "MacroTrackr";
-export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL ?? "support@local.invalid";
+// `??` let an explicitly empty build arg through as "", which renders a bare
+// `mailto:` link. The placeholder is a self-hosting default and is rejected for
+// a managed build by scripts/check-support-email.mjs.
+export const SUPPORT_EMAIL =
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- "" has to fall through to the default, which ?? would not do
+  import.meta.env.VITE_SUPPORT_EMAIL?.trim() || "support@local.invalid";
 export const SUPPORT_EMAIL_MAILTO = `mailto:${SUPPORT_EMAIL}`;
 export const GITHUB_REPO_URL = rawGitHubRepoUrl;
 export const DOCS_URL = rawDocumentationUrl;

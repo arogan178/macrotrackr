@@ -205,4 +205,4 @@ That's it. Start simple. Stay consistent. The results will come.
 
 The MacroTrackr Team
 
-*Questions about getting started? Email us at support@local.invalid. We read every message.*
+*Questions about getting started? Email us at support@macrotrackr.com. We read every message.*

@@ -7,7 +7,7 @@
 
 ## Direct contact
 
-Email: `support@local.invalid`
+Email: `support@macrotrackr.com`
 
 ## Self-hosted help checklist
 
