@@ -2,6 +2,7 @@ export { useBeforeUnload } from "./useBeforeUnload";
 export { useDeferredVisibility } from "./useDeferredVisibility";
 export { useFeatureLoading } from "./useFeatureLoading";
 export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
+export { useIsOffline } from "./useIsOffline";
 export {
   useMutationErrorHandler,
   useOptimisticMutationHandler,

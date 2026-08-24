@@ -1,9 +1,9 @@
 import React from "react";
 import { Navigate } from "@tanstack/react-router";
 
+import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
-import { LoadingFallback } from "@/routes/-authGuards";
 
 interface PublicSelfHostedGateProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function PublicSelfHostedGate({
   }
 
   if (!isLoaded) {
-    return <LoadingFallback />;
+    return <AuthLoadingScreen />;
   }
 
   if (isSignedIn) {
