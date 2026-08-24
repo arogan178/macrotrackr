@@ -57,6 +57,12 @@ jobs:
       working-directory: ./frontend
       run: bun run lint
 
+    # Five releases' worth of drift went unnoticed because this only ever ran
+    # by hand. A release note with no post is a release nobody was told about.
+    - name: Check release notes have posts
+      working-directory: ./frontend
+      run: bun run release:blog --check
+
     - name: Build
       working-directory: ./frontend
       run: bun run build
