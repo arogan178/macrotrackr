@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useIsOffline } from "@/hooks/useIsOffline";
 
 /**
  * The shell is precached, so offline the app opens and then every route fails
@@ -6,22 +6,7 @@ import { useEffect, useState } from "react";
  * render an unexplained empty state.
  */
 const OfflineBar: React.FC = () => {
-  const [isOffline, setIsOffline] = useState(
-    typeof navigator === "undefined" ? false : !navigator.onLine,
-  );
-
-  useEffect(() => {
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => setIsOffline(false);
-
-    globalThis.addEventListener("offline", goOffline);
-    globalThis.addEventListener("online", goOnline);
-
-    return () => {
-      globalThis.removeEventListener("offline", goOffline);
-      globalThis.removeEventListener("online", goOnline);
-    };
-  }, []);
+  const isOffline = useIsOffline();
 
   if (!isOffline) return null;
 

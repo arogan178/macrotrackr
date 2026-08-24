@@ -25,11 +25,31 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   ]);
 }
 
+function isApiErrorWithStatus(error: unknown, status: number): boolean {
+  return error instanceof ApiError && error.status === status;
+}
+
+const SYNC_TIMEOUT_MS = 12_000;
+const PROFILE_TIMEOUT_MS = 8000;
+
 interface UseAuthReadyResult {
   error: string | null;
   setupAuth: () => Promise<void>;
 }
 
+/**
+ * The step between "Clerk says you're signed in" and the app proper.
+ *
+ * Ordered around the fact that almost every visit here is a returning sign-in,
+ * whose account was linked to a local row long ago. So it asks for the profile
+ * first and only syncs when the answer is that there isn't one — one request
+ * for the common case, where this used to always spend a sync and a profile
+ * fetch back to back, plus 150ms of fixed sleeps between them.
+ *
+ * The sleeps are gone rather than shortened: they were waiting for the Clerk
+ * token to become available, and `apiClient.getAuthToken()` awaits the token
+ * getter on every request, so there was never anything to wait for.
+ */
 export function useAuthReady(redirectTo: string): UseAuthReadyResult {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -51,13 +71,57 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
         return;
       }
 
-      await new Promise((r) => setTimeout(r, 50));
+      if (shouldBypassSyncForRedirect(redirectTo)) {
+        navigate({ to: "/profile-setup", search: { redirectTo }, replace: true });
 
-      const shouldBypassSync = shouldBypassSyncForRedirect(redirectTo);
+        return;
+      }
 
-      if (!shouldBypassSync) {
+      // A 401 here means the backend rejected a token the client believes is
+      // live. Asking again picks up a freshly minted one; beyond that it is a
+      // real failure and not worth sitting on.
+      let userDetails: Record<string, unknown> | null = null;
+      let isAccountSynced = true;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
         try {
-          await withTimeout(authApi.syncUser(), 12000, "Account synchronization timed out");
+          const response = await withTimeout(
+            userApi.getUserDetails(),
+            PROFILE_TIMEOUT_MS,
+            "Fetching user details timed out",
+          );
+          if (isLikelyUserDetailsPayload(response)) {
+            userDetails = response;
+          }
+          break;
+        } catch (profileError) {
+          // No local row for this Clerk account yet: a first-ever sign-in, or a
+          // sign-up whose sync never landed. That is what the sync is for.
+          if (
+            profileError instanceof ApiError &&
+            profileError.status === 409 &&
+            profileError.code === "ACCOUNT_NOT_SYNCED"
+          ) {
+            isAccountSynced = false;
+            break;
+          }
+
+          if (isApiErrorWithStatus(profileError, 401) && attempt === 0) {
+            continue;
+          }
+
+          throw profileError;
+        }
+      }
+
+      if (!isAccountSynced) {
+        let isNewUser = false;
+        try {
+          const syncResult = await withTimeout(
+            authApi.syncUser(),
+            SYNC_TIMEOUT_MS,
+            "Account synchronization timed out",
+          );
+          isNewUser = syncResult.isNewUser;
         } catch (syncError: unknown) {
           if (
             syncError instanceof ApiError &&
@@ -69,48 +133,43 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
             return;
           }
 
-          if (syncError instanceof Error && "status" in syncError) {
-            const errorWithStatus = syncError as { status: number };
-            if (errorWithStatus.status === 401) {
-              setError("Authentication failed. Please sign in again.");
+          if (isApiErrorWithStatus(syncError, 401)) {
+            setError("Authentication failed. Please sign in again.");
 
-              return;
-            }
+            return;
           }
+
           logger.error("[AuthReadyPage] Failed to sync user", syncError);
           setError("We couldn't link your account yet. Please try signing in again.");
 
           return;
         }
-        await new Promise((r) => setTimeout(r, 100));
-        queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
-      }
 
-      if (shouldBypassSync) {
-        navigate({ to: "/profile-setup", search: { redirectTo }, replace: true });
+        // A row the sync just inserted has NULL details by construction, so
+        // there is nothing to read back — it goes to setup either way.
+        if (isNewUser) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
+          navigate({ to: "/profile-setup", search: { redirectTo } });
 
-        return;
-      }
+          return;
+        }
 
-      let userDetails: Record<string, unknown> | null = null;
-      for (let attempt = 0; attempt < 3; attempt += 1) {
         try {
-          const response = await withTimeout(userApi.getUserDetails(), 8000, "Fetching user details timed out");
-          if (!isLikelyUserDetailsPayload(response)) {
-            await new Promise((r) => setTimeout(r, 120));
-            continue;
+          const response = await withTimeout(
+            userApi.getUserDetails(),
+            PROFILE_TIMEOUT_MS,
+            "Fetching user details timed out",
+          );
+          if (isLikelyUserDetailsPayload(response)) {
+            userDetails = response;
           }
-          userDetails = response;
-          break;
-        } catch (userError) {
-          if (userError instanceof ApiError && userError.status === 401) {
-            await new Promise((r) => setTimeout(r, 120));
-            continue;
-          }
-          throw userError;
+        } catch (profileError) {
+          logger.error("[AuthReadyPage] Failed to load profile after sync", profileError);
         }
       }
 
+      // Seeds the cache the destination route is about to read, so it renders
+      // from this response instead of asking for it again.
       if (userDetails) {
         queryClient.setQueryData(queryKeys.auth.user(), userDetails);
       }

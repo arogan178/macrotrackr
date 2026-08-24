@@ -107,29 +107,23 @@ describe("apiServices contracts", () => {
   });
 
   it("keeps auth sync typed to its actual backend contract", async () => {
-    fetchMock.mockResolvedValueOnce(
-      createJsonResponse({
-        user: {
-          id: 12,
-          clerkId: "user_456",
-          email: "casey@example.com",
-          firstName: "Casey",
-          lastName: "Ng",
-        },
-        isNewUser: true,
-      }),
-    );
-
-    await expect(authApiClient.syncUser({ token: "token-123" })).resolves.toEqual({
-      user: {
-        id: 12,
-        clerkId: "user_456",
-        email: "casey@example.com",
-        firstName: "Casey",
-        lastName: "Ng",
-      },
+    // Flat, matching what /api/auth/clerk-sync actually returns. The nested
+    // `user` this once claimed never existed on the wire.
+    const syncResponse = {
+      id: 12,
+      clerkId: "user_456",
+      email: "casey@example.com",
+      firstName: "Casey",
+      lastName: "Ng",
       isNewUser: true,
-    });
+      message: "User created and synced successfully",
+    };
+
+    fetchMock.mockResolvedValueOnce(createJsonResponse(syncResponse));
+
+    await expect(authApiClient.syncUser({ token: "token-123" })).resolves.toEqual(
+      syncResponse,
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/auth/clerk-sync",

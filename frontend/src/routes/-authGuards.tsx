@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate } from "@tanstack/react-router";
 
+import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { isClerkAuthMode } from "@/config/runtime";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
@@ -10,11 +11,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAppAuthState();
 
   if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <AuthLoadingScreen />;
   }
 
   if (!isSignedIn) {
@@ -28,11 +25,7 @@ export function RequireUnauth({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAppAuthState();
 
   if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <AuthLoadingScreen />;
   }
 
   if (isSignedIn) {

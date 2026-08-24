@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "@tanstack/react-router";
 
+import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { isClerkAuthMode } from "@/config/runtime";
 import {
@@ -37,8 +38,12 @@ export function RequireCompleteProfile({
     enabled: shouldCheckProfileCompletion && isAuthLoaded && isSignedIn,
   });
 
-  // Show loading while auth state is being determined
-  if (!isAuthLoaded || isUserLoading) {
+  // Auth state is the one that can hang forever without a network.
+  if (!isAuthLoaded) {
+    return <AuthLoadingScreen />;
+  }
+
+  if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
         <LoadingSpinner size="lg" />

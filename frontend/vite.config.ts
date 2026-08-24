@@ -69,7 +69,15 @@ export default defineConfig(({ command }) => {
                 short_name: "MacroTrackr",
                 description:
                   "Log meals in seconds, set a macro split, and see where the week actually went.",
-                start_url: "/",
+                // The app, not the marketing page. `/` is a sales pitch with a
+                // "Log in" button in its header regardless of session state, so
+                // launching there made an installed app look signed out every
+                // time. `/home` is behind RequireAuth, which sends a genuinely
+                // signed-out launch to /login on its own.
+                //
+                // `id` stays "/" so this is a manifest update to the same
+                // installed app rather than a second install.
+                start_url: "/home",
                 display: "standalone",
                 // Shortcuts put the two things people open the app for on the
                 // launcher's long-press menu.
