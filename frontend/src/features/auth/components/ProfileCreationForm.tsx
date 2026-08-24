@@ -10,12 +10,16 @@ import { useNavigate } from "@tanstack/react-router";
 import { authApi } from "@/api/auth";
 import { goalsApi } from "@/api/goals";
 import { userApi } from "@/api/user";
+import Reveal from "@/components/animation/Reveal";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import InfoCard from "@/components/form/InfoCard";
 import NumberField from "@/components/form/NumberField";
 import Button from "@/components/ui/Button";
+import { TYPE_SCALE } from "@/components/ui/Heading";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
+import Panel, { RULE_HAIRLINE } from "@/components/ui/Panel";
+import Value from "@/components/ui/Value";
 import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
 import {
   getFirstErrorMessage,
@@ -24,6 +28,7 @@ import {
   validateStep2 as checkStep2,
 } from "@/features/auth/utils/profileValidation";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { cn } from "@/lib/classnameUtilities";
 import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -53,6 +58,16 @@ const GOAL_CHOICES: { value: WeightGoalChoice; label: string }[] = [
   { value: "maintain", label: "Maintain" },
   { value: "gain", label: "Gain weight" },
 ];
+
+// The summary reads as a label/value ledger. Rows are divided, not boxed: a
+// hairline says "same group", which is what these three figures are.
+const SUMMARY_ROW = cn(
+  "flex items-baseline justify-between gap-3 border-b py-3",
+  "first:pt-0 last:border-b-0 last:pb-0",
+  RULE_HAIRLINE,
+);
+
+const SUMMARY_LABEL = cn(TYPE_SCALE.small, "text-muted");
 
 function StepIndicator({ step }: { step: number }) {
   return (
@@ -142,14 +157,44 @@ export function ProfileCreationForm() {
         }).tdee
       : 0;
 
+  // The preview has to agree with the button the user pressed. Deriving the
+  // direction from the two weights alone meant a target left over from "Lose
+  // weight" kept printing deficit numbers after the user switched to "Gain",
+  // and the whole card sat frozen until submit finally rejected it.
+  const liveGoalErrors = checkGoalStep(weightGoal, targetWeight, weight);
+
+  // "Required" is not feedback while the field is still untouched, so the live
+  // check only speaks once there is a number to disagree with.
+  const targetWeightError =
+    targetWeight == null ? errors.targetWeight : liveGoalErrors.targetWeight;
+
   const goalCalculations =
-    tdee && weight && weightGoal
+    tdee && weight && weightGoal && !getFirstErrorMessage(liveGoalErrors)
       ? generateWeightGoalCalculations(
           tdee,
           weight,
           weightGoal === "maintain" ? weight : (targetWeight ?? weight),
         )
       : undefined;
+
+  const handleGoalChange = (choice: WeightGoalChoice) => {
+    setWeightGoal(choice);
+    setErrors((previous) => ({
+      ...previous,
+      weightGoal: "",
+      targetWeight: "",
+    }));
+    setTargetWeight((previous) => {
+      if (choice === "maintain") return null;
+      if (previous == null || weight == null) return previous;
+
+      // A target that pointed the other way is not a target for this goal.
+      const pointsTheRightWay =
+        choice === "lose" ? previous < weight : previous > weight;
+
+      return pointsTheRightWay ? previous : null;
+    });
+  };
 
   const handleNext = () => {
     if (step === 1 && getFirstErrorMessage(validateStep1())) return;
@@ -495,16 +540,14 @@ export function ProfileCreationForm() {
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                onClick={() => {
-                  setWeightGoal(choice.value);
-                  setErrors({});
-                  if (choice.value === "maintain") setTargetWeight(null);
-                }}
-                className={`cursor-pointer rounded-control border p-3 text-center font-medium transition-colors ${
+                onClick={() => handleGoalChange(choice.value)}
+                className={cn(
+                  "cursor-pointer rounded-control border p-3 text-center transition-colors",
+                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none",
                   isSelected
-                    ? "border-primary bg-primary/10 text-foreground"
-                    : "border-border bg-surface-2 text-muted hover:border-primary/40"
-                }`}
+                    ? "border-primary bg-primary/10 font-semibold text-foreground"
+                    : "border-border bg-surface-2 text-muted hover:border-primary/40",
+                )}
               >
                 {choice.label}
               </button>
@@ -513,49 +556,82 @@ export function ProfileCreationForm() {
         </div>
         <FieldError message={errors.weightGoal} />
 
-        {weightGoal !== "" && weightGoal !== "maintain" && (
-          <div>
-            <NumberField
-              label={`Target Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
-              value={targetWeight ?? undefined}
-              onChange={(value: number | undefined) => {
-                setTargetWeight(value ?? null);
-                if (errors.targetWeight) {
-                  setErrors((previous) => ({ ...previous, targetWeight: "" }));
-                }
-              }}
-              min={USER_MINIMUM_WEIGHT}
-              max={USER_MAXIMUM_WEIGHT}
-              step={0.1}
-              unit="kg"
-              required
-            />
-            <FieldError message={errors.targetWeight} />
-          </div>
-        )}
-
-        {goalCalculations && !errors.targetWeight && (
-          <div className="rounded-control border border-border bg-surface-2 p-4">
-            <div className="flex justify-between">
-              <span className="text-muted">Daily calorie target</span>
-              <span className="font-medium">
-                {goalCalculations.calorieTarget} kcal
-              </span>
+        {/* Keyed on the goal so switching pills fades the panel below them in.
+            The key never changes while typing, so the field keeps focus. */}
+        <Reveal key={weightGoal || "unset"} className="space-y-4">
+          {weightGoal !== "" && weightGoal !== "maintain" && (
+            <div>
+              <NumberField
+                label={`Target Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
+                value={targetWeight ?? undefined}
+                onChange={(value: number | undefined) => {
+                  setTargetWeight(value ?? null);
+                  if (errors.targetWeight) {
+                    setErrors((previous) => ({
+                      ...previous,
+                      targetWeight: "",
+                    }));
+                  }
+                }}
+                min={USER_MINIMUM_WEIGHT}
+                max={USER_MAXIMUM_WEIGHT}
+                step={0.1}
+                unit="kg"
+                required
+              />
+              <FieldError message={targetWeightError} />
             </div>
-            {weightGoal !== "maintain" && (
-              <div className="mt-2 flex justify-between">
-                <span className="text-muted">Expected change</span>
-                <span className="font-medium">
-                  {Math.abs(goalCalculations.weeklyChange).toFixed(2)} kg per
-                  week
-                </span>
-              </div>
-            )}
-            <p className="mt-3 text-xs text-muted">
-              You can change any of this later under Goals.
-            </p>
-          </div>
-        )}
+          )}
+
+          {goalCalculations && (
+            <Reveal step={1}>
+              <Panel raised padding="compact">
+                <dl>
+                  <div className={SUMMARY_ROW}>
+                    <dt className={SUMMARY_LABEL}>Daily calorie target</dt>
+                    <dd>
+                      <Value
+                        value={goalCalculations.calorieTarget}
+                        unit="kcal"
+                        size="stat"
+                      />
+                    </dd>
+                  </div>
+                  {weightGoal !== "maintain" && (
+                    <>
+                      <div className={SUMMARY_ROW}>
+                        <dt className={SUMMARY_LABEL}>Expected change</dt>
+                        <dd>
+                          <Value
+                            value={Math.abs(goalCalculations.weeklyChange)}
+                            unit="kg"
+                            suffix="per week"
+                          />
+                        </dd>
+                      </div>
+                      <div className={SUMMARY_ROW}>
+                        <dt className={SUMMARY_LABEL}>Time to target</dt>
+                        <dd>
+                          <Value
+                            value={goalCalculations.calculatedWeeks}
+                            suffix={
+                              goalCalculations.calculatedWeeks === 1
+                                ? "week"
+                                : "weeks"
+                            }
+                          />
+                        </dd>
+                      </div>
+                    </>
+                  )}
+                </dl>
+                <p className={cn(SUMMARY_LABEL, "mt-4")}>
+                  You can change any of this later under Goals.
+                </p>
+              </Panel>
+            </Reveal>
+          )}
+        </Reveal>
       </div>
 
       <div className="flex gap-3">
