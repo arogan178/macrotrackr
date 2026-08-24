@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bunx vite",
-    "build": "bunx vite build",
+    "build": "node ./scripts/check-support-email.mjs && bunx vite build",
     "postbuild": "(bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js) && (bun ./scripts/prerender.mjs || node ./scripts/prerender.mjs)",
     "preview": "bunx vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
@@ -27,6 +27,7 @@
     "bundle:size": "node scripts/analyze-bundle.js",
     "ui:budgets": "node ./scripts/check-ui-budgets.mjs",
     "verify:assetlinks": "node ./scripts/check-assetlinks.mjs",
+    "verify:support-email": "node ./scripts/check-support-email.mjs",
     "release:blog": "node ./scripts/release-note-to-blog.mjs"
   },
   "dependencies": {

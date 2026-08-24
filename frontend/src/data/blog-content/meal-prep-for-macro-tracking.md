@@ -310,4 +310,4 @@ Start small. Prep just lunches for one week. See how much easier your tracking b
 
 The MacroTrackr Team
 
-*Questions about meal prep strategies? Email us at support@local.invalid.*
+*Questions about meal prep strategies? Email us at support@macrotrackr.com.*

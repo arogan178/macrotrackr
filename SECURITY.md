@@ -9,7 +9,7 @@
 
 Do not open public issues for sensitive vulnerabilities.
 
-Email: `support@local.invalid`
+Email: `support@macrotrackr.com`
 
 Include:
 

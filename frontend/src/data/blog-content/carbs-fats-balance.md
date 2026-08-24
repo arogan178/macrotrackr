@@ -311,4 +311,4 @@ Your body will tell you what it needs. You just have to listen.
 
 The MacroTrackr Team
 
-*Need help setting your targets? Email us at support@local.invalid.*
+*Need help setting your targets? Email us at support@macrotrackr.com.*
