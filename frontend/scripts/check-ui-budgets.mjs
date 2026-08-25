@@ -47,16 +47,13 @@ const all = sources.join("\n");
  */
 const code = sources
   .map((source) =>
-    source
-      .replaceAll(/\/\*[\s\S]*?\*\//g, "")
-      .replaceAll(/^\s*\/\/.*$/gm, ""),
+    source.replaceAll(/\/\*[\s\S]*?\*\//g, "").replaceAll(/^\s*\/\/.*$/gm, ""),
   )
   .join("\n");
 
 const countMatches = (pattern) => (all.match(pattern) ?? []).length;
 const countCode = (pattern) => (code.match(pattern) ?? []).length;
-const countDistinct = (pattern) =>
-  new Set(all.match(pattern) ?? []).size;
+const countDistinct = (pattern) => new Set(all.match(pattern) ?? []).size;
 const countFiles = (needle) =>
   sources.filter((source) => source.includes(needle)).length;
 
@@ -86,9 +83,7 @@ const measurements = {
   // site is the drift. Motion gets measured the same way.
   //
   // Seconds-scale only — `duration: 8000` is a toast timer, not an animation.
-  motionDurations: countDistinct(
-    /\bduration: (?:[0-4](?:\.\d+)?)\b/g,
-  ),
+  motionDurations: countDistinct(/\bduration: (?:[0-4](?:\.\d+)?)\b/g),
   motionEasings: countDistinct(/\bease: (?:"[a-zA-Z]+"|\[[\d.,\s]+\])/g),
   // A call site declaring its own initial/animate is how 23 durations happened.
   // Intent belongs in <Reveal>; numbers belong in DURATIONS/EASINGS.
@@ -119,6 +114,40 @@ const measurements = {
   hexLiterals: countCode(/#[\dA-Fa-f]{6}\b/g),
   // Emoji are not part of the UI vocabulary. Badges shipped with 🔥, 🎯 and ⚡.
   emoji: countMatches(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu),
+  // One spelling for a figure. A daily target shipped as both "2000 kcal" and
+  // "2,000 kcal", and the split ran through the primitive meant to prevent it:
+  // `Value` grouped via toLocaleString, the `AnimatedNumber` it delegates to
+  // did not, so adding `animate` changed the spelling. Every separator comes
+  // from `formatGrouped` now; a call site formatting for itself is the drift.
+  // The no-argument form only: `date.toLocaleString("en-US", {...})` in the
+  // reporting queries formats a month label, which is not a figure and not
+  // this counter's business. formatNumber.ts is excluded as the implementation.
+  adHocNumberFormat: files.reduce(
+    (total, file, index) =>
+      /lib[/\\]formatNumber\.ts$/.test(file)
+        ? total
+        : total + (sources[index].match(/\.toLocaleString\(\)/g) ?? []).length,
+    0,
+  ),
+  // The other half of the same rule. `adHocNumberFormat` catches a call site
+  // reaching for `toLocaleString`; this catches one that formats by not
+  // formatting — `{tdee} kcal`, which prints "2841 kcal" beside a "2,841 kcal"
+  // two components away. Both JSX and template-literal forms, because the
+  // sweep found the split in both. Anything printing a figure next to a
+  // calorie unit goes through `formatGrouped`.
+  //
+  // Counted by matching then filtering rather than by subtracting two patterns:
+  // `{" "}` is JSX's explicit space, so `{formatGrouped(tdee)}{" "}\nkcal` puts
+  // a bare `{" "}` directly before the unit and a subtracting pattern scores it
+  // as raw. The expression itself has to be inspected.
+  rawCalorieFigures: (() => {
+    const figureBeforeUnit =
+      /\{[^{}\n]{1,70}\}\s*(?:\{" "\})?\s*(?:kcal|calories|cal\/)|\$\{[^}\n]{1,70}\}\s*(?:kcal|calories)/g;
+
+    return (code.match(figureBeforeUnit) ?? []).filter(
+      (match) => !match.includes("formatGrouped") && !/^\{"\s*"\}/.test(match),
+    ).length;
+  })(),
   // TYPE_SCALE stops at font-semibold except for its two display steps, so
   // font-bold outside Heading/Value is a call site inventing a weight. Heading
   // and Value are excluded because they define the scale.

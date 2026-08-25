@@ -15,6 +15,7 @@ import StatusIndicator from "@/components/ui/StatusIndicator";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -407,7 +408,7 @@ const CalorieSearch = memo(function CalorieSearch({
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-foreground">
                       {displayQuantity ? `${displayQuantity} | ` : ""}
-                      Calories: {calories.toFixed(1)} kcal | Protein:{" "}
+                      Calories: {formatGrouped(calories, 1)} kcal | Protein:{" "}
                       {protein.toFixed(1)}g, Carbs: {carbs.toFixed(1)}
                       g, Fats: {fats.toFixed(1)}g
                     </div>
@@ -514,7 +515,7 @@ const CalorieSearch = memo(function CalorieSearch({
                               </span>
                             </div>
                             <div className="mt-0.5 text-xs text-muted">
-                              Calories: {cals} kcal | Protein: {entry.protein}g,
+                              Calories: {formatGrouped(cals)} kcal | Protein: {entry.protein}g,
                               Carbs: {entry.carbs}g, Fats: {entry.fats}g
                             </div>
                           </button>

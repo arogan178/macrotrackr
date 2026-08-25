@@ -19,6 +19,7 @@ import {
   shareSnapshot,
 } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 import { useStore } from "@/store/store";
 
 export interface MacroSnapshotModalProps {
@@ -142,7 +143,7 @@ function MacroSnapshotModalInner({
               <div className="flex items-baseline justify-between gap-3">
                 <p className={cn(TYPE_SCALE.micro, "text-muted")}>Calories</p>
                 <p className="text-xs text-muted">
-                  Target {model.calorieTarget.toLocaleString()} kcal
+                  Target {formatGrouped(model.calorieTarget)} kcal
                 </p>
               </div>
 
@@ -151,7 +152,7 @@ function MacroSnapshotModalInner({
                   size="hero"
                   unit="kcal"
                   value={model.calories}
-                  suffix={`of ${model.calorieTarget.toLocaleString()}`}
+                  suffix={`of ${formatGrouped(model.calorieTarget)}`}
                 />
               </div>
 
@@ -207,7 +208,7 @@ function MacroSnapshotModalInner({
 
                   <div className="mt-2 flex items-baseline justify-between gap-2 text-xs">
                     <span className="font-semibold text-foreground tabular-nums">
-                      {row.calories.toLocaleString()} kcal
+                      {formatGrouped(row.calories)} kcal
                     </span>
                     <span className="text-muted tabular-nums">
                       {row.energyShare}%
@@ -224,7 +225,7 @@ function MacroSnapshotModalInner({
                   Energy split
                 </p>
                 <p className="text-xs text-muted">
-                  {model.totalMacroCalories.toLocaleString()} kcal from macros
+                  {formatGrouped(model.totalMacroCalories)} kcal from macros
                 </p>
               </div>
 

@@ -9,6 +9,7 @@ import {
   useSavedMeals,
 } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { Ingredient, MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -89,7 +90,9 @@ const SavedMealsList = memo(
                   <span className="text-sm font-medium text-foreground">
                     {meal.name}
                   </span>
-                  <span className="text-xs text-muted">{calories} kcal</span>
+                  <span className="text-xs text-muted">
+                    {formatGrouped(calories)} kcal
+                  </span>
                 </button>
                 <button
                   type="button"

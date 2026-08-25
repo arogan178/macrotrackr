@@ -91,17 +91,36 @@ describe("ProfileCreationForm goal step", () => {
     expect(losing).not.toEqual(gaining);
   });
 
-  it("drops a target weight that contradicts the newly picked goal", async () => {
+  it("keeps each direction's target weight to itself", async () => {
     const user = userEvent.setup();
     await reachGoalStep(user);
 
     await user.click(screen.getByRole("radio", { name: /lose weight/i }));
     await user.type(screen.getByLabelText(/target weight/i), "80");
 
+    // Gain must not inherit Lose's number, or the summary contradicts the pill.
     await user.click(screen.getByRole("radio", { name: /gain weight/i }));
-
     expect(screen.getByLabelText(/target weight/i)).toHaveValue(null);
     expect(screen.queryByText(/daily calorie target/i)).not.toBeInTheDocument();
+
+    // ...and looking at Gain must not cost you what you typed for Lose.
+    await user.click(screen.getByRole("radio", { name: /lose weight/i }));
+    expect(screen.getByLabelText(/target weight/i)).toHaveValue(80);
+    expect(screen.getByText(/daily calorie target/i)).toBeInTheDocument();
+  });
+
+  it("remembers a target through a detour via Maintain", async () => {
+    const user = userEvent.setup();
+    await reachGoalStep(user);
+
+    await user.click(screen.getByRole("radio", { name: /gain weight/i }));
+    await user.type(screen.getByLabelText(/target weight/i), "95");
+
+    await user.click(screen.getByRole("radio", { name: /maintain/i }));
+    expect(screen.queryByLabelText(/target weight/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: /gain weight/i }));
+    expect(screen.getByLabelText(/target weight/i)).toHaveValue(95);
   });
 
   it("flags a target pointing the wrong way while the user types", async () => {

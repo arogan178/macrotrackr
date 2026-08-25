@@ -3,6 +3,7 @@ import { ReferenceLine } from "recharts";
 import type { ChartDataPoint, LineConfig } from "@/components/chart/ChartTypes";
 import LineChartComponent from "@/components/chart/LineChartComponent";
 import Panel from "@/components/ui/Panel";
+import { formatGrouped } from "@/lib/formatNumber";
 
 /**
  * The two scenes that are genuinely charts, drawn with the same Recharts
@@ -81,7 +82,7 @@ export function WeekChart({ step }: { step: number }) {
       <div className="flex items-baseline justify-between px-4 py-3">
         <span className="text-sm font-semibold">This week</span>
         <span className="text-xs text-muted tabular-nums">
-          {average ? `${average.toLocaleString()} kcal average` : " "}
+          {average ? `${formatGrouped(average)} kcal average` : " "}
         </span>
       </div>
       <div className="border-t border-border px-2 pt-4 pb-2">

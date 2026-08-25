@@ -4,6 +4,7 @@ import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import MacroSlider from "@/components/macros/MacroSlider";
 import { COLOR_MAP } from "@/components/utils/UiConstants";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroType } from "@/types/macro";
 import {
   calculateBMR,
@@ -172,7 +173,7 @@ export default function MacroCalculatorPage() {
                 <p className="rounded-control border border-border bg-surface-2 px-3 py-2.5 text-xs leading-relaxed text-muted">
                   Based on your maintenance estimate of{" "}
                   <strong className="font-semibold text-foreground tabular-nums">
-                    {tdee} kcal
+                    {formatGrouped(tdee)} kcal
                   </strong>
                   . Switch to a custom target to set calories yourself.
                 </p>
@@ -249,7 +250,7 @@ export default function MacroCalculatorPage() {
                     {row.label}
                   </span>
                   <span className="text-muted tabular-nums">
-                    {row.percentage}% · {row.calories} kcal
+                    {row.percentage}% · {formatGrouped(row.calories)} kcal
                   </span>
                 </div>
                 <div className="text-xl font-extrabold text-foreground tabular-nums">

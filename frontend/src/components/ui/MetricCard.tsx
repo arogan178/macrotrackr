@@ -6,6 +6,7 @@ import Heading from "@/components/ui/Heading";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import Panel from "@/components/ui/Panel";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 
 /**
  * Five real meanings, each mapping to a declared token. This replaces
@@ -114,7 +115,10 @@ function MetricCardInner({
             {score === undefined ? null : (
               <span
                 aria-hidden="true"
-                className={cn("h-2.5 w-2.5 rounded-full", scoreToneClass(score))}
+                className={cn(
+                  "h-2.5 w-2.5 rounded-full",
+                  scoreToneClass(score),
+                )}
               />
             )}
           </div>
@@ -135,12 +139,10 @@ function MetricCardInner({
                     duration={0.8}
                   />
                 ) : (
-                  Math.round(numericValue).toLocaleString()
+                  formatGrouped(numericValue)
                 )}
               </span>
-              {unit ? (
-                <span className="text-xs text-muted">{unit}</span>
-              ) : null}
+              {unit ? <span className="text-xs text-muted">{unit}</span> : null}
             </p>
             {subtitle ? (
               <span className="text-[11px] text-muted">{subtitle}</span>
@@ -157,12 +159,10 @@ function MetricCardInner({
                     duration={0.8}
                   />
                 ) : (
-                  Math.round(numericValue).toLocaleString()
+                  formatGrouped(numericValue)
                 )}
               </span>
-              {unit ? (
-                <span className="text-sm text-muted">{unit}</span>
-              ) : null}
+              {unit ? <span className="text-sm text-muted">{unit}</span> : null}
             </p>
             {/* The subtitle used to sit on the value's own line with `ml-auto`,
                 which pushed it hard right and wrapped it to two ragged lines in a

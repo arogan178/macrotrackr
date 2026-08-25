@@ -9,6 +9,7 @@ import {
 
 import NumberField from "@/components/form/NumberField";
 import { RangeSlider } from "@/components/ui";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
 import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
@@ -69,8 +70,8 @@ const getCalorieAdjustmentInfo = (
   const diff = Math.abs(tdee - calorieIntake);
   const displayDiff = Math.max(diff, 50);
   const label = isWeightLoss
-    ? `Deficit: ${displayDiff} kcal`
-    : `Surplus: ${displayDiff} kcal`;
+    ? `Deficit: ${formatGrouped(displayDiff)} kcal`
+    : `Surplus: ${formatGrouped(displayDiff)} kcal`;
   const isLargeAdjustment = diff > 800;
 
   return { label, isLargeAdjustment };
@@ -365,7 +366,9 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           <div className="rounded-control border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
             <p className="text-sm font-semibold">Profile Details Incomplete</p>
             <p className="mt-1 text-xs">
-              Please complete your profile details (Date of Birth, Gender, Height, Weight, and Activity Level) in Settings to calculate your BMR and TDEE before setting a weight goal.
+              Please complete your profile details (Date of Birth, Gender,
+              Height, Weight, and Activity Level) in Settings to calculate your
+              BMR and TDEE before setting a weight goal.
             </p>
           </div>
         )}
@@ -380,7 +383,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                 Daily Calorie Intake
               </label>
               <span className="text-sm text-muted">
-                {calorieIntake} calories/day
+                {formatGrouped(calorieIntake)} calories/day
               </span>
             </div>
 

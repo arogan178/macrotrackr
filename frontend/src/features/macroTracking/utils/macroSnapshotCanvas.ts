@@ -2,6 +2,7 @@ import {
   BRAND_MARK_PATH,
   BRAND_MARK_VIEW_BOX,
 } from "@/components/layout/BrandMarkPath";
+import { formatGrouped } from "@/lib/formatNumber";
 
 import {
   buildSnapshotModel,
@@ -347,7 +348,7 @@ function drawHero(
   ctx.fillStyle = palette.muted;
   ctx.textAlign = "right";
   ctx.fillText(
-    `Target ${model.calorieTarget.toLocaleString()} kcal`,
+    `Target ${formatGrouped(model.calorieTarget)} kcal`,
     innerX + innerW,
     top + 44,
   );
@@ -356,14 +357,14 @@ function drawHero(
   // Hero figure: condensed and bold, per the Value scale.
   setFont(ctx, 700, 86, true);
   ctx.fillStyle = palette.foreground;
-  const figure = model.calories.toLocaleString();
+  const figure = formatGrouped(model.calories);
   ctx.fillText(figure, innerX, top + 128);
   const figureW = ctx.measureText(figure).width;
 
   setFont(ctx, 500, 24);
   ctx.fillStyle = palette.muted;
   ctx.fillText(
-    `kcal of ${model.calorieTarget.toLocaleString()}`,
+    `kcal of ${formatGrouped(model.calorieTarget)}`,
     innerX + figureW + 14,
     top + 128,
   );
@@ -436,7 +437,7 @@ function drawMacros(
 
     setFont(ctx, 600, 20);
     ctx.fillStyle = palette.foreground;
-    ctx.fillText(`${row.calories.toLocaleString()} kcal`, innerX, top + 222);
+    ctx.fillText(`${formatGrouped(row.calories)} kcal`, innerX, top + 222);
 
     setFont(ctx, 500, 20);
     ctx.fillStyle = palette.muted;
@@ -465,7 +466,7 @@ function drawDistribution(
   ctx.fillStyle = palette.muted;
   ctx.textAlign = "right";
   ctx.fillText(
-    `${model.totalMacroCalories.toLocaleString()} kcal from macros`,
+    `${formatGrouped(model.totalMacroCalories)} kcal from macros`,
     innerX + innerW,
     top + 42,
   );

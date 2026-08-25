@@ -1,3 +1,4 @@
+import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroTargetSettings } from "@/types/macro";
 
 import {
@@ -252,7 +253,7 @@ export function generateOverallTrendSummary(
       ? "Calories remain steady"
       : `Calories are trending ${caloriesTrend.direction === "up" ? "upward" : "downward"} (${
           caloriesTrend.delta && caloriesTrend.delta > 0 ? "+" : ""
-        }${caloriesTrend.delta} kcal/day)`;
+        }${formatGrouped(caloriesTrend.delta ?? 0)} kcal/day)`;
 
   const macroDrivers: string[] = [];
   if (proteinTrend.direction !== "stable") {

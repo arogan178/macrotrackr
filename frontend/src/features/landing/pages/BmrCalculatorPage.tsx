@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { ArrowRightIcon } from "@/components/ui";
+import { formatGrouped } from "@/lib/formatNumber";
 import { calculateBMR } from "@/utils/nutritionCalculations";
 import { ACTIVITY_LEVELS } from "@/utils/userConstants";
 
@@ -57,7 +58,7 @@ export default function BmrCalculatorPage() {
         statsReady
           ? {
               label: "Your BMR",
-              value: `${Math.round(bmr).toLocaleString()} kcal / day`,
+              value: `${formatGrouped(bmr)} kcal / day`,
             }
           : undefined
       }
@@ -106,7 +107,7 @@ export default function BmrCalculatorPage() {
                     {level.label}
                   </span>
                   <span className="whitespace-nowrap rounded-control border border-border bg-surface px-2 py-1 font-semibold text-foreground tabular-nums">
-                    {Math.round(bmr * level.multiplier)} kcal
+                    {formatGrouped(bmr * level.multiplier)} kcal
                   </span>
                 </li>
               ))}

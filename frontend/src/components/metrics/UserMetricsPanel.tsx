@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import { StarIcon, UserIcon } from "@/components/ui";
 import MetricCard from "@/components/ui/MetricCard";
+import { formatGrouped } from "@/lib/formatNumber";
 
 interface UserMetricsPanelProps {
   bmr: number;
@@ -75,11 +76,16 @@ function UserMetricsPanel({
             className="flex flex-1 items-center justify-between gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 shadow-xs"
           >
             <div className="flex items-center gap-1.5 min-w-0">
-              <Icon className={`h-3.5 w-3.5 shrink-0 ${iconClass}`} strokeWidth={1.5} />
-              <span className="text-xs font-medium text-foreground">{label}</span>
+              <Icon
+                className={`h-3.5 w-3.5 shrink-0 ${iconClass}`}
+                strokeWidth={1.5}
+              />
+              <span className="text-xs font-medium text-foreground">
+                {label}
+              </span>
             </div>
             <span className="text-xs font-semibold text-foreground whitespace-nowrap">
-              {value ? `${Math.round(value)} kcal` : "—"}
+              {value ? `${formatGrouped(value)} kcal` : "—"}
             </span>
           </div>
         ))}

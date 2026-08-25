@@ -67,6 +67,8 @@ describe("AnimatedNumber", () => {
     rerender(<AnimatedNumber value={2200} />);
 
     expect(animateMock).not.toHaveBeenCalled();
-    expect(document.body.textContent).toContain("2200");
+    // Grouped, same as the static path in `Value`. This asserted "2200"
+    // before, which is the spelling the two primitives used to disagree on.
+    expect(document.body.textContent).toContain("2,200");
   });
 });
