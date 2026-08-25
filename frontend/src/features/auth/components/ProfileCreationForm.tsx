@@ -29,6 +29,7 @@ import {
 } from "@/features/auth/utils/profileValidation";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -110,7 +111,14 @@ export function ProfileCreationForm() {
 
   // Goal data
   const [weightGoal, setWeightGoal] = useState<WeightGoalChoice | "">("");
-  const [targetWeight, setTargetWeight] = useState<number | null>(null);
+
+  // A target belongs to a direction, so it is stored per direction rather than
+  // in one slot. Clearing the slot on a direction switch stopped the preview
+  // contradicting itself, but it also meant looking at Gain to see what it did
+  // cost you the number you had already typed for Lose.
+  const [targetWeightByGoal, setTargetWeightByGoal] = useState<
+    Partial<Record<"lose" | "gain", number>>
+  >({});
   const [switchingSource, setSwitchingSource] = useState<
     Exclude<SwitchingSource, "unknown"> | ""
   >("");
@@ -157,6 +165,20 @@ export function ProfileCreationForm() {
         }).tdee
       : 0;
 
+  const targetWeight =
+    weightGoal === "lose" || weightGoal === "gain"
+      ? (targetWeightByGoal[weightGoal] ?? null)
+      : null;
+
+  const setTargetWeight = (value: number | null) => {
+    if (weightGoal !== "lose" && weightGoal !== "gain") return;
+
+    setTargetWeightByGoal((previous) => ({
+      ...previous,
+      [weightGoal]: value ?? undefined,
+    }));
+  };
+
   // The preview has to agree with the button the user pressed. Deriving the
   // direction from the two weights alone meant a target left over from "Lose
   // weight" kept printing deficit numbers after the user switched to "Gain",
@@ -177,6 +199,8 @@ export function ProfileCreationForm() {
         )
       : undefined;
 
+  // No clearing needed: each direction reads its own stored target, so Gain
+  // cannot show Lose's number and going back to Lose finds it still there.
   const handleGoalChange = (choice: WeightGoalChoice) => {
     setWeightGoal(choice);
     setErrors((previous) => ({
@@ -184,16 +208,6 @@ export function ProfileCreationForm() {
       weightGoal: "",
       targetWeight: "",
     }));
-    setTargetWeight((previous) => {
-      if (choice === "maintain") return null;
-      if (previous == null || weight == null) return previous;
-
-      // A target that pointed the other way is not a target for this goal.
-      const pointsTheRightWay =
-        choice === "lose" ? previous < weight : previous > weight;
-
-      return pointsTheRightWay ? previous : null;
-    });
   };
 
   const handleNext = () => {
@@ -495,7 +509,7 @@ export function ProfileCreationForm() {
         </h2>
         <p className="mt-2 text-muted">
           {tdee
-            ? `You burn about ${tdee} kcal a day. Your goal sets the target around it.`
+            ? `You burn about ${formatGrouped(tdee)} kcal a day. Your goal sets the target around it.`
             : "Your goal sets the daily calorie target on your dashboard."}
         </p>
       </div>
@@ -612,8 +626,13 @@ export function ProfileCreationForm() {
                       <div className={SUMMARY_ROW}>
                         <dt className={SUMMARY_LABEL}>Time to target</dt>
                         <dd>
+                          {/* The one animated figure on this card, and the
+                              only one that moves: the calorie target and the
+                              weekly rate are fixed per direction, while this
+                              tracks every keystroke in the target weight. */}
                           <Value
                             value={goalCalculations.calculatedWeeks}
+                            animate
                             suffix={
                               goalCalculations.calculatedWeeks === 1
                                 ? "week"
