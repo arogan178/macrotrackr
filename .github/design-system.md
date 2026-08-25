@@ -108,6 +108,26 @@ figure either way, which is how it went unnoticed.
 **Icons carry meaning or they go.** An icon beside a heading that repeats the
 heading is decoration. Icon-only controls need `aria-label`.
 
+**A figure has one spelling, and it is grouped.** "2,000 kcal", not "2000
+kcal". Every separator in the product comes from `formatGrouped`
+(`frontend/src/lib/formatNumber.ts`). Two budgets hold it, both pinned at 0,
+because there are two ways to get it wrong: `adHocNumberFormat` catches a call
+site reaching for `toLocaleString` itself, and `rawCalorieFigures` catches one
+that formats by not formatting — `{tdee} kcal`, which prints "2841 kcal" beside
+a "2,841 kcal" two components away. The second is the one that actually shipped,
+in eleven places.
+The standard is grouped because `Value` always was, and because the type scale
+was picked partly to carry it — Archivo's width axis is here so a condensed
+"2,140 kcal" fits a 390px column, which is an argument about the grouped form.
+
+It shipped both ways for a while, and the split ran straight through the
+primitive that exists to prevent it: `Value` grouped via `toLocaleString`, the
+`AnimatedNumber` it delegates to formatted with `toFixed` and did not, so the
+same call site changed spelling the moment someone added `animate`. A shared
+primitive delegating to a second one that formats differently is the same
+failure as two renderers disagreeing — it is just harder to see, because one
+prop is the whole reproduction. Changing the standard is one line in that file.
+
 **A number is never clamped to look better.** Clamp the bar — a bar cannot be
 longer than its track. Print the real figure beside it. A day over target is
 information the user came for.

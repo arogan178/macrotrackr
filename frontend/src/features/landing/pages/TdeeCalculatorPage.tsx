@@ -1,4 +1,5 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { formatGrouped } from "@/lib/formatNumber";
 import {
   calculateBMR,
   calculateMacroTarget,
@@ -100,7 +101,7 @@ export default function TdeeCalculatorPage() {
         statsReady
           ? {
               label: "Your TDEE",
-              value: `${Math.round(tdee).toLocaleString()} kcal / day`,
+              value: `${formatGrouped(tdee)} kcal / day`,
             }
           : undefined
       }
@@ -130,9 +131,14 @@ export default function TdeeCalculatorPage() {
           {statsReady ? (
             <p className="mt-3 text-xs leading-relaxed text-muted">
               Your Basal Metabolic Rate (BMR) is{" "}
-              <strong className="text-foreground">{bmr} kcal</strong>. Activity
-              adds{" "}
-              <strong className="text-foreground">{tdee - bmr} kcal</strong>.
+              <strong className="text-foreground">
+                {formatGrouped(bmr)} kcal
+              </strong>
+              . Activity adds{" "}
+              <strong className="text-foreground">
+                {formatGrouped(tdee - bmr)} kcal
+              </strong>
+              .
             </p>
           ) : null}
 
@@ -161,7 +167,7 @@ export default function TdeeCalculatorPage() {
                     >
                       <span className="leading-snug">{level.label}</span>
                       <span className="whitespace-nowrap font-medium tabular-nums">
-                        {Math.round(bmr * level.multiplier)} kcal
+                        {formatGrouped(bmr * level.multiplier)} kcal
                       </span>
                     </button>
                   </li>

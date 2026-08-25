@@ -3,6 +3,7 @@ import {
   resolveTokens,
   TOKEN_FALLBACK,
 } from "@/lib/designTokens";
+import { formatGrouped } from "@/lib/formatNumber";
 
 /**
  * One model for the share snapshot, read by both renderers.
@@ -168,11 +169,11 @@ export function buildSnapshotModel(data: MacroSnapshotData): SnapshotModel {
     calorieBarPercent: clampBar(caloriePercent),
     calorieRemainder:
       remaining >= 0
-        ? `${remaining.toLocaleString()} kcal left`
-        : `${Math.abs(remaining).toLocaleString()} kcal over`,
+        ? `${formatGrouped(remaining)} kcal left`
+        : `${formatGrouped(Math.abs(remaining))} kcal over`,
     macros,
     totalMacroCalories,
-    shareText: `${calories.toLocaleString()} of ${calorieTarget.toLocaleString()} kcal — ${macros
+    shareText: `${formatGrouped(calories)} of ${formatGrouped(calorieTarget)} kcal — ${macros
       .map((macro) => `${macro.label.toLowerCase()} ${macro.grams}g`)
       .join(", ")}.`,
     fileStem: toFileStem(dateLabel),

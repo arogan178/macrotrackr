@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 
 import Panel from "@/components/ui/Panel";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 
 /**
  * The loop, not a screenshot of it.
@@ -121,10 +122,10 @@ function LogScene({ step }: { step: number }) {
           </p>
           <p className="mt-1 flex items-baseline gap-1.5">
             <span className="text-4xl font-light tracking-tight tabular-nums">
-              {calories.toLocaleString()}
+              {formatGrouped(calories)}
             </span>
             <span className="text-sm text-muted">
-              of {TARGET.calories.toLocaleString()}
+              of {formatGrouped(TARGET.calories)}
             </span>
           </p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-3">

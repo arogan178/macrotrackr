@@ -3,6 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
 import { ChevronDownIcon, IconButton } from "@/components/ui";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroEntry } from "@/types/macro";
 
 import { EntryCard } from "./EntryCard";
@@ -112,7 +113,7 @@ const MobileEntryCards = memo(
             {group.totals.fats}g F
           </span>
           <span className="font-medium tracking-tight text-foreground whitespace-nowrap">
-            {group.totals.calories} kcal
+            {formatGrouped(group.totals.calories)} kcal
           </span>
           <IconButton
             variant="delete"

@@ -11,6 +11,7 @@ import ProgressBar from "@/components/ui/ProgressBar";
 import Value from "@/components/ui/Value";
 import MacroSnapshotModal from "@/features/macroTracking/components/MacroSnapshotModal";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
+import { formatGrouped } from "@/lib/formatNumber";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { getDisplayDate } from "@/utils/dateUtilities";
 
@@ -232,7 +233,7 @@ function DailySummaryInner({
           unit="kcal"
           animate
           value={macroCalories.total}
-          suffix={`of ${Math.round(dailyCalorieTarget).toLocaleString()}`}
+          suffix={`of ${formatGrouped(dailyCalorieTarget)}`}
         />
 
         <ProgressBar
@@ -269,7 +270,9 @@ function DailySummaryInner({
           >
             <div className="flex items-baseline justify-between gap-3">
               <span className="flex items-center gap-2">
-                <span className={`h-2 w-2 shrink-0 rounded-full ${macro.color}`} />
+                <span
+                  className={`h-2 w-2 shrink-0 rounded-full ${macro.color}`}
+                />
                 <span className="text-sm font-medium">{macro.name}</span>
               </span>
               <Value

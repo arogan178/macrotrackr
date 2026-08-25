@@ -21,6 +21,7 @@ import {
 import type { ContentType } from "recharts/types/component/Tooltip";
 
 import { LoadingSpinner } from "@/components/ui";
+import { formatGrouped } from "@/lib/formatNumber";
 
 import ChartTooltip from "./ChartTooltip";
 import type { ChartDataPoint, LineConfig } from "./ChartTypes";
@@ -137,7 +138,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
     axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickFormatter: (value) =>
-      typeof value === "number" ? value.toLocaleString() : String(value),
+      typeof value === "number" ? formatGrouped(value) : String(value),
     width: 40, // Default width, can be overridden
     ...yAxisProps, // Merge user props
   };
@@ -246,7 +247,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   strokeLinejoin="round"
                   strokeWidth="1.5"
                   d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                 />
+                />
               </svg>
               <p className="max-w-xs text-sm text-foreground">
                 No data available for the selected period.
@@ -281,9 +282,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <Tooltip
               // ContentType is what the prop declares; the previous cast to
               // ComponentType<Record<string, unknown>> was not assignable to it.
-              content={
-                TooltipContent as ContentType<ValueType, NameType>
-              }
+              content={TooltipContent as ContentType<ValueType, NameType>}
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
             {showLegend && (
@@ -303,7 +302,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   ? 1.5
                   : dataLength > 30
                     ? 2
-                    : line.strokeWidth ?? 2;
+                    : (line.strokeWidth ?? 2);
               const adaptiveActiveDot =
                 dataLength > 60
                   ? { r: 4 }

@@ -4,7 +4,9 @@ import { animate } from "motion/react";
 // The leaf module, not the `@/hooks` barrel: that barrel re-exports
 // `useSubscriptionStatus`, which reaches `useAuthQueries` and `@/config/runtime`,
 // and pulling it in here dragged auth into every screen that prints a number.
+import { DURATIONS } from "@/components/utils/UiConstants";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { formatGrouped } from "@/lib/formatNumber";
 
 /**
  * A counting number, and the one animation the global reduced-motion reset in
@@ -25,12 +27,15 @@ interface AnimatedNumberProps {
 export default function AnimatedNumber({
   value,
   toFixedValue = 0,
-  duration = 0.6,
+  duration = DURATIONS.value,
   className = "",
   prefix = "",
   suffix = "",
 }: AnimatedNumberProps) {
-  // Helper to safely format numbers
+  // Grouped, via the same `toLocaleString` call `Value` uses. This used to be
+  // `toFixed`, which meant one primitive printed a daily target two ways
+  // depending on a single prop: `<Value value={2000} unit="kcal" />` gave
+  // "2,000 kcal" and the same call with `animate` gave "2000 kcal".
   const safeFormat = useCallback(
     (inputValue: unknown) => {
       const numericValue =
@@ -38,7 +43,7 @@ export default function AnimatedNumber({
           ? inputValue
           : 0;
 
-      return `${prefix}${numericValue.toFixed(toFixedValue)}${suffix}`;
+      return `${prefix}${formatGrouped(numericValue, toFixedValue)}${suffix}`;
     },
     [prefix, suffix, toFixedValue],
   );

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
+import { formatGrouped } from "@/lib/formatNumber";
 import { kgToLb } from "@/utils/unitConversion";
 
 import BodyStatsForm from "../tools/BodyStatsForm";
@@ -62,25 +63,25 @@ const HIGH_PROTEIN_FOODS = [
     name: "Chicken Breast (Cooked)",
     serving: "100g",
     protein: "31g",
-    cals: "165",
+    cals: 165,
   },
   {
     name: "Greek Yogurt (Non-fat)",
     serving: "200g",
     protein: "20g",
-    cals: "120",
+    cals: 120,
   },
-  { name: "Salmon (Cooked)", serving: "100g", protein: "25g", cals: "206" },
-  { name: "Whey Protein Scoop", serving: "30g", protein: "24g", cals: "120" },
+  { name: "Salmon (Cooked)", serving: "100g", protein: "25g", cals: 206 },
+  { name: "Whey Protein Scoop", serving: "30g", protein: "24g", cals: 120 },
   {
     name: "Cottage Cheese (Low-fat)",
     serving: "150g",
     protein: "18g",
-    cals: "125",
+    cals: 125,
   },
-  { name: "Whole Eggs", serving: "3 large", protein: "18g", cals: "210" },
-  { name: "Extra Firm Tofu", serving: "150g", protein: "15g", cals: "120" },
-  { name: "Cooked Lentils", serving: "200g", protein: "18g", cals: "230" },
+  { name: "Whole Eggs", serving: "3 large", protein: "18g", cals: 210 },
+  { name: "Extra Firm Tofu", serving: "150g", protein: "15g", cals: 120 },
+  { name: "Cooked Lentils", serving: "200g", protein: "18g", cals: 230 },
 ];
 
 export default function ProteinCalculatorPage() {
@@ -169,7 +170,7 @@ export default function ProteinCalculatorPage() {
                 Total calories from protein
               </dt>
               <dd className={calculatorStatValueClass}>
-                {totalProteinGrams * 4} kcal
+                {formatGrouped(totalProteinGrams * 4)} kcal
               </dd>
             </div>
           </dl>
@@ -233,7 +234,7 @@ export default function ProteinCalculatorPage() {
                     {item.protein}
                   </td>
                   <td className="px-3 py-2.5 text-right whitespace-nowrap tabular-nums">
-                    {item.cals} kcal
+                    {formatGrouped(item.cals)} kcal
                   </td>
                 </tr>
               ))}

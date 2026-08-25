@@ -1,7 +1,9 @@
 import { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { DURATIONS } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
+import { formatGrouped } from "@/lib/formatNumber";
 
 export type ValueSize = "hero" | "stat" | "inline";
 export type ValueUnit = "kcal" | "g" | "kg" | "lb" | "%" | "";
@@ -64,17 +66,18 @@ function ValueInner({
 }: ValueProps) {
   const decimals = DECIMALS[unit];
   const safeValue = Number.isFinite(value) ? value : 0;
-  const formatted = safeValue.toLocaleString(undefined, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
+  const formatted = formatGrouped(safeValue, decimals);
   const sign = signed && safeValue > 0 ? "+" : "";
 
   return (
     <span className={cn("inline-flex items-baseline gap-1", className)}>
       <span className={cn(SIZE_CLASS[size], "tabular-nums")}>
         {animate ? (
-          <AnimatedNumber value={safeValue} toFixedValue={decimals} duration={0.8} />
+          <AnimatedNumber
+            value={safeValue}
+            toFixedValue={decimals}
+            duration={DURATIONS.value}
+          />
         ) : (
           `${sign}${formatted}`
         )}

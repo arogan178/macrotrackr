@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ProgressBar from "@/components/ui/ProgressBar";
+import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroTargetGrams } from "@/types/macro";
 import { calculateCaloriePercentages } from "@/utils/nutritionCalculations";
 
@@ -136,10 +137,10 @@ export function MacroIndicator({
 
         <div className="flex items-baseline gap-1 text-xs sm:text-sm shrink-0">
           <span className="font-bold text-foreground">
-            {Math.round(value)}g
+            {formatGrouped(value)}g
           </span>
           {target !== undefined && target > 0 && (
-            <span className="text-muted text-xs">/ {target}g</span>
+            <span className="text-muted text-xs">/ {formatGrouped(target)}g</span>
           )}
           {showPercentage && percentage !== undefined && (
             <span className="ml-1 text-[11px] font-medium text-muted">

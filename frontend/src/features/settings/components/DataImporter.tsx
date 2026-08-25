@@ -19,6 +19,7 @@ import {
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import { useImportMacros } from "@/hooks/queries/useMacroQueries";
+import { formatGrouped } from "@/lib/formatNumber";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 import { useStore } from "@/store/store";
 
@@ -395,7 +396,10 @@ export default function DataImporter() {
                   </span>
                   <span className="text-xs text-muted">
                     Total calories:{" "}
-                    {parsedData.summary.macroSummary.totalCalories} kcal
+                    {formatGrouped(
+                      parsedData.summary.macroSummary.totalCalories,
+                    )}{" "}
+                    kcal
                   </span>
                 </div>
                 <div className="overflow-x-auto rounded-card border border-border bg-surface-2">

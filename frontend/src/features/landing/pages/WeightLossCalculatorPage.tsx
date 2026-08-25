@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
+import { formatGrouped } from "@/lib/formatNumber";
 import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
 import { kgToLb, lbToKg } from "@/utils/unitConversion";
 import {
@@ -177,7 +178,7 @@ export default function WeightLossCalculatorPage() {
               role="status"
               className="mt-4 rounded-control border border-error/30 bg-error/10 p-3 text-sm leading-relaxed text-error"
             >
-              This target is below the usual minimum of {minSafeCalories}{" "}
+              This target is below the usual minimum of {formatGrouped(minSafeCalories)}{" "}
               kcal/day. Consider choosing a slower weekly pace.
             </p>
           )}
@@ -187,7 +188,9 @@ export default function WeightLossCalculatorPage() {
               <dt className={calculatorStatLabelClass}>
                 Maintenance burn (TDEE)
               </dt>
-              <dd className={calculatorStatValueClass}>{tdee} kcal</dd>
+              <dd className={calculatorStatValueClass}>
+                {formatGrouped(tdee)} kcal
+              </dd>
             </div>
             <div className={calculatorStatRowClass}>
               <dt className={calculatorStatLabelClass}>
@@ -196,7 +199,7 @@ export default function WeightLossCalculatorPage() {
               <dd className={calculatorStatValueClass}>
                 {isAtGoal
                   ? "0"
-                  : `${isGain ? "+" : "-"}${dailyCalorieAdjustment}`}{" "}
+                  : `${isGain ? "+" : "-"}${formatGrouped(dailyCalorieAdjustment)}`}{" "}
                 kcal
               </dd>
             </div>

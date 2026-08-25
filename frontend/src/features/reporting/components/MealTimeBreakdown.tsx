@@ -11,6 +11,7 @@ import {
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ChartCard from "@/components/chart/ChartCard";
 import TabBar from "@/components/ui/TabBar";
+import { formatGrouped } from "@/lib/formatNumber";
 import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
 
 import {
@@ -56,7 +57,7 @@ const CustomDonutTooltip = ({
         <div className="mt-2 flex flex-col gap-1">
           <p className="text-sm text-muted">
             <span className="font-medium text-foreground">
-              {Math.round(value)}
+              {formatGrouped(value)}
             </span>
             {unit}
           </p>
