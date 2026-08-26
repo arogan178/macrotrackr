@@ -86,7 +86,10 @@ const DeleteAccountPage: React.FC = () => {
             </p>
             <ul className="list-inside list-disc space-y-2 text-muted">
               <li>Your account, name and email address</li>
-              <li>Your profile details — date of birth, height, weight, gender, activity level</li>
+              <li>
+                Your profile details: date of birth, height, weight, gender and
+                activity level
+              </li>
               <li>Every logged meal and its macros</li>
               <li>Your weight history, weight goals and macro targets</li>
               <li>Your habits and saved meals</li>
@@ -99,8 +102,8 @@ const DeleteAccountPage: React.FC = () => {
               What we keep, and for how long
             </h2>
             <p className="mb-4 leading-relaxed text-muted">
-              We keep records of completed payments where the law requires it —
-              tax and accounting rules oblige us to retain transaction records,
+              We keep records of completed payments where the law requires it.
+              Tax and accounting rules oblige us to retain transaction records,
               typically for several years depending on jurisdiction. Those
               records are held by our payment providers (Google Play or Stripe)
               and are not linked back to a deleted account beyond what those

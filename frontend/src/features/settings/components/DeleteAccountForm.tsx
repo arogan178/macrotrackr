@@ -8,7 +8,6 @@ import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import { downloadHistoryCsv } from "@/features/macroTracking/utils/historyExport";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
-import { cn } from "@/lib/classnameUtilities";
 import type { MacroEntry } from "@/types/macro";
 
 /** Typed exactly, or the button stays disabled. */
@@ -54,7 +53,7 @@ const DeleteAccountForm: React.FC = () => {
     setError(null);
     try {
       await userApi.deleteAccount();
-      // The account is gone, so the session is meaningless — clear it rather
+      // The account is gone, so the session is meaningless. Clear it rather
       // than leaving the app holding a token for a user that no longer exists.
       logout.mutate();
     } catch (deleteError) {
@@ -74,60 +73,58 @@ const DeleteAccountForm: React.FC = () => {
       </Heading>
 
       <p className="mb-4 text-sm leading-relaxed text-muted">
-        This permanently deletes your account and everything in it — every
-        logged meal, your weight history, goals, macro targets, habits and saved
-        meals. It cannot be undone, and we cannot recover it for you.
-      </p>
-      <p className="mb-4 text-sm leading-relaxed text-muted">
-        If you want a copy of your data, download it first. Once the account is
-        gone we cannot recover it for you.
+        Deletes your account and all your data: meals, weight history, goals,
+        targets, habits and saved meals. This cannot be undone.
       </p>
 
-      <button
-        type="button"
-        onClick={handleExport}
-        disabled={isExporting || isDeleting}
-        aria-label="Download my history as CSV before deleting"
-        className={cn(
-          getButtonClasses("secondary", "md", isExporting || isDeleting),
-          "mb-6",
-        )}
-      >
-        {isExporting ? "Preparing download…" : "Download my data (CSV)"}
-      </button>
+      {/* One row: take a copy, confirm, delete. Previously five stacked blocks,
+          which made a routine settings panel look like a wizard. */}
+      <div className="flex flex-wrap items-end gap-3">
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={isExporting || isDeleting}
+          aria-label="Download my data as CSV before deleting"
+          className={getButtonClasses("secondary", "md", false)}
+        >
+          {isExporting ? "Preparing…" : "Download a copy (CSV)"}
+        </button>
 
-      <label
-        htmlFor="delete-confirm"
-        className="mb-2 block text-sm font-medium text-foreground"
-      >
-        Type <span className="font-semibold text-error">{CONFIRM_WORD}</span> to
-        confirm
-      </label>
-      <input
-        id="delete-confirm"
-        type="text"
-        value={confirmText}
-        onChange={(event) => setConfirmText(event.target.value)}
-        autoComplete="off"
-        aria-describedby={error ? "delete-error" : undefined}
-        className="mb-4 w-full max-w-xs rounded-control border border-border bg-surface-2 px-3 py-2 text-foreground"
-      />
+        <div>
+          <label
+            htmlFor="delete-confirm"
+            className="mb-1 block text-xs text-muted"
+          >
+            Type <span className="font-semibold text-error">{CONFIRM_WORD}</span>{" "}
+            to confirm
+          </label>
+          <input
+            id="delete-confirm"
+            type="text"
+            value={confirmText}
+            onChange={(event) => setConfirmText(event.target.value)}
+            autoComplete="off"
+            aria-describedby={error ? "delete-error" : undefined}
+            className="w-32 rounded-control border border-border bg-surface-2 px-3 py-2 text-foreground"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={!canDelete}
+          aria-label="Permanently delete my account"
+          className={getButtonClasses("danger", "md", false)}
+        >
+          {isDeleting ? "Deleting…" : "Delete my account"}
+        </button>
+      </div>
 
       {error ? (
-        <p id="delete-error" role="alert" className="mb-4 text-sm text-error">
+        <p id="delete-error" role="alert" className="mt-3 text-sm text-error">
           {error}
         </p>
       ) : null}
-
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={!canDelete}
-        aria-label="Permanently delete my account"
-        className={getButtonClasses("danger", "md", !canDelete)}
-      >
-        {isDeleting ? "Deleting…" : "Delete my account"}
-      </button>
     </Panel>
   );
 };
