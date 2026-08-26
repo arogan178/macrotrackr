@@ -25,6 +25,7 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
+import DeleteAccountForm from "@/features/settings/components/DeleteAccountForm";
 import { useBeforeUnload, useMutationErrorHandler } from "@/hooks";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
@@ -312,7 +313,10 @@ export default function SettingsPage() {
             )}
             {activeTab === "data" && (
               <PageTransition key="data">
-                <DataImporter />
+                <div className="space-y-6">
+                  <DataImporter />
+                  <DeleteAccountForm />
+                </div>
               </PageTransition>
             )}
             {BILLING_TAB_ENABLED && activeTab === "billing" && (

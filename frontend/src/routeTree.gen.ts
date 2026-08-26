@@ -21,6 +21,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GoalsRouteImport } from './routes/goals'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as AuthReadyRouteImport } from './routes/auth-ready'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools/index'
@@ -94,6 +95,11 @@ const HomeRoute = HomeRouteImport.update({
 const GoalsRoute = GoalsRouteImport.update({
   id: '/goals',
   path: '/goals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthReadyRoute = AuthReadyRouteImport.update({
@@ -171,6 +177,7 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth-ready': typeof AuthReadyRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-ready': typeof AuthReadyRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth-ready': typeof AuthReadyRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth-ready'
+    | '/delete-account'
     | '/goals'
     | '/home'
     | '/login'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth-ready'
+    | '/delete-account'
     | '/goals'
     | '/home'
     | '/login'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth-ready'
+    | '/delete-account'
     | '/goals'
     | '/home'
     | '/login'
@@ -343,6 +355,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthReadyRoute: typeof AuthReadyRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
   GoalsRoute: typeof GoalsRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
@@ -455,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoalsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth-ready': {
       id: '/auth-ready'
       path: '/auth-ready'
@@ -559,6 +579,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthReadyRoute: AuthReadyRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
   GoalsRoute: GoalsRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
