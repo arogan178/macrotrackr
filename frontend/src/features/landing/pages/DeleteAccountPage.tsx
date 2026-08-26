@@ -52,7 +52,7 @@ const DeleteAccountPage: React.FC = () => {
             <ol className="list-inside list-decimal space-y-2 text-muted">
               <li>Open {APP_NAME} and sign in.</li>
               <li>
-                Go to <strong>Settings</strong>.
+                Go to <strong>Settings → Security</strong>.
               </li>
               <li>
                 Choose <strong>Delete account</strong> and confirm.

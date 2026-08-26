@@ -313,10 +313,7 @@ export default function SettingsPage() {
             )}
             {activeTab === "data" && (
               <PageTransition key="data">
-                <div className="space-y-6">
-                  <DataImporter />
-                  <DeleteAccountForm />
-                </div>
+                <DataImporter />
               </PageTransition>
             )}
             {BILLING_TAB_ENABLED && activeTab === "billing" && (
@@ -331,7 +328,10 @@ export default function SettingsPage() {
             )}
             {activeTab === "security" && (
               <PageTransition key="security">
-                <ChangePasswordForm />
+                <div className="space-y-6">
+                  <ChangePasswordForm />
+                  <DeleteAccountForm />
+                </div>
               </PageTransition>
             )}
           </AnimatePresence>
