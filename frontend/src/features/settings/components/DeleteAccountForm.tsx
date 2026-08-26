@@ -74,40 +74,34 @@ const DeleteAccountForm: React.FC = () => {
 
       <p className="mb-4 text-sm leading-relaxed text-muted">
         Deletes your account and all your data: meals, weight history, goals,
-        targets, habits and saved meals. This cannot be undone.
-      </p>
-
-      {/* One row: take a copy, confirm, delete. Previously five stacked blocks,
-          which made a routine settings panel look like a wizard. */}
-      <div className="flex flex-wrap items-end gap-3">
+        targets, habits and saved meals. This cannot be undone.{" "}
         <button
           type="button"
           onClick={handleExport}
           disabled={isExporting || isDeleting}
-          aria-label="Download my data as CSV before deleting"
-          className={getButtonClasses("secondary", "md", false)}
+          className="text-primary underline underline-offset-4 disabled:opacity-60"
         >
-          {isExporting ? "Preparing…" : "Download a copy (CSV)"}
+          {isExporting ? "Preparing your copy…" : "Download a copy first."}
         </button>
+      </p>
 
-        <div>
-          <label
-            htmlFor="delete-confirm"
-            className="mb-1 block text-xs text-muted"
-          >
-            Type <span className="font-semibold text-error">{CONFIRM_WORD}</span>{" "}
-            to confirm
-          </label>
-          <input
-            id="delete-confirm"
-            type="text"
-            value={confirmText}
-            onChange={(event) => setConfirmText(event.target.value)}
-            autoComplete="off"
-            aria-describedby={error ? "delete-error" : undefined}
-            className="w-32 rounded-control border border-border bg-surface-2 px-3 py-2 text-foreground"
-          />
-        </div>
+      {/* One row, two controls. The export is a link inside the sentence rather
+          than a second button: a benign action at equal weight beside a
+          destructive one invites mis-clicks and made the panel read as two
+          equal options. The field carries its own affordance via the
+          placeholder, so the floating label above it is gone. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          id="delete-confirm"
+          type="text"
+          value={confirmText}
+          onChange={(event) => setConfirmText(event.target.value)}
+          autoComplete="off"
+          placeholder={`Type ${CONFIRM_WORD}`}
+          aria-label={`Type ${CONFIRM_WORD} to confirm account deletion`}
+          aria-describedby={error ? "delete-error" : undefined}
+          className="w-40 rounded-control border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder:text-muted"
+        />
 
         <button
           type="button"
