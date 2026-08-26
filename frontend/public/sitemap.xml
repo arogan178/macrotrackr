@@ -127,6 +127,12 @@
     <priority>0.2</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/delete-account</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/blog/v3-1-0</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>

@@ -13,6 +13,7 @@ import {
   NotFoundError,
   ConflictError,
   BadRequestError,
+  AuthIntegrationError,
 } from "../../lib/http/errors";
 import { handleError } from "../../lib/http/responses";
 import { loggerHelpers, logger } from "../../lib/observability/logger";
@@ -26,7 +27,12 @@ import {
 
 type UserRouteContext = AuthenticatedRouteContextWithUser<
   Record<string, unknown>
->;
+> & {
+  /** Present in clerk auth mode; absent when self-hosted with local auth. */
+  clerkClient?: {
+    users?: { deleteUser?: (clerkUserId: string) => Promise<unknown> };
+  };
+};
 
 const ErrorResponseSchema = t.Object({
   code: t.String(),
@@ -468,6 +474,99 @@ export const userRoutes = (app: Elysia) =>
           detail: {
             summary:
               "Add or update specific user details (e.g., during onboarding)",
+            tags: ["User"],
+          },
+        },
+      )
+      /**
+       * DELETE /me — irreversibly delete the caller's account.
+       *
+       * Every user-owned table carries ON DELETE CASCADE on its user_id
+       * foreign key (12 of them), so removing the users row takes the food
+       * log, weight history, goals, macro targets, habits, saved meals,
+       * subscriptions and sessions with it. That is deliberately relied on
+       * here rather than deleting each table by hand, which would rot the
+       * moment a new table is added.
+       *
+       * Refuses while a subscription is active: Play subscriptions cannot be
+       * cancelled server-side by us, so deleting the account would leave
+       * someone being billed with no account behind it.
+       */
+      .delete(
+        "/me",
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
+          try {
+            const { db, clerkClient } = context;
+            const { userId: internalUserId, providerUserId } =
+              context.authenticatedUser;
+
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError(
+                "Unable to resolve internal user ID.",
+              );
+            }
+
+            const existing = safeQuery<{
+              id: number;
+              subscription_status: string | null;
+            }>(
+              db,
+              "SELECT id, subscription_status FROM users WHERE id = ? LIMIT 1",
+              [internalUserId],
+            );
+            if (!existing) {
+              throw new NotFoundError("Account not found");
+            }
+
+            if (existing.subscription_status === "pro") {
+              throw new ConflictError(
+                "Cancel your subscription before deleting your account. " +
+                  "Manage it in Google Play if you subscribed on Android, " +
+                  "or in the billing portal if you subscribed on the web.",
+              );
+            }
+
+            // Clerk first: if it fails we still have a local row to retry
+            // with. Doing it the other way round can orphan a Clerk identity
+            // whose local account is already gone.
+            if (providerUserId && clerkClient?.users?.deleteUser) {
+              try {
+                await clerkClient.users.deleteUser(providerUserId);
+              } catch (clerkError) {
+                logger.error(
+                  { internalUserId, error: clerkError },
+                  "[/api/user/me] Failed to delete Clerk user; aborting",
+                );
+                throw new AuthIntegrationError(
+                  "Could not delete your sign-in identity. Please try again.",
+                );
+              }
+            }
+
+            const result = safeExecute(db, "DELETE FROM users WHERE id = ?", [
+              internalUserId,
+            ]);
+
+            logger.info(
+              { internalUserId, rowsDeleted: result.changes },
+              "[/api/user/me] Account deleted",
+            );
+
+            return {
+              success: true,
+              message: "Your account and all associated data have been deleted.",
+            };
+          } catch (error) {
+            return handleError(error, context.set);
+          }
+        },
+        {
+          response: {
+            200: t.Object({ success: t.Boolean(), message: t.String() }),
+          },
+          detail: {
+            summary: "Permanently delete the current account and all its data",
             tags: ["User"],
           },
         },

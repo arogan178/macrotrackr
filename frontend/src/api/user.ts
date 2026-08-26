@@ -176,6 +176,16 @@ export const userApi = {
   /**
    * @throws {ApiError}
    */
+  /**
+   * Permanently delete the current account and everything owned by it.
+   * Irreversible. Rejects with 409 while a subscription is active.
+   *
+   * @throws {ApiError}
+   */
+  deleteAccount: async (): Promise<{ success: boolean; message: string }> => {
+    return apiClient.del<{ success: boolean; message: string }>("/api/user/me");
+  },
+
   completeProfile: async (
     profileData: Partial<
       Pick<

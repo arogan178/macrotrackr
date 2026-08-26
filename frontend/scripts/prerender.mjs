@@ -260,6 +260,19 @@ const pages = [
     `,
   },
   {
+    route: "delete-account",
+    title: `Delete your account — ${APP_NAME}`,
+    description: `How to permanently delete your ${APP_NAME} account and all associated data.`,
+    canonical: `${APP_URL}/delete-account`,
+    type: "website",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <h1>Delete your account</h1>
+        <p>Delete your account and all associated data from Settings inside the app, or email support to request deletion.</p>
+      </main>
+    `,
+  },
+  {
     route: "terms",
     title: `Terms of Service — ${APP_NAME}`,
     description: `Terms and conditions for using ${APP_NAME}.`,

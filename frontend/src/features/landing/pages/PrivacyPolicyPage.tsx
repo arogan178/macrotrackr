@@ -89,7 +89,14 @@ const PrivacyPolicyPage: React.FC = () => {
                   <ul className="ml-4 list-inside list-disc space-y-2">
                     <li>Access your personal data</li>
                     <li>Correct inaccurate data</li>
-                    <li>Delete your account and data</li>
+                    <li>
+                      <a
+                        href="/delete-account"
+                        className="text-primary underline underline-offset-4"
+                      >
+                        Delete your account and data
+                      </a>
+                    </li>
                     <li>Export your data</li>
                   </ul>
                 </section>
