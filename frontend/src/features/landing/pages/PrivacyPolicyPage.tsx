@@ -94,6 +94,19 @@ const PrivacyPolicyPage: React.FC = () => {
                   </ul>
                 </section>
 
+                <section className="mb-8">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
+                    Children's Privacy
+                  </h2>
+                  <p>
+                    MacroTrackr is intended for people aged 18 and over. We do
+                    not knowingly collect personal information from children. If
+                    you believe a child has provided us with personal
+                    information, contact us and we will delete the account and
+                    its data.
+                  </p>
+                </section>
+
                 <section className="mb-2">
                   <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Contact Us
