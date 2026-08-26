@@ -60,6 +60,13 @@ const TermsAndConditionsPage: React.FC = () => {
                   account. You are responsible for account security and accurate
                   information.
                 </p>
+                <p className="mb-4 leading-relaxed text-muted">
+                  <strong>You must be 18 or older to create an account.</strong>{" "}
+                  MacroTrackr is not intended for children, and we do not
+                  knowingly collect information from anyone under 18. If you
+                  believe a minor has created an account, contact us and we will
+                  remove it.
+                </p>
                 <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
                   <li>Maintain credential confidentiality</li>
                   <li>All activities under your account</li>
@@ -111,8 +118,27 @@ const TermsAndConditionsPage: React.FC = () => {
                   7. Health Disclaimer
                 </h2>
                 <p className="mb-4 leading-relaxed text-muted">
-                  MacroTrackr is not a medical service; consult professionals
-                  before significant dietary or exercise changes.
+                  <strong>
+                    MacroTrackr does not provide medical advice.
+                  </strong>{" "}
+                  It is a tracking tool, not a medical service, and nothing in
+                  it is a diagnosis, treatment, or a substitute for professional
+                  care. Consult a qualified healthcare professional before
+                  making significant dietary or exercise changes, and
+                  particularly before pursuing a calorie deficit.
+                </p>
+                <p className="mb-4 leading-relaxed text-muted">
+                  Calorie and macro targets, along with BMR and TDEE figures,
+                  are <strong>estimates</strong> produced by standard formulae
+                  from the details you enter. They are not measurements, they
+                  are not personalised to your medical history, and they can be
+                  wrong for you.
+                </p>
+                <p className="mb-4 leading-relaxed text-muted">
+                  Do not use MacroTrackr if tracking food intake is harmful to
+                  you. If you are experiencing disordered eating, or tracking
+                  makes your relationship with food worse, please stop and speak
+                  to a doctor or a qualified support service.
                 </p>
               </section>
 
