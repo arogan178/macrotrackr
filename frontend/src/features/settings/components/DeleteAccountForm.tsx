@@ -1,11 +1,15 @@
 import React, { useCallback, useState } from "react";
 
 import { ApiError } from "@/api/core";
+import { macrosApi } from "@/api/macros";
 import { userApi } from "@/api/user";
 import { getButtonClasses } from "@/components/ui/Button";
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
+import { downloadHistoryCsv } from "@/features/macroTracking/utils/historyExport";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
+import { cn } from "@/lib/classnameUtilities";
+import type { MacroEntry } from "@/types/macro";
 
 /** Typed exactly, or the button stays disabled. */
 const CONFIRM_WORD = "DELETE";
@@ -23,8 +27,24 @@ const CONFIRM_WORD = "DELETE";
 const DeleteAccountForm: React.FC = () => {
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const logout = useLogout();
+
+  // Same call and same CSV writer the Entry History export uses, rather than a
+  // second implementation that could drift from it.
+  const handleExport = useCallback(async () => {
+    setIsExporting(true);
+    setError(null);
+    try {
+      const response = await macrosApi.getAllHistory();
+      downloadHistoryCsv(response.entries as MacroEntry[]);
+    } catch {
+      setError("Could not export your history. Try again before deleting.");
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
 
   const canDelete = confirmText.trim() === CONFIRM_WORD && !isDeleting;
 
@@ -59,8 +79,22 @@ const DeleteAccountForm: React.FC = () => {
         meals. It cannot be undone, and we cannot recover it for you.
       </p>
       <p className="mb-4 text-sm leading-relaxed text-muted">
-        If you want a copy of your data, export it as CSV before you continue.
+        If you want a copy of your data, download it first. Once the account is
+        gone we cannot recover it for you.
       </p>
+
+      <button
+        type="button"
+        onClick={handleExport}
+        disabled={isExporting || isDeleting}
+        aria-label="Download my history as CSV before deleting"
+        className={cn(
+          getButtonClasses("secondary", "md", isExporting || isDeleting),
+          "mb-6",
+        )}
+      >
+        {isExporting ? "Preparing download…" : "Download my data (CSV)"}
+      </button>
 
       <label
         htmlFor="delete-confirm"
