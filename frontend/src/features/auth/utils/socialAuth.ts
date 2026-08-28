@@ -25,7 +25,7 @@ interface ClerkLikeError {
   errors?: ClerkErrorEntry[];
 }
 
-function extractClerkError(error: unknown): {
+export function extractClerkError(error: unknown): {
   code?: string;
   message?: string;
 } {

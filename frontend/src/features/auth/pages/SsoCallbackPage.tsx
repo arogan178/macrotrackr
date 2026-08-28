@@ -9,6 +9,11 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { isClerkAuthMode } from "@/config/runtime";
 import { handleAccountCollision } from "@/features/auth/utils/handleAuthCollision";
 import {
+  forgetLegalConsent,
+  hasRememberedLegalConsent,
+  isMissingLegalConsent,
+} from "@/features/auth/utils/legalConsent";
+import {
   normalizeAuthRedirect,
   resolveAuthReturnTo,
 } from "@/features/auth/utils/redirect";
@@ -43,7 +48,7 @@ export default function SSOCallbackPage() {
 }
 
 function ClerkSsoCallbackPage() {
-  const { handleRedirectCallback, signOut } = useClerk();
+  const { client, handleRedirectCallback, setActive, signOut } = useClerk();
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
@@ -76,21 +81,82 @@ function ClerkSsoCallbackPage() {
       // the fallback variants, but those props had force semantics.
       signInForceRedirectUrl: globalThis.location.href,
       signUpForceRedirectUrl: globalThis.location.href,
-    }).catch((error_) => {
-      // Clerk may throw if the callback was already handled (e.g. page refresh)
-      // This is safe to ignore if the user is already signed in
-      const resolution = resolveSocialAuthError(
-        error_,
-        isSignUpFlow ? "signup" : "signin",
-      );
+      // An OAuth sign-up that still owes a field sends Clerk to its continue
+      // URL, which defaults to the hosted Account Portal on another origin.
+      // Keep it here so the block below can finish the attempt in the app.
+      continueSignUpUrl: globalThis.location.href,
+    })
+      .then(() => completePendingLegalConsent())
+      .catch((error_) => {
+        // Clerk may throw if the callback was already handled (e.g. page refresh)
+        // This is safe to ignore if the user is already signed in
+        const resolution = resolveSocialAuthError(
+          error_,
+          isSignUpFlow ? "signup" : "signin",
+        );
 
-      logger.warn(
-        "[SSOCallback] handleRedirectCallback error (may be safe to ignore):",
-        error_,
-      );
-      setCallbackResolution(resolution);
-    });
-  }, [handleRedirectCallback, isSignUpFlow]);
+        logger.warn(
+          "[SSOCallback] handleRedirectCallback error (may be safe to ignore):",
+          error_,
+        );
+        setCallbackResolution(resolution);
+      });
+
+    // Legal consent is a required sign-up field, and an OAuth redirect has no
+    // way to carry it. Clerk hands the attempt back at missing_requirements,
+    // which is neither a session nor an error, so step 2 returned early and the
+    // spinner never stopped. The forms record consent before leaving; apply it.
+    async function completePendingLegalConsent() {
+      const pendingSignUp = client?.signUp;
+
+      if (!pendingSignUp || !isMissingLegalConsent(pendingSignUp)) {
+        return;
+      }
+
+      // The client keeps the last sign-up attempt around, so an abandoned one
+      // from earlier in the session looks identical to the one we just came
+      // back with. Only the latter has a verified external account on it, and
+      // completing the wrong attempt would activate a session nobody asked for.
+      if (pendingSignUp.verifications?.externalAccount?.status !== "verified") {
+        return;
+      }
+
+      if (!hasRememberedLegalConsent()) {
+        setError(
+          "To finish creating your account, accept the Terms and Privacy Policy on the sign-up page.",
+        );
+
+        return;
+      }
+
+      try {
+        const updated = await pendingSignUp.update({ legalAccepted: true });
+
+        if (updated.status === "complete" && updated.createdSessionId) {
+          forgetLegalConsent();
+          await setActive({ session: updated.createdSessionId });
+
+          return;
+        }
+
+        logger.error("[SSOCallback] Sign-up incomplete after legal consent", {
+          status: updated.status,
+          missingFields: updated.missingFields,
+        });
+        setError(
+          "We couldn't finish creating your account. Please try signing up again.",
+        );
+      } catch (consentError) {
+        logger.error(
+          "[SSOCallback] Failed to record legal consent:",
+          consentError,
+        );
+        setError(
+          "We couldn't finish creating your account. Please try signing up again.",
+        );
+      }
+    }
+  }, [client, handleRedirectCallback, isSignUpFlow, setActive]);
 
   // Step 2: Once Clerk is loaded and user is signed in, handle routing
   useEffect(() => {
@@ -111,6 +177,8 @@ function ClerkSsoCallbackPage() {
     async function routeUser() {
       try {
         const safeRedirectTo = redirectTo;
+
+        forgetLegalConsent();
 
         // For sign-in flows, go straight to auth-ready
         if (!isSignUpFlow) {

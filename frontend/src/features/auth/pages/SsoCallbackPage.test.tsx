@@ -1,16 +1,33 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import SSOCallbackPage from "@/features/auth/pages/SsoCallbackPage";
 
-const { handleRedirectCallback, signOut, navigate } = vi.hoisted(() => ({
+const {
+  handleRedirectCallback,
+  signOut,
+  navigate,
+  setActive,
+  signUpUpdate,
+  clientState,
+} = vi.hoisted(() => ({
   handleRedirectCallback: vi.fn(),
   signOut: vi.fn(),
   navigate: vi.fn(),
+  setActive: vi.fn(),
+  signUpUpdate: vi.fn(),
+  clientState: {
+    signUp: undefined as Record<string, unknown> | undefined,
+  },
 }));
 
 vi.mock("@clerk/react", () => ({
-  useClerk: () => ({ handleRedirectCallback, signOut }),
+  useClerk: () => ({
+    client: clientState,
+    handleRedirectCallback,
+    setActive,
+    signOut,
+  }),
   useAuth: () => ({ isLoaded: true, isSignedIn: false }),
   useUser: () => ({ user: null, isLoaded: true }),
 }));
@@ -29,6 +46,8 @@ vi.mock("@/components/ui/LoadingSpinner", () => ({ default: () => null }));
 describe("SSOCallbackPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
+    clientState.signUp = undefined;
     handleRedirectCallback.mockResolvedValue(undefined);
   });
 
@@ -68,5 +87,85 @@ describe("SSOCallbackPage", () => {
     await waitFor(() => {
       expect(handleRedirectCallback).toHaveBeenCalledOnce();
     });
+  });
+
+  /**
+   * Legal consent is a required sign-up field and an OAuth redirect cannot
+   * carry it, so Clerk hands the attempt back at missing_requirements: no
+   * session, no error, and this page spun until the user gave up.
+   */
+  it("finishes a sign-up that came back short of legal consent", async () => {
+    sessionStorage.setItem("macrotrackr.signup.legalAccepted", "true");
+    clientState.signUp = {
+      status: "missing_requirements",
+      missingFields: ["legal_accepted"],
+      verifications: { externalAccount: { status: "verified" } },
+      update: signUpUpdate,
+    };
+    signUpUpdate.mockResolvedValue({
+      status: "complete",
+      createdSessionId: "sess_1",
+      missingFields: [],
+    });
+
+    render(<SSOCallbackPage />);
+
+    await waitFor(() => {
+      expect(signUpUpdate).toHaveBeenCalledWith({ legalAccepted: true });
+    });
+    await waitFor(() => {
+      expect(setActive).toHaveBeenCalledWith({ session: "sess_1" });
+    });
+  });
+
+  it("says so rather than spinning when consent was never given", async () => {
+    clientState.signUp = {
+      status: "missing_requirements",
+      missingFields: ["legal_accepted"],
+      verifications: { externalAccount: { status: "verified" } },
+      update: signUpUpdate,
+    };
+
+    render(<SSOCallbackPage />);
+
+    expect(
+      await screen.findByText(/accept the terms and privacy policy/i),
+    ).toBeInTheDocument();
+    expect(signUpUpdate).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The client hangs on to the last sign-up attempt, so an abandoned one from
+   * earlier in the session is indistinguishable from the one this callback is
+   * for. Completing it would activate a session the user never asked for.
+   */
+  it("leaves an attempt alone when it did not come from this callback", async () => {
+    sessionStorage.setItem("macrotrackr.signup.legalAccepted", "true");
+    clientState.signUp = {
+      status: "missing_requirements",
+      missingFields: ["legal_accepted"],
+      verifications: { externalAccount: { status: null } },
+      update: signUpUpdate,
+    };
+
+    render(<SSOCallbackPage />);
+
+    await waitFor(() => {
+      expect(handleRedirectCallback).toHaveBeenCalledOnce();
+    });
+    expect(signUpUpdate).not.toHaveBeenCalled();
+    expect(setActive).not.toHaveBeenCalled();
+  });
+
+  it("keeps Clerk off its hosted continue page", async () => {
+    render(<SSOCallbackPage />);
+
+    await waitFor(() => {
+      expect(handleRedirectCallback).toHaveBeenCalledOnce();
+    });
+
+    expect(handleRedirectCallback.mock.calls[0]?.[0].continueSignUpUrl).toBe(
+      globalThis.location.href,
+    );
   });
 });
