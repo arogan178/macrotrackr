@@ -9,12 +9,14 @@ import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
+import { LegalLink } from "@/features/auth/components/LegalLink";
 import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
 import {
   SocialAuthOptions,
   type SocialAuthStrategy,
 } from "@/features/auth/components/SocialAuthOptions";
 import { AUTH_NOT_READY_MESSAGE } from "@/features/auth/constants";
+import { rememberLegalConsent } from "@/features/auth/utils/legalConsent";
 import { getAuthLinkIntent } from "@/features/auth/utils/linkIntent";
 import {
   buildSocialAuthRedirectUrls,
@@ -315,6 +317,10 @@ export function ClerkSignInForm({
       return;
     }
 
+    // These buttons fall through to sign-up for anyone without an account, and
+    // consent is presented beneath them. The redirect cannot carry the flag, so
+    // record it for /sso-callback.
+    rememberLegalConsent();
     setLoadingStrategy(strategy);
 
     try {
@@ -391,6 +397,7 @@ export function ClerkSignInForm({
               strategy,
               redirectUrl,
               actionCompleteRedirectUrl: redirectUrlComplete,
+              legalAccepted: true,
             });
 
             externalUrl =
@@ -733,6 +740,13 @@ export function ClerkSignInForm({
               onContinueWithEmail={() => setIsEmailMode(true)}
               loadingStrategy={loadingStrategy}
             />
+
+            <p className="mt-4 text-center text-xs text-muted">
+              A provider creates an account if you do not have one, which means
+              you agree to our{" "}
+              <LegalLink to="/terms">Terms of Service</LegalLink> and{" "}
+              <LegalLink to="/privacy">Privacy Policy</LegalLink>.
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

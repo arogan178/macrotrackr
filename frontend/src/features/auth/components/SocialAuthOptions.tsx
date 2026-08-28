@@ -3,14 +3,17 @@ import type React from "react";
 import Button from "@/components/ui/Button";
 import { AppleIcon, GoogleIcon } from "@/components/ui/Icons";
 
-export type SocialAuthStrategy =
-  | "oauth_google"
-  | "oauth_apple";
+export type SocialAuthStrategy = "oauth_google" | "oauth_apple";
 
 interface SocialAuthOptionsProps {
   onProviderSelect: (strategy: SocialAuthStrategy) => void;
   onContinueWithEmail: () => void;
   loadingStrategy?: SocialAuthStrategy | null;
+  /**
+   * Sign-up holds these until legal consent is ticked. The email button stays
+   * live: consent is only needed at submit, and the form asks again there.
+   */
+  providersDisabled?: boolean;
 }
 
 interface SocialAuthProviderConfig {
@@ -48,6 +51,7 @@ export function SocialAuthOptions({
   onProviderSelect,
   onContinueWithEmail,
   loadingStrategy,
+  providersDisabled = false,
 }: SocialAuthOptionsProps) {
   return (
     <>
@@ -69,12 +73,14 @@ export function SocialAuthOptions({
               isLoading={isLoading}
               loadingText={`Connecting to ${label}...`}
               onClick={() => {
-                if (enabled && !loadingStrategy) {
+                if (enabled && !loadingStrategy && !providersDisabled) {
                   onProviderSelect(strategy);
                 }
               }}
               leftIcon={<Icon className="h-5 w-5" />}
-              disabled={!enabled || Boolean(loadingStrategy)}
+              disabled={
+                !enabled || Boolean(loadingStrategy) || providersDisabled
+              }
             >
               {buttonLabel}
             </Button>

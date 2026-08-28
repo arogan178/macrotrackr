@@ -76,6 +76,13 @@ export async function signUpViaUI(page: Page, email: string, password: string): 
   const passwordInput = page.locator('input[type="password"], input[name="password"]').first()
   await passwordInput.fill(password)
 
+  // Legal consent is a required sign-up field on the Clerk instance, so the
+  // submit stays disabled until it is ticked.
+  const consentCheckbox = page.locator('input[name="legalAccepted"]').first()
+  if (await consentCheckbox.isVisible().catch(() => false)) {
+    await consentCheckbox.check()
+  }
+
   // Submit form
   const submitButton = page.locator('button[type="submit"], button:has-text("Create Account")').first()
   await submitButton.click()

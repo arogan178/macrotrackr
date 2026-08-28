@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Browser } from "@capacitor/browser";
 import { useClerk } from "@clerk/react";
 import { useSignIn, useSignUp } from "@clerk/react/legacy";
@@ -9,18 +9,27 @@ import { AnimatePresence, motion } from "motion/react";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { CalorieIcon } from "@/components/ui/Icons";
+import { LegalConsentCheckbox } from "@/features/auth/components/LegalConsentCheckbox";
 import {
   SocialAuthOptions,
   type SocialAuthStrategy,
 } from "@/features/auth/components/SocialAuthOptions";
 import { AUTH_NOT_READY_MESSAGE } from "@/features/auth/constants";
 import {
+  forgetLegalConsent,
+  isMissingLegalConsent,
+  rememberLegalConsent,
+} from "@/features/auth/utils/legalConsent";
+import {
   buildSocialAuthRedirectUrls,
   encodeAuthRedirect,
   normalizeAuthRedirect,
   shouldBypassSyncForRedirect,
 } from "@/features/auth/utils/redirect";
-import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
+import {
+  extractClerkError,
+  resolveSocialAuthError,
+} from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 import {
@@ -29,6 +38,37 @@ import {
 } from "@/services/native/googleAuth";
 import { isNativePlatform } from "@/services/native/platform";
 import { useStore } from "@/store/store";
+
+const RESEND_COOLDOWN_SECONDS = 30;
+
+const VERIFICATION_CODE_LENGTH = 6;
+
+// Pasting a code out of an email routinely brings whitespace with it, and the
+// autofill for one-time-code can bring a non-breaking space. Keep the digits.
+function sanitizeVerificationCode(value: string): string {
+  return value.replaceAll(/\D/gu, "").slice(0, VERIFICATION_CODE_LENGTH);
+}
+
+const CONSENT_REQUIRED_MESSAGE =
+  "Please accept the Terms of Service and Privacy Policy to create an account.";
+
+function resolveVerificationErrorMessage(
+  errorCode: string | undefined,
+  message: string | undefined,
+): string {
+  switch (errorCode) {
+    case "form_code_incorrect":
+    case "verification_failed": {
+      return "That code doesn't match. Check the email and try again, or resend a new code.";
+    }
+    case "verification_expired": {
+      return "That code has expired. Send a new one and try again.";
+    }
+    default: {
+      return message ?? "Verification failed. Please try again.";
+    }
+  }
+}
 
 interface ClerkSignUpFormProps {
   onSwitchToSignIn: () => void;
@@ -60,9 +100,118 @@ export function ClerkSignUpForm({
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const [isEmailMode, setIsEmailMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [consentRequiredOnVerify, setConsentRequiredOnVerify] = useState(false);
+  const hasCheckedPendingSignUp = useRef(false);
 
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
   const normalizedRedirect = normalizeAuthRedirect(redirectTo);
+  const pendingEmail = signUp?.emailAddress ?? email;
+
+  // Latched at restore rather than read live, so ticking the box does not make
+  // the box disappear out from under the pointer.
+  const consentOutstanding = consentRequiredOnVerify && !legalAccepted;
+
+  const afterSignUpRedirect = shouldBypassSyncForRedirect(normalizedRedirect)
+    ? normalizedRedirect
+    : `/profile-setup?redirectTo=${encodeAuthRedirect(normalizedRedirect)}`;
+
+  // A sign-up attempt lives on the Clerk client, not in this component, so an
+  // unverified one survives a reload, a tab close, or the app being killed.
+  // Without this the user came back to an empty form and no way to reach the
+  // code they had already been sent.
+  useEffect(() => {
+    if (!isLoaded || hasCheckedPendingSignUp.current) {
+      return;
+    }
+    hasCheckedPendingSignUp.current = true;
+
+    // Clerk abandons a stale attempt server-side. Restoring one puts the user
+    // on a screen where the code, the resend and the submit all fail.
+    const isAbandoned =
+      signUp.abandonAt !== null && signUp.abandonAt <= Date.now();
+
+    if (
+      !isAbandoned &&
+      signUp.status === "missing_requirements" &&
+      signUp.unverifiedFields.includes("email_address") &&
+      signUp.emailAddress
+    ) {
+      setEmail(signUp.emailAddress);
+      setIsEmailMode(true);
+      setVerifying(true);
+      // An attempt created before consent was collected still owes it. Ask on
+      // the verify screen rather than accepting on the user's behalf when the
+      // code lands.
+      setConsentRequiredOnVerify(isMissingLegalConsent(signUp));
+    }
+  }, [isLoaded, signUp]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setResendCooldown((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const goToAuthReady = useCallback(
+    async (sessionId: string) => {
+      forgetLegalConsent();
+      await setActive?.({ session: sessionId });
+      navigate({
+        to: "/auth-ready",
+        search: { redirectTo: afterSignUpRedirect },
+      });
+    },
+    [afterSignUpRedirect, navigate, setActive],
+  );
+
+  type SignUpAttempt = NonNullable<typeof signUp>;
+
+  /**
+   * Settles whatever the attempt still owes. "outstanding" means something is
+   * genuinely unmet, so the caller can say what rather than reaching for the
+   * nearest error message.
+   */
+  const finishSignUpAttempt = useCallback(
+    async (
+      attempt: SignUpAttempt,
+    ): Promise<"signed-in" | "needs-sign-in" | "outstanding"> => {
+      let settled = attempt;
+
+      if (isMissingLegalConsent(settled)) {
+        settled = await settled.update({ legalAccepted: true });
+      }
+
+      if (settled.status !== "complete") {
+        return "outstanding";
+      }
+
+      if (!settled.createdSessionId) {
+        // Complete with no session is not something the user can act on here.
+        logger.error("Sign-up completed without a session");
+        showNotification(
+          "Your account was created, but we couldn't sign you in. Please sign in to continue.",
+          "warning",
+        );
+        onSwitchToSignIn();
+
+        return "needs-sign-in";
+      }
+
+      await goToAuthReady(settled.createdSessionId);
+
+      return "signed-in";
+    },
+    [goToAuthReady, onSwitchToSignIn, showNotification],
+  );
 
   // Handle social sign-up
   const handleSocialSignUp = async (strategy: SocialAuthStrategy) => {
@@ -71,6 +220,16 @@ export function ClerkSignUpForm({
 
       return;
     }
+
+    if (!legalAccepted) {
+      showNotification(CONSENT_REQUIRED_MESSAGE, "warning");
+
+      return;
+    }
+
+    // The redirect paths cannot carry the consent flag, so record it here and
+    // let /sso-callback apply it to the attempt Clerk hands back.
+    rememberLegalConsent();
 
     productAnalytics.capture({
       event: "signup_started",
@@ -150,6 +309,7 @@ export function ClerkSignUpForm({
             strategy,
             redirectUrl,
             actionCompleteRedirectUrl: redirectUrlComplete,
+            legalAccepted: true,
           });
 
           externalUrl =
@@ -249,6 +409,12 @@ export function ClerkSignUpForm({
       return;
     }
 
+    if (!legalAccepted) {
+      showNotification(CONSENT_REQUIRED_MESSAGE, "warning");
+
+      return;
+    }
+
     productAnalytics.capture({
       event: "signup_started",
       properties: {
@@ -259,31 +425,28 @@ export function ClerkSignUpForm({
     setIsLoading(true);
 
     try {
+      // legalAccepted is required by the instance. Omitting it leaves the
+      // attempt at missing_requirements even after the email code verifies.
       const result = await signUp.create({
         emailAddress: email,
         password,
         firstName,
         lastName,
+        legalAccepted: true,
       });
 
       if (result.status === "complete") {
         // Sign-up complete, set session and redirect to auth-ready
         // AuthReadyPage will set the token and then redirect to the intended destination
-        await setActive({ session: result.createdSessionId });
-        navigate({
-          to: "/auth-ready",
-          search: {
-            redirectTo: shouldBypassSyncForRedirect(normalizedRedirect)
-              ? normalizedRedirect
-              : `/profile-setup?redirectTo=${encodeAuthRedirect(normalizedRedirect)}`,
-          },
-        });
+        await finishSignUpAttempt(result);
       } else if (result.status === "missing_requirements") {
         // Email verification required
         await signUp.prepareEmailAddressVerification({
           strategy: "email_code",
         });
         setVerifying(true);
+        setCode("");
+        setResendCooldown(RESEND_COOLDOWN_SECONDS);
         showNotification(
           "Please check your email for the verification code",
           "success",
@@ -357,43 +520,102 @@ export function ClerkSignUpForm({
   const handleVerify = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded) return;
+    // The submit button is disabled while loading, but Enter in the code field
+    // is not, and a second attempt on an accepted code fails.
+    if (!isLoaded || isLoading) return;
+
+    if (consentOutstanding) {
+      showNotification(CONSENT_REQUIRED_MESSAGE, "warning");
+
+      return;
+    }
 
     setIsLoading(true);
 
     try {
       const result = await signUp.attemptEmailAddressVerification({
-        code,
+        code: sanitizeVerificationCode(code),
       });
 
-      if (result.status === "complete") {
-        // Verification complete, set session and redirect to auth-ready
-        // AuthReadyPage will set the token and then redirect to the intended destination
-        await setActive({ session: result.createdSessionId });
-        showNotification("Email verified successfully!", "success");
-        navigate({
-          to: "/auth-ready",
-          search: {
-            redirectTo: shouldBypassSyncForRedirect(normalizedRedirect)
-              ? normalizedRedirect
-              : `/profile-setup?redirectTo=${encodeAuthRedirect(normalizedRedirect)}`,
-          },
-        });
-      } else {
-        showNotification(
-          "Invalid verification code. Please try again.",
-          "error",
-        );
+      // Reaching here means the code was accepted: a wrong one throws. Anything
+      // still outstanding is a different requirement, and blaming the code for
+      // it strands the user on a screen whose only input is already correct.
+      const outcome = await finishSignUpAttempt(result);
+
+      if (outcome === "signed-in") {
+        showNotification("Email verified", "success");
+
+        return;
       }
+
+      if (outcome === "needs-sign-in") {
+        return;
+      }
+
+      logger.error("Sign-up still incomplete after verification", {
+        status: result.status,
+        missingFields: result.missingFields,
+        unverifiedFields: result.unverifiedFields,
+      });
+      showNotification(
+        "Your email is verified, but we couldn't finish creating the account. Please try again.",
+        "error",
+      );
     } catch (error) {
       logger.error("Verification error:", error);
+
+      const { code: errorCode, message } = extractClerkError(error);
+
+      // The code landed on an earlier submit. Carry on from where that got to
+      // rather than reporting a failure for something that already worked.
+      if (
+        errorCode === "verification_already_verified" &&
+        (await finishSignUpAttempt(signUp)) !== "outstanding"
+      ) {
+        return;
+      }
+
       showNotification(
-        error instanceof Error ? error.message : "Verification failed",
+        resolveVerificationErrorMessage(errorCode, message),
         "error",
       );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Codes expire, and a user coming back to a half-finished sign-up needs a
+  // fresh one rather than a dead end.
+  const handleResendCode = async () => {
+    if (!isLoaded || isResending || resendCooldown > 0) return;
+
+    setIsResending(true);
+
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setCode("");
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      showNotification(`New code sent to ${pendingEmail}`, "success");
+    } catch (error) {
+      logger.error("Resend verification code error:", error);
+      showNotification(
+        extractClerkError(error).message ??
+          "Couldn't send a new code. Please try again.",
+        "error",
+      );
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleUseDifferentEmail = () => {
+    setVerifying(false);
+    setCode("");
+    setResendCooldown(0);
+    // A restored attempt prefills the old address; leaving it there makes the
+    // button a lie and re-submits the same sign-up.
+    setEmail("");
+    setPassword("");
   };
 
   // Show verification form
@@ -408,7 +630,7 @@ export function ClerkSignUpForm({
             Verify Your Email
           </h1>
           <p className="mt-2 text-muted">
-            We&apos;ve sent a verification code to {email}
+            We&apos;ve sent a verification code to {pendingEmail}
           </p>
         </div>
 
@@ -416,32 +638,51 @@ export function ClerkSignUpForm({
           <TextField
             label="Verification Code"
             value={code}
-            onChange={setCode}
+            onChange={(value) => setCode(sanitizeVerificationCode(value))}
             type="text"
             required
             placeholder="123456"
-            maxLength={6}
             name="verificationCode"
             autoComplete="one-time-code"
           />
+
+          {consentRequiredOnVerify ? (
+            <LegalConsentCheckbox
+              checked={legalAccepted}
+              onChange={setLegalAccepted}
+            />
+          ) : null}
 
           <Button
             type="submit"
             fullWidth
             isLoading={isLoading}
             loadingText="Verifying..."
+            disabled={consentOutstanding}
           >
             Verify Email
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 flex flex-col items-center gap-1 text-center">
           <button
             type="button"
-            onClick={() => setVerifying(false)}
-            className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+            onClick={handleResendCode}
+            disabled={isResending || resendCooldown > 0}
+            className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:text-muted disabled:hover:no-underline"
           >
-            Back to sign up
+            {resendCooldown > 0
+              ? `Resend code in ${resendCooldown}s`
+              : isResending
+                ? "Sending..."
+                : "Resend code"}
+          </button>
+          <button
+            type="button"
+            onClick={handleUseDifferentEmail}
+            className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+          >
+            Use a different email
           </button>
         </div>
       </div>
@@ -544,11 +785,17 @@ export function ClerkSignUpForm({
                 ) : null}
               </AnimatePresence>
 
+              <LegalConsentCheckbox
+                checked={legalAccepted}
+                onChange={setLegalAccepted}
+              />
+
               <Button
                 type="submit"
                 fullWidth
                 isLoading={isLoading}
                 loadingText="Creating account..."
+                disabled={!legalAccepted}
               >
                 Create Account
               </Button>
@@ -562,10 +809,18 @@ export function ClerkSignUpForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
+            <div className="mb-5">
+              <LegalConsentCheckbox
+                checked={legalAccepted}
+                onChange={setLegalAccepted}
+              />
+            </div>
+
             <SocialAuthOptions
               onProviderSelect={handleSocialSignUp}
               onContinueWithEmail={() => setIsEmailMode(true)}
               loadingStrategy={loadingStrategy}
+              providersDisabled={!legalAccepted}
             />
           </motion.div>
         )}
