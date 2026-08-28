@@ -788,6 +788,7 @@ export function ClerkSignUpForm({
               <LegalConsentCheckbox
                 checked={legalAccepted}
                 onChange={setLegalAccepted}
+                showRequiredHint={!legalAccepted}
               />
 
               <Button
@@ -809,10 +810,11 @@ export function ClerkSignUpForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className="mb-5">
+            <div className="mb-3">
               <LegalConsentCheckbox
                 checked={legalAccepted}
                 onChange={setLegalAccepted}
+                showRequiredHint={!legalAccepted}
               />
             </div>
 
