@@ -1,20 +1,40 @@
 import type { Page } from '@playwright/test'
-import { waitForAnyVisible, waitForPageReady } from './index'
+import { TEST_VERIFICATION_CODE, waitForAnyVisible, waitForPageReady } from './index'
 
 export interface TestUser {
   email: string
   password: string
 }
 
+/**
+ * Both auth screens open on the social providers. The email fields are behind
+ * "Continue with email", so every helper that wants them has to ask first.
+ */
+async function revealEmailForm(page: Page): Promise<void> {
+  const emailField = page.locator('input[name="email"]').first()
+  if (await emailField.isVisible().catch(() => false)) {
+    return
+  }
+
+  const continueWithEmail = page
+    .locator('button:has-text("Continue with email")')
+    .first()
+  if (await continueWithEmail.isVisible().catch(() => false)) {
+    await continueWithEmail.click()
+  }
+}
+
 export async function navigateToSignUp(page: Page): Promise<void> {
   await page.goto('/register')
   await waitForPageReady(page)
+  await revealEmailForm(page)
   await waitForAnyVisible(page, ['input[type="email"]', 'input[name="email"]'])
 }
 
 export async function navigateToSignIn(page: Page): Promise<void> {
   await page.goto('/login')
   await waitForPageReady(page)
+  await revealEmailForm(page)
   await waitForAnyVisible(page, ['input[type="email"]', 'input[name="email"]'])
 }
 
@@ -87,12 +107,32 @@ export async function signUpViaUI(page: Page, email: string, password: string): 
   const submitButton = page.locator('button[type="submit"], button:has-text("Create Account")').first()
   await submitButton.click()
 
-  await Promise.race([
-    page.waitForURL(/\/home|\/dashboard|verify|register|confirm|auth/, { timeout: 15000 }),
-    waitForAnyVisible(page, ['[role="alert"]', 'text=verify', 'text=Check your email'], 15000),
-  ])
+  await completeEmailVerification(page)
 
   await waitForPageReady(page)
+}
+
+/**
+ * Clerk puts any address containing +clerk_test into test mode: no mail is
+ * sent and TEST_VERIFICATION_CODE is accepted. Without this step the sign-up
+ * stops at the verify screen and never becomes an account, which is how the
+ * registration test came to assert nothing.
+ */
+export async function completeEmailVerification(page: Page): Promise<void> {
+  const codeInput = page.locator('input[name="verificationCode"]').first()
+
+  try {
+    await codeInput.waitFor({ state: 'visible', timeout: 15000 })
+  } catch {
+    // Sign-up completed without a verification step.
+    return
+  }
+
+  await codeInput.fill(TEST_VERIFICATION_CODE)
+  await page.locator('button:has-text("Verify Email")').first().click()
+  await page.waitForURL(/\/profile-setup|\/home|\/dashboard|\/auth-ready/, {
+    timeout: 20000,
+  })
 }
 
 export async function isAuthenticated(page: Page): Promise<boolean> {

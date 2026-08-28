@@ -1,6 +1,8 @@
+import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { navigateToSignUp, navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
+import { generateRandomEmail, generateRandomPassword } from './helpers'
 
 test.describe('Authentication E2E Tests', () => {
   test.describe('Sign Up Flow', () => {
@@ -41,6 +43,8 @@ test.describe('Authentication E2E Tests', () => {
       const emailInput = page.locator('input[type="email"], input[name="email"]').first()
       await expect(emailInput).toBeVisible()
 
+      // The password field is revealed once there is an email to go with it.
+      await emailInput.fill('someone@example.com')
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first()
       await expect(passwordInput).toBeVisible()
     })
@@ -50,20 +54,24 @@ test.describe('Authentication E2E Tests', () => {
     test('should complete registration flow', async ({ page }: { page: Page }) => {
       test.setTimeout(60000)
 
-      const email = `test_${Date.now()}@example.com`
-      const password = 'TestPassword123!'
+      // The dev instance has bot protection on, which blocks a headless
+      // sign-up outright. Without this the flow never reaches the code screen.
+      await setupClerkTestingToken({ page })
+
+      const email = generateRandomEmail()
+      // A fixed password fails HIBP on the dev instance (form_password_pwned).
+      const password = generateRandomPassword()
 
       await signUpViaUI(page, email, password)
 
-      // After sign up, should be redirected to home, verification page, or still on register if verification needed
-      const url = page.url()
-      const isSuccess = url.includes('home') || 
-                       url.includes('verify') || 
-                       url.includes('dashboard') ||
-                       url.includes('register') ||
-                       url.includes('confirm') ||
-                       url.includes('auth')
-      expect(isSuccess).toBe(true)
+      // "still on /register" used to count as success here, so this passed
+      // while the account was never created. Landing on profile setup or the
+      // app is the only outcome that means the sign-up actually completed.
+      // /auth-ready is a staging post: it exchanges the Clerk token and syncs
+      // the account before routing on, so give it room.
+      await expect(page).toHaveURL(/\/profile-setup|\/home|\/dashboard/, {
+        timeout: 30000,
+      })
     })
   })
 
@@ -76,6 +84,7 @@ test.describe('Authentication E2E Tests', () => {
         test.skip()
       }
 
+      await setupClerkTestingToken({ page })
       await loginWithTestUser(page)
 
       // Verify we're on an authenticated page

@@ -67,9 +67,14 @@ export async function waitForAnyVisible(
   throw new Error(`None of the expected selectors became visible: ${selectors.join(', ')}`)
 }
 
+/**
+ * The +clerk_test marker puts Clerk into test mode for this address: no real
+ * email is sent and TEST_VERIFICATION_CODE is accepted. Without it a sign-up
+ * test waits on a delivery that never arrives.
+ */
 export function generateRandomEmail(): string {
   const timestamp = Date.now()
-  return `test_${timestamp}@example.com`
+  return `test_${timestamp}+clerk_test@example.com`
 }
 
 export function generateRandomPassword(): string {
