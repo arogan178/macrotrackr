@@ -10,6 +10,7 @@ import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { CalorieIcon } from "@/components/ui/Icons";
 import { LegalConsentCheckbox } from "@/features/auth/components/LegalConsentCheckbox";
+import { LegalConsentNotice } from "@/features/auth/components/LegalConsentNotice";
 import {
   SocialAuthOptions,
   type SocialAuthStrategy,
@@ -221,14 +222,8 @@ export function ClerkSignUpForm({
       return;
     }
 
-    if (!legalAccepted) {
-      showNotification(CONSENT_REQUIRED_MESSAGE, "warning");
-
-      return;
-    }
-
-    // The redirect paths cannot carry the consent flag, so record it here and
-    // let /sso-callback apply it to the attempt Clerk hands back.
+    // Pressing the button is the agreement: the terms sit under it. The
+    // redirect paths cannot carry the flag, so record it for /sso-callback.
     rememberLegalConsent();
 
     productAnalytics.capture({
@@ -788,7 +783,6 @@ export function ClerkSignUpForm({
               <LegalConsentCheckbox
                 checked={legalAccepted}
                 onChange={setLegalAccepted}
-                showRequiredHint={!legalAccepted}
               />
 
               <Button
@@ -810,20 +804,13 @@ export function ClerkSignUpForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className="mb-3">
-              <LegalConsentCheckbox
-                checked={legalAccepted}
-                onChange={setLegalAccepted}
-                showRequiredHint={!legalAccepted}
-              />
-            </div>
-
             <SocialAuthOptions
               onProviderSelect={handleSocialSignUp}
               onContinueWithEmail={() => setIsEmailMode(true)}
               loadingStrategy={loadingStrategy}
-              providersDisabled={!legalAccepted}
             />
+
+            <LegalConsentNotice />
           </motion.div>
         )}
       </AnimatePresence>

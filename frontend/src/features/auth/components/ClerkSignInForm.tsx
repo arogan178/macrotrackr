@@ -9,7 +9,7 @@ import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
-import { LegalLink } from "@/features/auth/components/LegalLink";
+import { LegalConsentNotice } from "@/features/auth/components/LegalConsentNotice";
 import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
 import {
   SocialAuthOptions,
@@ -741,12 +741,7 @@ export function ClerkSignInForm({
               loadingStrategy={loadingStrategy}
             />
 
-            <p className="mt-4 text-center text-xs text-muted">
-              A provider creates an account if you do not have one, which means
-              you agree to our{" "}
-              <LegalLink to="/terms">Terms of Service</LegalLink> and{" "}
-              <LegalLink to="/privacy">Privacy Policy</LegalLink>.
-            </p>
+            <LegalConsentNotice lead="A provider creates an account if you do not have one." />
           </motion.div>
         )}
       </AnimatePresence>

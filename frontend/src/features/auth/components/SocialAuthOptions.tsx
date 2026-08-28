@@ -9,11 +9,6 @@ interface SocialAuthOptionsProps {
   onProviderSelect: (strategy: SocialAuthStrategy) => void;
   onContinueWithEmail: () => void;
   loadingStrategy?: SocialAuthStrategy | null;
-  /**
-   * Sign-up holds these until legal consent is ticked. The email button stays
-   * live: consent is only needed at submit, and the form asks again there.
-   */
-  providersDisabled?: boolean;
 }
 
 interface SocialAuthProviderConfig {
@@ -51,7 +46,6 @@ export function SocialAuthOptions({
   onProviderSelect,
   onContinueWithEmail,
   loadingStrategy,
-  providersDisabled = false,
 }: SocialAuthOptionsProps) {
   return (
     <>
@@ -73,14 +67,12 @@ export function SocialAuthOptions({
               isLoading={isLoading}
               loadingText={`Connecting to ${label}...`}
               onClick={() => {
-                if (enabled && !loadingStrategy && !providersDisabled) {
+                if (enabled && !loadingStrategy) {
                   onProviderSelect(strategy);
                 }
               }}
               leftIcon={<Icon className="h-5 w-5" />}
-              disabled={
-                !enabled || Boolean(loadingStrategy) || providersDisabled
-              }
+              disabled={!enabled || Boolean(loadingStrategy)}
             >
               {buttonLabel}
             </Button>
