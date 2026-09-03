@@ -91,15 +91,6 @@
     font-size: inherit;
   }
 
-  /* Ensure form controls never drop below 16px on mobile viewports to prevent iOS auto-zoom on focus */
-  @media screen and (max-width: 639px) {
-    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-    select,
-    textarea {
-      font-size: 16px;
-    }
-  }
-
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
   }
@@ -113,6 +104,22 @@
   :disabled {
     opacity: 0.5;
     pointer-events: auto;
+  }
+}
+
+/* Unlayered on purpose. iOS WebKit auto-zooms on focus for any control under
+   16px and never zooms back out on blur, so this is a hard floor, not a default:
+   inside @layer base a single Tailwind `text-sm` on an input silently defeats it,
+   which is how six inputs kept auto-zooming after the first attempt at this fix.
+   Unlayered declarations outrank every layer, so the floor holds wherever a
+   control was styled without thinking about it. Above `sm` the utilities are free
+   to size text again, which is why the query is a hard `< 40rem` and not a range.
+   Owned here; `formStyles.input.base` sets the same floor for the styled path. */
+@media (width < 40rem) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 

@@ -22,24 +22,41 @@ interface BarcodeDetectorLike {
 type BarcodeDetectorConstructor = new (options?: { formats: string[] }) => BarcodeDetectorLike;
 
 /**
- * Returns a barcode detector instance.
- * Uses native BarcodeDetector if supported by the browser (Chromium / Android).
- * Falls back to @zxing/library on iOS Safari / WebKit and other browsers lacking native support.
+ * The interval between decode attempts, and the interval zxing is told to pace
+ * itself at. One cadence, so the two cannot drift apart.
  */
-export const createBarcodeDetector = async (options?: {
-  formats: string[];
-}): Promise<BarcodeDetectorLike | null> => {
+const SCAN_INTERVAL_MS = 300;
+
+/** What a food barcode is ever going to be. Native names; zxing gets the map below. */
+const SCANNED_FORMATS = [
+  "ean_13",
+  "ean_8",
+  "upc_a",
+  "upc_e",
+  "code_128",
+  "code_39",
+  "qr_code",
+] as const;
+
+/**
+ * Chromium and Android WebView have a native BarcodeDetector. WebKit does not,
+ * and on iOS every browser is WebKit, so the scanner used to be dead there: the
+ * camera opened and silently never decoded. zxing fills that gap, loaded only
+ * once the native check has failed, so the browsers that do not need a decoder
+ * never download one.
+ */
+const createBarcodeDetector = async (): Promise<BarcodeDetectorLike | null> => {
   if (typeof window === "undefined") return null;
 
-  const WindowWithBarcode = window as unknown as {
+  const { BarcodeDetector } = window as unknown as {
     BarcodeDetector?: BarcodeDetectorConstructor;
   };
 
-  if (WindowWithBarcode.BarcodeDetector) {
+  if (BarcodeDetector) {
     try {
-      return new WindowWithBarcode.BarcodeDetector(options);
+      return new BarcodeDetector({ formats: [...SCANNED_FORMATS] });
     } catch {
-      // Fall through to fallback
+      // Constructed but unsupported formats: fall through to zxing.
     }
   }
 
@@ -48,43 +65,31 @@ export const createBarcodeDetector = async (options?: {
       "@zxing/library"
     );
 
-    const hints = new Map();
-    if (options?.formats && options.formats.length > 0) {
-      const formatMap: Record<string, BarcodeFormat> = {
-        ean_13: BarcodeFormat.EAN_13,
-        ean_8: BarcodeFormat.EAN_8,
-        upc_a: BarcodeFormat.UPC_A,
-        upc_e: BarcodeFormat.UPC_E,
-        code_128: BarcodeFormat.CODE_128,
-        code_39: BarcodeFormat.CODE_39,
-        qr_code: BarcodeFormat.QR_CODE,
-        itf: BarcodeFormat.ITF,
-        data_matrix: BarcodeFormat.DATA_MATRIX,
-        aztec: BarcodeFormat.AZTEC,
-        pdf417: BarcodeFormat.PDF_417,
-      };
-      const formats = options.formats
-        .map((f) => formatMap[f])
-        .filter((f): f is BarcodeFormat => f !== undefined);
-      if (formats.length > 0) {
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
-      }
-    }
+    const zxingFormats: Record<(typeof SCANNED_FORMATS)[number], BarcodeFormat> = {
+      ean_13: BarcodeFormat.EAN_13,
+      ean_8: BarcodeFormat.EAN_8,
+      upc_a: BarcodeFormat.UPC_A,
+      upc_e: BarcodeFormat.UPC_E,
+      code_128: BarcodeFormat.CODE_128,
+      code_39: BarcodeFormat.CODE_39,
+      qr_code: BarcodeFormat.QR_CODE,
+    };
 
-    const reader = new BrowserMultiFormatReader(hints, 300);
+    const hints = new Map([
+      [DecodeHintType.POSSIBLE_FORMATS, SCANNED_FORMATS.map((format) => zxingFormats[format])],
+    ]);
+    const reader = new BrowserMultiFormatReader(hints, SCAN_INTERVAL_MS);
 
     return {
-      async detect(source: HTMLVideoElement | ImageBitmap | HTMLCanvasElement) {
+      detect(source: HTMLVideoElement | ImageBitmap | HTMLCanvasElement) {
         try {
-          const result = reader.decode(source as HTMLVisualMediaElement);
-          if (result?.getText()) {
-            return [{ rawValue: result.getText() }];
-          }
+          const text = reader.decode(source as HTMLVisualMediaElement).getText();
 
-          return [];
+          return Promise.resolve(text ? [{ rawValue: text }] : []);
         } catch {
-          // NotFoundException is thrown on each frame without a barcode
-          return [];
+          // zxing throws NotFoundException for every frame without a barcode,
+          // which is almost all of them. Not an error worth surfacing.
+          return Promise.resolve([]);
         }
       },
     };
@@ -115,10 +120,13 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
   const streamRef = useRef<MediaStream | null>(null);
   const scanIntervalRef = useRef<number | null>(null);
   const isLookupInProgressRef = useRef(false);
-  const isCameraActiveRef = useRef(false);
+  // Bumped by every stop, so an in-flight startCamera can tell that it was
+  // superseded and bail instead of installing a second stream. A boolean could
+  // not: the newer start set it back to true before the older one resumed.
+  const startGenerationRef = useRef(0);
 
   const stopCamera = useCallback(() => {
-    isCameraActiveRef.current = false;
+    startGenerationRef.current += 1;
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
       scanIntervalRef.current = null;
@@ -164,7 +172,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
 
   const startCamera = useCallback(async () => {
     stopCamera();
-    isCameraActiveRef.current = true;
+    const generation = startGenerationRef.current;
     setErrorMessage(null);
 
     if (
@@ -178,11 +186,9 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
       return;
     }
 
-    const barcodeDetector = await createBarcodeDetector({
-      formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
-    });
+    const barcodeDetector = await createBarcodeDetector();
 
-    if (!isCameraActiveRef.current) return;
+    if (generation !== startGenerationRef.current) return;
 
     if (!barcodeDetector) {
       setHasCamera(false);
@@ -203,7 +209,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         },
       });
 
-      if (!isCameraActiveRef.current) {
+      if (generation !== startGenerationRef.current) {
         for (const track of stream.getTracks()) {
           track.stop();
         }
@@ -233,9 +239,9 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         } catch {
           // Ignore detection errors in animation loop
         }
-      }, 300);
+      }, SCAN_INTERVAL_MS);
     } catch {
-      if (!isCameraActiveRef.current) return;
+      if (generation !== startGenerationRef.current) return;
       setHasCamera(false);
       setMode("manual");
       setErrorMessage("Camera access was not granted. Please enter the barcode numbers manually.");
