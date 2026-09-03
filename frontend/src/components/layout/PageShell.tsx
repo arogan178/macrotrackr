@@ -40,14 +40,20 @@ const PageShell: React.FC<PageShellProps> = ({
   as: Element = "main",
   id,
 }) => (
-  <div className="relative min-h-screen text-foreground">
+  // No height of its own: MainLayout's <main> is already min-h-dvh and, signed
+  // in on a phone, pads for MobileTabBar on top of that. A nested min-h-dvh
+  // added a second viewport to the total and guaranteed an overflow scroll of
+  // exactly the tab-bar height on every page. min-h-full would not fix it
+  // either: the parent height is auto, so a percentage min-height resolves to
+  // auto and the class is inert.
+  <div className="relative text-foreground">
     <Element
       id={id}
       className={cn(
         "relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8",
         WIDTHS[width],
         offsetHeader ? "pt-[var(--header-offset)]" : "pt-4 sm:pt-6",
-        "pb-[calc(3rem+var(--sab))]",
+        "pb-[var(--page-shell-pb)]",
         className,
       )}
     >

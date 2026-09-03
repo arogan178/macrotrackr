@@ -93,6 +93,16 @@ const measurements = {
   layoutProjection: countMatches(/\blayoutId=|^\s+layout$/gm),
   // Loose backstop only. Not the headline.
   motionFiles: countFiles("motion/react"),
+  // 100vh on iOS measures the viewport as if the browser chrome were not there,
+  // so a min-h-screen page is taller than the screen and pans under the toolbar.
+  // min-h-dvh is the replacement. The three shells are converted; this counts
+  // what is left, on landing, blog and legal pages, so the next page cannot add
+  // another spelling of full height without the decision showing up in review.
+  // The budget is the count on master, which is one above what this branch
+  // measures on its own: the landing DeleteAccountPage and the extracted
+  // AuthLoadingScreen landed while this was open, and the check runs on the
+  // merge. Pinning a new counter to a stale base fails it on arrival.
+  legacyViewportHeight: countMatches(/\bmin-h-screen\b/g),
   // One breakpoint was doing all the work; this should keep falling as density
   // moves into the primitives.
   smOverrides: countMatches(/\bsm:/g),
