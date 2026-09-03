@@ -32,6 +32,8 @@
 @layer base {
   html {
     color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -44,6 +46,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    overflow-x: clip;
   }
 
   body {
@@ -86,6 +89,15 @@
   textarea {
     font-family: inherit;
     font-size: inherit;
+  }
+
+  /* Ensure form controls never drop below 16px on mobile viewports to prevent iOS auto-zoom on focus */
+  @media screen and (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
   }
 
   :focus-visible {
@@ -145,6 +157,9 @@
   --floating-notification-top: calc(
     1rem + var(--sat) + var(--header-height) + 0.75rem
   );
+
+  /* PageShell bottom padding: on public pages, reserves safe area at the bottom. */
+  --page-shell-pb: calc(3rem + var(--sab));
 }
 
 /* Signed in on a phone there is no top bar — MobileTabBar carries navigation —
@@ -155,6 +170,8 @@
     --header-offset: calc(1rem + var(--sat));
     /* Toasts cleared a bar that is no longer there. */
     --floating-notification-top: calc(1rem + var(--sat));
+    /* MainLayout <main> already pads for MobileTabBar and --sab. Avoid double-padding. */
+    --page-shell-pb: 1.5rem;
   }
 }
 

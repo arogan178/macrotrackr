@@ -68,9 +68,67 @@ describe("BarcodeScannerModal", () => {
     });
   });
 
-  it("falls back to manual entry when the browser has no BarcodeDetector", async () => {
-    // Safari/iOS: getUserMedia exists but there is nothing to decode frames with.
-    const getUserMedia = vi.fn();
+  it("uses fallback detector and starts camera when native BarcodeDetector is absent (Safari/iOS)", async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = {
+      getTracks: vi.fn().mockReturnValue([mockTrack]),
+    };
+    const getUserMedia = vi.fn().mockResolvedValue(mockStream);
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      mediaDevices: { getUserMedia },
+    });
+    const playSpy = vi.spyOn(window.HTMLMediaElement.prototype, "play").mockResolvedValue();
+
+    render(
+      <BarcodeScannerModal isOpen onClose={vi.fn()} onProductFound={vi.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(getUserMedia).toHaveBeenCalledWith(
+        expect.objectContaining({
+          video: expect.objectContaining({
+            facingMode: { ideal: "environment" },
+          }),
+        })
+      );
+    });
+
+    playSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses native BarcodeDetector when available (Chromium/Android)", async () => {
+    class MockBarcodeDetector {
+      detect = vi.fn().mockResolvedValue([{ rawValue: "737628064502" }]);
+    }
+    vi.stubGlobal("BarcodeDetector", MockBarcodeDetector);
+
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = {
+      getTracks: vi.fn().mockReturnValue([mockTrack]),
+    };
+    const getUserMedia = vi.fn().mockResolvedValue(mockStream);
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      mediaDevices: { getUserMedia },
+    });
+    const playSpy = vi.spyOn(window.HTMLMediaElement.prototype, "play").mockResolvedValue();
+
+    render(
+      <BarcodeScannerModal isOpen onClose={vi.fn()} onProductFound={vi.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(getUserMedia).toHaveBeenCalled();
+    });
+
+    playSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it("falls back to manual entry when camera access is denied", async () => {
+    const getUserMedia = vi.fn().mockRejectedValue(new Error("Permission denied"));
     vi.stubGlobal("navigator", {
       ...navigator,
       mediaDevices: { getUserMedia },
@@ -81,10 +139,8 @@ describe("BarcodeScannerModal", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/cannot scan barcodes/i)).toBeInTheDocument();
+      expect(screen.getByText(/camera access was not granted/i)).toBeInTheDocument();
     });
-    // The camera is never opened, so no preview streams that could not scan.
-    expect(getUserMedia).not.toHaveBeenCalled();
     expect(screen.getByLabelText(/barcode number/i)).toBeInTheDocument();
 
     vi.unstubAllGlobals();

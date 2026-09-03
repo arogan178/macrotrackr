@@ -40,14 +40,14 @@ const PageShell: React.FC<PageShellProps> = ({
   as: Element = "main",
   id,
 }) => (
-  <div className="relative min-h-screen text-foreground">
+  <div className="relative min-h-dvh text-foreground">
     <Element
       id={id}
       className={cn(
         "relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8",
         WIDTHS[width],
         offsetHeader ? "pt-[var(--header-offset)]" : "pt-4 sm:pt-6",
-        "pb-[calc(3rem+var(--sab))]",
+        "pb-[var(--page-shell-pb)]",
         className,
       )}
     >

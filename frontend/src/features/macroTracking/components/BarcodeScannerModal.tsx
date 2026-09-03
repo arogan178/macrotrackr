@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import type { BarcodeFormat, HTMLVisualMediaElement } from "@zxing/library";
 
 import { type FoodSearchResult, macrosApi } from "@/api/macros";
 import { formStyles } from "@/components/form/FormStyles";
@@ -21,16 +22,75 @@ interface BarcodeDetectorLike {
 type BarcodeDetectorConstructor = new (options?: { formats: string[] }) => BarcodeDetectorLike;
 
 /**
- * Safari (iOS, and therefore every browser on iOS) ships no BarcodeDetector, so
- * there is nothing to decode frames with. Opening the camera anyway would show a
- * live preview that silently never scans, so we check first and say so instead.
+ * Returns a barcode detector instance.
+ * Uses native BarcodeDetector if supported by the browser (Chromium / Android).
+ * Falls back to @zxing/library on iOS Safari / WebKit and other browsers lacking native support.
  */
-const getBarcodeDetectorConstructor = (): BarcodeDetectorConstructor | null => {
+export const createBarcodeDetector = async (options?: {
+  formats: string[];
+}): Promise<BarcodeDetectorLike | null> => {
   if (typeof window === "undefined") return null;
 
-  return (
-    (window as unknown as { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector ?? null
-  );
+  const WindowWithBarcode = window as unknown as {
+    BarcodeDetector?: BarcodeDetectorConstructor;
+  };
+
+  if (WindowWithBarcode.BarcodeDetector) {
+    try {
+      return new WindowWithBarcode.BarcodeDetector(options);
+    } catch {
+      // Fall through to fallback
+    }
+  }
+
+  try {
+    const { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } = await import(
+      "@zxing/library"
+    );
+
+    const hints = new Map();
+    if (options?.formats && options.formats.length > 0) {
+      const formatMap: Record<string, BarcodeFormat> = {
+        ean_13: BarcodeFormat.EAN_13,
+        ean_8: BarcodeFormat.EAN_8,
+        upc_a: BarcodeFormat.UPC_A,
+        upc_e: BarcodeFormat.UPC_E,
+        code_128: BarcodeFormat.CODE_128,
+        code_39: BarcodeFormat.CODE_39,
+        qr_code: BarcodeFormat.QR_CODE,
+        itf: BarcodeFormat.ITF,
+        data_matrix: BarcodeFormat.DATA_MATRIX,
+        aztec: BarcodeFormat.AZTEC,
+        pdf417: BarcodeFormat.PDF_417,
+      };
+      const formats = options.formats
+        .map((f) => formatMap[f])
+        .filter((f): f is BarcodeFormat => f !== undefined);
+      if (formats.length > 0) {
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+      }
+    }
+
+    const reader = new BrowserMultiFormatReader(hints, 300);
+
+    return {
+      async detect(source: HTMLVideoElement | ImageBitmap | HTMLCanvasElement) {
+        try {
+          const result = reader.decode(source as HTMLVisualMediaElement);
+          if (result?.getText()) {
+            return [{ rawValue: result.getText() }];
+          }
+
+          return [];
+        } catch {
+          // NotFoundException is thrown on each frame without a barcode
+          return [];
+        }
+      },
+    };
+  } catch {
+    return null;
+  }
 };
 
 interface BarcodeScannerModalProps {
@@ -55,8 +115,10 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
   const streamRef = useRef<MediaStream | null>(null);
   const scanIntervalRef = useRef<number | null>(null);
   const isLookupInProgressRef = useRef(false);
+  const isCameraActiveRef = useRef(false);
 
   const stopCamera = useCallback(() => {
+    isCameraActiveRef.current = false;
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
       scanIntervalRef.current = null;
@@ -102,6 +164,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
 
   const startCamera = useCallback(async () => {
     stopCamera();
+    isCameraActiveRef.current = true;
     setErrorMessage(null);
 
     if (
@@ -115,12 +178,17 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
       return;
     }
 
-    const BarcodeDetectorConstructor = getBarcodeDetectorConstructor();
-    if (!BarcodeDetectorConstructor) {
+    const barcodeDetector = await createBarcodeDetector({
+      formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
+    });
+
+    if (!isCameraActiveRef.current) return;
+
+    if (!barcodeDetector) {
       setHasCamera(false);
       setMode("manual");
       setErrorMessage(
-        "This browser cannot scan barcodes (Safari and every iOS browser lack the detector). Enter the barcode numbers below instead."
+        "This browser cannot scan barcodes. Enter the barcode numbers below instead."
       );
 
       return;
@@ -135,6 +203,14 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         },
       });
 
+      if (!isCameraActiveRef.current) {
+        for (const track of stream.getTracks()) {
+          track.stop();
+        }
+
+        return;
+      }
+
       streamRef.current = stream;
       setHasCamera(true);
       setIsScanning(true);
@@ -143,10 +219,6 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         videoRef.current.srcObject = stream;
         await videoRef.current.play().catch(() => {});
       }
-
-      const barcodeDetector = new BarcodeDetectorConstructor({
-        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
-      });
 
       scanIntervalRef.current = window.setInterval(async () => {
         if (!videoRef.current || videoRef.current.readyState < 2 || isLookupInProgressRef.current) {
@@ -163,6 +235,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         }
       }, 300);
     } catch {
+      if (!isCameraActiveRef.current) return;
       setHasCamera(false);
       setMode("manual");
       setErrorMessage("Camera access was not granted. Please enter the barcode numbers manually.");
