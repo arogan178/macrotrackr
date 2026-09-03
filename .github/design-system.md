@@ -163,6 +163,25 @@ it as a queue of work rather than as headroom.
 The numbers may fall freely. Raising one is a design decision and belongs in the
 same commit as the change that needs it, so the trade-off appears in the diff.
 
+A budget is enforced against what the change in front of it actually added.
+`src` is counted twice, once as it stands and once out of the base the change
+started from: the base branch tip for a pull request, because the checkout is
+the merge commit and its counts already include whatever landed while the
+branch was open, and the fork point when you run it by hand. A count over
+budget that the base already holds prints `~~`, says so, and does not fail,
+because this change is not what moved it. That cannot let a regression in:
+absolution requires the base to already hold the count, so the edit is owed by
+whatever put it there, and a count higher than the base still fails. If the
+base cannot be read the check falls back to the budget alone, which is the
+stricter answer, so a shallow clone loses the nuance and not the gate.
+
+This is what `legacyViewportHeight` ran into on arrival. It was pinned at 29,
+the count on a branch that had forked 20 commits earlier. `master` reached 34
+while the branch was open, the branch's own four conversions to `min-h-dvh`
+came off that, and the merge measured 30. The check failed a change that had
+just removed four call sites, against a number describing a tree nobody was
+merging.
+
 **A counter that cannot rise is worse than no counter.** `surfaces` read 2
 against a budget of 4 for its whole life, and printed `ratchet this down` the
 entire time. Its alternation listed `surface` ahead of `surface-2`, and `-` is a
