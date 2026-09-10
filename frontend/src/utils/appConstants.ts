@@ -43,6 +43,9 @@ export const DOCS_URL = rawDocumentationUrl;
 export const SETUP_DOCS_URL = `${GITHUB_REPO_URL}#self-hosting-with-docker-compose`;
 
 export const APP_ICON_URL = `${APP_URL}/icon.png`;
+// The square icon is the logo; the card is 1200x630. Sharing a page with the
+// icon as og:image is what demoted the link preview to a summary card.
+export const APP_OG_IMAGE_URL = `${APP_URL}/og.png`;
 export const PRICING_URL = `${APP_URL}/pricing`;
 export const SCHEMA_ORG_CONTEXT = "https://schema.org";
 

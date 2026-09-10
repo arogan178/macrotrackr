@@ -45,7 +45,15 @@
       content="Log meals in seconds, set a macro split, and see where the week actually went. Free, open source, and self-hostable."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icon.png" />
+    <!-- Absolute, because the card crawlers do not resolve a relative image and
+         silently fall back to the small summary layout. -->
+    <meta property="og:image" content="https://macrotrackr.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="MacroTrackr — a day logged at 1,771 of 2,200 calories, with protein, carbs and fats against their targets"
+    />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -57,7 +65,11 @@
       name="twitter:description"
       content="Log meals in seconds, set a macro split, and see where the week actually went. Free, open source, and self-hostable."
     />
-    <meta name="twitter:image" content="/icon.png" />
+    <meta name="twitter:image" content="https://macrotrackr.com/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="MacroTrackr — a day logged at 1,771 of 2,200 calories, with protein, carbs and fats against their targets"
+    />
 
     <!-- Structured data (Organization) with alternateName to capture common misspelling -->
     <script type="application/ld+json">

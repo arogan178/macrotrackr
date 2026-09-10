@@ -16,7 +16,7 @@ import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { purchasePro } from "@/services/native/playBilling";
 import { useStore } from "@/store/store";
-import { APP_ICON_URL, buildCanonicalUrl } from "@/utils/appConstants";
+import { APP_OG_IMAGE_URL, buildCanonicalUrl } from "@/utils/appConstants";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
@@ -50,7 +50,7 @@ const PricingPage: React.FC = () => {
     description:
       "Compare plans and unlock Pro features on MacroTrackr — advanced insights, priority support, and unlimited tracking.",
     canonical: buildCanonicalUrl("/pricing"),
-    ogImage: APP_ICON_URL,
+    ogImage: APP_OG_IMAGE_URL,
   });
 
   const { isLoaded, isSignedIn } = useAppAuthState();
