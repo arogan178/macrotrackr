@@ -39,6 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        # Depth 1 fetches the merge commit and none of its parents, and the UI
+        # budget check needs the base.
+        fetch-depth: 0
 
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
@@ -55,6 +59,10 @@ jobs:
 
     - name: Lint
       working-directory: ./frontend
+      env:
+        # Base branch tip for a pull request, previous head for a push. Empty
+        # otherwise, and the check falls back to the budget alone.
+        UI_BUDGET_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
       run: bun run lint
 
     # Five releases' worth of drift went unnoticed because this only ever ran
