@@ -8,9 +8,19 @@ const ROOT = process.cwd();
 const SCRIPT = path.join(ROOT, "scripts", "check-ui-budgets.mjs");
 const BUDGETS = path.join(ROOT, "ui-budgets.json");
 
-const run = (): { status: number; output: string } => {
+const rev = (revision: string): string =>
+  execFileSync("git", ["rev-parse", revision], { encoding: "utf8" }).trim();
+
+// The base is always passed explicitly. Left to itself the check resolves the
+// fork point against origin/master, so whether a breach is absolved would
+// depend on which refs the machine happens to have — green in a shallow CI
+// clone, red on a developer's.
+const run = (base: string): { status: number; output: string } => {
   try {
-    const output = execFileSync("node", [SCRIPT], { encoding: "utf8" });
+    const output = execFileSync("node", [SCRIPT], {
+      encoding: "utf8",
+      env: { ...process.env, UI_BUDGET_BASE_SHA: base },
+    });
 
     return { status: 0, output };
   } catch (error) {
@@ -28,22 +38,36 @@ afterEach(() => {
 
 describe("ui budgets", () => {
   it("passes on the current tree", () => {
-    const { status, output } = run();
+    const { status, output } = run(rev("HEAD"));
 
     expect(output).toContain("UI budgets");
     expect(status).toBe(0);
   });
 
-  it("fails when a budget is exceeded, so drift is caught in review", () => {
+  // A base of HEAD is a tree compared against itself, which the check treats as
+  // no base at all, so this is the budget standing on its own.
+  it("fails when a budget is exceeded and no base absolves it", () => {
     const budgets = JSON.parse(original);
     budgets.budgets.radii = 0;
     writeFileSync(BUDGETS, JSON.stringify(budgets, undefined, 2));
 
-    const { status, output } = run();
+    const { status, output } = run(rev("HEAD"));
 
     expect(status).toBe(1);
     expect(output).toContain("radii");
     expect(output).toContain("ui-budgets.json");
+  });
+
+  it("absolves a count the base already holds, and says whose it is", () => {
+    const budgets = JSON.parse(original);
+    budgets.budgets.radii = 0;
+    writeFileSync(BUDGETS, JSON.stringify(budgets, undefined, 2));
+
+    const { status, output } = run(rev("HEAD^"));
+
+    expect(status).toBe(0);
+    expect(output).toContain("~~ radii");
+    expect(output).toContain("this change did not move it");
   });
 
   it("holds the closed token set at its intended shape", () => {
