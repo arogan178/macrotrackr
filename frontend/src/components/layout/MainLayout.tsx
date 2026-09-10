@@ -65,7 +65,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div
-      className={`min-h-screen bg-background text-foreground ${
+      className={`min-h-dvh bg-background text-foreground ${
         isAuthenticated ? "app-shell-headerless" : ""
       }`}
     >
@@ -88,7 +88,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       )}
       <main
         id="main-content"
-        className={`relative min-h-screen ${
+        className={`relative min-h-dvh ${
           isAuthenticated ? "pb-[calc(4.5rem+var(--sab))] md:pb-0" : ""
         }`}
       >
