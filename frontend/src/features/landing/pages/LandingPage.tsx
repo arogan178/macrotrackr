@@ -6,8 +6,8 @@ import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { usePageMetadata } from "@/hooks";
 import {
-  APP_ICON_URL,
   APP_NAME,
+  APP_OG_IMAGE_URL,
   APP_URL,
   buildCanonicalUrl,
   PRICING_URL,
@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
     description:
       "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
     canonical: buildCanonicalUrl("/"),
-    ogImage: APP_ICON_URL,
+    ogImage: APP_OG_IMAGE_URL,
   });
   const shouldReduceMotion = useReducedMotion();
 
