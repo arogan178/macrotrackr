@@ -95,8 +95,16 @@ export default function TdeeCalculatorPage() {
       title="TDEE Calculator"
       subtitle="Estimate your Total Daily Energy Expenditure and explore calorie targets for fat loss, maintenance, or muscle gain."
       canonicalPath="/tools/tdee-calculator"
-      description="Free TDEE Calculator (Total Daily Energy Expenditure). Estimate your daily maintenance calories and macro splits accurately."
       faqs={FAQS}
+      method={
+        <>
+          Basal Metabolic Rate comes from the Mifflin-St Jeor equation
+          (10 x weight in kg + 6.25 x height in cm - 5 x age, +5 for men and
+          -161 for women), then multiplies by an activity factor from 1.2 for
+          sedentary to 1.9 for very active. Activity factors are self-reported
+          bands, so they are the least precise part of the estimate.
+        </>
+      }
       ctaResult={
         statsReady
           ? {

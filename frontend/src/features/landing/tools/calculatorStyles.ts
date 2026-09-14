@@ -30,8 +30,12 @@ export const calculatorStatValueClass =
 /**
  * The result column follows the inputs on small screens, matching the order
  * people fill the calculator in, and moves to a sticky right rail from md.
- * Below md it docks to the bottom of the viewport instead: the answer used to
- * scroll away behind the keyboard while the inputs were still being typed.
+ *
+ * It used to dock to the bottom of the viewport below md, to stop the answer
+ * scrolling away while the inputs were still being typed. That card runs 577px
+ * on a 844px screen, so docking it covered the form: every input measured
+ * unreachable, taps landing on the card instead. `CalculatorResultBar` keeps
+ * the answer on screen in one line instead, and this column now just flows.
  */
 export const calculatorResultColumnClass =
-  "sticky bottom-[var(--sab)] z-20 md:col-span-5 md:bottom-auto md:top-[var(--header-offset)] md:self-start";
+  "md:sticky md:col-span-5 md:top-[var(--header-offset)] md:self-start";

@@ -30,7 +30,7 @@ const FAQS = [
   {
     question: "Is high protein intake safe for healthy kidneys?",
     answer:
-      "Yes. Research consistently shows high protein diets (up to 3.3g/kg per day) are completely safe for healthy adults without pre-existing kidney conditions.",
+      "Controlled trials in healthy adults with normal kidney function have not found harm to kidney function at intakes up to roughly 3.3g/kg per day. That evidence does not extend to people with existing kidney disease, who should follow the intake their clinician sets. This calculator gives a general estimate, not medical advice.",
   },
   {
     question: "How much protein can the body absorb in one meal?",
@@ -104,8 +104,24 @@ export default function ProteinCalculatorPage() {
       title="Protein Intake Calculator"
       subtitle="Estimate a practical daily protein target for muscle building, fat loss, or endurance training."
       canonicalPath="/tools/protein-calculator"
-      description="Free Protein Intake Calculator. Calculate exact daily grams of protein and per-meal targets tailored to your weight and fitness goals."
       faqs={FAQS}
+      method={
+        <>
+          Your target is bodyweight in kilograms multiplied by a grams-per-kilo
+          ratio for your training context, from 1.2 g/kg at maintenance to 2.4
+          g/kg in a deficit. These bands reflect the range used in sports
+          nutrition position stands rather than a single study. The per-meal
+          figure divides the daily total by the number of meals you set.
+        </>
+      }
+      ctaResult={
+        weightReady
+          ? {
+              label: "Your protein target",
+              value: `${formatGrouped(totalProteinGrams)} g / day`,
+            }
+          : undefined
+      }
     >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}

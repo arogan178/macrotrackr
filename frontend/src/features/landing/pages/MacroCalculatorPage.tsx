@@ -137,8 +137,23 @@ export default function MacroCalculatorPage() {
       title="Macro Calculator"
       subtitle="Build a daily macronutrient target with adjustable protein, carbohydrate, and fat ratios."
       canonicalPath="/tools/macro-calculator"
-      description="Free Flexible Macro Calculator. Customize your protein, carbohydrate, and fat percentage splits to hit your fitness goals."
       faqs={FAQS}
+      method={
+        <>
+          Daily calories come from the Mifflin-St Jeor equation multiplied by
+          your activity factor, then adjusted for your goal. That total is split
+          into grams using the Atwater factors: 4 kcal per gram of protein, 4
+          per gram of carbohydrate and 9 per gram of fat.
+        </>
+      }
+      ctaResult={
+        resultReady
+          ? {
+              label: "Your daily target",
+              value: `${formatGrouped(totalCalories)} kcal / day`,
+            }
+          : undefined
+      }
     >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Left Inputs */}
