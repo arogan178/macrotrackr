@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { config } from "../../config";
 import { logger } from "../../lib/observability/logger";
 import { handleServiceError } from "../../lib/http/error-handler";
+import type { ProviderSubscriptionStatus } from "./subscription-service";
 
 function requireStripeSecretKey(): string {
   if (!config.STRIPE_SECRET_KEY) {
@@ -104,6 +105,44 @@ export interface CreateCustomerOptions {
   email: string;
   name?: string;
   metadata?: Record<string, string>;
+}
+
+export function toProviderSubscriptionStatus(
+  status: Stripe.Subscription.Status
+): ProviderSubscriptionStatus {
+  if (
+    status === "active" ||
+    status === "canceled" ||
+    status === "past_due" ||
+    status === "unpaid"
+  ) {
+    return status;
+  }
+
+  if (status === "trialing") {
+    return "active";
+  }
+
+  return "unpaid";
+}
+
+/**
+ * Flatten a Stripe subscription onto what the subscriptions table stores.
+ * Null when Stripe returns no items, since there is then no period to store.
+ */
+export function normalizeStripeSubscription(
+  subscription: Stripe.Subscription
+): { status: ProviderSubscriptionStatus; currentPeriodEnd: string } | null {
+  const item = subscription.items.data[0];
+
+  if (!item) {
+    return null;
+  }
+
+  return {
+    status: toProviderSubscriptionStatus(subscription.status),
+    currentPeriodEnd: new Date(item.current_period_end * 1000).toISOString(),
+  };
 }
 
 export class StripeService {

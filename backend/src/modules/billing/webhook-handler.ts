@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 import { logger } from "../../lib/observability/logger";
 import {
   StripeService,
+  toProviderSubscriptionStatus,
   type NormalizedWebhookEvent,
   type RelatedStripeObject,
 } from "./stripe-service";
@@ -22,12 +23,6 @@ type WebhookRouteContext = {
   request: Request;
 };
 
-type SupportedSubscriptionStatus =
-  | "active"
-  | "canceled"
-  | "past_due"
-  | "unpaid";
-
 function isStripeSubscription(
   value: Stripe.Event.Data.Object | RelatedStripeObject | null | undefined,
 ): value is Stripe.Subscription {
@@ -37,25 +32,6 @@ function isStripeSubscription(
     "object" in value &&
     value.object === "subscription"
   );
-}
-
-function toSupportedSubscriptionStatus(
-  status: Stripe.Subscription.Status,
-): SupportedSubscriptionStatus {
-  if (
-    status === "active" ||
-    status === "canceled" ||
-    status === "past_due" ||
-    status === "unpaid"
-  ) {
-    return status;
-  }
-
-  if (status === "trialing") {
-    return "active";
-  }
-
-  return "unpaid";
 }
 
 function resolveSubscriptionPlan(
@@ -78,6 +54,10 @@ function resolveSubscriptionPlan(
 /**
  * Stripe webhook handler - must be mounted before auth middleware
  * to preserve raw body for signature verification
+ *
+ * The endpoint must be subscribed to customer.subscription.created, .updated
+ * and .deleted. Without .updated no renewal ever reaches us, and an account
+ * keeps whatever period end it was sold on.
  */
 export const webhookHandler = new Elysia({ name: "webhookHandler" }).post(
   "/api/billing/webhook",
@@ -267,7 +247,7 @@ async function handleSubscriptionEvent(
   }
 
   const subscriptionId = subscription.id;
-  const status = toSupportedSubscriptionStatus(subscription.status);
+  const status = toProviderSubscriptionStatus(subscription.status);
   const plan = resolveSubscriptionPlan(subscription);
 
   // Find user by Stripe customer ID
