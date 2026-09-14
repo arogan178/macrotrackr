@@ -1,12 +1,13 @@
 import { Link, useParams } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { Accordion, BackIcon } from "@/components/ui";
+import { Accordion, BackIcon, ContentImage } from "@/components/ui";
 import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_NAME, APP_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
 import {
@@ -14,6 +15,7 @@ import {
   getComparisonBySlug,
 } from "../comparisons/comparisonsCatalog";
 import ComparisonTable from "../comparisons/ComparisonTable";
+import { getMigrationGuide } from "../migrations/migrationGuidesCatalog";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
 export default function ComparisonArticlePage() {
@@ -23,12 +25,14 @@ export default function ComparisonArticlePage() {
   const canonicalUrl = `${APP_URL}/compare/${comparison?.slug ?? ""}`;
 
   usePageMetadata({
-    title: comparison
-      ? `${comparison.title} — ${APP_NAME}`
-      : `Comparison Not Found — ${APP_NAME}`,
-    description: comparison?.metaDescription ?? "MacroTrackr comparison article",
+    ...(comparison
+      ? getPageMetadata(`/compare/${comparison.slug}`)
+      : { title: `Comparison Not Found — ${APP_NAME}`, description: "" }),
     canonical: canonicalUrl,
+    noindex: !comparison,
   });
+
+  const migrationGuide = comparison ? getMigrationGuide(comparison.slug) : null;
 
   if (!comparison) {
     return (
@@ -211,6 +215,42 @@ export default function ComparisonArticlePage() {
             }))}
           />
 
+          {/* "Ad-free" and "no paywall" are visual claims, and the page made
+              them in prose against competitors whose pages show a screenshot. */}
+          <section className="mb-12" aria-labelledby="preview-heading">
+            <Heading level="panel" id="preview-heading" className="mb-4 text-xl">
+              What {APP_NAME} looks like
+            </Heading>
+            <figure>
+              <ContentImage
+                src="/screens/product-preview.webp"
+                width={1792}
+                height={664}
+                containerClassName="rounded-card border border-border"
+                className="w-full"
+                alt={`A day logged in ${APP_NAME}: four meals totalling 1,494 of 2,200 calories, with protein, carbs and fats against their targets. No advertisements anywhere on the screen.`}
+              />
+              <figcaption className="mt-3 text-sm text-muted">
+                Four meals, about twenty seconds of typing. No banner ads, and
+                no feature behind a paywall.
+              </figcaption>
+            </figure>
+            <figure className="mt-8">
+              <ContentImage
+                src="/screens/week-view.webp"
+                width={1788}
+                height={452}
+                containerClassName="rounded-card border border-border"
+                className="w-full"
+                alt={`A week of calories in ${APP_NAME} plotted against a 2,200 calorie target, showing days above and below the line.`}
+              />
+              <figcaption className="mt-3 text-sm text-muted">
+                The week against your target, which is the view that actually
+                tells you whether the plan is working.
+              </figcaption>
+            </figure>
+          </section>
+
           {/* Key Differentiators */}
           <section className="mb-12" aria-labelledby="differentiators-heading">
             <Heading
@@ -241,6 +281,29 @@ export default function ComparisonArticlePage() {
             </Heading>
             <Accordion items={faqAccordionItems} defaultOpenFirst />
           </section>
+
+          {/* Someone comparing trackers is deciding whether to switch, and the
+              next thing they need is whether their history comes with them.
+              These two hubs had no links between them. */}
+          {migrationGuide && (
+            <section className="mb-12">
+              <Panel padding="compact">
+                <Heading level="panel" as="h2">
+                  Already using {comparison.competitorName}?
+                </Heading>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  {migrationGuide.summary}
+                </p>
+                <Link
+                  to="/migrate/$slug"
+                  params={{ slug: migrationGuide.slug }}
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                >
+                  {migrationGuide.title}
+                </Link>
+              </Panel>
+            </section>
+          )}
 
           {/* CTA Banner */}
           <ToolsCtaBanner

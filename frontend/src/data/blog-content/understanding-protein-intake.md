@@ -15,7 +15,7 @@ Before diving into numbers, understand what protein actually does in your body:
 
 **Satiety:** Protein is the most filling macronutrient. Eat 200 calories of chicken breast versus 200 calories of bread. The chicken keeps you full longer.
 
-**Thermic Effect:** Your body burns 20-30% of protein calories just digesting it. For carbs and fats, it's 5-10%.
+**Thermic Effect:** Your body burns 20-30% of protein calories just digesting it. For carbohydrate it is 5-10%, and for fat 0-3% ([Westerterp, 2004](https://doi.org/10.1186/1743-7075-1-5)).
 
 **Metabolic Health:** Protein helps regulate blood sugar and supports a healthy metabolism.
 
@@ -25,9 +25,9 @@ The answer depends on your goals, activity level, and body composition. If you w
 
 ### The Bare Minimum (RDA)
 
-The government recommends **0.36g per pound** (0.8g per kg) of body weight. For a 160 lb person, that's about 58g per day.
+The government recommends **0.36g per pound** (0.8g per kg) of body weight. For a 160 lb person, that's about 58g per day. That figure is set to prevent deficiency in the general population, not to support training.
 
-**Problem:** This prevents deficiency, but it's not optimal for anyone training regularly.
+**Problem:** This prevents deficiency, but it's not optimal for anyone training regularly. A meta-analysis of 49 studies and 1,863 participants found gains in fat-free mass from resistance training stopped improving beyond **1.62 g/kg/day**, with the confidence interval reaching about 2.2 g/kg ([Morton et al., 2018, *British Journal of Sports Medicine*](https://pubmed.ncbi.nlm.nih.gov/28698222/)). The International Society of Sports Nutrition puts the practical range at 1.4-2.0 g/kg/day ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)).
 
 ### Recreational Exercisers
 
@@ -53,15 +53,17 @@ When eating fewer calories, protein needs increase to preserve muscle: **0.8-1.2
 - 160 lb person: 130-190g protein daily
 - 200 lb person: 160-240g protein daily
 
-**Why higher during deficits?** With fewer calories coming in, your body is more likely to break down muscle for energy. Extra protein provides a buffer.
+**Why higher during deficits?** With fewer calories coming in, your body is more likely to break down muscle for energy. Extra protein provides a buffer. A systematic review of lean, resistance-trained athletes in a deficit put the requirement at **2.3-3.1 g/kg of fat-free mass**, scaling up the leaner you are and the steeper the cut ([Helms et al., 2014, *IJSNEM*](https://journals.humankinetics.com/view/journals/ijsnem/24/2/article-p127.xml)).
 
 ## The "Upper Limit" Myth
 
 You'll hear people claim you "can't absorb more than 30g of protein per meal." This is misinformation.
 
-**What the 30g number actually refers to:** Research suggests that 20-40g of high-quality protein maximally stimulates muscle protein synthesis (MPS) in a single sitting. This doesn't mean excess protein is wasted. It just means the *rate* of muscle building may not increase beyond that point.
+**What the 30g number actually refers to:** The ISSN's per-meal guidance is 0.25 g/kg of bodyweight, or an absolute dose of 20-40g, to maximally stimulate muscle protein synthesis (MPS) in a single sitting ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)). This doesn't mean excess protein is wasted. It just means the *rate* of muscle building may not increase beyond that point.
 
 **What actually happens:** Your body absorbs what you eat. Eat 60g of protein in a meal, and you'll absorb 60g. Some will be used for MPS, some for other bodily functions, and yes, excess can be converted to glucose or fat, but this is true of any macronutrient in excess.
+
+A 2023 trial tested this directly: 100g of protein after resistance exercise produced a larger and longer muscle protein synthesis response than 25g, lasting beyond 12 hours, with under 15% of the amino acids oxidised. The authors concluded there is no practical upper limit to the anabolic response ([Trommelen et al., 2023, *Cell Reports Medicine*](https://www.cell.com/cell-reports-medicine/fulltext/S2666-3791(23)00540-2)).
 
 **Practical takeaway:** Distribute protein across 3-5 meals for optimal MPS, but don't stress if one meal is protein-heavy.
 
@@ -71,7 +73,7 @@ You'll hear people claim you "can't absorb more than 30g of protein per meal." T
 
 Old school bodybuilding said you needed protein within 30 minutes post-workout or the session was "wasted."
 
-**Current research shows:** The anabolic window is much wider, possibly up to 24 hours. Total daily protein intake matters far more than timing.
+**Current research shows:** The ISSN position stand states the anabolic effect of exercise lasts at least 24 hours, though it diminishes as time passes ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)). Total daily protein intake matters far more than timing.
 
 ### Optimal Distribution
 
@@ -237,7 +239,7 @@ Setting and hitting your protein target is simple:
 ## Common Protein Myths
 
 **Myth:** "Too much protein damages your kidneys."
-**Truth:** In healthy individuals, high protein intake (up to 2g per pound) shows no negative effects on kidney function. If you have existing kidney disease, consult your doctor.
+**Truth:** A one-year crossover trial in resistance-trained men averaging 3.3 g/kg/day found no adverse effect on kidney function, liver function or blood lipids ([Antonio et al., 2016, *Journal of Nutrition and Metabolism*](https://pubmed.ncbi.nlm.nih.gov/27807480/)). That evidence covers healthy adults with normal kidney function. If you have existing kidney disease, follow the intake your clinician sets.
 
 **Myth:** "You must eat protein immediately post-workout."
 **Truth:** The anabolic window is much wider than 30 minutes. Get protein within a few hours and you're fine.
@@ -253,6 +255,17 @@ Setting and hitting your protein target is simple:
 Protein is the most important macronutrient for anyone training regularly. Set your target based on your goals (0.7-1g per pound for most), distribute it across 3-5 meals, and prioritize whole food sources.
 
 Don't overcomplicate it. Hit your daily target consistently, train hard, and the results will follow.
+
+## References
+
+1. Westerterp KR. Diet induced thermogenesis. *Nutrition & Metabolism*. 2004;1:5. [doi:10.1186/1743-7075-1-5](https://doi.org/10.1186/1743-7075-1-5)
+2. Morton RW, Murphy KT, McKellar SR, et al. A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. *British Journal of Sports Medicine*. 2018;52(6):376-384. [PubMed](https://pubmed.ncbi.nlm.nih.gov/28698222/)
+3. Jäger R, Kerksick CM, Campbell BI, et al. International Society of Sports Nutrition Position Stand: protein and exercise. *Journal of the International Society of Sports Nutrition*. 2017;14:20. [Full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)
+4. Helms ER, Zinn C, Rowlands DS, Brown SR. A systematic review of dietary protein during caloric restriction in resistance trained lean athletes: a case for higher intakes. *International Journal of Sport Nutrition and Exercise Metabolism*. 2014;24(2):127-138. [Journal](https://journals.humankinetics.com/view/journals/ijsnem/24/2/article-p127.xml)
+5. Trommelen J, van Lieshout GAA, Nyakayiru J, et al. The anabolic response to protein ingestion during recovery from exercise has no upper limit in magnitude and duration in vivo in humans. *Cell Reports Medicine*. 2023;4(12):101324. [Full text](https://www.cell.com/cell-reports-medicine/fulltext/S2666-3791(23)00540-2)
+6. Antonio J, Ellerbroek A, Silver T, et al. A high protein diet has no harmful effects: a one-year crossover study in resistance-trained males. *Journal of Nutrition and Metabolism*. 2016;2016:9104792. [PubMed](https://pubmed.ncbi.nlm.nih.gov/27807480/)
+
+*This article summarises published research for general fitness planning. It is not medical advice.*
 
 The MacroTrackr Team
 

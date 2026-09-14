@@ -50,6 +50,10 @@ It tends to create the same four problems over and over.
 
 Appetite changes, social meals happen, and water retention moves scale weight around. If you judge progress one day at a time, every fluctuation feels meaningful. Most of them are not.
 
+This has been measured. Tracking 4,657 daily weigh-ins from 80 adults, researchers found a consistent weekly rhythm: weight peaks on Sunday and Monday and falls through the working week. They concluded that variation between weekends and weekdays is normal, and that the people who compensate across the week are the ones who lose or maintain weight over time ([Orsama et al., 2014, *Obesity Facts*](https://karger.com/ofa/article/7/1/36/240088/Weight-Rhythms-Weight-Increases-during-Weekends)).
+
+So a Monday morning reading that looks bad is often just a Monday morning reading.
+
 ### 2. You make bad compensation decisions
 
 A bigger-than-planned dinner often leads to one of two reactions: either the day gets mentally written off, or the next day gets slashed in the name of making up for it. Both make the week harder than it needs to be.
@@ -93,3 +97,7 @@ If a day goes off plan, finish logging it anyway.
 That one habit keeps your weekly average honest, and honesty is what makes useful adjustment possible. The people who improve fastest are rarely the ones with the cleanest days. They are usually the ones with the clearest data.
 
 Aim for a week you can repeat, not a day you can brag about.
+
+## References
+
+1. Orsama AL, Mattila E, Ermes M, van Gils M, Wansink B, Korhonen I. Weight rhythms: weight increases during weekends and decreases during weekdays. *Obesity Facts*. 2014;7(1):36-47. [Full text](https://karger.com/ofa/article/7/1/36/240088/Weight-Rhythms-Weight-Increases-during-Weekends)
