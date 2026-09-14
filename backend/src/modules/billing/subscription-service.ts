@@ -445,24 +445,97 @@ export class SubscriptionService {
   }
 
   /**
+   * Re-read a subscription from the provider that bills it.
+   *
+   * A renewal only reaches us as a webhook, so a single missed delivery would
+   * otherwise hold a paying account on free limits until the next one arrives.
+   */
+  private static async refreshFromProvider(
+    subscription: SubscriptionRecord
+  ): Promise<SubscriptionRecord | null> {
+    const cacheService = getCacheService();
+    const throttleKey = `subscription-refresh:${subscription.provider}:${subscription.provider_subscription_id}`;
+
+    // Without this, a provider outage means one lookup per gated request.
+    if (cacheService.get(throttleKey)) {
+      return null;
+    }
+    cacheService.set(throttleKey, true);
+
+    try {
+      let fresh: {
+        status: ProviderSubscriptionStatus;
+        currentPeriodEnd: string;
+      } | null;
+
+      if (subscription.provider === "play") {
+        const { PlayService } = await import("./play-service");
+        fresh = await PlayService.getSubscription(
+          subscription.provider_subscription_id
+        );
+      } else {
+        const { StripeService, normalizeStripeSubscription } = await import(
+          "./stripe-service"
+        );
+        fresh = normalizeStripeSubscription(
+          await StripeService.getSubscription(
+            subscription.provider_subscription_id
+          )
+        );
+      }
+
+      if (!fresh) {
+        return null;
+      }
+
+      logger.info(
+        {
+          operation: "refresh_subscription_from_provider",
+          userId: subscription.user_id,
+          provider: subscription.provider,
+          subscriptionId: subscription.provider_subscription_id,
+          status: fresh.status,
+          currentPeriodEnd: fresh.currentPeriodEnd,
+        },
+        "Refreshed a stale subscription from its provider"
+      );
+
+      return await SubscriptionService.upsertSubscription(
+        subscription.user_id,
+        subscription.provider,
+        subscription.provider_subscription_id,
+        fresh.status,
+        fresh.currentPeriodEnd
+      );
+    } catch (error) {
+      logger.error(
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          operation: "refresh_subscription_from_provider",
+          userId: subscription.user_id,
+          provider: subscription.provider,
+          subscriptionId: subscription.provider_subscription_id,
+        },
+        "Failed to refresh subscription from its provider"
+      );
+      return null;
+    }
+  }
+
+  /**
    * Check if user has active Pro subscription
    */
   static async hasActiveProSubscription(userId: number): Promise<boolean> {
     const db = getDb();
     try {
-      // First, let's get the raw subscription data to debug
-      const rawSubscription = safeQuery<{
-        id: string;
-        status: string;
-        current_period_end: string;
-      }>(
+      const subscription = safeQuery<SubscriptionRecord>(
         db,
-        `SELECT id, status, current_period_end FROM subscriptions 
+        `SELECT * FROM subscriptions
          WHERE user_id = ? AND status = 'active'`,
         [userId]
       );
 
-      if (!rawSubscription) {
+      if (!subscription) {
         logger.debug(
           { operation: "check_active_pro_subscription", userId },
           "No active subscription found for user"
@@ -470,13 +543,20 @@ export class SubscriptionService {
         return false;
       }
 
-      // Check if the current period end is in the future
-      const currentPeriodEnd = new Date(rawSubscription.current_period_end);
       const now = new Date();
-      const hasActive = currentPeriodEnd > now;
 
+      if (new Date(subscription.current_period_end) > now) {
+        return true;
+      }
 
-      return hasActive;
+      const refreshed = await SubscriptionService.refreshFromProvider(
+        subscription
+      );
+
+      return (
+        refreshed?.status === "active" &&
+        new Date(refreshed.current_period_end) > now
+      );
     } catch (error) {
       logger.error(
         {
