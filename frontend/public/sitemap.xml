@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://macrotrackr.com/</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -14,67 +14,67 @@
   </url>
   <url>
     <loc>https://macrotrackr.com/tools</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/tdee-calculator</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/bmr-calculator</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/macro-calculator</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/weight-loss-calculator</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/protein-calculator</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/myfitnesspal</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/macrofactor</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/cronometer</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/lose-it</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -110,75 +110,27 @@
   </url>
   <url>
     <loc>https://macrotrackr.com/pricing</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/privacy</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/terms</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/delete-account</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v3-1-0</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v0-8-0</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v0-9-0</loc>
-    <lastmod>2026-02-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v1-0-0</loc>
-    <lastmod>2026-03-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v2-6-0</loc>
-    <lastmod>2026-08-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v3-0-0</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v2-5-mobile-ux-polish-and-responsive-density</loc>
-    <lastmod>2026-08-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://macrotrackr.com/blog/v2-launch-complete-ui-overhaul</loc>
-    <lastmod>2026-03-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/blog/how-to-estimate-restaurant-meals-without-guessing-blind</loc>

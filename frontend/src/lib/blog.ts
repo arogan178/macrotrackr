@@ -119,8 +119,14 @@ export function getRelatedPosts(slug: string, limit = 3) {
   const currentPost = normalizedPosts.find((post) => post.slug === slug);
   if (!currentPost) return [];
 
+  // Release notes were absorbing most related-post slots on articles they share
+  // a tag with, so an article on carbs linked out to a UI release. They stay
+  // related to each other, just not to editorial.
+  const isRelease = currentPost.category === RELEASE_CATEGORY;
+
   return normalizedPosts
     .filter((post) => post.slug !== slug)
+    .filter((post) => isRelease || post.category !== RELEASE_CATEGORY)
     .map((post) => {
       const sharedTags = post.tags.filter((tag) =>
         currentPost.tags.some((currentTag) => slugify(currentTag) === slugify(tag)),

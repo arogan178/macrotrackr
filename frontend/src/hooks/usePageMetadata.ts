@@ -5,6 +5,7 @@ interface Meta {
   description?: string;
   canonical?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
 // Small helper to set or create a meta tag
@@ -26,10 +27,15 @@ export function usePageMetadata({
   description,
   canonical,
   ogImage,
+  noindex,
 }: Meta) {
   useEffect(() => {
     const previousTitle = document.title;
     if (title) document.title = title;
+
+    // Restored on unmount: the app routes client-side, so a noindex left behind
+    // by the 404 page would follow the visitor onto every page after it.
+    if (noindex) setMeta("robots", "noindex,follow");
 
     setMeta("description", description);
     setMeta("twitter:card", "summary_large_image");
@@ -52,6 +58,7 @@ export function usePageMetadata({
 
     return () => {
       document.title = previousTitle;
+      if (noindex) setMeta("robots", "index,follow");
     };
-  }, [title, description, canonical, ogImage]);
+  }, [title, description, canonical, ogImage, noindex]);
 }
