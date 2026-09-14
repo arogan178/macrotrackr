@@ -311,7 +311,8 @@ const BlogArticlePage: React.FC = () => {
         "@type": "BlogPosting",
         "headline": post.title,
         "description": post.excerpt,
-        "image": post.image,
+        // Site-relative in the JSON; schema.org needs it absolute.
+        "image": post.image ? `${APP_URL}${post.image}` : undefined,
         "datePublished": post.date,
         "author": {
           "@type": "Organization",
