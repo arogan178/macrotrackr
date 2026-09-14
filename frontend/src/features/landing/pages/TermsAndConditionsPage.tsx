@@ -5,12 +5,12 @@ import PageShell from "@/components/layout/PageShell";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_URL, buildCanonicalUrl, SUPPORT_EMAIL } from "@/utils/appConstants";
 
 const TermsAndConditionsPage: React.FC = () => {
   usePageMetadata({
-    title: "Terms and Conditions — MacroTrackr",
-    description: "Read the Terms and Conditions for using MacroTrackr, our fitness and nutrition tracking platform.",
+    ...getPageMetadata("/terms"),
     canonical: buildCanonicalUrl("/terms"),
   });
 

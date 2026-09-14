@@ -1,0 +1,103 @@
+{
+  "/": {
+    "title": "MacroTrackr — Open Source Macro & Calorie Tracker",
+    "description": "Log meals in seconds, set a macro split, and see where the week actually went. Free, open source, and self-hostable."
+  },
+  "/pricing": {
+    "title": "Pricing — Free Forever, $4/mo Cloud Sync | MacroTrackr",
+    "description": "Free forever for self-hosting and core tracking. Cloud sync across devices is $4/month. No ads, no locked macro goals, cancel anytime."
+  },
+  "/privacy": {
+    "title": "Privacy Policy — MacroTrackr",
+    "description": "Read the Privacy Policy for MacroTrackr, detailing how we securely collect, use, and store your nutritional tracking data."
+  },
+  "/terms": {
+    "title": "Terms and Conditions — MacroTrackr",
+    "description": "Read the Terms and Conditions for using MacroTrackr, our fitness and nutrition tracking platform."
+  },
+  "/delete-account": {
+    "title": "Delete your account — MacroTrackr",
+    "description": "How to permanently delete your MacroTrackr account and all associated data, what is removed, and what is kept."
+  },
+  "/blog": {
+    "title": "Macro Tracking Guides & Product Updates — MacroTrackr",
+    "description": "Nutrition guides, macro tracking strategies and release notes from the MacroTrackr team."
+  },
+  "/tools": {
+    "title": "Free TDEE, BMR & Macro Calculators — MacroTrackr",
+    "description": "Free evidence-based nutrition calculators. Work out your TDEE, BMR, macro split, weight loss timeline and daily protein target."
+  },
+  "/tools/tdee-calculator": {
+    "title": "Free TDEE Calculator — Daily Calorie Needs | MacroTrackr",
+    "description": "Estimate your Total Daily Energy Expenditure from bodyweight, height, age and activity level, then turn it into a daily calorie and macro target.",
+    "h1": "TDEE Calculator"
+  },
+  "/tools/bmr-calculator": {
+    "title": "Free BMR Calculator (Mifflin-St Jeor) — MacroTrackr",
+    "description": "Calculate your Basal Metabolic Rate with the Mifflin-St Jeor equation and see the calories your body burns at complete rest.",
+    "h1": "BMR Calculator"
+  },
+  "/tools/macro-calculator": {
+    "title": "Free Macro Calculator — Protein, Carbs & Fat | MacroTrackr",
+    "description": "Turn your calorie target into daily grams of protein, carbs and fat. Adjust the split for fat loss, muscle gain or body recomposition.",
+    "h1": "Macro Calculator"
+  },
+  "/tools/weight-loss-calculator": {
+    "title": "Weight Loss Calculator — Deficit & Timeline | MacroTrackr",
+    "description": "Estimate the daily calorie deficit you need, your weekly rate of loss, and a realistic date to reach your goal weight.",
+    "h1": "Weight Loss & Timeline Calculator"
+  },
+  "/tools/protein-calculator": {
+    "title": "Free Protein Intake Calculator — Daily Grams | MacroTrackr",
+    "description": "Calculate your daily protein target in grams for muscle gain, fat loss or endurance, plus a per-meal number you can actually hit.",
+    "h1": "Protein Intake Calculator"
+  },
+  "/compare": {
+    "title": "MacroTrackr vs MyFitnessPal, Cronometer & MacroFactor",
+    "description": "Side-by-side comparisons of MacroTrackr against MyFitnessPal, MacroFactor, Cronometer and Lose It: pricing, barcode scanning, ads and privacy."
+  },
+  "/compare/myfitnesspal": {
+    "title": "Free MyFitnessPal Alternative, No Ads — MacroTrackr",
+    "description": "A free MyFitnessPal alternative with fast barcode scanning, custom macro splits, weekly compliance and self-hosted privacy. No paywalled basics.",
+    "h1": "The Best Free, Open-Source MyFitnessPal Alternative"
+  },
+  "/compare/macrofactor": {
+    "title": "Free MacroFactor Alternative, No Subscription — MacroTrackr",
+    "description": "MacroTrackr vs MacroFactor: compare features, pricing and philosophy. Trend tracking and smooth logging with no monthly lock-in.",
+    "h1": "Open-Source MacroFactor Alternative for Calorie & Macro Tracking"
+  },
+  "/compare/cronometer": {
+    "title": "Lightweight Cronometer Alternative — MacroTrackr",
+    "description": "Compare MacroTrackr and Cronometer. A streamlined, ad-free macro tracker with instant logging and self-hosted privacy, minus the micronutrient clutter.",
+    "h1": "Lightweight, Focused Cronometer Alternative"
+  },
+  "/compare/lose-it": {
+    "title": "Ad-Free Lose It! Alternative — MacroTrackr",
+    "description": "A Lose It! alternative with free custom macro goals, no ads, weekly averages and open-source self-hosting.",
+    "h1": "The Ad-Free, Privacy-First Lose It! Alternative"
+  },
+  "/migrate": {
+    "title": "Import Your Nutrition History — MacroTrackr",
+    "description": "Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into MacroTrackr with a preview before anything is saved."
+  },
+  "/migrate/myfitnesspal": {
+    "title": "How to Import MyFitnessPal History into MacroTrackr",
+    "description": "Move your MyFitnessPal meal history into MacroTrackr from the official nutrition CSV export, with a preview before anything is saved.",
+    "h1": "How to Import MyFitnessPal History into MacroTrackr"
+  },
+  "/migrate/cronometer": {
+    "title": "How to Import Cronometer History into MacroTrackr",
+    "description": "Move Cronometer diary entries into MacroTrackr using Cronometer's CSV export and review the parsed meals before saving them.",
+    "h1": "How to Import Cronometer History into MacroTrackr"
+  },
+  "/migrate/macrofactor": {
+    "title": "How to Import MacroFactor History into MacroTrackr",
+    "description": "Move MacroFactor nutrition history into MacroTrackr from a granular data export, with a full preview before import.",
+    "h1": "How to Import MacroFactor History into MacroTrackr"
+  },
+  "/migrate/lose-it": {
+    "title": "How to Import Lose It! History into MacroTrackr",
+    "description": "Move Lose It! food history into MacroTrackr from the official account download and verify every detected meal before saving.",
+    "h1": "How to Import Lose It! History into MacroTrackr"
+  }
+}

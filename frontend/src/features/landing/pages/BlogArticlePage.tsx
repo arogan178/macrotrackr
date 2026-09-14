@@ -21,7 +21,9 @@ import {
   getPostBySlug,
   getRelatedPosts,
   normalizeBlogFilter,
+  RELEASE_CATEGORY,
 } from "@/lib/blog";
+import { BLOG_TITLE_SUFFIX } from "@/lib/pageMetadata";
 import {
   APP_ICON_URL,
   APP_NAME,
@@ -295,9 +297,12 @@ const BlogArticlePage: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState(false);
 
   usePageMetadata({
-    title: post ? `${post.title} — MacroTrackr Blog` : "Blog — MacroTrackr",
+    title: post ? `${post.title}${BLOG_TITLE_SUFFIX}` : "Blog — MacroTrackr",
     description: post?.excerpt ?? "Read the latest from MacroTrackr.",
     canonical: buildCanonicalUrl(`/blog/${slug}`),
+    // Release notes stay reachable by direct link, but the feed already hides
+    // them and the sitemap no longer submits them.
+    noindex: post?.category === RELEASE_CATEGORY,
   });
 
   const schemaScript = post

@@ -14,6 +14,7 @@ import { usePageMetadata } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { purchasePro } from "@/services/native/playBilling";
 import { useStore } from "@/store/store";
 import { APP_OG_IMAGE_URL, buildCanonicalUrl } from "@/utils/appConstants";
@@ -46,9 +47,7 @@ const faqs = [
  */
 const PricingPage: React.FC = () => {
   usePageMetadata({
-    title: "Pricing — MacroTrackr",
-    description:
-      "Compare plans and unlock Pro features on MacroTrackr — advanced insights, priority support, and unlimited tracking.",
+    ...getPageMetadata("/pricing"),
     canonical: buildCanonicalUrl("/pricing"),
     ogImage: APP_OG_IMAGE_URL,
   });

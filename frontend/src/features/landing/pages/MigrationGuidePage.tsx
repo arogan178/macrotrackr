@@ -7,6 +7,7 @@ import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 import { APP_NAME, APP_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
@@ -24,9 +25,11 @@ export default function MigrationGuidePage() {
   const canonicalUrl = `${APP_URL}/migrate/${guide?.slug ?? ""}`;
 
   usePageMetadata({
-    title: guide ? `${guide.title} — ${APP_NAME}` : `Migration Guide — ${APP_NAME}`,
-    description: guide?.description ?? "MacroTrackr data migration guide",
+    ...(guide
+      ? getPageMetadata(`/migrate/${guide.slug}`)
+      : { title: `Migration Guide — ${APP_NAME}`, description: "" }),
     canonical: canonicalUrl,
+    noindex: !guide,
   });
 
   if (!guide) {
@@ -48,24 +51,24 @@ export default function MigrationGuidePage() {
     );
   }
 
+  // Was HowTo, whose rich result Google retired in 2023. BreadcrumbList is
+  // still live and matches the breadcrumb this page already renders.
   const structuredData = {
     "@context": SCHEMA_ORG_CONTEXT,
-    "@type": "HowTo",
-    name: guide.title,
-    description: guide.description,
-    url: canonicalUrl,
-    step: [
-      ...guide.exportSteps.map((text, index) => ({
-        "@type": "HowToStep",
-        position: index + 1,
-        name: `Export step ${index + 1}`,
-        text,
-      })),
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: APP_URL },
       {
-        "@type": "HowToStep",
-        position: guide.exportSteps.length + 1,
-        name: `Import into ${APP_NAME}`,
-        text: guide.fileGuidance,
+        "@type": "ListItem",
+        position: 2,
+        name: "Migration guides",
+        item: `${APP_URL}/migrate`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: guide.sourceName,
+        item: canonicalUrl,
       },
     ],
   };

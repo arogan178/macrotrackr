@@ -5,6 +5,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import {
   APP_NAME,
   APP_OG_IMAGE_URL,
@@ -53,9 +54,7 @@ function ThemedFallback() {
 
 const LandingPage: React.FC = () => {
   usePageMetadata({
-    title: "MacroTrackr — Macro Tracking That Fits Real Life",
-    description:
-      "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
+    ...getPageMetadata("/"),
     canonical: buildCanonicalUrl("/"),
     ogImage: APP_OG_IMAGE_URL,
   });

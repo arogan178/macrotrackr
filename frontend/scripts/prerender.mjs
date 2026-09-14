@@ -176,6 +176,17 @@ const tools = [
   },
 ];
 
+// Title and description for every route come from the same file the React
+// pages read, so the static HTML and the rendered DOM cannot disagree.
+const pageMeta = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/page-metadata.json"), "utf8")
+);
+const metaFor = (route) => {
+  const meta = pageMeta[route];
+  if (!meta) throw new Error(`No metadata for "${route}" in src/data/page-metadata.json`);
+  return meta;
+};
+
 // Load blog posts
 let blogPosts = [];
 try {
@@ -221,8 +232,7 @@ if (blogPosts.length > 0) {
 const pages = [
   {
     route: "",
-    title: `${APP_NAME} — Know what you ate, without the admin`,
-    description: "Log meals in seconds, set a macro split, and see where the week actually went. Free, open source, and self-hostable nutrition tracker.",
+    ...metaFor("/"),
     canonical: APP_URL,
     type: "website",
     bodyHtml: `
@@ -235,8 +245,7 @@ const pages = [
   },
   {
     route: "pricing",
-    title: `Pricing — Transparent & Fair | ${APP_NAME}`,
-    description: "Free forever for self-hosters and core tracking. $4/month cloud sync for multi-device convenience.",
+    ...metaFor("/pricing"),
     canonical: `${APP_URL}/pricing`,
     type: "website",
     bodyHtml: `
@@ -248,8 +257,7 @@ const pages = [
   },
   {
     route: "privacy",
-    title: `Privacy Policy — ${APP_NAME}`,
-    description: `How ${APP_NAME} protects your health data and respects your privacy.`,
+    ...metaFor("/privacy"),
     canonical: `${APP_URL}/privacy`,
     type: "website",
     bodyHtml: `
@@ -261,8 +269,7 @@ const pages = [
   },
   {
     route: "delete-account",
-    title: `Delete your account — ${APP_NAME}`,
-    description: `How to permanently delete your ${APP_NAME} account and all associated data.`,
+    ...metaFor("/delete-account"),
     canonical: `${APP_URL}/delete-account`,
     type: "website",
     bodyHtml: `
@@ -274,8 +281,7 @@ const pages = [
   },
   {
     route: "terms",
-    title: `Terms of Service — ${APP_NAME}`,
-    description: `Terms and conditions for using ${APP_NAME}.`,
+    ...metaFor("/terms"),
     canonical: `${APP_URL}/terms`,
     type: "website",
     bodyHtml: `
@@ -286,8 +292,7 @@ const pages = [
   },
   {
     route: "tools",
-    title: `Free Nutrition Calculators — TDEE, BMR, Macros & Protein | ${APP_NAME}`,
-    description: "Free evidence-based fitness and nutrition calculators. Calculate your TDEE, BMR, optimal macros, weight loss timeline, and protein target.",
+    ...metaFor("/tools"),
     canonical: `${APP_URL}/tools`,
     type: "website",
     bodyHtml: `
@@ -302,8 +307,7 @@ const pages = [
   },
   {
     route: "compare",
-    title: `Best Free Alternatives & Comparisons — ${APP_NAME}`,
-    description: `Compare ${APP_NAME} against MyFitnessPal, MacroFactor, Cronometer, and Lose It. See why users choose our ad-free, open-source nutrition tracker.`,
+    ...metaFor("/compare"),
     canonical: `${APP_URL}/compare`,
     type: "website",
     bodyHtml: `
@@ -318,8 +322,7 @@ const pages = [
   },
   {
     route: "migrate",
-    title: `Import Your Nutrition History — ${APP_NAME}`,
-    description: `Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into ${APP_NAME} with a preview before anything is saved.`,
+    ...metaFor("/migrate"),
     canonical: `${APP_URL}/migrate`,
     type: "website",
     bodyHtml: `
@@ -334,13 +337,12 @@ const pages = [
   },
   {
     route: "blog",
-    title: `Blog & Product Updates — ${APP_NAME}`,
-    description: "Nutrition guides, macro tracking strategies, product release notes, and updates from the MacroTrackr team.",
+    ...metaFor("/blog"),
     canonical: `${APP_URL}/blog`,
     type: "website",
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
-        <h1>${APP_NAME} Blog & Release Notes</h1>
+        <h1>${APP_NAME} Blog</h1>
         <ul>
           ${blogPosts.map((p) => `<li><a href="/blog/${p.slug}">${p.title}</a> (${p.date}) - ${p.excerpt}</li>`).join("")}
         </ul>
@@ -353,14 +355,13 @@ const pages = [
 for (const tool of tools) {
   pages.push({
     route: `tools/${tool.slug}`,
-    title: tool.title,
-    description: tool.description,
+    ...metaFor(`/tools/${tool.slug}`),
     canonical: `${APP_URL}/tools/${tool.slug}`,
     type: "website",
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/tools">Calculators</a> / <span>${tool.heading}</span></nav>
-        <h1>${tool.heading}</h1>
+        <h1>${metaFor(`/tools/${tool.slug}`).h1}</h1>
         <p>${tool.subtitle}</p>
         <p>${tool.description}</p>
         <p><a href="/register">Start Tracking with ${APP_NAME}</a></p>
@@ -371,43 +372,15 @@ for (const tool of tools) {
 
 // Add comparison pages
 for (const comp of comparisons) {
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: comp.faqs.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: f.a,
-      },
-    })),
-  };
-
-  const breadcrumbsSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: APP_URL },
-      { "@type": "ListItem", position: 2, name: "Comparisons", item: `${APP_URL}/compare` },
-      { "@type": "ListItem", position: 3, name: comp.shortTitle, item: `${APP_URL}/compare/${comp.slug}` },
-    ],
-  };
-
   pages.push({
     route: `compare/${comp.slug}`,
-    title: comp.title,
-    description: comp.description,
+    ...metaFor(`/compare/${comp.slug}`),
     canonical: `${APP_URL}/compare/${comp.slug}`,
     type: "article",
-    extraHead: `
-      <script type="application/ld+json">${JSON.stringify(breadcrumbsSchema)}</script>
-      <script type="application/ld+json">${JSON.stringify(faqSchema)}</script>
-    `,
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/compare">Comparisons</a> / <span>${comp.competitorName}</span></nav>
-        <h1>${comp.heading}</h1>
+        <h1>${metaFor(`/compare/${comp.slug}`).h1}</h1>
         <p><strong>${comp.tagline}</strong></p>
         <h2>Quick Verdict</h2>
         <p>${comp.verdict}</p>
@@ -422,14 +395,13 @@ for (const comp of comparisons) {
 for (const migration of migrations) {
   pages.push({
     route: `migrate/${migration.slug}`,
-    title: migration.title,
-    description: migration.description,
+    ...metaFor(`/migrate/${migration.slug}`),
     canonical: `${APP_URL}/migrate/${migration.slug}`,
     type: "article",
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/migrate">Migration guides</a> / <span>${migration.sourceName}</span></nav>
-        <h1>${migration.title}</h1>
+        <h1>${metaFor(`/migrate/${migration.slug}`).h1}</h1>
         <p>${migration.description}</p>
         <p><a href="/register?returnTo=%2Fsettings%3Ftab%3Ddata%26from%3Dmigration">Create an account and open the importer</a></p>
       </main>
@@ -439,31 +411,12 @@ for (const migration of migrations) {
 
 // Add blog posts
 for (const post of blogPosts) {
-  const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: post.date,
-    author: {
-      "@type": "Organization",
-      name: post.author || APP_NAME,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: APP_NAME,
-      logo: `${APP_URL}/icon.png`,
-    },
-    mainEntityOfPage: `${APP_URL}/blog/${post.slug}`,
-  };
-
   pages.push({
     route: `blog/${post.slug}`,
     title: `${post.title} — ${APP_NAME}`,
     description: post.excerpt,
     canonical: `${APP_URL}/blog/${post.slug}`,
     type: "article",
-    extraHead: `<script type="application/ld+json">${JSON.stringify(articleSchema)}</script>`,
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/blog">Blog</a> / <span>${post.title}</span></nav>
@@ -534,10 +487,9 @@ for (const page of pages) {
     `<meta name="twitter:description" content="${escapeAttr(page.description)}" />`
   );
 
-  // Inject Extra Head if present
-  if (page.extraHead) {
-    html = html.replace("</head>", `${page.extraHead}\n</head>`);
-  }
+  // No JSON-LD is injected here. The React pages emit their own on mount, and
+  // emitting it from both places shipped two BlogPosting blocks per article and
+  // two BreadcrumbList blocks per comparison, each pair disagreeing.
 
   // Keep crawler copy available when JavaScript is disabled without letting it
   // flash before the client-rendered app mounts.
