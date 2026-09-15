@@ -33,6 +33,7 @@ import { Route as ToolsWeightLossCalculatorRouteImport } from './routes/tools/we
 import { Route as ToolsTdeeCalculatorRouteImport } from './routes/tools/tdee-calculator'
 import { Route as ToolsProteinCalculatorRouteImport } from './routes/tools/protein-calculator'
 import { Route as ToolsMacroCalculatorRouteImport } from './routes/tools/macro-calculator'
+import { Route as ToolsBmrVsTdeeRouteImport } from './routes/tools/bmr-vs-tdee'
 import { Route as ToolsBmrCalculatorRouteImport } from './routes/tools/bmr-calculator'
 import { Route as MigrateSlugRouteImport } from './routes/migrate/$slug'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
@@ -159,6 +160,11 @@ const ToolsMacroCalculatorRoute = ToolsMacroCalculatorRouteImport.update({
   path: '/tools/macro-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsBmrVsTdeeRoute = ToolsBmrVsTdeeRouteImport.update({
+  id: '/tools/bmr-vs-tdee',
+  path: '/tools/bmr-vs-tdee',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsBmrCalculatorRoute = ToolsBmrCalculatorRouteImport.update({
   id: '/tools/bmr-calculator',
   path: '/tools/bmr-calculator',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/compare/$slug': typeof CompareSlugRoute
   '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
+  '/tools/bmr-vs-tdee': typeof ToolsBmrVsTdeeRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
@@ -231,6 +238,7 @@ export interface FileRoutesByTo {
   '/compare/$slug': typeof CompareSlugRoute
   '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
+  '/tools/bmr-vs-tdee': typeof ToolsBmrVsTdeeRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
@@ -262,6 +270,7 @@ export interface FileRoutesById {
   '/compare/$slug': typeof CompareSlugRoute
   '/migrate/$slug': typeof MigrateSlugRoute
   '/tools/bmr-calculator': typeof ToolsBmrCalculatorRoute
+  '/tools/bmr-vs-tdee': typeof ToolsBmrVsTdeeRoute
   '/tools/macro-calculator': typeof ToolsMacroCalculatorRoute
   '/tools/protein-calculator': typeof ToolsProteinCalculatorRoute
   '/tools/tdee-calculator': typeof ToolsTdeeCalculatorRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/compare/$slug'
     | '/migrate/$slug'
     | '/tools/bmr-calculator'
+    | '/tools/bmr-vs-tdee'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/compare/$slug'
     | '/migrate/$slug'
     | '/tools/bmr-calculator'
+    | '/tools/bmr-vs-tdee'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/compare/$slug'
     | '/migrate/$slug'
     | '/tools/bmr-calculator'
+    | '/tools/bmr-vs-tdee'
     | '/tools/macro-calculator'
     | '/tools/protein-calculator'
     | '/tools/tdee-calculator'
@@ -385,6 +397,7 @@ export interface RootRouteChildren {
   CompareSlugRoute: typeof CompareSlugRoute
   MigrateSlugRoute: typeof MigrateSlugRoute
   ToolsBmrCalculatorRoute: typeof ToolsBmrCalculatorRoute
+  ToolsBmrVsTdeeRoute: typeof ToolsBmrVsTdeeRoute
   ToolsMacroCalculatorRoute: typeof ToolsMacroCalculatorRoute
   ToolsProteinCalculatorRoute: typeof ToolsProteinCalculatorRoute
   ToolsTdeeCalculatorRoute: typeof ToolsTdeeCalculatorRoute
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsMacroCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/bmr-vs-tdee': {
+      id: '/tools/bmr-vs-tdee'
+      path: '/tools/bmr-vs-tdee'
+      fullPath: '/tools/bmr-vs-tdee'
+      preLoaderRoute: typeof ToolsBmrVsTdeeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools/bmr-calculator': {
       id: '/tools/bmr-calculator'
       path: '/tools/bmr-calculator'
@@ -617,6 +637,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareSlugRoute: CompareSlugRoute,
   MigrateSlugRoute: MigrateSlugRoute,
   ToolsBmrCalculatorRoute: ToolsBmrCalculatorRoute,
+  ToolsBmrVsTdeeRoute: ToolsBmrVsTdeeRoute,
   ToolsMacroCalculatorRoute: ToolsMacroCalculatorRoute,
   ToolsProteinCalculatorRoute: ToolsProteinCalculatorRoute,
   ToolsTdeeCalculatorRoute: ToolsTdeeCalculatorRoute,

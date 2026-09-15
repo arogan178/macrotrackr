@@ -104,5 +104,10 @@
     "title": "Open Source Macro Tracker, Self-Hostable — MacroTrackr",
     "description": "MacroTrackr is AGPLv3 and self-hostable with Docker on Unraid, CasaOS, Umbrel, TrueNAS or a VPS. SQLite, local accounts, no telemetry, no licence key.",
     "h1": "An open source macro tracker you can host yourself"
+  },
+  "/tools/bmr-vs-tdee": {
+    "title": "BMR vs TDEE: What's the Difference? — MacroTrackr",
+    "description": "BMR is what you burn at rest, TDEE is what you burn across the day. Which one to set calorie targets from, the activity factors that connect them, and why sedentary is 1.2.",
+    "h1": "BMR vs TDEE, and which one to set targets from"
   }
 }
