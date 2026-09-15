@@ -140,6 +140,28 @@ if (blogPosts.length > 0) {
   };
 }
 
+// The React footer is the only site-wide navigation on legal and article
+// pages, and it did not exist in the crawler copy. Without it every
+// pre-rendered page was an island, which is why Google had never reached
+// /pricing, /contact or the calculators.
+const siteNavHtml = `
+      <nav style="padding:2rem 1rem;max-width:800px;margin:0 auto;" aria-label="Site">
+        <h2>${APP_NAME}</h2>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/tools">Free calculators</a></li>
+          <li><a href="/compare">Alternatives and comparisons</a></li>
+          <li><a href="/migrate">Import your history</a></li>
+          <li><a href="/open-source">Open source and self-hosting</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/terms">Terms of service</a></li>
+          <li><a href="/privacy">Privacy policy</a></li>
+        </ul>
+      </nav>
+`;
+
 // Build all pages to pre-render
 const pages = [
   {
@@ -562,7 +584,7 @@ for (const page of pages) {
   if (page.bodyHtml) {
     html = html.replace(
       "</noscript>",
-      `${page.bodyHtml}\n    </noscript>`
+      `${page.bodyHtml}${siteNavHtml}\n    </noscript>`
     );
   }
 
