@@ -417,6 +417,9 @@ for (const post of blogPosts) {
     description: post.excerpt,
     canonical: `${APP_URL}/blog/${post.slug}`,
     type: "article",
+    // The hero only enters the DOM once React hydrates, around 5s on a
+    // throttled phone, so the fetch started far too late to serve LCP.
+    preloadImage: post.image,
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/blog">Blog</a> / <span>${post.title}</span></nav>
@@ -486,6 +489,13 @@ for (const page of pages) {
     /<meta\s+name=["']twitter:description["']\s+content=["'][^"']*["']\s*\/?>/i,
     `<meta name="twitter:description" content="${escapeAttr(page.description)}" />`
   );
+
+  if (page.preloadImage) {
+    html = html.replace(
+      "</head>",
+      `  <link rel="preload" as="image" href="${escapeAttr(page.preloadImage)}" fetchpriority="high" />\n  </head>`
+    );
+  }
 
   // No JSON-LD is injected here. The React pages emit their own on mount, and
   // emitting it from both places shipped two BlogPosting blocks per article and
