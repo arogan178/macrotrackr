@@ -9,7 +9,9 @@ import remarkGfm from "remark-gfm";
 import AppHeader from "@/components/layout/AppHeader";
 import { BackIcon, CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
+import { TYPE_SCALE } from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
+import author from "@/data/author.json";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
@@ -314,11 +316,22 @@ const BlogArticlePage: React.FC = () => {
         // Site-relative in the JSON; schema.org needs it absolute.
         "image": post.image ? `${APP_URL}${post.image}` : undefined,
         "datePublished": post.date,
-        "author": {
-          "@type": "Organization",
-          "name": post.author || "MacroTrackr Team",
-          "url": APP_URL,
-        },
+        // A named human on health content, because "MacroTrackr Team" gives a
+        // reader nobody to hold responsible. Release notes keep the project as
+        // author: nobody signs a changelog.
+        "author":
+          post.author === author.name
+            ? {
+                "@type": "Person",
+                "name": author.name,
+                "jobTitle": author.role,
+                "url": `${APP_URL}/contact`,
+              }
+            : {
+                "@type": "Organization",
+                "name": post.author || author.releaseAuthor,
+                "url": APP_URL,
+              },
         "publisher": {
           "@type": "Organization",
           "name": APP_NAME,
@@ -515,6 +528,27 @@ const BlogArticlePage: React.FC = () => {
               </Link>
             </div>
           </Panel>
+
+          {/* A name in schema that a reader never sees is a signal aimed only at
+              a crawler. On health writing the person should be visible. */}
+          {post.author === author.name && (
+            <section className="mt-14 rounded-card border border-border bg-surface p-6">
+              <p className={`${TYPE_SCALE.micro} text-muted`}>Written by</p>
+              <p className="mt-2 text-base font-semibold text-foreground">
+                {author.name}
+              </p>
+              <p className="text-sm text-muted">{author.role}</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                {author.bio}
+              </p>
+              <Link
+                to="/contact"
+                className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
+              >
+                Get in touch
+              </Link>
+            </section>
+          )}
 
           {relatedPosts.length > 0 && (
             <section className="mt-14">
