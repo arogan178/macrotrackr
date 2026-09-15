@@ -4,7 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import LogoButton from "@/components/layout/LogoButton";
 import { getButtonClasses } from "@/components/ui/Button";
 import { cn } from "@/lib/classnameUtilities";
-import { APP_NAME, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
+import { APP_NAME } from "@/utils/appConstants";
 
 const footerLinkClasses =
   "inline-flex min-h-11 items-center rounded-control py-1 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
@@ -71,9 +71,9 @@ const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="/#pricing" className={footerLinkClasses}>
+                <Link to="/pricing" className={footerLinkClasses}>
                   Pricing
-                </a>
+                </Link>
               </li>
               <li>
                 <Link
@@ -126,14 +126,6 @@ const Footer: React.FC = () => {
                 <Link to="/privacy" className={footerLinkClasses}>
                   Privacy Policy
                 </Link>
-              </li>
-              <li>
-                <a
-                  href={SUPPORT_EMAIL_MAILTO}
-                  className={footerLinkClasses}
-                >
-                  Contact
-                </a>
               </li>
             </ul>
           </div>
