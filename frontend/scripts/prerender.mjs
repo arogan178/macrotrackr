@@ -58,36 +58,26 @@ const migrations = JSON.parse(
 const tools = [
   {
     slug: "tdee-calculator",
-    title: `Free TDEE Calculator — Total Daily Energy Expenditure | ${APP_NAME}`,
-    description: "Calculate your Total Daily Energy Expenditure (TDEE) based on your BMR, activity level, and fitness goals with MacroTrackr's free calculator.",
     heading: "Free TDEE Calculator",
     subtitle: "Calculate your Total Daily Energy Expenditure and baseline daily calorie burn.",
   },
   {
     slug: "bmr-calculator",
-    title: `Free BMR Calculator — Basal Metabolic Rate | ${APP_NAME}`,
-    description: "Find your Basal Metabolic Rate (BMR) using the Mifflin-St Jeor formula. Free, accurate, and instant.",
     heading: "Free BMR Calculator",
     subtitle: "Determine your Basal Metabolic Rate — the calories your body burns at rest.",
   },
   {
     slug: "macro-calculator",
-    title: `Free Macro Calculator — Protein, Carbs & Fat Targets | ${APP_NAME}`,
-    description: "Calculate optimal daily grams of protein, fats, and carbs for fat loss, muscle gain, or body recomposition.",
     heading: "Free Macro Calculator",
     subtitle: "Determine your exact macronutrient breakdown in grams tailored to your fitness objective.",
   },
   {
     slug: "weight-loss-calculator",
-    title: `Free Weight Loss Timeline Calculator | ${APP_NAME}`,
-    description: "Estimate your realistic weight loss timeline, required daily caloric deficit, and projected goal date.",
     heading: "Free Weight Loss Calculator",
     subtitle: "Calculate your target calorie deficit and project your realistic goal timeline.",
   },
   {
     slug: "protein-calculator",
-    title: `Free Protein Intake Calculator | ${APP_NAME}`,
-    description: "Calculate optimal daily protein intake in grams for muscle building, fat loss, or endurance training.",
     heading: "Free Protein Calculator",
     subtitle: "Calculate your optimal daily protein target in grams based on body weight and activity.",
   },
@@ -168,7 +158,7 @@ const pages = [
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <h1>${APP_NAME} Pricing</h1>
-        <p>100% Free & Open Source for self-hosting. Optional cloud sync at $4/month.</p>
+        <p>100% Free & Open Source for self-hosting. Pro adds cloud sync and advanced insights at $3.99/month.</p>
       </main>
     `,
   },
