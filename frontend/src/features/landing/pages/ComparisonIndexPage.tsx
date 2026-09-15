@@ -60,7 +60,7 @@ export default function ComparisonIndexPage() {
 
           <ComparisonTable
             caption="Features and pricing"
-            description="Side by side across the major macro trackers."
+            description="Side by side across the major macro trackers. Competitor prices checked September 2026 and quoted at list rate; check theirs before switching."
             columns={[
               { key: "feature", label: "Feature" },
               { key: "macrotrackr", label: APP_NAME, isOwn: true },
