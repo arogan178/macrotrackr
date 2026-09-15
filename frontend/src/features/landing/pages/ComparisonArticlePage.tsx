@@ -199,7 +199,7 @@ export default function ComparisonArticlePage() {
 
           <ComparisonTable
             caption="Feature comparison"
-            description={`${APP_NAME} against ${comparison.competitorName}, row by row.`}
+            description={`${APP_NAME} against ${comparison.competitorName}, row by row. Competitor prices checked September 2026 and quoted at list rate; check theirs before switching.`}
             minWidthClass="min-w-[520px]"
             columns={[
               { key: "feature", label: "Feature" },

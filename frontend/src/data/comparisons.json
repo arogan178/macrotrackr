@@ -34,8 +34,8 @@
       },
       {
         "feature": "Cloud / Premium",
-        "macrotrackr": "$3.99/mo",
-        "competitor": "$19.99/mo"
+        "macrotrackr": "$3.99/mo or $29.99/yr",
+        "competitor": "$19.99/mo or $79.99/yr"
       },
       {
         "feature": "Barcode Scanner",
@@ -123,7 +123,7 @@
       },
       {
         "feature": "Cloud / Premium",
-        "macrotrackr": "$3.99/mo",
+        "macrotrackr": "$3.99/mo or $29.99/yr",
         "competitor": "$11.99/mo"
       },
       {
@@ -198,8 +198,8 @@
       },
       {
         "feature": "Cloud / Premium",
-        "macrotrackr": "$3.99/mo",
-        "competitor": "$9.99/mo"
+        "macrotrackr": "$3.99/mo or $29.99/yr",
+        "competitor": "$10.99/mo or $59.99/yr"
       },
       {
         "feature": "User Interface",
@@ -273,8 +273,8 @@
       },
       {
         "feature": "Cloud / Premium",
-        "macrotrackr": "$3.99/mo",
-        "competitor": "$9.99/mo"
+        "macrotrackr": "$3.99/mo or $29.99/yr",
+        "competitor": "$9.99/mo or $39.99/yr"
       },
       {
         "feature": "Custom Macro Targets",
