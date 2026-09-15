@@ -99,6 +99,11 @@ const Footer: React.FC = () => {
                   Import Your History
                 </Link>
               </li>
+              <li>
+                <Link to="/open-source" className={footerLinkClasses}>
+                  Open Source & Self-Hosting
+                </Link>
+              </li>
             </ul>
           </div>
 

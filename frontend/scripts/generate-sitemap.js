@@ -25,6 +25,7 @@ const ROUTE_SOURCES = {
   "/privacy": [`${SRC}/PrivacyPolicyPage.tsx`],
   "/terms": [`${SRC}/TermsAndConditionsPage.tsx`],
   "/delete-account": [`${SRC}/DeleteAccountPage.tsx`],
+  "/open-source": [`${SRC}/OpenSourcePage.tsx`, "src/data/open-source.json"],
 };
 
 const routes = [
@@ -36,6 +37,7 @@ const routes = [
   { path: "/tools/macro-calculator", changefreq: "monthly", priority: 0.6 },
   { path: "/tools/weight-loss-calculator", changefreq: "monthly", priority: 0.6 },
   { path: "/tools/protein-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/open-source", changefreq: "monthly", priority: 0.7 },
   { path: "/compare", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/myfitnesspal", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/macrofactor", changefreq: "weekly", priority: 0.7 },

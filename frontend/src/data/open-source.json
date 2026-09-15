@@ -1,0 +1,69 @@
+{
+  "intro": "MacroTrackr is AGPLv3. The whole tracker runs on your own hardware with a SQLite file and local accounts, with no external auth provider, no telemetry and no licence key. The managed service at macrotrackr.com runs the same code.",
+  "principles": [
+    {
+      "title": "The same build, either way",
+      "description": "Self-hosting is not a cut-down edition. Managed hosting adds cross-device sync and billing; everything else is identical, because it is the same image."
+    },
+    {
+      "title": "Your data stays a file you own",
+      "description": "The backend stores everything in one SQLite database on a volume you mount. Back it up by copying a file. Export or delete it from Settings at any time."
+    },
+    {
+      "title": "Nothing phones home",
+      "description": "Analytics and billing are disabled by default in self-hosted mode, and the billing routes are not mounted at all. There is no usage reporting to switch off."
+    },
+    {
+      "title": "No accounts you did not create",
+      "description": "Self-hosted mode uses local authentication with database-backed sessions. It does not require Clerk, an OAuth provider, or any outbound connection to sign in."
+    }
+  ],
+  "platforms": [
+    {
+      "name": "Docker Compose",
+      "detail": "The standard path. `docker compose up -d` with the published images from GitHub Container Registry."
+    },
+    {
+      "name": "Unraid",
+      "detail": "Community Applications XML template, with appdata mapped to a path you choose."
+    },
+    {
+      "name": "CasaOS and ZimaOS",
+      "detail": "Import the compose file as a custom app, or add the AppStore manifest to your own list."
+    },
+    {
+      "name": "Umbrel",
+      "detail": "Community App Store manifest, installable from the CLI."
+    },
+    {
+      "name": "Cosmos Cloud",
+      "detail": "ServApp import."
+    },
+    {
+      "name": "TrueNAS SCALE",
+      "detail": "Native compose, or through Dockge."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "What does AGPLv3 mean for me?",
+      "answer": "Run it, modify it and self-host it freely. If you distribute a modified version, or offer it to others over a network, that version has to be published under the same licence. Running an unmodified copy for yourself or your household carries no obligations."
+    },
+    {
+      "question": "Is the self-hosted version missing features?",
+      "answer": "No. Meal logging, barcode scanning, macro goals, weekly trends, the importers and every calculator are in the open-source build. Managed hosting exists for cross-device sync and for people who would rather not run a server."
+    },
+    {
+      "question": "What does it need to run?",
+      "answer": "A machine that runs Docker. It uses SQLite rather than a separate database server, so there is nothing else to provision, and it is comfortable on a NAS or a small VPS."
+    },
+    {
+      "question": "Can I move between self-hosted and managed later?",
+      "answer": "Yes. Data export is in Settings, and the importers read the same format, so you can move in either direction without losing history."
+    },
+    {
+      "question": "Do I need an account to use the calculators?",
+      "answer": "No. Every calculator on the site runs in the browser with no account and no data sent anywhere."
+    }
+  ]
+}

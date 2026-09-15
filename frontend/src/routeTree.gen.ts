@@ -18,6 +18,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileSetupRouteImport } from './routes/profile-setup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as OpenSourceRouteImport } from './routes/open-source'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GoalsRouteImport } from './routes/goals'
@@ -80,6 +81,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpenSourceRoute = OpenSourceRouteImport.update({
+  id: '/open-source',
+  path: '/open-source',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/open-source': typeof OpenSourceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile-setup': typeof ProfileSetupRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/open-source': typeof OpenSourceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile-setup': typeof ProfileSetupRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/goals': typeof GoalsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/open-source': typeof OpenSourceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile-setup': typeof ProfileSetupRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/goals'
     | '/home'
     | '/login'
+    | '/open-source'
     | '/pricing'
     | '/privacy'
     | '/profile-setup'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/goals'
     | '/home'
     | '/login'
+    | '/open-source'
     | '/pricing'
     | '/privacy'
     | '/profile-setup'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/goals'
     | '/home'
     | '/login'
+    | '/open-source'
     | '/pricing'
     | '/privacy'
     | '/profile-setup'
@@ -359,6 +371,7 @@ export interface RootRouteChildren {
   GoalsRoute: typeof GoalsRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  OpenSourceRoute: typeof OpenSourceRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileSetupRoute: typeof ProfileSetupRoute
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/open-source': {
+      id: '/open-source'
+      path: '/open-source'
+      fullPath: '/open-source'
+      preLoaderRoute: typeof OpenSourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -583,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoalsRoute: GoalsRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  OpenSourceRoute: OpenSourceRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileSetupRoute: ProfileSetupRoute,

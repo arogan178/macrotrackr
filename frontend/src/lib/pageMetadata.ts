@@ -9,7 +9,12 @@ import pageMetadata from "@/data/page-metadata.json";
  * since Google indexes the rendered DOM the weaker of the two always won.
  * `pageMetadata.test.ts` asserts the two stay in step.
  */
-export interface PageMeta { title: string; description: string }
+export interface PageMeta {
+  title: string;
+  description: string;
+  /** Present where the rendered H1 differs from the title. */
+  h1?: string;
+}
 
 const metadata: Record<string, PageMeta> = pageMetadata;
 

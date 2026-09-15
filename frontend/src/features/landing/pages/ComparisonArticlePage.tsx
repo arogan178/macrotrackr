@@ -301,6 +301,12 @@ export default function ComparisonArticlePage() {
                 >
                   {migrationGuide.title}
                 </Link>
+                <Link
+                  to="/open-source"
+                  className="mt-4 ml-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                >
+                  Or run it on your own server
+                </Link>
               </Panel>
             </section>
           )}
