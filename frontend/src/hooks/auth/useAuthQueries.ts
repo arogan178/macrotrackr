@@ -1,13 +1,23 @@
 import { shouldMountClerk } from "@/config/clerkRuntime";
 import { isClerkAuthMode } from "@/config/runtime";
 
-import * as clerkHooks from "./useAuthQueries.clerk";
+import {
+  useClerkChangePassword,
+  useClerkLogout,
+  useClerkResetPassword,
+  useClerkUser,
+} from "./clerkAuthRegistry";
 import * as localHooks from "./useAuthQueries.local";
 import * as signedOutHooks from "./useAuthQueries.signedOut";
 
 const selectedHooks = isClerkAuthMode
   ? shouldMountClerk
-    ? clerkHooks
+    ? {
+        useUser: useClerkUser,
+        useLogout: useClerkLogout,
+        useResetPassword: useClerkResetPassword,
+        useChangePassword: useClerkChangePassword,
+      }
     : signedOutHooks
   : localHooks;
 
