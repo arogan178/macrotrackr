@@ -41,6 +41,10 @@ const calculatorContent = JSON.parse(
   fs.readFileSync(path.join(srcDir, "data/calculator-content.json"), "utf8")
 );
 
+const openSource = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/open-source.json"), "utf8")
+);
+
 // Same file the React catalog imports.
 const migrations = JSON.parse(
   fs.readFileSync(path.join(srcDir, "data/migrations.json"), "utf8")
@@ -211,6 +215,42 @@ const pages = [
         <ul>
           ${tools.map((t) => `<li><a href="/tools/${t.slug}">${t.heading}</a> - ${t.subtitle}</li>`).join("")}
         </ul>
+      </main>
+    `,
+  },
+  {
+    route: "open-source",
+    ...metaFor("/open-source"),
+    canonical: `${APP_URL}/open-source`,
+    type: "website",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <h1>${escapeHtml(metaFor("/open-source").h1)}</h1>
+        <p>${escapeHtml(openSource.intro)}</p>
+        <h2>What that actually buys you</h2>
+        ${openSource.principles
+          .map(
+            (item) =>
+              `<h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>`
+          )
+          .join("")}
+        <h2>Where it runs</h2>
+        <ul>
+          ${openSource.platforms
+            .map(
+              (item) =>
+                `<li><strong>${escapeHtml(item.name)}</strong>: ${escapeHtml(item.detail)}</li>`
+            )
+            .join("")}
+        </ul>
+        <h2>Questions</h2>
+        ${openSource.faqs
+          .map(
+            (faq) =>
+              `<h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p>`
+          )
+          .join("")}
+        <p><a href="/pricing">Managed hosting pricing</a> | <a href="/register">Start free</a></p>
       </main>
     `,
   },

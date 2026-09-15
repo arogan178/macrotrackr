@@ -99,5 +99,10 @@
     "title": "How to Import Lose It! History into MacroTrackr",
     "description": "Move Lose It! food history into MacroTrackr from the official account download and verify every detected meal before saving.",
     "h1": "How to Import Lose It! History into MacroTrackr"
+  },
+  "/open-source": {
+    "title": "Open Source Macro Tracker, Self-Hostable — MacroTrackr",
+    "description": "MacroTrackr is AGPLv3 and self-hostable with Docker on Unraid, CasaOS, Umbrel, TrueNAS or a VPS. SQLite, local accounts, no telemetry, no licence key.",
+    "h1": "An open source macro tracker you can host yourself"
   }
 }

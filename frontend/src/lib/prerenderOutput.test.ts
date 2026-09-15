@@ -55,6 +55,7 @@ function prerenderRoute(route: string): string {
     "comparisons.json",
     "migrations.json",
     "calculator-content.json",
+    "open-source.json",
   ]) {
     copyFileSync(
       path.join(FRONTEND_ROOT, "src", "data", dataFile),
