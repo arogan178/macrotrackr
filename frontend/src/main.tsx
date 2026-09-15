@@ -51,6 +51,9 @@ if (shouldEnablePostHog && posthogConfig) {
     // once someone signs in. Pinned here rather than in a dashboard so the cost
     // is visible to whoever reads this file.
     disable_session_recording: true,
+    // Nothing in the app reads or renders a survey, but PostHog still fetched
+    // 33KB of surveys.js on every page load.
+    disable_surveys: true,
   });
 }
 
