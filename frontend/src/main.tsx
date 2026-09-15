@@ -44,6 +44,13 @@ if (shouldEnablePostHog && posthogConfig) {
     capture_exceptions: true,
     debug: import.meta.env.MODE === "development",
     defaults: "2026-01-30",
+    // Sampled on by the project settings, so a marketing visitor could draw the
+    // recorder: measured, it cost a single 1,600ms main-thread task and took a
+    // calculator page from ~70 to 29 in Lighthouse. Replay is worth that inside
+    // the app, where there is a session to watch, so PostHogUserSync starts it
+    // once someone signs in. Pinned here rather than in a dashboard so the cost
+    // is visible to whoever reads this file.
+    disable_session_recording: true,
   });
 }
 
