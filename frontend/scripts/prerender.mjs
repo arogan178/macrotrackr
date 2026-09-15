@@ -45,6 +45,10 @@ const openSource = JSON.parse(
   fs.readFileSync(path.join(srcDir, "data/open-source.json"), "utf8")
 );
 
+const bmrVsTdee = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/bmr-vs-tdee.json"), "utf8")
+);
+
 // Same file the React catalog imports.
 const migrations = JSON.parse(
   fs.readFileSync(path.join(srcDir, "data/migrations.json"), "utf8")
@@ -215,6 +219,40 @@ const pages = [
         <ul>
           ${tools.map((t) => `<li><a href="/tools/${t.slug}">${t.heading}</a> - ${t.subtitle}</li>`).join("")}
         </ul>
+      </main>
+    `,
+  },
+  {
+    route: "tools/bmr-vs-tdee",
+    ...metaFor("/tools/bmr-vs-tdee"),
+    canonical: `${APP_URL}/tools/bmr-vs-tdee`,
+    type: "article",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <nav><a href="/">Home</a> / <a href="/tools">Calculators</a> / <span>BMR vs TDEE</span></nav>
+        <h1>${escapeHtml(metaFor("/tools/bmr-vs-tdee").h1)}</h1>
+        <p>${escapeHtml(bmrVsTdee.intro)}</p>
+        <h2>The difference in one line each</h2>
+        ${bmrVsTdee.definitions
+          .map((item) => `<h3>${escapeHtml(item.term)}</h3><p>${escapeHtml(item.body)}</p>`)
+          .join("")}
+        <h2>What TDEE is made of</h2>
+        <ul>
+          ${bmrVsTdee.components
+            .map((item) => `<li><strong>${escapeHtml(item.name)}</strong>: ${escapeHtml(item.note)}</li>`)
+            .join("")}
+        </ul>
+        <h2>Turning BMR into TDEE</h2>
+        <ul>
+          ${bmrVsTdee.multipliers
+            .map((item) => `<li>${escapeHtml(item.level)}: x${escapeHtml(item.factor)}</li>`)
+            .join("")}
+        </ul>
+        <h2>Questions</h2>
+        ${bmrVsTdee.faqs
+          .map((faq) => `<h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p>`)
+          .join("")}
+        <p><a href="/tools/tdee-calculator">TDEE calculator</a> | <a href="/tools/bmr-calculator">BMR calculator</a></p>
       </main>
     `,
   },

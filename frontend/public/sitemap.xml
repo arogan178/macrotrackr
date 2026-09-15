@@ -49,6 +49,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/tools/bmr-vs-tdee</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/open-source</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>

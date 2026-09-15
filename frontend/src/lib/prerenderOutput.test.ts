@@ -56,6 +56,7 @@ function prerenderRoute(route: string): string {
     "migrations.json",
     "calculator-content.json",
     "open-source.json",
+    "bmr-vs-tdee.json",
   ]) {
     copyFileSync(
       path.join(FRONTEND_ROOT, "src", "data", dataFile),

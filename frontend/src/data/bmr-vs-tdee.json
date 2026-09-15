@@ -1,0 +1,60 @@
+{
+  "intro": "BMR is what you burn doing nothing. TDEE is what you burn living your day. The second is the one you set calorie targets from, and it is the first multiplied by how active you are.",
+  "definitions": [
+    {
+      "term": "BMR, basal metabolic rate",
+      "body": "The energy your body spends keeping you alive at complete rest: breathing, circulation, temperature, cell repair. Measured lying still, fasted, in a controlled room. Nobody actually burns only this on a real day, which is why a BMR figure is a building block rather than a target."
+    },
+    {
+      "term": "TDEE, total daily energy expenditure",
+      "body": "Everything you burn across a day. BMR is the largest part of it, usually somewhere around 60 to 70 per cent for most people, with the rest coming from activity, incidental movement and digesting food. This is the number a calorie target is built on."
+    }
+  ],
+  "components": [
+    {
+      "name": "Basal metabolic rate",
+      "note": "The resting cost of being alive. Estimated here with the Mifflin-St Jeor equation."
+    },
+    {
+      "name": "Thermic effect of food",
+      "note": "Digestion is not free. Roughly 20-30% of protein calories, 5-10% of carbohydrate and 0-3% of fat are spent processing them (Westerterp, 2004)."
+    },
+    {
+      "name": "Deliberate exercise",
+      "note": "Training sessions. Usually smaller than people expect unless the volume is high."
+    },
+    {
+      "name": "Everything else you do",
+      "note": "Walking, standing, fidgeting, chores. Varies more between two people than their training does, and is the main reason two identical bodies need different intakes."
+    }
+  ],
+  "multipliers": [
+    { "level": "Sedentary, little or no exercise", "factor": "1.2" },
+    { "level": "Lightly active, light exercise 1-3 days a week", "factor": "1.375" },
+    { "level": "Moderately active, moderate exercise 3-5 days a week", "factor": "1.55" },
+    { "level": "Very active, hard exercise 6-7 days a week", "factor": "1.725" },
+    { "level": "Extremely active, very hard exercise and a physical job", "factor": "1.9" }
+  ],
+  "faqs": [
+    {
+      "question": "Should I eat my BMR?",
+      "answer": "No. Eating at your BMR means eating as though you spent the day unconscious, which for most people is a steep and unnecessary deficit. Set targets from TDEE instead, then subtract for fat loss."
+    },
+    {
+      "question": "Why is sedentary 1.2 and not 1.0?",
+      "answer": "Because a sedentary person still digests food and moves around a little. That baseline is worth roughly 20% above resting, which is exactly what the 1.2 floor represents. A 1.0 multiplier would claim someone burns nothing beyond staying alive."
+    },
+    {
+      "question": "Which number is more accurate?",
+      "answer": "BMR, and it is not close. It comes from an equation validated against measured resting expenditure. TDEE multiplies that by a self-reported activity band, and people routinely overestimate their own activity, so the error in your TDEE is mostly the error in picking your multiplier."
+    },
+    {
+      "question": "My tracker and my watch disagree. Which is right?",
+      "answer": "Neither, exactly. Both are estimates. What matters more is that you pick one method and watch how your weight responds over two or three weeks, then adjust the number to match reality rather than trusting it in advance."
+    },
+    {
+      "question": "Does BMR fall when I diet?",
+      "answer": "Somewhat. Losing weight reduces the tissue that needs maintaining, so a smaller body has a lower BMR, and prolonged deficits add a further adaptive drop. Recalculate as your weight changes rather than holding the original figure."
+    }
+  ]
+}
