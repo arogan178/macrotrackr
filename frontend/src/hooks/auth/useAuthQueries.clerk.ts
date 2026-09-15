@@ -11,12 +11,12 @@ import { queryKeys } from "@/lib/queryKeys";
 import { clearBiometricCredentials } from "@/services/biometrics";
 import { removeToken } from "@/utils/tokenStorage";
 
-interface ResetPasswordData {
+export interface ResetPasswordData {
   token: string;
   newPassword: string;
 }
 
-interface ChangePasswordData {
+export interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
 }

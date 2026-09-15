@@ -172,7 +172,6 @@ export default defineConfig(({ command }) => {
             "vendor-query": ["@tanstack/react-query"],
             "vendor-charts": ["recharts"],
             "vendor-motion": ["motion"],
-            "vendor-clerk": ["@clerk/react"],
             "vendor-ui": [
               "lucide-react",
               "clsx",

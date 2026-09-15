@@ -113,7 +113,7 @@ const appTree = shouldEnablePostHog ? (
   <AppContent includePostHogSync={false} />
 );
 
-ReactDOM.createRoot(document.querySelector("#root")!).render(
+const rootElement = (
   <React.StrictMode>
     {hasRequiredClerkConfig ? (
       <PersistQueryClientProvider
@@ -139,8 +139,21 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
     ) : (
       <RuntimeConfigError />
     )}
-  </React.StrictMode>,
+  </React.StrictMode>
 );
+
+// Registering before the first render keeps the hook implementations stable for
+// every component, and the dynamic import is what keeps @clerk/react out of the
+// entry chunk.
+async function bootstrap() {
+  if (shouldMountClerk) {
+    await import("./hooks/auth/registerClerkAuthHooks");
+  }
+
+  ReactDOM.createRoot(document.querySelector("#root")!).render(rootElement);
+}
+
+void bootstrap();
 
 // Registered before the worker so a stale chunk from a previous build can
 // recover even if service worker registration itself fails.
