@@ -2,7 +2,7 @@
 
 > A free, open source macro and calorie tracker. Log meals in seconds, set a
 > macro split, and review the week. Self-hostable under AGPLv3, with a hosted
-> option at $4/month for cross-device sync.
+> option at $3.99/month for cross-device sync.
 
 MacroTrackr is a progressive web app, not an App Store listing. Core tracking
 and all calculators are free. Barcode scanning uses the OpenFoodFacts database
@@ -31,17 +31,18 @@ reduced fallback. The summaries below carry the substance of each page.
 
 ## Comparisons
 
-- [vs MyFitnessPal](https://macrotrackr.com/compare/myfitnesspal): MyFitnessPal
-  Premium is $19.99/month or $79.99/year and gates barcode scanning and custom
-  macro goals. Both are free on MacroTrackr.
-- [vs MacroFactor](https://macrotrackr.com/compare/macrofactor): MacroFactor is
-  $11.99/month or $71.99/year with no free tier beyond a 7-day trial.
-  MacroTrackr has a free tier that does not expire.
-- [vs Cronometer](https://macrotrackr.com/compare/cronometer): Cronometer Gold
-  is $9.99/month or $59.99/year. MacroTrackr targets calories and macros rather
-  than an extensive micronutrient table.
-- [vs Lose It!](https://macrotrackr.com/compare/lose-it): Lose It! Premium is
-  $39.99/year. Custom macro gram targets are free on MacroTrackr.
+Competitors change their pricing, so the figures live on the comparison pages
+rather than here, where they would be quoted long after they stopped being true.
+
+- [vs MyFitnessPal](https://macrotrackr.com/compare/myfitnesspal): barcode
+  scanning and custom macro goals sit behind MyFitnessPal's paid tier. Both are
+  free on MacroTrackr.
+- [vs MacroFactor](https://macrotrackr.com/compare/macrofactor): MacroFactor has
+  no free tier beyond a trial. MacroTrackr's free tier does not expire.
+- [vs Cronometer](https://macrotrackr.com/compare/cronometer): MacroTrackr
+  targets calories and macros rather than an extensive micronutrient table.
+- [vs Lose It!](https://macrotrackr.com/compare/lose-it): custom macro gram
+  targets are free on MacroTrackr.
 
 ## Switching from another tracker
 
