@@ -97,7 +97,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
       {isAuthenticated && <LogSheet />}
       <OfflineBar />
-      <InstallPrompt />
+      <InstallPrompt clearsTabBar={isAuthenticated} />
       <UpdatePrompt />
       <NotificationManager />
     </div>
