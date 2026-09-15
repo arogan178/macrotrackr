@@ -30,112 +30,21 @@ const baseTemplate = fs
     '<script data-cfasync="false"$1'
   );
 
-// Load comparisons catalog
-const comparisons = [
-  {
-    slug: "myfitnesspal",
-    shortTitle: "MyFitnessPal Alternative",
-    title: `Best Free MyFitnessPal Alternative Without Ads (2026) — ${APP_NAME}`,
-    description: `Looking for a MyFitnessPal alternative? ${APP_NAME} offers 100% free barcode scanning, zero banner ads, rapid logging, and self-hosted privacy.`,
-    heading: "The Clean, Free Alternative to MyFitnessPal",
-    tagline: "Free barcode scanning, zero ads, no locked macro goals, and open-source self-hosting.",
-    competitorName: "MyFitnessPal",
-    priceNote: "$19.99/mo or $79.99/yr for Premium",
-    verdict: `${APP_NAME} provides a fast, privacy-focused alternative to MyFitnessPal with free barcode scanning and custom macro targets out of the box.`,
-    faqs: [
-      {
-        q: "Is barcode scanning really free on MacroTrackr?",
-        a: "Yes. Barcode scanning on MacroTrackr uses the OpenFoodFacts global database and is 100% free forever without requiring a premium subscription.",
-      },
-      {
-        q: "Can I self-host MacroTrackr on my own server?",
-        a: "Yes. MacroTrackr is fully open source (AGPLv3) and can be deployed with Docker in under 60 seconds on any Linux server, VPS, or Raspberry Pi.",
-      },
-      {
-        q: "How does MacroTrackr compare in logging speed?",
-        a: "MacroTrackr is built with optimistic UI updates and zero ad networks, making meal logging 2-3x faster than heavy ad-supported commercial apps.",
-      },
-    ],
-  },
-  {
-    slug: "macrofactor",
-    shortTitle: "MacroFactor Alternative",
-    title: `Free & Open Source MacroFactor Alternative — ${APP_NAME}`,
-    description: `Compare ${APP_NAME} with MacroFactor. Get weekly macro trend tracking, responsive smart averages, and clean analytics without a monthly fee.`,
-    heading: "Smart Macro Tracking Without the Expensive Subscription",
-    tagline: "Weekly average analytics and smooth macro targets with an open-source core.",
-    competitorName: "MacroFactor",
-    priceNote: "$11.99/mo or $71.99/yr (No Free Tier)",
-    verdict: `${APP_NAME} offers clean weekly averages and goal tracking for athletes and fitness enthusiasts who want total control over their targets without a paid subscription.`,
-    faqs: [
-      {
-        q: "Does MacroTrackr have a free tier unlike MacroFactor?",
-        a: "Yes. MacroTrackr is free to self-host and has a generous free tier with zero trial expiration, whereas MacroFactor requires a paid subscription after a 7-day trial.",
-      },
-    ],
-  },
-  {
-    slug: "cronometer",
-    shortTitle: "Cronometer Alternative",
-    title: `Lightweight Cronometer Alternative — ${APP_NAME}`,
-    description: `A fast, distraction-free alternative to Cronometer. Focus on calories and macros without spreadsheet clutter or bloated menus.`,
-    heading: "Streamlined Nutrition Tracking Without the Clutter",
-    tagline: "Fast macro tracking focused on energy and protein balance without overwhelming micro-nutrient tables.",
-    competitorName: "Cronometer",
-    priceNote: "$9.99/mo or $59.99/yr for Gold",
-    verdict: `${APP_NAME} focuses on macro balance and fast meal logging with a clean, modern interface that avoids spreadsheet fatigue.`,
-    faqs: [
-      {
-        q: "Why choose MacroTrackr over Cronometer?",
-        a: "If your goal is tracking daily calories, protein, carbs, and fats without managing 80+ micronutrient progress bars, MacroTrackr gets you logged and out in seconds.",
-      },
-    ],
-  },
-  {
-    slug: "lose-it",
-    shortTitle: "Lose It! Alternative",
-    title: `Best Ad-Free Lose It! Alternative — ${APP_NAME}`,
-    description: `Compare ${APP_NAME} with Lose It! Track custom protein, carb, and fat gram targets without paywalls, upsells, or intrusive ads.`,
-    heading: "Ad-Free Calorie & Macro Tracking with Custom Gram Splits",
-    tagline: "Lock in your exact macro gram splits without paying for a premium unlock.",
-    competitorName: "Lose It!",
-    priceNote: "$39.99/yr for Premium",
-    verdict: `${APP_NAME} provides custom gram goals and comprehensive macro analytics on the free tier with zero banner advertisements.`,
-    faqs: [
-      {
-        q: "Can I customize exact macro gram targets in MacroTrackr for free?",
-        a: "Yes. Setting custom gram goals and dynamic percentage splits is completely free on MacroTrackr.",
-      },
-    ],
-  },
-];
+// The same file the React catalog imports. Transcribing it here is what let
+// the served and rendered pages drift apart.
+const comparisons = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/comparisons.json"), "utf8")
+);
 
-const migrations = [
-  {
-    slug: "myfitnesspal",
-    sourceName: "MyFitnessPal",
-    title: `Import MyFitnessPal History into ${APP_NAME}`,
-    description: `Move your MyFitnessPal nutrition CSV into ${APP_NAME}, preview the detected meals, and keep tracking without starting over.`,
-  },
-  {
-    slug: "cronometer",
-    sourceName: "Cronometer",
-    title: `Import Cronometer History into ${APP_NAME}`,
-    description: `Move your Cronometer servings CSV into ${APP_NAME} and verify the detected meals before saving them.`,
-  },
-  {
-    slug: "macrofactor",
-    sourceName: "MacroFactor",
-    title: `Import MacroFactor History into ${APP_NAME}`,
-    description: `Move your MacroFactor granular nutrition export into ${APP_NAME} without losing your existing tracking history.`,
-  },
-  {
-    slug: "lose-it",
-    sourceName: "Lose It!",
-    title: `Import Lose It! History into ${APP_NAME}`,
-    description: `Move your Lose It! food log into ${APP_NAME}, preview the detected entries, and continue tracking without starting over.`,
-  },
-];
+// Same file the calculator pages read.
+const calculatorContent = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/calculator-content.json"), "utf8")
+);
+
+// Same file the React catalog imports.
+const migrations = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/migrations.json"), "utf8")
+);
 
 // Tools catalog
 const tools = [
@@ -360,11 +269,21 @@ for (const tool of tools) {
     type: "website",
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
-        <nav><a href="/">Home</a> / <a href="/tools">Calculators</a> / <span>${tool.heading}</span></nav>
-        <h1>${metaFor(`/tools/${tool.slug}`).h1}</h1>
-        <p>${tool.subtitle}</p>
-        <p>${tool.description}</p>
-        <p><a href="/register">Start Tracking with ${APP_NAME}</a></p>
+        <nav><a href="/">Home</a> / <a href="/tools">Calculators</a> / <span>${escapeHtml(tool.heading)}</span></nav>
+        <h1>${escapeHtml(metaFor(`/tools/${tool.slug}`).h1)}</h1>
+        <p>${escapeHtml(tool.subtitle)}</p>
+        <p>${escapeHtml(metaFor(`/tools/${tool.slug}`).description)}</p>
+        <h2>How this is calculated</h2>
+        <p>${escapeHtml(calculatorContent.calculators[tool.slug].method)}</p>
+        <h2>Frequently Asked Questions</h2>
+        ${calculatorContent.calculators[tool.slug].faqs
+          .map(
+            (faq) =>
+              `<h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p>`
+          )
+          .join("")}
+        <p>${escapeHtml(calculatorContent.disclaimer)}</p>
+        <p><a href="/tools">All free calculators</a> | <a href="/register">Start Tracking with ${APP_NAME}</a></p>
       </main>
     `,
   });
@@ -380,12 +299,36 @@ for (const comp of comparisons) {
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
         <nav><a href="/">Home</a> / <a href="/compare">Comparisons</a> / <span>${comp.competitorName}</span></nav>
-        <h1>${metaFor(`/compare/${comp.slug}`).h1}</h1>
-        <p><strong>${comp.tagline}</strong></p>
-        <h2>Quick Verdict</h2>
-        <p>${comp.verdict}</p>
-        <h2>Frequently Asked Questions</h2>
-        ${comp.faqs.map((f) => `<div><h3>${f.q}</h3><p>${f.a}</p></div>`).join("")}
+        <h1>${escapeHtml(metaFor(`/compare/${comp.slug}`).h1)}</h1>
+        <p><strong>${escapeHtml(comp.tagline)}</strong></p>
+        <p>${escapeHtml(comp.subtitle)}</p>
+        <h2>${APP_NAME} vs ${escapeHtml(comp.competitorName)}, feature by feature</h2>
+        <table>
+          <thead><tr><th>Feature</th><th>${APP_NAME}</th><th>${escapeHtml(comp.competitorName)}</th></tr></thead>
+          <tbody>
+            ${comp.matrix
+              .map(
+                (row) =>
+                  `<tr><td>${escapeHtml(row.feature)}</td><td>${escapeHtml(row.macrotrackr)}</td><td>${escapeHtml(row.competitor)}</td></tr>`
+              )
+              .join("")}
+          </tbody>
+        </table>
+        <h2>Where ${APP_NAME} differs</h2>
+        ${comp.keyDifferentiators
+          .map(
+            (diff) =>
+              `<h3>${escapeHtml(diff.title)}</h3><p>${escapeHtml(diff.description)}</p>`
+          )
+          .join("")}
+        <h2>Questions</h2>
+        ${comp.faqs
+          .map(
+            (faq) =>
+              `<h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p>`
+          )
+          .join("")}
+        <p><a href="/migrate/${comp.slug}">How to import your ${escapeHtml(comp.competitorName)} history</a></p>
         <p><a href="/register">Get Started Free with ${APP_NAME}</a></p>
       </main>
     `,
@@ -400,9 +343,18 @@ for (const migration of migrations) {
     type: "article",
     bodyHtml: `
       <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
-        <nav><a href="/">Home</a> / <a href="/migrate">Migration guides</a> / <span>${migration.sourceName}</span></nav>
-        <h1>${metaFor(`/migrate/${migration.slug}`).h1}</h1>
-        <p>${migration.description}</p>
+        <nav><a href="/">Home</a> / <a href="/migrate">Migration guides</a> / <span>${escapeHtml(migration.sourceName)}</span></nav>
+        <h1>${escapeHtml(metaFor(`/migrate/${migration.slug}`).h1)}</h1>
+        <p>${escapeHtml(migration.summary)}</p>
+        <h2>Export from ${escapeHtml(migration.sourceName)}</h2>
+        <ol>
+          ${migration.exportSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
+        </ol>
+        <p><strong>Before you export:</strong> ${escapeHtml(migration.caveat)}</p>
+        <h2>Preview, then import</h2>
+        <p>${escapeHtml(migration.fileGuidance)} Nothing is written until you confirm the preview.</p>
+        <p><a href="${escapeAttr(migration.officialExportUrl)}">Official ${escapeHtml(migration.sourceName)} export instructions</a></p>
+        <p><a href="/compare/${migration.slug}">${APP_NAME} compared with ${escapeHtml(migration.sourceName)}</a></p>
         <p><a href="/register?returnTo=%2Fsettings%3Ftab%3Ddata%26from%3Dmigration">Create an account and open the importer</a></p>
       </main>
     `,

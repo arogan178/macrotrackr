@@ -26,24 +26,6 @@ import {
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const FAQS = [
-  {
-    question: "How fast should I safely lose weight?",
-    answer:
-      "A safe and sustainable rate of fat loss is 0.5 to 1.0 kg (1 to 2 lbs) per week, which corresponds to a daily deficit of 500 to 1,000 calories.",
-  },
-  {
-    question: "How many calories are in 1 kg of body fat?",
-    answer:
-      "1 kg of body fat contains approximately 7,700 calories (or ~3,500 calories per pound). A daily deficit of 500 calories creates a 3,500 calorie weekly deficit, yielding ~0.45 kg (1 lb) of fat loss per week.",
-  },
-  {
-    question: "Why is eating too few calories counterproductive?",
-    answer:
-      "Severe calorie deficits trigger metabolic adaptation, extreme hunger, fatigue, and muscle degradation. Moderation preserves muscle tissue and metabolic rate.",
-  },
-];
-
 // ~7,700 kcal per kg of body fat, spread across seven days.
 const CALORIES_PER_KG_OF_FAT_PER_DAY = 1100;
 
@@ -106,16 +88,6 @@ export default function WeightLossCalculatorPage() {
       title="Weight Loss & Timeline Calculator"
       subtitle="Estimate a daily calorie target, a realistic pace, and a projected date for your goal weight."
       canonicalPath="/tools/weight-loss-calculator"
-      faqs={FAQS}
-      method={
-        <>
-          Maintenance calories come from the Mifflin-St Jeor equation multiplied
-          by your activity factor. The deficit assumes roughly 7,700 kcal per
-          kilogram of body fat, so a 0.5 kg per week pace works out at about 550
-          kcal per day. Real rates vary with water weight and adaptation, so
-          treat the goal date as an estimate rather than a schedule.
-        </>
-      }
       ctaResult={
         statsReady
           ? {

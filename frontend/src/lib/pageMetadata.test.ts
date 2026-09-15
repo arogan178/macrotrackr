@@ -43,10 +43,17 @@ function prerenderAll(): Map<string, Rendered> {
     path.join(FRONTEND_ROOT, "scripts", "prerender.mjs"),
     path.join(scriptsDirectory, "prerender.mjs"),
   );
-  copyFileSync(
-    path.join(FRONTEND_ROOT, "src", "data", "page-metadata.json"),
-    path.join(dataDirectory, "page-metadata.json"),
-  );
+  for (const dataFile of [
+    "page-metadata.json",
+    "comparisons.json",
+    "migrations.json",
+    "calculator-content.json",
+  ]) {
+    copyFileSync(
+      path.join(FRONTEND_ROOT, "src", "data", dataFile),
+      path.join(dataDirectory, dataFile),
+    );
+  }
   writeFileSync(path.join(dataDirectory, "blog-posts.json"), "[]");
   writeFileSync(
     path.join(distributionDirectory, "index.html"),

@@ -21,24 +21,6 @@ import {
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const FAQS = [
-  {
-    question: "How much protein do I need per day?",
-    answer:
-      "General healthy adults need 1.2–1.6g per kg of body weight. Active individuals training with resistance or in a calorie deficit benefit from 1.6–2.4g per kg (0.8–1.1g per lb) to build and retain muscle.",
-  },
-  {
-    question: "Is high protein intake safe for healthy kidneys?",
-    answer:
-      "Controlled trials in healthy adults with normal kidney function have not found harm to kidney function at intakes up to roughly 3.3g/kg per day. That evidence does not extend to people with existing kidney disease, who should follow the intake their clinician sets. This calculator gives a general estimate, not medical advice.",
-  },
-  {
-    question: "How much protein can the body absorb in one meal?",
-    answer:
-      "Your digestive system can absorb virtually all protein eaten in a meal. However, muscle protein synthesis peaks around 30–50g of high-quality protein per meal.",
-  },
-];
-
 const TRAINING_GOAL_OPTIONS = [
   {
     value: "1.2",
@@ -104,16 +86,6 @@ export default function ProteinCalculatorPage() {
       title="Protein Intake Calculator"
       subtitle="Estimate a practical daily protein target for muscle building, fat loss, or endurance training."
       canonicalPath="/tools/protein-calculator"
-      faqs={FAQS}
-      method={
-        <>
-          Your target is bodyweight in kilograms multiplied by a grams-per-kilo
-          ratio for your training context, from 1.2 g/kg at maintenance to 2.4
-          g/kg in a deficit. These bands reflect the range used in sports
-          nutrition position stands rather than a single study. The per-meal
-          figure divides the daily total by the number of meals you set.
-        </>
-      }
       ctaResult={
         weightReady
           ? {

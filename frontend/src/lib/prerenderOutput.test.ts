@@ -37,7 +37,7 @@ const htmlTemplate = `<!doctype html>
   </body>
 </html>`;
 
-function prerenderHomepage(): string {
+function prerenderRoute(route: string): string {
   const fixtureRoot = mkdtempSync(path.join(tmpdir(), "macrotrackr-prerender-"));
   temporaryDirectories.push(fixtureRoot);
 
@@ -50,10 +50,17 @@ function prerenderHomepage(): string {
 
   const fixtureScript = path.join(scriptsDirectory, "prerender.mjs");
   copyFileSync(PRERENDER_SCRIPT, fixtureScript);
-  copyFileSync(
-    path.join(FRONTEND_ROOT, "src", "data", "page-metadata.json"),
-    path.join(dataDirectory, "page-metadata.json"),
-  );
+  for (const dataFile of [
+    "page-metadata.json",
+    "comparisons.json",
+    "migrations.json",
+    "calculator-content.json",
+  ]) {
+    copyFileSync(
+      path.join(FRONTEND_ROOT, "src", "data", dataFile),
+      path.join(dataDirectory, dataFile),
+    );
+  }
   writeFileSync(path.join(distributionDirectory, "index.html"), htmlTemplate);
   writeFileSync(path.join(dataDirectory, "blog-posts.json"), "[]");
 
@@ -62,7 +69,10 @@ function prerenderHomepage(): string {
     env: { ...process.env, VITE_APP_URL: "https://macrotrackr.test" },
   });
 
-  return readFileSync(path.join(distributionDirectory, "index.html"), "utf8");
+  return readFileSync(
+    path.join(distributionDirectory, route, "index.html"),
+    "utf8",
+  );
 }
 
 afterEach(() => {
@@ -73,7 +83,7 @@ afterEach(() => {
 
 describe("pre-rendered HTML", () => {
   it("keeps crawler copy inside noscript and leaves the React root empty", () => {
-    const html = prerenderHomepage();
+    const html = prerenderRoute("");
     const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1];
 
     expect(html).toContain('<div id="root"></div>');
@@ -82,8 +92,37 @@ describe("pre-rendered HTML", () => {
     );
   });
 
+  it("gives crawlers the comparison table, not just a headline", () => {
+    // Retrieval crawlers for AI answers do not run JavaScript. This copy used
+    // to be a tagline and three FAQs while the rendered page carried a nine-row
+    // feature matrix, so they saw about a quarter of the page.
+    const html = prerenderRoute("compare/myfitnesspal");
+    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
+
+    expect(noscript).toContain("Barcode Scanner");
+    expect(noscript).toContain("Where MacroTrackr differs");
+    expect(noscript).toContain("How to import your MyFitnessPal history");
+  });
+
+  it("gives crawlers the calculator method and questions", () => {
+    const html = prerenderRoute("tools/tdee-calculator");
+    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
+
+    expect(noscript).toContain("Mifflin-St Jeor");
+    expect(noscript).toContain("How this is calculated");
+    expect(noscript).toContain("not medical advice");
+  });
+
+  it("gives crawlers the migration steps", () => {
+    const html = prerenderRoute("migrate/myfitnesspal");
+    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
+
+    expect(noscript).toContain("Export from MyFitnessPal");
+    expect(noscript).toContain("Before you export");
+  });
+
   it("exempts the Vite entry module from Cloudflare Rocket Loader", () => {
-    const html = prerenderHomepage();
+    const html = prerenderRoute("");
 
     expect(html).toContain(
       '<script data-cfasync="false" type="module" src="/assets/index.js"></script>',
