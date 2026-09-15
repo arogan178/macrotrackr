@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import {
   createRootRoute,
   Link,
@@ -8,10 +8,13 @@ import {
 import { AnimatePresence, LazyMotion } from "motion/react";
 
 import PageTransition from "@/components/animation/PageTransition";
+import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
+import { pathNeedsClerk, shouldMountClerk } from "@/config/clerkRuntime";
+import { isClerkAuthMode } from "@/config/runtime";
 import { usePageMetadata } from "@/hooks";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
@@ -57,6 +60,24 @@ function RootComponent() {
   const location = useLocation();
   const { isLoaded, isSignedIn } = useAppAuthState();
   useRealtimeSync(isLoaded && isSignedIn);
+
+  // This document started on a public route with no session, so no
+  // ClerkProvider was mounted. The auth screens call Clerk hooks directly and
+  // would throw, so hand the route to a fresh document that does mount it.
+  const needsClerkReload =
+    isClerkAuthMode && !shouldMountClerk && pathNeedsClerk(location.pathname);
+
+  const clerkReloadHref = location.href;
+
+  useEffect(() => {
+    if (needsClerkReload) {
+      window.location.assign(clerkReloadHref);
+    }
+  }, [needsClerkReload, clerkReloadHref]);
+
+  if (needsClerkReload) {
+    return <AuthLoadingScreen />;
+  }
 
   return (
     <ErrorBoundary>

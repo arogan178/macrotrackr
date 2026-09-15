@@ -5,9 +5,10 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import posthog from "posthog-js";
 
-import { ClerkAppShell } from "@/components/auth/ClerkAppShell";
+import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 
 import { initializeAuthTokenProvider } from "./api/core";
+import { shouldMountClerk } from "./config/clerkRuntime";
 import { isClerkAuthMode, runtimeConfig } from "./config/runtime";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { ProductAnalyticsProvider } from "./lib/productAnalytics";
@@ -96,6 +97,22 @@ function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
   );
 }
 
+const ClerkAppShell = React.lazy(() =>
+  import("@/components/auth/ClerkAppShell").then((module) => ({
+    default: module.ClerkAppShell,
+  })),
+);
+
+const appTree = shouldEnablePostHog ? (
+  <PostHogProvider client={posthog}>
+    <ProductAnalyticsProvider>
+      <AppContent includePostHogSync />
+    </ProductAnalyticsProvider>
+  </PostHogProvider>
+) : (
+  <AppContent includePostHogSync={false} />
+);
+
 ReactDOM.createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
     {hasRequiredClerkConfig ? (
@@ -109,26 +126,14 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
           buster: "macrotrackr-v1",
         }}
       >
-        {isClerkAuthMode ? (
-          <ClerkAppShell publishableKey={clerkPublishableKey!}>
-            {shouldEnablePostHog ? (
-              <PostHogProvider client={posthog}>
-                <ProductAnalyticsProvider>
-                  <AppContent includePostHogSync />
-                </ProductAnalyticsProvider>
-              </PostHogProvider>
-            ) : (
-              <AppContent includePostHogSync={false} />
-            )}
-          </ClerkAppShell>
-        ) : shouldEnablePostHog ? (
-          <PostHogProvider client={posthog}>
-            <ProductAnalyticsProvider>
-              <AppContent includePostHogSync />
-            </ProductAnalyticsProvider>
-          </PostHogProvider>
+        {shouldMountClerk ? (
+          <React.Suspense fallback={<AuthLoadingScreen />}>
+            <ClerkAppShell publishableKey={clerkPublishableKey!}>
+              {appTree}
+            </ClerkAppShell>
+          </React.Suspense>
         ) : (
-          <AppContent includePostHogSync={false} />
+          appTree
         )}
       </PersistQueryClientProvider>
     ) : (
