@@ -26,24 +26,6 @@ import {
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const FAQS = [
-  {
-    question: "What is Total Daily Energy Expenditure (TDEE)?",
-    answer:
-      "TDEE is the total number of calories you burn each day through resting metabolism, daily movement, physical activity, and food digestion.",
-  },
-  {
-    question: "How should I use my TDEE to lose weight?",
-    answer:
-      "To lose fat, consume 300–500 calories below your TDEE daily. This creates a sustainable deficit resulting in about 0.5–1 lb (0.25–0.5 kg) of fat loss per week.",
-  },
-  {
-    question: "Which activity level should I select?",
-    answer:
-      "If you work a desk job and do not exercise, select Sedentary. If you work a desk job but work out 3-4 times a week, select Lightly Active or Moderately Active. Most people overestimate physical activity, so err on the conservative side.",
-  },
-];
-
 const GOAL_SPLIT = { protein: 30, carbs: 40, fats: 30 } as const;
 
 export default function TdeeCalculatorPage() {
@@ -95,16 +77,6 @@ export default function TdeeCalculatorPage() {
       title="TDEE Calculator"
       subtitle="Estimate your Total Daily Energy Expenditure and explore calorie targets for fat loss, maintenance, or muscle gain."
       canonicalPath="/tools/tdee-calculator"
-      faqs={FAQS}
-      method={
-        <>
-          Basal Metabolic Rate comes from the Mifflin-St Jeor equation
-          (10 x weight in kg + 6.25 x height in cm - 5 x age, +5 for men and
-          -161 for women), then multiplies by an activity factor from 1.2 for
-          sedentary to 1.9 for very active. Activity factors are self-reported
-          bands, so they are the least precise part of the estimate.
-        </>
-      }
       ctaResult={
         statsReady
           ? {

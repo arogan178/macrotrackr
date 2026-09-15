@@ -17,29 +17,6 @@ import {
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const FAQS = [
-  {
-    question: "What is Basal Metabolic Rate (BMR)?",
-    answer:
-      "BMR is the number of calories your body burns at rest to maintain essential life functions like breathing, circulation, cell production, and temperature regulation.",
-  },
-  {
-    question: "What is the difference between BMR and TDEE?",
-    answer:
-      "BMR is your baseline resting energy burn. TDEE (Total Daily Energy Expenditure) includes your BMR plus the calories burned through movement, exercise, and digesting food.",
-  },
-  {
-    question: "Which formula does this calculator use?",
-    answer:
-      "This calculator uses the Mifflin-St Jeor equation, widely recognized in clinical research as the most accurate formula for estimating resting metabolic rate.",
-  },
-  {
-    question: "Should I eat less than my BMR?",
-    answer:
-      "Generally no. Eating below your BMR for extended periods can cause muscle loss, nutrient deficiencies, low energy levels, and hormonal disruption. Aim to eat between your BMR and TDEE for weight loss.",
-  },
-];
-
 export default function BmrCalculatorPage() {
   const stats = useBodyStats();
   const { weightKg, heightCm, age, gender } = stats;
@@ -52,15 +29,6 @@ export default function BmrCalculatorPage() {
       title="BMR Calculator"
       subtitle="Estimate the calories your body uses at complete rest to keep essential functions running."
       canonicalPath="/tools/bmr-calculator"
-      faqs={FAQS}
-      method={
-        <>
-          This uses the Mifflin-St Jeor equation: 10 x weight in kg + 6.25 x
-          height in cm - 5 x age, then +5 for men and -161 for women. It
-          estimates resting energy expenditure only, and does not include
-          activity or the energy cost of digestion.
-        </>
-      }
       ctaResult={
         statsReady
           ? {

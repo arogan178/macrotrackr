@@ -1,0 +1,94 @@
+{
+  "disclaimer": "These calculators give population-level estimates for general fitness planning, not medical advice. Individual needs vary. If you are pregnant, managing a health condition, or working with a clinician or dietitian, follow their guidance instead.",
+  "calculators": {
+    "tdee-calculator": {
+      "method": "Basal Metabolic Rate comes from the Mifflin-St Jeor equation (10 x weight in kg + 6.25 x height in cm - 5 x age, +5 for men and -161 for women), then multiplies by an activity factor from 1.2 for sedentary to 1.9 for very active. Activity factors are self-reported bands, so they are the least precise part of the estimate.",
+      "faqs": [
+        {
+          "question": "What is Total Daily Energy Expenditure (TDEE)?",
+          "answer": "TDEE is the total number of calories you burn each day through resting metabolism, daily movement, physical activity, and food digestion."
+        },
+        {
+          "question": "How should I use my TDEE to lose weight?",
+          "answer": "To lose fat, consume 300\u2013500 calories below your TDEE daily. This creates a sustainable deficit resulting in about 0.5\u20131 lb (0.25\u20130.5 kg) of fat loss per week."
+        },
+        {
+          "question": "Which activity level should I select?",
+          "answer": "If you work a desk job and do not exercise, select Sedentary. If you work a desk job but work out 3-4 times a week, select Lightly Active or Moderately Active. Most people overestimate physical activity, so err on the conservative side."
+        }
+      ]
+    },
+    "bmr-calculator": {
+      "method": "This uses the Mifflin-St Jeor equation: 10 x weight in kg + 6.25 x height in cm - 5 x age, then +5 for men and -161 for women. It estimates resting energy expenditure only, and does not include activity or the energy cost of digestion.",
+      "faqs": [
+        {
+          "question": "What is Basal Metabolic Rate (BMR)?",
+          "answer": "BMR is the number of calories your body burns at rest to maintain essential life functions like breathing, circulation, cell production, and temperature regulation."
+        },
+        {
+          "question": "What is the difference between BMR and TDEE?",
+          "answer": "BMR is your baseline resting energy burn. TDEE (Total Daily Energy Expenditure) includes your BMR plus the calories burned through movement, exercise, and digesting food."
+        },
+        {
+          "question": "Which formula does this calculator use?",
+          "answer": "This calculator uses the Mifflin-St Jeor equation, widely recognized in clinical research as the most accurate formula for estimating resting metabolic rate."
+        },
+        {
+          "question": "Should I eat less than my BMR?",
+          "answer": "Generally no. Eating below your BMR for extended periods can cause muscle loss, nutrient deficiencies, low energy levels, and hormonal disruption. Aim to eat between your BMR and TDEE for weight loss."
+        }
+      ]
+    },
+    "macro-calculator": {
+      "method": "Daily calories come from the Mifflin-St Jeor equation multiplied by your activity factor, then adjusted for your goal. That total is split into grams using the Atwater factors: 4 kcal per gram of protein, 4 per gram of carbohydrate and 9 per gram of fat.",
+      "faqs": [
+        {
+          "question": "What is a macro split?",
+          "answer": "A macro split is the percentage breakdown of daily calories coming from Protein (4 kcal/g), Carbohydrates (4 kcal/g), and Fats (9 kcal/g)."
+        },
+        {
+          "question": "What is the best macro split for fat loss?",
+          "answer": "A common high-protein split for fat loss is 35% Protein / 35% Carbs / 30% Fats. High protein preserves lean muscle tissue while in a calorie deficit."
+        },
+        {
+          "question": "What is the best macro split for muscle building?",
+          "answer": "For lean muscle gain, 30% Protein / 45% Carbs / 25% Fats works well. Higher carbs replenish glycogen stores and fuel intense workout performance."
+        }
+      ]
+    },
+    "protein-calculator": {
+      "method": "Your target is bodyweight in kilograms multiplied by a grams-per-kilo ratio for your training context, from 1.2 g/kg at maintenance to 2.4 g/kg in a deficit. These bands reflect the range used in sports nutrition position stands rather than a single study. The per-meal figure divides the daily total by the number of meals you set.",
+      "faqs": [
+        {
+          "question": "How much protein do I need per day?",
+          "answer": "General healthy adults need 1.2\u20131.6g per kg of body weight. Active individuals training with resistance or in a calorie deficit benefit from 1.6\u20132.4g per kg (0.8\u20131.1g per lb) to build and retain muscle."
+        },
+        {
+          "question": "Is high protein intake safe for healthy kidneys?",
+          "answer": "Controlled trials in healthy adults with normal kidney function have not found harm to kidney function at intakes up to roughly 3.3g/kg per day. That evidence does not extend to people with existing kidney disease, who should follow the intake their clinician sets. This calculator gives a general estimate, not medical advice."
+        },
+        {
+          "question": "How much protein can the body absorb in one meal?",
+          "answer": "Your digestive system can absorb virtually all protein eaten in a meal. However, muscle protein synthesis peaks around 30\u201350g of high-quality protein per meal."
+        }
+      ]
+    },
+    "weight-loss-calculator": {
+      "method": "Maintenance calories come from the Mifflin-St Jeor equation multiplied by your activity factor. The deficit assumes roughly 7,700 kcal per kilogram of body fat, so a 0.5 kg per week pace works out at about 550 kcal per day. Real rates vary with water weight and adaptation, so treat the goal date as an estimate rather than a schedule.",
+      "faqs": [
+        {
+          "question": "How fast should I safely lose weight?",
+          "answer": "A safe and sustainable rate of fat loss is 0.5 to 1.0 kg (1 to 2 lbs) per week, which corresponds to a daily deficit of 500 to 1,000 calories."
+        },
+        {
+          "question": "How many calories are in 1 kg of body fat?",
+          "answer": "1 kg of body fat contains approximately 7,700 calories (or ~3,500 calories per pound). A daily deficit of 500 calories creates a 3,500 calorie weekly deficit, yielding ~0.45 kg (1 lb) of fat loss per week."
+        },
+        {
+          "question": "Why is eating too few calories counterproductive?",
+          "answer": "Severe calorie deficits trigger metabolic adaptation, extreme hunger, fatigue, and muscle degradation. Moderation preserves muscle tissue and metabolic rate."
+        }
+      ]
+    }
+  }
+}

@@ -11,7 +11,8 @@ import { usePageMetadata } from "@/hooks";
 import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
-import { buildToolSchema, type FaqItem } from "./buildToolSchema";
+import { buildToolSchema } from "./buildToolSchema";
+import { CALCULATOR_DISCLAIMER, getCalculatorContent } from "./calculatorContent";
 import CalculatorResultBar from "./CalculatorResultBar";
 import { calculatorCardClass } from "./calculatorStyles";
 import RelatedTools from "./RelatedTools";
@@ -23,14 +24,11 @@ interface CalculatorLayoutProps {
   subtitle: string;
   canonicalPath: string;
   badge?: string;
-  faqs?: FaqItem[];
   /**
    * The figure this calculator produced, carried into the closing CTA and into
    * the sticky mobile result bar.
    */
   ctaResult?: { label: string; value: string };
-  /** Named equation or ratio this calculator applies, shown under the tool. */
-  method: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -39,14 +37,13 @@ export default function CalculatorLayout({
   subtitle,
   canonicalPath,
   badge,
-  faqs = [],
   ctaResult,
-  method,
   children,
 }: CalculatorLayoutProps) {
   const canonicalUrl = buildCanonicalUrl(canonicalPath);
 
   const meta = getPageMetadata(canonicalPath);
+  const { method, faqs } = getCalculatorContent(canonicalPath);
 
   usePageMetadata({
     ...meta,
@@ -157,10 +154,7 @@ export default function CalculatorLayout({
           {/* These are nutrition figures on a public page. The only disclaimer
               used to be in Terms section 7, which no calculator visitor reads. */}
           <p className="mt-6 text-xs leading-relaxed text-muted">
-            These calculators give population-level estimates for general
-            fitness planning, not medical advice. Individual needs vary. If you
-            are pregnant, managing a health condition, or working with a
-            clinician or dietitian, follow their guidance instead.
+            {CALCULATOR_DISCLAIMER}
           </p>
 
         </div>

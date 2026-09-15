@@ -30,24 +30,6 @@ import { redistributeMacroPercentages } from "../tools/macroRedistribution";
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const FAQS = [
-  {
-    question: "What is a macro split?",
-    answer:
-      "A macro split is the percentage breakdown of daily calories coming from Protein (4 kcal/g), Carbohydrates (4 kcal/g), and Fats (9 kcal/g).",
-  },
-  {
-    question: "What is the best macro split for fat loss?",
-    answer:
-      "A common high-protein split for fat loss is 35% Protein / 35% Carbs / 30% Fats. High protein preserves lean muscle tissue while in a calorie deficit.",
-  },
-  {
-    question: "What is the best macro split for muscle building?",
-    answer:
-      "For lean muscle gain, 30% Protein / 45% Carbs / 25% Fats works well. Higher carbs replenish glycogen stores and fuel intense workout performance.",
-  },
-];
-
 const GOAL_OPTIONS = [
   { value: "lose", label: "Fat Loss (-500 kcal)" },
   { value: "maintain", label: "Maintenance (TDEE)" },
@@ -137,15 +119,6 @@ export default function MacroCalculatorPage() {
       title="Macro Calculator"
       subtitle="Build a daily macronutrient target with adjustable protein, carbohydrate, and fat ratios."
       canonicalPath="/tools/macro-calculator"
-      faqs={FAQS}
-      method={
-        <>
-          Daily calories come from the Mifflin-St Jeor equation multiplied by
-          your activity factor, then adjusted for your goal. That total is split
-          into grams using the Atwater factors: 4 kcal per gram of protein, 4
-          per gram of carbohydrate and 9 per gram of fat.
-        </>
-      }
       ctaResult={
         resultReady
           ? {
