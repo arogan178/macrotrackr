@@ -11,6 +11,7 @@ const srcDir = path.resolve(__dirname, "../src");
 
 const APP_NAME = "MacroTrackr";
 const APP_URL = (process.env.VITE_APP_URL || "https://macrotrackr.com").replace(/\/$/, "");
+const SUPPORT_EMAIL = process.env.VITE_SUPPORT_EMAIL?.trim() || "support@macrotrackr.com";
 
 if (!fs.existsSync(distDir)) {
   console.log("No dist directory found; skipping pre-rendering.");
@@ -47,6 +48,10 @@ const openSource = JSON.parse(
 
 const bmrVsTdee = JSON.parse(
   fs.readFileSync(path.join(srcDir, "data/bmr-vs-tdee.json"), "utf8")
+);
+
+const contact = JSON.parse(
+  fs.readFileSync(path.join(srcDir, "data/contact.json"), "utf8")
 );
 
 // Same file the React catalog imports.
@@ -243,6 +248,29 @@ const pages = [
           .map((faq) => `<h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p>`)
           .join("")}
         <p><a href="/tools/tdee-calculator">TDEE calculator</a> | <a href="/tools/bmr-calculator">BMR calculator</a></p>
+      </main>
+    `,
+  },
+  {
+    route: "contact",
+    ...metaFor("/contact"),
+    canonical: `${APP_URL}/contact`,
+    type: "website",
+    bodyHtml: `
+      <main style="padding:2rem 1rem;max-width:800px;margin:0 auto;">
+        <h1>${escapeHtml(metaFor("/contact").h1)}</h1>
+        <p>${escapeHtml(contact.intro)}</p>
+        <p><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
+        <h2>What to send where</h2>
+        ${contact.channels
+          .map(
+            (channel) =>
+              `<h3>${escapeHtml(channel.title)}</h3><p>${escapeHtml(channel.body)}</p>`
+          )
+          .join("")}
+        <h2>Self-hosting</h2>
+        <p>${escapeHtml(contact.selfHostedNote)}</p>
+        <p><a href="/open-source">Open source and self-hosting</a></p>
       </main>
     `,
   },

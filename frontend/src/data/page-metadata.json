@@ -109,5 +109,10 @@
     "title": "BMR vs TDEE: What's the Difference? — MacroTrackr",
     "description": "BMR is what you burn at rest, TDEE is what you burn across the day. Which one to set calorie targets from, the activity factors that connect them, and why sedentary is 1.2.",
     "h1": "BMR vs TDEE, and which one to set targets from"
+  },
+  "/contact": {
+    "title": "Contact MacroTrackr — Support, Bugs and Security",
+    "description": "Reach the people who build MacroTrackr. One support address for accounts, billing and questions, GitHub issues for bugs, and a private route for security reports.",
+    "h1": "Get in touch"
   }
 }

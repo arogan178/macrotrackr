@@ -27,6 +27,7 @@ const ROUTE_SOURCES = {
   "/terms": [`${SRC}/TermsAndConditionsPage.tsx`],
   "/delete-account": [`${SRC}/DeleteAccountPage.tsx`],
   "/open-source": [`${SRC}/OpenSourcePage.tsx`, "src/data/open-source.json"],
+  "/contact": [`${SRC}/ContactPage.tsx`, "src/data/contact.json"],
 };
 
 const routes = [
@@ -40,6 +41,7 @@ const routes = [
   { path: "/tools/protein-calculator", changefreq: "monthly", priority: 0.6 },
   { path: "/tools/bmr-vs-tdee", changefreq: "monthly", priority: 0.6 },
   { path: "/open-source", changefreq: "monthly", priority: 0.7 },
+  { path: "/contact", changefreq: "yearly", priority: 0.4 },
   { path: "/compare", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/myfitnesspal", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/macrofactor", changefreq: "weekly", priority: 0.7 },
