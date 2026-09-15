@@ -59,3 +59,10 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
 ] as const;
 
 export const TOOLS_HUB_PATH = "/tools";
+
+/** Not a calculator, so it is not in the list above, but it belongs beside them. */
+export const TOOLS_EXPLAINER = {
+  path: "/tools/bmr-vs-tdee",
+  title: "BMR vs TDEE",
+  tagline: "Which number to set calorie targets from, and why.",
+} as const;

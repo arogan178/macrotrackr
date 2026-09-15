@@ -10,7 +10,7 @@ import { buildCanonicalUrl } from "@/utils/appConstants";
 
 import { buildToolSchema } from "../tools/buildToolSchema";
 import { calculatorCardClass } from "../tools/calculatorStyles";
-import { CALCULATOR_TOOLS } from "../tools/toolsCatalog";
+import { CALCULATOR_TOOLS, TOOLS_EXPLAINER } from "../tools/toolsCatalog";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
 export default function ToolsHubPage() {
@@ -98,6 +98,17 @@ export default function ToolsHubPage() {
               </li>
             ))}
           </ul>
+
+          <p className="mt-6 text-sm leading-relaxed text-muted">
+            Not sure which number you need?{" "}
+            <Link
+              to={TOOLS_EXPLAINER.path}
+              className="font-medium text-primary hover:underline"
+            >
+              {TOOLS_EXPLAINER.title}
+            </Link>{" "}
+            {TOOLS_EXPLAINER.tagline}
+          </p>
 
           <ToolsCtaBanner
             heading="Know your target? Make it a habit."

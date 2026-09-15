@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 
 import { ArrowRightIcon } from "@/components/ui";
 
-import { CALCULATOR_TOOLS, TOOLS_HUB_PATH } from "./toolsCatalog";
+import { CALCULATOR_TOOLS, TOOLS_EXPLAINER, TOOLS_HUB_PATH } from "./toolsCatalog";
 
 interface RelatedToolsProps {
   currentPath: string;
@@ -55,6 +55,25 @@ function RelatedTools({ currentPath }: RelatedToolsProps) {
             </Link>
           </li>
         ))}
+        <li>
+          <Link
+            to={TOOLS_EXPLAINER.path}
+            className="group flex h-full min-h-16 items-center justify-between gap-3 rounded-control border border-border bg-surface px-4 py-3 transition-[border-color,background-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+          >
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-foreground">
+                {TOOLS_EXPLAINER.title}
+              </span>
+              <span className="block text-xs leading-relaxed text-muted">
+                {TOOLS_EXPLAINER.tagline}
+              </span>
+            </span>
+            <ArrowRightIcon
+              className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-foreground"
+              aria-hidden="true"
+            />
+          </Link>
+        </li>
       </ul>
     </section>
   );

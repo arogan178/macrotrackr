@@ -236,6 +236,7 @@ const pages = [
         <ul>
           ${tools.map((t) => `<li><a href="/tools/${t.slug}">${t.heading}</a> - ${t.subtitle}</li>`).join("")}
         </ul>
+        <p><a href="/tools/bmr-vs-tdee">BMR vs TDEE</a>: which number to set calorie targets from, and why.</p>
       </main>
     `,
   },
@@ -401,7 +402,7 @@ for (const tool of tools) {
           )
           .join("")}
         <p>${escapeHtml(calculatorContent.disclaimer)}</p>
-        <p><a href="/tools">All free calculators</a> | <a href="/register">Start Tracking with ${APP_NAME}</a></p>
+        <p><a href="/tools">All free calculators</a> | <a href="/tools/bmr-vs-tdee">BMR vs TDEE</a> | <a href="/register">Start Tracking with ${APP_NAME}</a></p>
       </main>
     `,
   });
