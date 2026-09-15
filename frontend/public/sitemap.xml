@@ -61,6 +61,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/contact</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/compare</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>weekly</changefreq>

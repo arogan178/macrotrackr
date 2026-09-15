@@ -50,6 +50,7 @@ function prerenderAll(): Map<string, Rendered> {
     "calculator-content.json",
     "open-source.json",
     "bmr-vs-tdee.json",
+    "contact.json",
   ]) {
     copyFileSync(
       path.join(FRONTEND_ROOT, "src", "data", dataFile),

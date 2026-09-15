@@ -1,0 +1,26 @@
+{
+  "intro": "One address, read by the people who build MacroTrackr. There is no support tier and no ticket queue to climb.",
+  "channels": [
+    {
+      "title": "Email",
+      "body": "Anything at all: an account problem, a wrong number in a calculator, a refund, or a question before you sign up. Include what you were doing and what happened.",
+      "action": "email"
+    },
+    {
+      "title": "Bug reports and feature requests",
+      "body": "Open an issue on GitHub. It is the fastest route for anything reproducible, and the discussion stays public so the next person with the same problem finds it.",
+      "action": "github"
+    },
+    {
+      "title": "Security issues",
+      "body": "Email rather than opening an issue, so the report stays private until it is fixed. The security policy in the repository sets out what to include.",
+      "action": "email"
+    },
+    {
+      "title": "Deleting your account or data",
+      "body": "You can do it yourself from Settings without asking anyone. If you would rather it was handled for you, email and it will be.",
+      "action": "delete"
+    }
+  ],
+  "selfHostedNote": "Running your own instance? Include your runtime profile, the platform you deployed on and any relevant logs. The self-hosting guide in the repository lists what is useful to send."
+}
