@@ -307,6 +307,12 @@ export default function ComparisonArticlePage() {
                 >
                   Or run it on your own server
                 </Link>
+                <Link
+                  to="/tools"
+                  className="mt-4 ml-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                >
+                  Work out your targets first
+                </Link>
               </Panel>
             </section>
           )}

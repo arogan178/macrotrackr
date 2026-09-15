@@ -162,6 +162,40 @@ export default function MigrationGuidePage() {
             <p className="mt-3 text-xs text-muted">Free, no card required.</p>
           </section>
 
+          {/* The calculators were reachable only from a header dropdown, and
+              Google had never crawled them. These guides rank on page one, so
+              they are the best place to link from, and someone who has just
+              imported their history needs a target to track against. */}
+          <section className="mt-12 border-t border-border pt-8">
+            <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
+              Now set your targets
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Your history tells you what you have been eating. These work out
+              what you should be, and need no account.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/tools/tdee-calculator"
+                className="rounded-control border border-border bg-surface px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50"
+              >
+                TDEE calculator
+              </Link>
+              <Link
+                to="/tools/macro-calculator"
+                className="rounded-control border border-border bg-surface px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50"
+              >
+                Macro calculator
+              </Link>
+              <Link
+                to="/tools"
+                className="rounded-control border border-border bg-surface px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50"
+              >
+                All free calculators
+              </Link>
+            </div>
+          </section>
+
           <section className="mt-12 border-t border-border pt-8">
             <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
               Moving from another app?

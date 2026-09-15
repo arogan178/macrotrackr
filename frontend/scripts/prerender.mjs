@@ -425,6 +425,7 @@ for (const comp of comparisons) {
           )
           .join("")}
         <p><a href="/migrate/${comp.slug}">How to import your ${escapeHtml(comp.competitorName)} history</a></p>
+        <p><a href="/tools">Free calculators: work out your targets</a></p>
         <p><a href="/register">Get Started Free with ${APP_NAME}</a></p>
       </main>
     `,
@@ -451,6 +452,13 @@ for (const migration of migrations) {
         <p>${escapeHtml(migration.fileGuidance)} Nothing is written until you confirm the preview.</p>
         <p><a href="${escapeAttr(migration.officialExportUrl)}">Official ${escapeHtml(migration.sourceName)} export instructions</a></p>
         <p><a href="/compare/${migration.slug}">${APP_NAME} compared with ${escapeHtml(migration.sourceName)}</a></p>
+        <h2>Now set your targets</h2>
+        <p>Your history tells you what you have been eating. These work out what you should be, and need no account.</p>
+        <ul>
+          <li><a href="/tools/tdee-calculator">TDEE calculator</a></li>
+          <li><a href="/tools/macro-calculator">Macro calculator</a></li>
+          <li><a href="/tools">All free calculators</a></li>
+        </ul>
         <p><a href="/register?returnTo=%2Fsettings%3Ftab%3Ddata%26from%3Dmigration">Create an account and open the importer</a></p>
       </main>
     `,
