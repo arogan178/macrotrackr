@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import Button from "@/components/ui/Button";
 import { CloseIcon } from "@/components/ui/Icons";
+
+interface InstallPromptProps {
+  /** The tab bar only renders for signed-in visitors, so only they need clearing. */
+  clearsTabBar?: boolean;
+}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -24,11 +29,14 @@ const isIos = (): boolean =>
  * told anyone it existed. Chrome hands us the event; iOS has no equivalent, so
  * Safari gets the Share-sheet hint instead of nothing.
  */
-const InstallPrompt: React.FC = () => {
+const InstallPrompt: React.FC<InstallPromptProps> = ({
+  clearsTabBar = false,
+}) => {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(
     null,
   );
   const [showIosHint, setShowIosHint] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
   const [dismissed, setDismissed] = useState(
     () => globalThis.localStorage?.getItem(DISMISSED_KEY) === "1",
   );
@@ -62,14 +70,43 @@ const InstallPrompt: React.FC = () => {
     dismiss();
   }, [deferred, dismiss]);
 
-  if (dismissed || (!deferred && !showIosHint)) return null;
+  const visible = !dismissed && (deferred !== null || showIosHint);
+
+  // Anything else docked to the bottom of the viewport needs to know this is
+  // there. It is fixed, so it does not take part in layout and would otherwise
+  // sit straight on top: measured, it covered the calculators' result bar
+  // completely.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!visible) {
+      root.style.removeProperty("--install-prompt-height");
+
+      return;
+    }
+
+    const height = bannerRef.current?.offsetHeight ?? 0;
+    root.style.setProperty("--install-prompt-height", `${height}px`);
+
+    return () => {
+      root.style.removeProperty("--install-prompt-height");
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <div
+      ref={bannerRef}
       role="complementary"
       aria-label="Install MacroTrackr"
       className="fixed inset-x-4 z-80 mx-auto flex max-w-md items-center gap-3 rounded-card border border-border bg-surface px-4 py-3 md:hidden"
-      style={{ bottom: "calc(5rem + var(--sab))" }}
+      // 5rem clears the mobile tab bar, which only exists when signed in. On a
+      // public page the same offset floated this into the middle of the content:
+      // measured, it covered a calculator's Activity Level select and swallowed
+      // the tap.
+      style={{
+        bottom: clearsTabBar ? "calc(5rem + var(--sab))" : "var(--sab)",
+      }}
     >
       <p className="flex-1 text-sm">
         {deferred

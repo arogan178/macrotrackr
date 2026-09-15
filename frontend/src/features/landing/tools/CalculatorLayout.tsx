@@ -68,7 +68,10 @@ export default function CalculatorLayout({
 
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      {/* The result bar and, when shown, the install prompt are docked to the
+          bottom of the viewport. Without room to scroll past them, whatever
+          input lands in that strip cannot be reached. */}
+      <main className="relative z-10 pt-[var(--header-offset)] pb-[calc(9rem+var(--install-prompt-height,0px))] md:pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1 text-xs text-muted">

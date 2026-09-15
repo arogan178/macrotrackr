@@ -15,7 +15,7 @@ function CalculatorResultBar({ result }: CalculatorResultBarProps) {
   return (
     <div
       aria-live="polite"
-      className="sticky bottom-[var(--sab)] z-20 flex items-baseline justify-between gap-3 border-t border-border-2 bg-surface-2 px-4 py-3 md:hidden"
+      className="sticky bottom-[calc(var(--sab)+var(--install-prompt-height,0px))] z-20 flex items-baseline justify-between gap-3 border-t border-border-2 bg-surface-2 px-4 py-3 md:hidden"
     >
       <span className="text-[11px] font-medium tracking-wider text-muted uppercase">
         {result.label}
