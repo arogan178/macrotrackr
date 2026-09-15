@@ -48,7 +48,7 @@ export const MASTER_COMPARISON_MATRIX: readonly MasterComparisonRow[] = [
     feature: "Cloud / Premium",
     macrotrackr: "$3.99/mo or $29.99/yr",
     myfitnesspal: "$19.99/mo or $79.99/yr",
-    macrofactor: "$11.99/mo",
+    macrofactor: "$11.99/mo or $71.99/yr",
     cronometer: "$10.99/mo or $59.99/yr",
     loseIt: "$9.99/mo or $39.99/yr",
   },
