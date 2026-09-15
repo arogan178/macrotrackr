@@ -24,6 +24,9 @@
       href="/fonts/archivo-latin-variable.woff2"
       crossorigin
     />
+    <!-- Blog hero images are only discovered once hydration renders them, so the
+         connection cost lands on LCP rather than in parallel with the bundle. -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <meta
       name="description"
       content="Log meals in seconds, set a macro split, and see where the week actually went. Free, open source, and self-hostable."
@@ -71,15 +74,21 @@
       content="MacroTrackr — a day logged at 1,771 of 2,200 calories, with protein, carbs and fats against their targets"
     />
 
-    <!-- Structured data (Organization) with alternateName to capture common misspelling -->
+    <!-- Structured data (Organization) with alternateName to capture common misspelling.
+         sameAs disambiguates from the unrelated "MacroTrack" app that outranks
+         us on a brand search. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "MacroTrackr",
         "alternateName": ["MacroTracker"],
-        "logo": "/icon.png",
-        "url": "https://macrotrackr.com/"
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://macrotrackr.com/icon.png"
+        },
+        "url": "https://macrotrackr.com/",
+        "sameAs": ["https://github.com/arogan178/macrotrackr"]
       }
     </script>
 

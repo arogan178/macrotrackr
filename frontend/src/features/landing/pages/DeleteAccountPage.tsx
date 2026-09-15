@@ -6,6 +6,7 @@ import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import {
   APP_NAME,
   buildCanonicalUrl,
@@ -27,8 +28,7 @@ import {
  */
 const DeleteAccountPage: React.FC = () => {
   usePageMetadata({
-    title: `Delete your account — ${APP_NAME}`,
-    description: `How to permanently delete your ${APP_NAME} account and all associated data, what is removed, and what is kept.`,
+    ...getPageMetadata("/delete-account"),
     canonical: buildCanonicalUrl("/delete-account"),
   });
 

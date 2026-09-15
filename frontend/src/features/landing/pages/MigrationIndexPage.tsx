@@ -6,6 +6,7 @@ import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_NAME, APP_URL } from "@/utils/appConstants";
 
 import { MIGRATION_GUIDES } from "../migrations/migrationGuidesCatalog";
@@ -15,9 +16,7 @@ export default function MigrationIndexPage() {
   const canonicalUrl = `${APP_URL}/migrate`;
 
   usePageMetadata({
-    title: `Import Your Nutrition History — ${APP_NAME}`,
-    description:
-      "Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into MacroTrackr with a preview before anything is saved.",
+    ...getPageMetadata("/migrate"),
     canonical: canonicalUrl,
   });
 

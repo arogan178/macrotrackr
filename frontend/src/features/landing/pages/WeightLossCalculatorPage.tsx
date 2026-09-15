@@ -106,8 +106,24 @@ export default function WeightLossCalculatorPage() {
       title="Weight Loss & Timeline Calculator"
       subtitle="Estimate a daily calorie target, a realistic pace, and a projected date for your goal weight."
       canonicalPath="/tools/weight-loss-calculator"
-      description="Free Weight Loss Timeline Calculator. Estimate daily calorie deficit, weekly progress, and completion date for your target weight."
       faqs={FAQS}
+      method={
+        <>
+          Maintenance calories come from the Mifflin-St Jeor equation multiplied
+          by your activity factor. The deficit assumes roughly 7,700 kcal per
+          kilogram of body fat, so a 0.5 kg per week pace works out at about 550
+          kcal per day. Real rates vary with water weight and adaptation, so
+          treat the goal date as an estimate rather than a schedule.
+        </>
+      }
+      ctaResult={
+        statsReady
+          ? {
+              label: "Your daily target",
+              value: `${formatGrouped(targetCalories)} kcal / day`,
+            }
+          : undefined
+      }
     >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}

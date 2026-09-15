@@ -12,6 +12,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
+import { usePageMetadata } from "@/hooks";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
@@ -27,6 +28,10 @@ export const Route = createRootRoute({
 });
 
 function NotFoundRouteComponent() {
+  // The server serves the SPA shell with a 200 for any unmatched path, so
+  // without this every typo and guessed slug is an indexable duplicate.
+  usePageMetadata({ title: "Page not found — MacroTrackr", noindex: true });
+
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
       <h1 className="mb-4 text-6xl font-bold tracking-tighter text-foreground">

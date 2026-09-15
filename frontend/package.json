@@ -28,7 +28,8 @@
     "ui:budgets": "node ./scripts/check-ui-budgets.mjs",
     "verify:assetlinks": "node ./scripts/check-assetlinks.mjs",
     "verify:support-email": "node ./scripts/check-support-email.mjs",
-    "release:blog": "node ./scripts/release-note-to-blog.mjs"
+    "release:blog": "node ./scripts/release-note-to-blog.mjs",
+    "seo:indexnow": "node ./scripts/submit-indexnow.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

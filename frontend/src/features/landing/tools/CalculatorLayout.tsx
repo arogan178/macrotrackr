@@ -4,12 +4,15 @@ import { Link } from "@tanstack/react-router";
 import AppHeader from "@/components/layout/AppHeader";
 import { ChevronRightIcon } from "@/components/ui";
 import Accordion from "@/components/ui/Accordion";
+import { TYPE_SCALE } from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
 import { buildToolSchema, type FaqItem } from "./buildToolSchema";
+import CalculatorResultBar from "./CalculatorResultBar";
 import { calculatorCardClass } from "./calculatorStyles";
 import RelatedTools from "./RelatedTools";
 import { TOOLS_HUB_PATH } from "./toolsCatalog";
@@ -19,13 +22,15 @@ interface CalculatorLayoutProps {
   title: string;
   subtitle: string;
   canonicalPath: string;
-  description: string;
-  /** Overrides the browser tab title when the default reads redundantly. */
-  metaTitle?: string;
   badge?: string;
   faqs?: FaqItem[];
-  /** The figure this calculator produced, carried into the closing CTA. */
+  /**
+   * The figure this calculator produced, carried into the closing CTA and into
+   * the sticky mobile result bar.
+   */
   ctaResult?: { label: string; value: string };
+  /** Named equation or ratio this calculator applies, shown under the tool. */
+  method: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -33,24 +38,24 @@ export default function CalculatorLayout({
   title,
   subtitle,
   canonicalPath,
-  description,
-  metaTitle,
   badge,
   faqs = [],
   ctaResult,
+  method,
   children,
 }: CalculatorLayoutProps) {
   const canonicalUrl = buildCanonicalUrl(canonicalPath);
 
+  const meta = getPageMetadata(canonicalPath);
+
   usePageMetadata({
-    title: metaTitle ?? `${title} - Free Calculator`,
-    description,
+    ...meta,
     canonical: canonicalUrl,
   });
 
   const schemaScript = buildToolSchema({
     name: title,
-    description,
+    description: meta.description,
     url: canonicalUrl,
     faqs,
   });
@@ -139,8 +144,29 @@ export default function CalculatorLayout({
 
           <RelatedTools currentPath={canonicalPath} />
 
+          {/* Four of the five calculators published numbers without saying
+              where they came from, which is the first thing a reader checking
+              our working looks for. */}
+          <section className="mt-12" aria-labelledby="method-heading">
+            <h2 id="method-heading" className={`${TYPE_SCALE.micro} text-foreground`}>
+              How this is calculated
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{method}</p>
+          </section>
+
+          {/* These are nutrition figures on a public page. The only disclaimer
+              used to be in Terms section 7, which no calculator visitor reads. */}
+          <p className="mt-6 text-xs leading-relaxed text-muted">
+            These calculators give population-level estimates for general
+            fitness planning, not medical advice. Individual needs vary. If you
+            are pregnant, managing a health condition, or working with a
+            clinician or dietitian, follow their guidance instead.
+          </p>
+
         </div>
       </main>
+
+      <CalculatorResultBar result={ctaResult} />
 
       <Footer />
       <BackToTopButton label="Back to top" />

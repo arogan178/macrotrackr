@@ -5,6 +5,7 @@ import { ArrowRightIcon } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
 import { buildToolSchema } from "../tools/buildToolSchema";
@@ -16,9 +17,7 @@ export default function ToolsHubPage() {
   const canonicalUrl = buildCanonicalUrl("/tools");
 
   usePageMetadata({
-    title: "Free Nutrition & Macro Calculators",
-    description:
-      "Free nutrition, TDEE, BMR, macro, weight loss, and protein calculators. Accurate fitness tools with privacy-first design.",
+    ...getPageMetadata("/tools"),
     canonical: canonicalUrl,
   });
 

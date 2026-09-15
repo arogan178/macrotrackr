@@ -10,6 +10,7 @@ import Footer from "@/features/landing/components/Footer";
 import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
 import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
 interface BlogIndexSearch {
@@ -24,9 +25,7 @@ const BlogIndexPage: React.FC = () => {
   const search = (useSearch({ strict: false }) ?? {}) as BlogIndexSearch;
 
   usePageMetadata({
-    title: "Blog — MacroTrackr",
-    description:
-      "Clearer nutrition writing, product releases, and practical tracking advice from the MacroTrackr team.",
+    ...getPageMetadata("/blog"),
     canonical: buildCanonicalUrl("/blog"),
   });
 

@@ -5,12 +5,12 @@ import PageShell from "@/components/layout/PageShell";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const PrivacyPolicyPage: React.FC = () => {
   usePageMetadata({
-    title: "Privacy Policy — MacroTrackr",
-    description: "Read the Privacy Policy for MacroTrackr, detailing how we securely collect, use, and store your nutritional tracking data.",
+    ...getPageMetadata("/privacy"),
     canonical: buildCanonicalUrl("/privacy"),
   });
 

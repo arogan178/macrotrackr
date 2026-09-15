@@ -1,9 +1,32 @@
 #!/usr/bin/env bun
+import { execFileSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
 // Static list of canonical routes to include in the sitemap.
 // Edit this list as you add or remove public marketing pages.
+// Files whose last change actually dates each page, for an honest lastmod.
+const SRC = "src/features/landing/pages";
+const ROUTE_SOURCES = {
+  "/": [`${SRC}/LandingPage.tsx`],
+  "/blog": [`${SRC}/BlogIndexPage.tsx`, "src/data/blog-posts.json"],
+  "/tools": [`${SRC}/ToolsHubPage.tsx`, "src/features/landing/tools/toolsCatalog.ts"],
+  "/tools/tdee-calculator": [`${SRC}/TdeeCalculatorPage.tsx`],
+  "/tools/bmr-calculator": [`${SRC}/BmrCalculatorPage.tsx`],
+  "/tools/macro-calculator": [`${SRC}/MacroCalculatorPage.tsx`],
+  "/tools/weight-loss-calculator": [`${SRC}/WeightLossCalculatorPage.tsx`],
+  "/tools/protein-calculator": [`${SRC}/ProteinCalculatorPage.tsx`],
+  "/compare": [`${SRC}/ComparisonIndexPage.tsx`],
+  "/compare/myfitnesspal": ["src/features/landing/comparisons/comparisonsCatalog.ts"],
+  "/compare/macrofactor": ["src/features/landing/comparisons/comparisonsCatalog.ts"],
+  "/compare/cronometer": ["src/features/landing/comparisons/comparisonsCatalog.ts"],
+  "/compare/lose-it": ["src/features/landing/comparisons/comparisonsCatalog.ts"],
+  "/pricing": ["src/features/billing/pages/PricingPage.tsx"],
+  "/privacy": [`${SRC}/PrivacyPolicyPage.tsx`],
+  "/terms": [`${SRC}/TermsAndConditionsPage.tsx`],
+  "/delete-account": [`${SRC}/DeleteAccountPage.tsx`],
+};
+
 const routes = [
   { path: "/", changefreq: "weekly", priority: 0.8 },
   { path: "/blog", changefreq: "weekly", priority: 0.7 },
@@ -66,21 +89,41 @@ function buildSitemap(hostname) {
     console.error("Warning: Could not read blog-posts.json:", err.message);
   }
 
-  // Static pages share the newest post date as their lastmod (content freshness).
-  const newestPostDate =
-    blogPosts.map((post) => post.date).sort().at(-1) ??
-    new Date().toISOString().slice(0, 10);
+  // Release notes are excluded from the default feed on /blog, so submitting
+  // them here was offering crawlers 8 orphaned pages, half of them under 100
+  // words, that the site itself does not link to.
+  const indexablePosts = blogPosts.filter((post) => post.category !== "Releases");
+
+  // Static pages used to share the newest post date, which claimed /privacy
+  // changed four months after it actually did. Google discounts lastmod
+  // site-wide once it catches dates that do not hold up, which would also cost
+  // the blog its accurate per-post dates.
+  const today = new Date().toISOString().slice(0, 10);
+  const lastCommitDate = (routePath) => {
+    const source = ROUTE_SOURCES[routePath];
+    if (!source) return undefined;
+    try {
+      const out = execFileSync(
+        "git",
+        ["log", "-1", "--format=%cs", "--", ...source],
+        { cwd: path.resolve(new URL("..", import.meta.url).pathname), encoding: "utf8" },
+      ).trim();
+      return out || undefined;
+    } catch {
+      return undefined;
+    }
+  };
 
   const allRoutes = [
     ...routes.map((route) => ({
       ...route,
-      lastmod: route.lastmod ?? newestPostDate,
+      lastmod: route.lastmod ?? lastCommitDate(route.path) ?? today,
     })),
-    ...blogPosts.map((post) => ({
+    ...indexablePosts.map((post) => ({
       path: `/blog/${post.slug}`,
       changefreq: "weekly",
       priority: 0.6,
-      lastmod: post.date || newestPostDate,
+      lastmod: post.date || today,
     })),
   ];
 

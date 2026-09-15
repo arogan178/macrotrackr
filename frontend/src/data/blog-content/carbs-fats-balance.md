@@ -54,6 +54,10 @@ If you're unsure where to begin, start here:
 
 This is not magical. It is a reasonable starting point that works for many people. From here, you adjust based on your response.
 
+It is worth being clear about how much the carb-to-fat ratio actually decides. In the DIETFITS trial, 609 adults were randomised to a healthy low-fat or a healthy low-carbohydrate diet for 12 months, and there was no significant difference in weight change between the two groups ([Gardner et al., 2018, *JAMA*](https://jamanetwork.com/journals/jama/fullarticle/2673150)). A meta-analysis of 32 tightly controlled feeding studies did find an advantage to lower-fat diets when calories were matched, but the size of it was about 16 g of fat loss per day, which is small next to the effect of adherence ([Hall & Guo, 2017, *Gastroenterology*](https://www.gastrojournal.org/article/S0016-5085(17)30152-X/fulltext)).
+
+So treat the split below as a comfort and performance dial rather than the thing that determines your result. The ratio you can actually stick to beats the theoretically optimal one you abandon in March.
+
 ## Finding Your Optimal Ratio: The Testing Method
 
 Don't guess. Test.
@@ -308,6 +312,13 @@ Start with a balanced approach (40/30/30), track your response for two weeks, ad
 Your body will tell you what it needs. You just have to listen.
 
 [Start tracking your macros in MacroTrackr](/register) and find your optimal balance. Free tier includes everything you need to test and refine your approach.
+
+## References
+
+1. Gardner CD, Trepanowski JF, Del Gobbo LC, et al. Effect of low-fat vs low-carbohydrate diet on 12-month weight loss in overweight adults and the association with genotype pattern or insulin secretion: the DIETFITS randomized clinical trial. *JAMA*. 2018;319(7):667-679. [Full text](https://jamanetwork.com/journals/jama/fullarticle/2673150)
+2. Hall KD, Guo J. Obesity energetics: body weight regulation and the effects of diet composition. *Gastroenterology*. 2017;152(7):1718-1727. [Full text](https://www.gastrojournal.org/article/S0016-5085(17)30152-X/fulltext)
+
+*This article summarises published research for general fitness planning. It is not medical advice.*
 
 The MacroTrackr Team
 

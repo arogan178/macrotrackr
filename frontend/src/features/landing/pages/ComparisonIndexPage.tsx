@@ -6,6 +6,7 @@ import Heading from "@/components/ui/Heading";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
+import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_NAME, APP_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
 import {
@@ -20,8 +21,7 @@ export default function ComparisonIndexPage() {
   const canonicalUrl = `${APP_URL}/compare`;
 
   usePageMetadata({
-    title: `Macro Tracker Comparisons & Alternatives — ${APP_NAME}`,
-    description: `Compare ${APP_NAME} against MyFitnessPal, MacroFactor, Cronometer, and Lose It. See feature tables, pricing models, barcode scanning, and privacy side-by-side.`,
+    ...getPageMetadata("/compare"),
     canonical: canonicalUrl,
   });
 

@@ -77,3 +77,6 @@ docs/growth-analytics.md
 # Marketing/reference captures: derived artefacts, regenerate with
 # backend/scripts/seed-demo.ts + frontend/scripts/capture-device.mjs
 assets/
+
+# SEO audit artifacts (claude-seo)
+macrotrackr.com-audit/

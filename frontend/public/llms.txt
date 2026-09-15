@@ -1,0 +1,65 @@
+# MacroTrackr
+
+> A free, open source macro and calorie tracker. Log meals in seconds, set a
+> macro split, and review the week. Self-hostable under AGPLv3, with a hosted
+> option at $4/month for cross-device sync.
+
+MacroTrackr is a progressive web app, not an App Store listing. Core tracking
+and all calculators are free. Barcode scanning uses the OpenFoodFacts database
+and is free with no premium tier. There are no banner ads and no third-party ad
+trackers.
+
+The site renders client-side, so pages fetched without JavaScript return a
+reduced fallback. The summaries below carry the substance of each page.
+
+## Calculators
+
+- [TDEE Calculator](https://macrotrackr.com/tools/tdee-calculator): Total Daily
+  Energy Expenditure from bodyweight, height, age, sex and activity level.
+  Derives BMR via Mifflin-St Jeor, then applies an activity multiplier.
+- [BMR Calculator](https://macrotrackr.com/tools/bmr-calculator): Basal
+  Metabolic Rate using the Mifflin-St Jeor equation.
+- [Macro Calculator](https://macrotrackr.com/tools/macro-calculator): converts a
+  calorie target into daily grams of protein, carbohydrate and fat, with
+  adjustable percentage splits.
+- [Weight Loss Calculator](https://macrotrackr.com/tools/weight-loss-calculator):
+  daily deficit, weekly rate and projected goal date. Flags targets below
+  1,200 kcal (female) or 1,500 kcal (male).
+- [Protein Calculator](https://macrotrackr.com/tools/protein-calculator): daily
+  protein in grams from 1.2 to 2.4 g/kg depending on training context, plus a
+  per-meal figure.
+
+## Comparisons
+
+- [vs MyFitnessPal](https://macrotrackr.com/compare/myfitnesspal): MyFitnessPal
+  Premium is $19.99/month or $79.99/year and gates barcode scanning and custom
+  macro goals. Both are free on MacroTrackr.
+- [vs MacroFactor](https://macrotrackr.com/compare/macrofactor): MacroFactor is
+  $11.99/month or $71.99/year with no free tier beyond a 7-day trial.
+  MacroTrackr has a free tier that does not expire.
+- [vs Cronometer](https://macrotrackr.com/compare/cronometer): Cronometer Gold
+  is $9.99/month or $59.99/year. MacroTrackr targets calories and macros rather
+  than an extensive micronutrient table.
+- [vs Lose It!](https://macrotrackr.com/compare/lose-it): Lose It! Premium is
+  $39.99/year. Custom macro gram targets are free on MacroTrackr.
+
+## Switching from another tracker
+
+CSV import with a preview before anything is written:
+[MyFitnessPal](https://macrotrackr.com/migrate/myfitnesspal),
+[Cronometer](https://macrotrackr.com/migrate/cronometer),
+[MacroFactor](https://macrotrackr.com/migrate/macrofactor),
+[Lose It!](https://macrotrackr.com/migrate/lose-it).
+
+## Other
+
+- [Pricing](https://macrotrackr.com/pricing)
+- [Blog](https://macrotrackr.com/blog)
+- [Source code](https://github.com/arogan178/macrotrackr) (AGPLv3, Docker)
+- [Privacy policy](https://macrotrackr.com/privacy)
+
+## Notes
+
+Calculator output is an estimate for general fitness planning, not medical
+advice. Anyone with a medical condition affecting diet should speak to a
+qualified professional.

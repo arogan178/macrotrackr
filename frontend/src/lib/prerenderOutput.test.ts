@@ -50,6 +50,10 @@ function prerenderHomepage(): string {
 
   const fixtureScript = path.join(scriptsDirectory, "prerender.mjs");
   copyFileSync(PRERENDER_SCRIPT, fixtureScript);
+  copyFileSync(
+    path.join(FRONTEND_ROOT, "src", "data", "page-metadata.json"),
+    path.join(dataDirectory, "page-metadata.json"),
+  );
   writeFileSync(path.join(distributionDirectory, "index.html"), htmlTemplate);
   writeFileSync(path.join(dataDirectory, "blog-posts.json"), "[]");
 

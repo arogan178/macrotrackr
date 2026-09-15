@@ -52,8 +52,15 @@ export default function BmrCalculatorPage() {
       title="BMR Calculator"
       subtitle="Estimate the calories your body uses at complete rest to keep essential functions running."
       canonicalPath="/tools/bmr-calculator"
-      description="Free Basal Metabolic Rate (BMR) calculator using the Mifflin-St Jeor equation. Calculate your baseline calories burned at rest."
       faqs={FAQS}
+      method={
+        <>
+          This uses the Mifflin-St Jeor equation: 10 x weight in kg + 6.25 x
+          height in cm - 5 x age, then +5 for men and -161 for women. It
+          estimates resting energy expenditure only, and does not include
+          activity or the energy cost of digestion.
+        </>
+      }
       ctaResult={
         statsReady
           ? {
