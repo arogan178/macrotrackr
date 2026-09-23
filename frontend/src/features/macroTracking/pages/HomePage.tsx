@@ -14,20 +14,18 @@ import {
   DailySummaryLoadingSkeleton,
   HistoryLoadingSkeleton,
 } from "@/features/macroTracking/components/HomePageSkeletons";
+import { useAddEntry } from "@/features/macroTracking/hooks/useAddEntry";
 import {
   useHistoryPagination,
   useHomeHeader,
   useNutritionProfile,
 } from "@/features/macroTracking/hooks/useHomePage";
-import type {
-  EditingEntry,
-  MacroEntryInput,
-} from "@/features/macroTracking/types/macro";
+import type { EditingEntry } from "@/features/macroTracking/types/macro";
 import { downloadHistoryCsv } from "@/features/macroTracking/utils";
+import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
-  useAddMacroEntry,
   useDeleteMacroEntry,
   useMacroDailyTotals,
   useMacroTargetQuery,
@@ -39,7 +37,6 @@ import {
   useSavedMeals,
 } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -66,7 +63,8 @@ export default function HomePage() {
     limits,
   } = useHistoryPagination(20);
 
-  const addMacroEntryMutation = useAddMacroEntry();
+  const { addEntry: handleAddEntry, saveAsMeal: handleSaveMeal, isSaving } =
+    useAddEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
   const createSavedMealMutation = useCreateSavedMeal();
@@ -95,7 +93,10 @@ export default function HomePage() {
     return ids;
   }, [history, savedMeals]);
 
-  const { editingEntry, setEditingEntry } = useStore();
+  const { editingEntry, setEditingEntry, showNotification } = useStore();
+  const { handleMutationError } = useMutationErrorHandler({
+    onError: (message) => showNotification(message, "error"),
+  });
 
   const nutritionProfileSource: NutritionProfileSource | undefined =
     user && (user.gender === "male" || user.gender === "female")
@@ -111,60 +112,6 @@ export default function HomePage() {
 
   const nutritionProfile = useNutritionProfile(nutritionProfileSource);
 
-  const handleSaveMeal = useCallback(
-    async (entry: MacroEntry) => {
-      const entryName = entry.foodName ?? entry.mealName;
-      if (!entryName) return;
-
-      const ingredients =
-        entry.ingredients && entry.ingredients.length > 0
-          ? entry.ingredients
-          : [
-              {
-                name: entryName,
-                protein: entry.protein,
-                carbs: entry.carbs,
-                fats: entry.fats,
-                quantity: 100,
-                unit: "g",
-                baseProtein: entry.protein,
-                baseCarbs: entry.carbs,
-                baseFats: entry.fats,
-                baseQuantity: 100,
-                baseUnit: "g",
-              },
-            ];
-
-      await createSavedMealMutation.mutateAsync({
-        name: entryName,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fats: entry.fats,
-        mealType: entry.mealType,
-        ingredients,
-      });
-    },
-    [createSavedMealMutation],
-  );
-
-  const handleAddEntry = useCallback(
-    async (entry: MacroEntryInput) => {
-      const newEntry = await addMacroEntryMutation.mutateAsync(entry);
-      if (entry.saveAsMeal) {
-        await handleSaveMeal({
-          id: (newEntry as MacroEntry | undefined)?.id ?? 0,
-          protein: entry.protein,
-          carbs: entry.carbs,
-          fats: entry.fats,
-          mealType: entry.mealType,
-          mealName: entry.mealName,
-          ingredients: entry.ingredients,
-        } as MacroEntry);
-      }
-    },
-    [addMacroEntryMutation, handleSaveMeal],
-  );
-
   const handleUnsaveMeal = useCallback(
     async (entry: MacroEntry) => {
       const entryName = entry.foodName ?? entry.mealName;
@@ -177,11 +124,15 @@ export default function HomePage() {
           sm.mealType === entry.mealType,
       );
 
-      if (savedMeal) {
+      if (!savedMeal) return;
+
+      try {
         await deleteSavedMealMutation.mutateAsync(savedMeal.id);
+      } catch (error) {
+        handleMutationError(error, "removing saved meal");
       }
     },
-    [savedMeals, deleteSavedMealMutation],
+    [savedMeals, deleteSavedMealMutation, handleMutationError],
   );
 
   const handleGroupMeals = useCallback(
@@ -260,11 +211,11 @@ export default function HomePage() {
           ingredients,
         });
       } catch (error) {
-        logger.error("Failed to save grouped meal", error);
+        handleMutationError(error, "saving grouped meal");
         throw error;
       }
     },
-    [createSavedMealMutation],
+    [createSavedMealMutation, handleMutationError],
   );
 
   const handleEditEntry = useCallback(
@@ -290,9 +241,13 @@ export default function HomePage() {
 
   const handleDeleteEntry = useCallback(
     async (id: number) => {
-      await deleteMacroEntryMutation.mutateAsync(id);
+      try {
+        await deleteMacroEntryMutation.mutateAsync(id);
+      } catch (error) {
+        handleMutationError(error, "deleting entry");
+      }
     },
-    [deleteMacroEntryMutation],
+    [deleteMacroEntryMutation, handleMutationError],
   );
 
   const handleExportHistory = useCallback(async () => {
@@ -300,19 +255,23 @@ export default function HomePage() {
     try {
       const response = await macrosApi.getAllHistory();
       downloadHistoryCsv(response.entries as MacroEntry[]);
+    } catch (error) {
+      handleMutationError(error, "exporting history");
     } finally {
       setIsExportingHistory(false);
     }
-  }, []);
+  }, [handleMutationError]);
 
   const handleCloseModal = useCallback(() => {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
   const isLoading = isHistoryLoading;
-  const isSaving = addMacroEntryMutation.isPending;
   const isEditing = updateMacroEntryMutation.isPending;
-  const isDeleting = deleteMacroEntryMutation.isPending;
+  const deletingId = deleteMacroEntryMutation.isPending
+    ? deleteMacroEntryMutation.variables
+    : undefined;
+  const isDeleting = useCallback((id: number) => id === deletingId, [deletingId]);
 
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget ?? nutritionProfile?.tdee;

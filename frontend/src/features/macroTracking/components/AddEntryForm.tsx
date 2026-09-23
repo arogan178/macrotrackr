@@ -470,17 +470,22 @@ function AddEntry({
       const { date: entryDate, time: entryTime } =
         pickedDateTime ?? currentDateTime();
 
-      await onSubmit({
-        protein: protein as number,
-        carbs: carbs as number,
-        fats: fats as number,
-        mealType,
-        mealName,
-        entryDate,
-        entryTime,
-        ingredients: finalIngredients,
-        saveAsMeal,
-      });
+      try {
+        await onSubmit({
+          protein: protein as number,
+          carbs: carbs as number,
+          fats: fats as number,
+          mealType,
+          mealName,
+          entryDate,
+          entryTime,
+          ingredients: finalIngredients,
+          saveAsMeal,
+        });
+      } catch {
+        // The caller reports the failure; keep the values so the user can retry.
+        return;
+      }
 
       handleClearSearch();
     },

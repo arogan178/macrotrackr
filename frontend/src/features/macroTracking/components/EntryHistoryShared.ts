@@ -31,7 +31,7 @@ export interface EntryHistoryController {
 
   isMealSaved: (entryId: number) => boolean;
 
-  isDeleting: boolean;
+  isDeleting: (id: number) => boolean;
   isSelectionMode: boolean;
   isEntrySelected: (id: number) => boolean;
   onToggleEntrySelection?: (id: number) => void;
