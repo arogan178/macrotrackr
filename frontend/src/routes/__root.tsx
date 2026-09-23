@@ -5,7 +5,7 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { AnimatePresence, LazyMotion } from "motion/react";
+import { AnimatePresence, LazyMotion, MotionConfig } from "motion/react";
 
 import PageTransition from "@/components/animation/PageTransition";
 import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
@@ -81,23 +81,25 @@ function RootComponent() {
 
   return (
     <ErrorBoundary>
-      <LazyMotion features={() => import("motion/react").then((module_) => module_.domAnimation)}>
-        <div id="app-root" className="relative min-h-screen">
-          <TopLoadingBar />
-          <GlobalLoadingOverlay />
-          <MainLayout>
-            <Suspense fallback={<LoadingFallback />}>
-              {/* No entrance animation on the first page: prerendered markup has
-                  to paint visible, and hydrate into the same styles. */}
-              <AnimatePresence mode="wait" initial={false}>
-                <PageTransition key={location.pathname}>
-                  <Outlet />
-                </PageTransition>
-              </AnimatePresence>
-            </Suspense>
-          </MainLayout>
-        </div>
-      </LazyMotion>
+      <MotionConfig reducedMotion="user">
+        <LazyMotion features={() => import("motion/react").then((module_) => module_.domAnimation)}>
+          <div id="app-root" className="relative min-h-screen">
+            <TopLoadingBar />
+            <GlobalLoadingOverlay />
+            <MainLayout>
+              <Suspense fallback={<LoadingFallback />}>
+                {/* No entrance animation on the first page: prerendered markup has
+                    to paint visible, and hydrate into the same styles. */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <PageTransition key={location.pathname}>
+                    <Outlet />
+                  </PageTransition>
+                </AnimatePresence>
+              </Suspense>
+            </MainLayout>
+          </div>
+        </LazyMotion>
+      </MotionConfig>
     </ErrorBoundary>
   );
 }

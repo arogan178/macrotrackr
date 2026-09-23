@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useId, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -17,10 +17,12 @@ import type {
 // close button at the least reachable part of a phone screen, and the keyboard
 // covers the middle of the viewport exactly where the dialog sits.
 const CONTAINER_CLASS =
-  "fixed inset-0 z-100 flex items-end justify-center md:items-center md:p-6";
+  "fixed inset-0 z-100 flex items-end justify-center outline-none md:items-center md:p-6";
 const CONTENT_CLASS =
   "relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface pb-[var(--sab)] md:max-h-[calc(100dvh-3rem)] md:rounded-card md:pb-0";
 const SURFACE_CLASS = "bg-surface";
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const SIZE_CLASS_MAP = {
   sm: "md:max-w-sm md:w-full",
   md: "md:max-w-md md:w-full",
@@ -163,11 +165,42 @@ function Modal(properties: ModalProps) {
     hideClose = false,
   } = properties;
   const [isMounted, setIsMounted] = useState(false);
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<Element | null>(null);
+
+  // Captured during render: a child's autoFocus has already moved focus by the
+  // time effects run.
+  if (!isOpen) {
+    openerRef.current = null;
+  } else if (!openerRef.current && typeof document !== "undefined") {
+    openerRef.current = document.activeElement;
+  }
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
         onClose();
+      }
+
+      const dialog = dialogRef.current;
+      if (event.key !== "Tab" || !dialog?.contains(document.activeElement)) {
+        return;
+      }
+
+      const focusable =
+        dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (!first || !last) {
+        event.preventDefault();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -183,6 +216,20 @@ function Modal(properties: ModalProps) {
       globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen || !isMounted) return;
+
+    const opener = openerRef.current;
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.contains(document.activeElement)) {
+      (dialog.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ?? dialog).focus();
+    }
+
+    return () => {
+      if (opener instanceof HTMLElement) opener.focus();
+    };
+  }, [isOpen, isMounted]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -204,7 +251,9 @@ function Modal(properties: ModalProps) {
           className={CONTAINER_CLASS}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="modal-title"
+          aria-labelledby={!hideClose && title ? titleId : undefined}
+          tabIndex={-1}
+          ref={dialogRef}
           style={{ perspective: "1000px" }}
         >
           <motion.div
@@ -234,7 +283,7 @@ function Modal(properties: ModalProps) {
                 )}
               >
                 <h2
-                  id="modal-title"
+                  id={titleId}
                   className="text-lg font-semibold tracking-tight text-foreground"
                 >
                   {title}
