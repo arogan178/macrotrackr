@@ -1,4 +1,21 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+function subscribe(onChange: () => void) {
+  globalThis.addEventListener("offline", onChange);
+  globalThis.addEventListener("online", onChange);
+
+  return () => {
+    globalThis.removeEventListener("offline", onChange);
+    globalThis.removeEventListener("online", onChange);
+  };
+}
+
+// Bun and Node define `navigator` without `onLine`; only an explicit false is offline.
+const getSnapshot = () => globalThis.navigator?.onLine === false;
+
+// Prerendered pages are rendered online, and hydration has to start from the
+// same answer before React re-reads the real one.
+const getServerSnapshot = () => false;
 
 /**
  * Tracks `navigator.onLine`.
@@ -9,22 +26,5 @@ import { useEffect, useState } from "react";
  * "connection, but something else is wrong".
  */
 export function useIsOffline(): boolean {
-  const [isOffline, setIsOffline] = useState(
-    typeof navigator === "undefined" ? false : !navigator.onLine,
-  );
-
-  useEffect(() => {
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => setIsOffline(false);
-
-    globalThis.addEventListener("offline", goOffline);
-    globalThis.addEventListener("online", goOnline);
-
-    return () => {
-      globalThis.removeEventListener("offline", goOffline);
-      globalThis.removeEventListener("online", goOnline);
-    };
-  }, []);
-
-  return isOffline;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

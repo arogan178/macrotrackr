@@ -40,9 +40,10 @@ export function hasClerkSessionCookie(cookie: string): boolean {
  * Mounting ClerkProvider pulls 1.5MB across clerk-js and @clerk/ui, and a
  * visitor reading a calculator never needs any of it. Decided once per document
  * load, so the hook implementations stay stable for the lifetime of the page.
+ * The build-time prerender has no window and renders the signed-out page.
  */
 export const shouldMountClerk =
   isClerkAuthMode &&
-  (typeof window === "undefined" ||
-    hasClerkSessionCookie(document.cookie) ||
+  typeof window !== "undefined" &&
+  (hasClerkSessionCookie(document.cookie) ||
     pathNeedsClerk(window.location.pathname));

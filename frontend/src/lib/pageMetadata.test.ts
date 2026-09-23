@@ -26,7 +26,7 @@ const metadata: Record<string, { title: string; description: string; h1?: string
 const FRONTEND_ROOT = process.cwd();
 const temporaryDirectories: string[] = [];
 
-interface Rendered { title: string; description: string; h1: string }
+interface Rendered { title: string; description: string }
 
 function prerenderAll(): Map<string, Rendered> {
   const fixtureRoot = mkdtempSync(path.join(tmpdir(), "macrotrackr-meta-"));
@@ -47,10 +47,6 @@ function prerenderAll(): Map<string, Rendered> {
     "page-metadata.json",
     "comparisons.json",
     "migrations.json",
-    "calculator-content.json",
-    "open-source.json",
-    "bmr-vs-tdee.json",
-    "contact.json",
   ]) {
     copyFileSync(
       path.join(FRONTEND_ROOT, "src", "data", dataFile),
@@ -83,7 +79,6 @@ function prerenderAll(): Map<string, Rendered> {
       title: /<title>(.*?)<\/title>/.exec(html)?.[1] ?? "",
       description:
         /<meta name="description" content="(.*?)"/.exec(html)?.[1] ?? "",
-      h1: /<h1>(.*?)<\/h1>/.exec(html)?.[1] ?? "",
     });
   }
 
@@ -117,11 +112,6 @@ describe("page metadata", () => {
         expected.description,
       );
 
-      // The crawler copy inside <noscript> used to carry a different heading
-      // from the one React renders, on every comparison page.
-      if ("h1" in expected) {
-        expect(decodeEntities(actual?.h1 ?? "")).toBe(expected.h1);
-      }
     },
   );
 

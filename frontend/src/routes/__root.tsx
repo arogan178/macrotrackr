@@ -87,7 +87,9 @@ function RootComponent() {
           <GlobalLoadingOverlay />
           <MainLayout>
             <Suspense fallback={<LoadingFallback />}>
-              <AnimatePresence mode="wait">
+              {/* No entrance animation on the first page: prerendered markup has
+                  to paint visible, and hydrate into the same styles. */}
+              <AnimatePresence mode="wait" initial={false}>
                 <PageTransition key={location.pathname}>
                   <Outlet />
                 </PageTransition>

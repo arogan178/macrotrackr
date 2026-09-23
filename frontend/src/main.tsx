@@ -18,7 +18,7 @@ import {
   shouldPersistQuery,
 } from "./lib/queryClient";
 import { registerStaleChunkRecovery } from "./lib/staleChunkRecovery";
-import AppRouter from "./AppRouter";
+import AppRouter, { router } from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
 
 import "./style.css";
@@ -150,7 +150,25 @@ async function bootstrap() {
     await import("./hooks/auth/registerClerkAuthHooks");
   }
 
-  ReactDOM.createRoot(document.querySelector("#root")!).render(rootElement);
+  const container = document.querySelector<HTMLElement>("#root")!;
+
+  // The prerender renders the signed-out page for one path. Anything else (a
+  // session, the service worker's shell on another route) renders from scratch.
+  if (
+    hasRequiredClerkConfig &&
+    !shouldMountClerk &&
+    container.dataset.prerendered === window.location.pathname
+  ) {
+    await router.load();
+    // Marks the router as hydrating: it renders the same wrapper the server did
+    // and skips the load it would otherwise start on mount.
+    router.ssr = { manifest: undefined };
+    ReactDOM.hydrateRoot(container, rootElement);
+
+    return;
+  }
+
+  ReactDOM.createRoot(container).render(rootElement);
 }
 
 void bootstrap();
