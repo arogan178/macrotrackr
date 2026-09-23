@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import FloatingNotification from "./FloatingNotification";
@@ -104,5 +104,23 @@ describe("FloatingNotification", () => {
 
     const progressBar = container.querySelector(".bg-primary");
     expect(progressBar).not.toBeInTheDocument();
+  });
+
+  it("runs the action and closes when its button is pressed", () => {
+    const onUndo = vi.fn();
+    renderWithQueryClient(
+      <FloatingNotification
+        {...defaultProps}
+        action={{ label: "Undo", onClick: onUndo }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 });

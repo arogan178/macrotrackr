@@ -295,4 +295,41 @@ describe("EntryHistoryHelpers & Panel", () => {
       expect(loadMoreCalled).toBe(true);
     });
   });
+
+  it("deletes a whole day without offering undo per entry", async () => {
+    const today = todayISO();
+    const deleteEntry = vi.fn();
+    const modalRoot = document.createElement("div");
+    modalRoot.setAttribute("id", "modal-root");
+    document.body.append(modalRoot);
+
+    render(
+      <QueryClientProvider client={createQueryClient()}>
+        <EntryHistoryPanel
+          history={[
+            {
+              id: 41,
+              mealName: "Toast",
+              mealType: "breakfast",
+              protein: 5,
+              carbs: 20,
+              fats: 2,
+              entryDate: today,
+              entryTime: "08:00",
+              createdAt: new Date().toISOString(),
+            },
+          ]}
+          deleteEntry={deleteEntry}
+          onEdit={() => {}}
+          isDeleting={() => false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getAllByLabelText("Delete all entries for Today")[0]);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete All" }));
+
+    expect(deleteEntry).toHaveBeenCalledWith(41, { undoable: false });
+  });
 });

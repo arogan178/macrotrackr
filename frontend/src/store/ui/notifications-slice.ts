@@ -6,7 +6,10 @@ import {
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
 } from "@/components/notifications/NotificationConstants";
-import type { NotificationType } from "@/components/notifications/NotificationTypes";
+import type {
+  NotificationAction,
+  NotificationType,
+} from "@/components/notifications/NotificationTypes";
 
 export interface Notification {
   id: string;
@@ -15,6 +18,7 @@ export interface Notification {
   duration: number;
   autoClose: boolean;
   createdAt: number;
+  action?: NotificationAction;
 }
 
 export interface NotificationSlice {
@@ -25,6 +29,7 @@ export interface NotificationSlice {
     options?: {
       duration?: number;
       autoClose?: boolean;
+      action?: NotificationAction;
     },
   ) => string;
   hideNotification: (id: string) => void;
@@ -46,18 +51,21 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
     options: {
       duration?: number;
       autoClose?: boolean;
+      action?: NotificationAction;
     } = {},
   ) => {
     const {
       duration = DEFAULT_NOTIFICATION_DURATION,
       autoClose = DEFAULT_NOTIFICATION_AUTO_CLOSE,
+      action,
     } = options;
 
     const dedupeKey = `${message}:${type}`;
     const lastShownTime = lastNotificationMap.get(dedupeKey) ?? 0;
     const now = Date.now();
 
-    if (now - lastShownTime < NOTIFICATION_DEDUPE_TIMEOUT) {
+    // An action belongs to one event, so a repeat must not be swallowed.
+    if (!action && now - lastShownTime < NOTIFICATION_DEDUPE_TIMEOUT) {
       const existing = get().notifications.find(
         (n) => n.message === message && n.type === type,
       );
@@ -75,6 +83,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       duration,
       autoClose,
       createdAt: now,
+      action,
     };
 
     if (autoClose && duration > 0) {

@@ -240,14 +240,43 @@ export default function HomePage() {
   );
 
   const handleDeleteEntry = useCallback(
-    async (id: number) => {
+    async (id: number, options?: { undoable?: boolean }) => {
+      const deleted = history.find((entry) => entry.id === id);
       try {
         await deleteMacroEntryMutation.mutateAsync(id);
       } catch (error) {
         handleMutationError(error, "deleting entry");
+
+        return;
       }
+      if (!deleted || options?.undoable === false) return;
+
+      showNotification("Entry deleted", "success", {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            // addEntry has already shown the error if this fails.
+            handleAddEntry({
+              protein: deleted.protein,
+              carbs: deleted.carbs,
+              fats: deleted.fats,
+              mealType: deleted.mealType,
+              mealName: deleted.mealName,
+              entryDate: deleted.entryDate,
+              entryTime: deleted.entryTime,
+              ingredients: deleted.ingredients,
+            }).catch(() => {});
+          },
+        },
+      });
     },
-    [deleteMacroEntryMutation, handleMutationError],
+    [
+      history,
+      deleteMacroEntryMutation,
+      handleMutationError,
+      showNotification,
+      handleAddEntry,
+    ],
   );
 
   const handleExportHistory = useCallback(async () => {

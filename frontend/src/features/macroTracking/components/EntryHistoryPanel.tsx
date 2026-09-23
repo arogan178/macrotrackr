@@ -36,7 +36,7 @@ import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
-  deleteEntry: (id: number) => void;
+  deleteEntry: (id: number, options?: { undoable?: boolean }) => void;
   onEdit: (entry: MacroEntry) => void;
   isDeleting: (id: number) => boolean;
   isEditing: boolean;
@@ -317,7 +317,9 @@ const EntryHistoryComponent = function EntryHistory({
     if (!dateToDelete) return;
     const group = totalEntries.find((g) => g.date === dateToDelete);
     if (group?.entries) {
-      for (const entry of group.entries) deleteEntry(entry.id);
+      for (const entry of group.entries) {
+        deleteEntry(entry.id, { undoable: false });
+      }
     }
     setIsDeleteModalOpen(false);
     setDateToDelete(undefined);
