@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useState } from "react";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 
 import CardContainer from "@/components/form/CardContainer";
@@ -12,6 +13,7 @@ import { Button, PlusIcon, StarIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
 import { type Ingredient, MealType } from "@/types/macro";
+import { todayISO } from "@/utils/dateUtilities";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
@@ -30,6 +32,12 @@ interface AddEntryProps {
     saveAsMeal?: boolean;
   }) => Promise<void>;
   isSaving: boolean;
+}
+
+function currentDateTime() {
+  const now = new Date();
+
+  return { date: todayISO(now), time: format(now, "HH:mm") };
 }
 
 function getFactor(
@@ -105,16 +113,12 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const [mealType, setMealType] = useState<MealType>(getDefaultMealType());
   const [mealName, setMealName] = useState<string>("");
 
-  const [loggedNow] = useState(() => ({
-    date: new Date().toISOString().split("T")[0],
-    time: new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }),
-  }));
-  const [entryDate, setEntryDate] = useState<string>(loggedNow.date);
-  const [entryTime, setEntryTime] = useState<string>(loggedNow.time);
+  // Unset means "now", resolved at submit so an open form never goes stale.
+  const [pickedDateTime, setPickedDateTime] = useState<{
+    date: string;
+    time: string;
+  }>();
+  const shownDateTime = pickedDateTime ?? currentDateTime();
   const [isDateTimeExpanded, setIsDateTimeExpanded] = useState(false);
   const [isDateTimeRendered, setIsDateTimeRendered] = useState(false);
 
@@ -129,8 +133,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     });
   }, []);
 
-  const isLoggedNow =
-    entryDate === loggedNow.date && entryTime === loggedNow.time;
+  const isLoggedNow = pickedDateTime === undefined;
 
   useEffect(() => {
     const factor = getFactor(quantity, unit);
@@ -459,6 +462,9 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         ];
       }
 
+      const { date: entryDate, time: entryTime } =
+        pickedDateTime ?? currentDateTime();
+
       await onSubmit({
         protein: protein as number,
         carbs: carbs as number,
@@ -479,8 +485,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       fats,
       mealType,
       mealName,
-      entryDate,
-      entryTime,
+      pickedDateTime,
       onSubmit,
       isFormValid,
       handleClearSearch,
@@ -612,7 +617,10 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               onClick={toggleDateTime}
               className="cursor-pointer list-none text-xs text-muted transition-colors hover:text-foreground select-none"
             >
-              Logged {isLoggedNow ? "now" : `${entryDate} at ${entryTime}`}
+              Logged{" "}
+              {isLoggedNow
+                ? "now"
+                : `${shownDateTime.date} at ${shownDateTime.time}`}
               <span
                 className={cn(
                   "ml-1.5 underline decoration-border underline-offset-4",
@@ -633,14 +641,18 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
                   <DateField
                     label="Date"
-                    value={entryDate}
-                    onChange={setEntryDate}
+                    value={shownDateTime.date}
+                    onChange={(date) =>
+                      setPickedDateTime({ ...shownDateTime, date })
+                    }
                     required
                   />
                   <TimeField
                     label="Time"
-                    value={entryTime}
-                    onChange={setEntryTime}
+                    value={shownDateTime.time}
+                    onChange={(time) =>
+                      setPickedDateTime({ ...shownDateTime, time })
+                    }
                     required
                   />
                 </div>

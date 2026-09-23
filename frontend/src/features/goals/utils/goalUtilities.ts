@@ -1,4 +1,5 @@
 import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
+import { todayISO } from "@/utils/dateUtilities";
 
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 import type { WeightGoalsResponse } from "../types";
@@ -92,7 +93,7 @@ export function calculateGoalDetails(
   }
 
   const today = new Date();
-  const formattedToday = today.toISOString().split("T")[0];
+  const formattedToday = todayISO(today);
 
   const calorieTarget =
     customCalorieTarget ??
