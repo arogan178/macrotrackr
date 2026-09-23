@@ -51,6 +51,21 @@ function getCurrentWeight(
   return startingWeight;
 }
 
+/**
+ * Keep the profile weight on the newest log entry, so logging a backdated
+ * weight does not replace today's.
+ */
+function syncProfileWeightToLatestLog(db: Database, userId: number): void {
+  const latestWeight = getCurrentWeight(db, userId, null);
+  if (latestWeight === null) return;
+
+  safeExecute(
+    db,
+    "UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?",
+    [latestWeight, userId],
+  );
+}
+
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
@@ -511,11 +526,7 @@ export const goalRoutes = (app: Elysia) =>
               weight,
             ]);
 
-            const updateUserDetailQuery = `
-              UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
-              WHERE user_id = ?
-            `;
-            safeExecute(db, updateUserDetailQuery, [weight, internalUserId]);
+            syncProfileWeightToLatestLog(db, internalUserId!);
 
             publishUserSyncEvent(internalUserId!, "goals");
 
@@ -578,28 +589,7 @@ export const goalRoutes = (app: Elysia) =>
               );
             }
 
-            const findLatestQuery = `
-              SELECT weight, timestamp FROM weight_log
-              WHERE user_id = ?
-              ORDER BY timestamp DESC, id DESC
-              LIMIT 1
-            `;
-            const latestEntryResult = safeQueryAll<{
-              weight: number;
-              timestamp: string;
-            }>(db, findLatestQuery, [internalUserId]);
-            const latestEntry = latestEntryResult[0];
-
-            if (latestEntry) {
-              const updateUserDetailQuery = `
-                UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ?
-              `;
-              safeExecute(db, updateUserDetailQuery, [
-                latestEntry.weight,
-                internalUserId,
-              ]);
-            }
+            syncProfileWeightToLatestLog(db, internalUserId!);
 
             publishUserSyncEvent(internalUserId!, "goals");
 
