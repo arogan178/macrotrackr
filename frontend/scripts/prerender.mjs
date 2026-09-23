@@ -23,15 +23,14 @@ if (!fs.existsSync(templatePath)) {
   process.exit(1);
 }
 
-// Local auth redirects every public page to /login, and Capacitor serves from
-// the APK, so neither has a signed-out page worth rendering.
+// Capacitor serves from the APK and local auth redirects every public page to
+// /login, so neither has a signed-out page worth rendering.
 const ssrEntry = path.resolve(__dirname, "../dist-ssr/entry-prerender.js");
-const renderRoute =
-  process.env.CAPACITOR !== "true" &&
-  process.env.VITE_AUTH_MODE !== "local" &&
-  fs.existsSync(ssrEntry)
-    ? (await import(ssrEntry)).render
+const ssr =
+  process.env.CAPACITOR !== "true" && fs.existsSync(ssrEntry)
+    ? await import(ssrEntry)
     : null;
+const renderRoute = ssr?.rendersPublicPages ? ssr.render : null;
 
 const baseTemplate = fs
   .readFileSync(templatePath, "utf8")

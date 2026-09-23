@@ -6,6 +6,10 @@ import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { queryClient } from "./lib/queryClient";
 import { createAppRouter } from "./AppRouter";
 
+// Local auth redirects every public page to /login, so there is nothing to
+// prerender. Exported from the bundle because only Vite sees the .env files.
+export { isClerkAuthMode as rendersPublicPages } from "./config/runtime";
+
 /**
  * Renders a public route at build time for `scripts/prerender.mjs`.
  *

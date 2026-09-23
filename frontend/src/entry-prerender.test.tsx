@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import blogPosts from "@/data/blog-posts.json";
@@ -8,14 +9,9 @@ const metadata: Record<string, { h1?: string }> = pageMetadata;
 
 let render: (pathname: string) => Promise<string>;
 
-function textOf(html: string): string {
-  return html
-    .replaceAll(/<!--.*?-->/g, "")
-    .replaceAll(/<[^>]+>/g, "")
-    .replaceAll("&amp;", "&")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#x27;", "'")
-    .trim();
+// Parsed the way a crawler would, rather than picked apart with regexes.
+function parse(html: string): Document {
+  return new JSDOM(html).window.document;
 }
 
 beforeAll(async () => {
@@ -30,48 +26,51 @@ describe("build-time render", () => {
   const routes = [...Object.keys(metadata), `/blog/${firstArticle.slug}`];
 
   it.each(routes)("renders %s as a complete page", async (route) => {
-    const html = await render(route);
-    const h1 = /<h1[^>]*>([\S\s]*?)<\/h1>/.exec(html)?.[1];
+    const page = parse(await render(route));
+    const h1 = page.querySelector("h1");
 
-    expect(h1).toBeDefined();
-    if (metadata[route]?.h1) expect(textOf(h1!)).toBe(metadata[route].h1);
+    expect(h1).not.toBeNull();
+    if (metadata[route]?.h1) expect(h1!.textContent).toBe(metadata[route].h1);
 
     // The CSP allows no inline script, so anything but JSON-LD would stay
     // inert in the DOM and break hydration.
     expect(
-      html.match(/<script(?![^>]*application\/ld\+json)[^>]*>/g),
-    ).toBeNull();
+      page.querySelectorAll('script:not([type="application/ld+json"])'),
+    ).toHaveLength(0);
 
     // Entrance animations would paint the page invisible until JS runs.
-    expect(html).not.toMatch(/opacity:\s*0[";]/);
+    const hidden = [...page.querySelectorAll<HTMLElement>("[style]")].filter(
+      (element) => element.style.opacity === "0",
+    );
+    expect(hidden).toHaveLength(0);
 
     // Crawlers read this raw, so it must parse, and one block per type.
     const types = [
-      ...html.matchAll(
-        /<script type="application\/ld\+json">([\S\s]*?)<\/script>/g,
-      ),
-    ].flatMap(([, json]) =>
-      [JSON.parse(json)].flat().map((block) => block["@type"]),
+      ...page.querySelectorAll('script[type="application/ld+json"]'),
+    ].flatMap((script) =>
+      [JSON.parse(script.textContent ?? "")]
+        .flat()
+        .map((block: { "@type": string }) => block["@type"]),
     );
     expect(new Set(types).size).toBe(types.length);
   });
 
   it("renders the blog article body, not just its excerpt", async () => {
-    const html = await render(`/blog/${firstArticle.slug}`);
+    const page = parse(await render(`/blog/${firstArticle.slug}`));
 
-    expect(textOf(html)).toContain(firstArticle.title);
-    expect(html.match(/<p[\s>]/g)?.length ?? 0).toBeGreaterThan(10);
+    expect(page.body.textContent).toContain(firstArticle.title);
+    expect(page.querySelectorAll("p").length).toBeGreaterThan(10);
   });
 
   it("gives crawlers the calculator method and questions", async () => {
-    const text = textOf(await render("/tools/tdee-calculator"));
+    const text = parse(await render("/tools/tdee-calculator")).body.textContent;
 
     expect(text).toContain("Mifflin-St Jeor");
     expect(text).toContain("not medical advice");
   });
 
   it("gives crawlers the comparison table", async () => {
-    const text = textOf(await render("/compare/myfitnesspal"));
+    const text = parse(await render("/compare/myfitnesspal")).body.textContent;
 
     expect(text).toContain("Barcode Scanner");
     expect(text).toContain("MyFitnessPal");

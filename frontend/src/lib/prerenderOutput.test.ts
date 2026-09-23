@@ -39,11 +39,17 @@ const htmlTemplate = `<!doctype html>
 
 // Stand in for the SSR build of src/entry-prerender.tsx, which
 // entry-prerender.test.tsx covers against the real route tree.
-const RENDERS_PAGE = `export async function render(pathname) {
+const RENDERS_PAGE = `export const rendersPublicPages = true;
+export async function render(pathname) {
   return "<main><h1>Rendered " + pathname + "</h1></main>";
 }`;
-const STUCK_LOADING = `export async function render() {
+const STUCK_LOADING = `export const rendersPublicPages = true;
+export async function render() {
   return "<div>Loading</div>";
+}`;
+const LOCAL_AUTH = `export const rendersPublicPages = false;
+export async function render() {
+  return "<div>Redirecting to /login</div>";
 }`;
 
 function prerenderRoute(
@@ -107,6 +113,12 @@ describe("pre-rendered HTML", () => {
 
   it("leaves the root empty for the Capacitor build", () => {
     const html = prerenderRoute("", { env: { CAPACITOR: "true" } });
+
+    expect(html).toContain('<div id="root"></div>');
+  });
+
+  it("leaves the root empty for a local-auth build", () => {
+    const html = prerenderRoute("", { render: LOCAL_AUTH });
 
     expect(html).toContain('<div id="root"></div>');
   });
