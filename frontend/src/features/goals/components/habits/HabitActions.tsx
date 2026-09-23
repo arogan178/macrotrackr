@@ -82,7 +82,10 @@ function HabitActions({
   };
 
   return (
-    <div className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100" ref={menuReference}>
+    <div
+      className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+      ref={menuReference}
+    >
       {/* Progress increment button */}
       {!isComplete && (
         <button

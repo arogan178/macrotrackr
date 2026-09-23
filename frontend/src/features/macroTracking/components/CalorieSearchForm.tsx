@@ -43,7 +43,12 @@ interface CalorieSearchProps {
     ingredients?: Ingredient[];
   }) => void;
   recentEntries?: MacroEntry[];
+  focusOnOpen?: boolean;
 }
+
+// The sheet's open spring settles in about this long. A keyboard that opens
+// mid-animation resizes the viewport under it.
+const AUTO_FOCUS_DELAY_MS = 300;
 
 type ActivePanel = "results" | "savedMeals" | null;
 type ActiveTab = "recents" | "savedMeals";
@@ -52,6 +57,7 @@ const CalorieSearch = memo(function CalorieSearch({
   onResult,
   onSelectSavedMeal,
   recentEntries,
+  focusOnOpen = false,
 }: CalorieSearchProps) {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -60,6 +66,7 @@ const CalorieSearch = memo(function CalorieSearch({
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const wrapperReference = useRef<HTMLDivElement>(null);
+  const inputReference = useRef<HTMLInputElement>(null);
 
   const { data: historyData, isLoading: isHistoryLoading } = useMacroHistory(
     15,
@@ -89,6 +96,17 @@ const CalorieSearch = memo(function CalorieSearch({
   }, [rawRecents]);
 
   const trimmedQuery = query.trim();
+
+  useEffect(() => {
+    if (!focusOnOpen) return;
+
+    const timer = setTimeout(
+      () => inputReference.current?.focus({ preventScroll: true }),
+      AUTO_FOCUS_DELAY_MS,
+    );
+
+    return () => clearTimeout(timer);
+  }, [focusOnOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -332,6 +350,7 @@ const CalorieSearch = memo(function CalorieSearch({
               <SearchIcon className="text-foreground!" />
             </div>
             <input
+              ref={inputReference}
               id="calorie-search-input"
               type="text"
               value={query}

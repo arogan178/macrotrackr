@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { macrosApi } from "@/api/macros";
@@ -39,6 +45,36 @@ describe("CalorieSearchForm", () => {
       modalRoot.setAttribute("id", "modal-root");
       document.body.appendChild(modalRoot);
     }
+  });
+
+  it("focuses the search input after the delay when focusOnOpen is set", () => {
+    vi.useFakeTimers();
+    try {
+      renderWithQueryClient(
+        <CalorieSearchForm
+          onResult={() => {}}
+          onSelectSavedMeal={() => {}}
+          focusOnOpen
+        />,
+      );
+      const input = screen.getByRole("textbox", { name: "Search for food" });
+      expect(input).not.toHaveFocus();
+
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+      expect(input).toHaveFocus();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not focus the search input without focusOnOpen", async () => {
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    expect(screen.getByRole("textbox", { name: "Search for food" })).not.toHaveFocus();
   });
 
   it("renders without crashing", () => {
