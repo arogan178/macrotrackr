@@ -1,10 +1,18 @@
+import DateField from "@/components/form/DateField";
+import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TextField from "@/components/form/TextField";
+import TimeField from "@/components/form/TimeField";
+import { MEAL_TYPE_OPTIONS } from "@/features/macroTracking/constants";
 import type { UnitType } from "@/features/macroTracking/utils/units";
+import type { MealType } from "@/types/macro";
 
 interface MealDetailsSectionProps {
   mealName: string;
+  mealType: MealType;
+  entryDate: string;
+  entryTime: string;
   protein: number;
   carbs: number;
   fats: number;
@@ -12,6 +20,9 @@ interface MealDetailsSectionProps {
   unit?: string;
   isMultiIngredient: boolean;
   onMealNameChange: (value: string) => void;
+  onMealTypeChange: (value: MealType) => void;
+  onEntryDateChange: (value: string) => void;
+  onEntryTimeChange: (value: string) => void;
   onMacroChange: (
     field: "protein" | "carbs" | "fats",
     value: number | undefined,
@@ -27,6 +38,9 @@ interface MealDetailsSectionProps {
 
 export default function MealDetailsSection({
   mealName,
+  mealType,
+  entryDate,
+  entryTime,
   protein,
   carbs,
   fats,
@@ -34,6 +48,9 @@ export default function MealDetailsSection({
   unit = "g",
   isMultiIngredient,
   onMealNameChange,
+  onMealTypeChange,
+  onEntryDateChange,
+  onEntryTimeChange,
   onMacroChange,
   onQuantityChange,
   onUnitChange,
@@ -62,6 +79,33 @@ export default function MealDetailsSection({
         placeholder="Enter food name"
         required
       />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Dropdown
+          id="edit-meal-type"
+          label="Meal Type"
+          options={MEAL_TYPE_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.display,
+          }))}
+          value={mealType}
+          onChange={(value) => onMealTypeChange(value as MealType)}
+        />
+        <DateField
+          id="edit-entry-date"
+          label="Date"
+          value={entryDate}
+          onChange={onEntryDateChange}
+          required
+        />
+        <TimeField
+          id="edit-entry-time"
+          label="Time"
+          value={entryTime}
+          onChange={onEntryTimeChange}
+          required
+        />
+      </div>
 
       {!isMultiIngredient && onQuantityChange && onUnitChange && (
         <QuantityUnitField

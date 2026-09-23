@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { MacroEntry } from "@/types/macro";
@@ -194,7 +194,7 @@ describe("EditModal", () => {
     expect(screen.getByDisplayValue("50")).toBeInTheDocument();
 
     // Now switch unit from pcs to g
-    const unitDropdown = screen.getByRole("combobox");
+    const unitDropdown = screen.getByDisplayValue("pcs");
     fireEvent.change(unitDropdown, { target: { value: "g" } });
 
     // 2 pcs should convert to 200g, carbs should remain 50
@@ -207,6 +207,65 @@ describe("EditModal", () => {
 
     // Carbs should scale to 25
     expect(screen.getByDisplayValue("25")).toBeInTheDocument();
+  });
+
+  it("saves an edited meal type, date and time", async () => {
+    const onSave = vi.fn();
+    render(
+      <EditModal
+        isOpen
+        entry={mockSingleEntry}
+        onSave={onSave}
+        onClose={vi.fn()}
+        isSaving={false}
+      />,
+    );
+
+    expect(screen.getByLabelText("Meal Type")).toHaveValue("breakfast");
+    expect(screen.getByLabelText(/^Date/)).toHaveValue("2026-07-27");
+    expect(screen.getByLabelText(/^Time/)).toHaveValue("08:00");
+
+    fireEvent.change(screen.getByLabelText("Meal Type"), {
+      target: { value: "snack" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Date/), {
+      target: { value: "2026-07-26" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Time/), {
+      target: { value: "21:15" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mealType: "snack",
+          entryDate: "2026-07-26",
+          entryTime: "21:15",
+        }),
+      );
+    });
+  });
+
+  it("warns about unsaved changes after only the date changes", () => {
+    const onClose = vi.fn();
+    render(
+      <EditModal
+        isOpen
+        entry={mockSingleEntry}
+        onSave={vi.fn()}
+        onClose={onClose}
+        isSaving={false}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/^Date/), {
+      target: { value: "2026-07-26" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("scales macros proportionally when quantity changes in single item mode", () => {

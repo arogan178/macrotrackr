@@ -168,6 +168,8 @@ export default function EditModal({
     if (editedEntry) {
       const isValid =
         editedEntry.mealName.trim() !== "" &&
+        editedEntry.entryDate !== "" &&
+        editedEntry.entryTime !== "" &&
         editedEntry.protein >= 0 &&
         editedEntry.carbs >= 0 &&
         editedEntry.fats >= 0;
@@ -578,6 +580,9 @@ export default function EditModal({
         <div className="space-y-5 md:space-y-6">
           <MealDetailsSection
             mealName={String(editedEntry.mealName)}
+            mealType={editedEntry.mealType}
+            entryDate={editedEntry.entryDate}
+            entryTime={editedEntry.entryTime}
             protein={editedEntry.protein}
             carbs={editedEntry.carbs}
             fats={editedEntry.fats}
@@ -585,6 +590,9 @@ export default function EditModal({
             unit={singleUnit}
             isMultiIngredient={isMultiIngredient}
             onMealNameChange={(value) => handleInputChange("mealName", value)}
+            onMealTypeChange={(value) => handleInputChange("mealType", value)}
+            onEntryDateChange={(value) => handleInputChange("entryDate", value)}
+            onEntryTimeChange={(value) => handleInputChange("entryTime", value)}
             onMacroChange={
               isMultiIngredient
                 ? () => {}
