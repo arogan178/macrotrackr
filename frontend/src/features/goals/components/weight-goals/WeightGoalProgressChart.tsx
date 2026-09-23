@@ -11,6 +11,7 @@ import LineChartComponent from "@/components/chart/LineChartComponent";
 import { BarChartIcon, StateCard } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
+import { useStore } from "@/store/store";
 
 // Custom Tooltip specific to Weight Goal Progress
 function WeightCustomTooltip({
@@ -59,6 +60,9 @@ function WeightCustomTooltip({
 function WeightGoalProgressChart() {
   const { data: weightLog = [], isLoading: weightLogLoading } = useWeightLog();
   const { data: weightGoals, isLoading: weightGoalsLoading } = useWeightGoals();
+  const setLogWeightModalOpen = useStore(
+    (state) => state.setLogWeightModalOpen,
+  );
   const isLoading = weightLogLoading || weightGoalsLoading;
   const error = undefined; // TanStack Query handles errors differently
 
@@ -218,9 +222,7 @@ function WeightGoalProgressChart() {
       icon={<BarChartIcon className="h-14 w-14 text-primary" strokeWidth={1} />}
       action={{
         label: "Log Weight",
-        onClick: () => {
-          // TODO: Implement modal opening logic, likely via parent state/context
-        },
+        onClick: () => setLogWeightModalOpen(true),
         variant: "ghost",
       }}
       className="h-full"

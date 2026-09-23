@@ -31,6 +31,9 @@ function WeightLogList({
 
   // Get notification function from store for user feedback
   const showNotification = useStore((state) => state.showNotification);
+  const setLogWeightModalOpen = useStore(
+    (state) => state.setLogWeightModalOpen,
+  );
 
   // State for confirmation modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -130,6 +133,11 @@ function WeightLogList({
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
           icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
+          action={{
+            label: "Log Weight",
+            onClick: () => setLogWeightModalOpen(true),
+          }}
+          size="sm"
           className="h-full"
         />
       </div>
