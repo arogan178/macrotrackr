@@ -69,7 +69,18 @@ function getCacheService(): CacheService {
   return cacheServiceRef;
 }
 
+const stripeDetailsCacheKey = (providerSubscriptionId: string) =>
+  `stripe-details:${providerSubscriptionId}`;
+
 export class SubscriptionService {
+  /**
+   * Drop the cached Stripe view of a subscription so the next read sees a
+   * change made in Stripe, such as a pending cancellation.
+   */
+  static forgetStripeDetails(providerSubscriptionId: string): void {
+    getCacheService().delete(stripeDetailsCacheKey(providerSubscriptionId));
+  }
+
   /**
    * Create or update a subscription record
    */
@@ -200,7 +211,7 @@ export class SubscriptionService {
         subscription?.provider === "stripe" &&
         subscription.provider_subscription_id
       ) {
-        cacheKey = `stripe-details:${subscription.provider_subscription_id}`;
+        cacheKey = stripeDetailsCacheKey(subscription.provider_subscription_id);
         const cached = cacheService.get<CachedStripeDetails>(cacheKey);
         if (cached) {
           price = cached.price;

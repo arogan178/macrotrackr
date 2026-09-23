@@ -19,6 +19,7 @@ const SubscriptionInfoSchema = t.Object({
   currentPeriodEnd: t.Nullable(t.String()),
   provider: t.Union([t.Literal("stripe"), t.Literal("play")]),
   providerSubscriptionId: t.Nullable(t.String()),
+  cancelAtPeriodEnd: t.Boolean(),
 });
 
 const BillingDetailsResponseSchema = t.Object({
@@ -201,6 +202,9 @@ export const billingRoutes = (app: Elysia) =>
                     provider: subscriptionInfo.subscription.provider,
                     providerSubscriptionId:
                       subscriptionInfo.subscription.provider_subscription_id,
+                    cancelAtPeriodEnd:
+                      subscriptionInfo.stripeDetails?.cancel_at_period_end ===
+                      true,
                   }
                 : null,
               price: subscriptionInfo.price ?? null,
@@ -242,14 +246,12 @@ export const billingRoutes = (app: Elysia) =>
                 "This subscription is billed by Google Play. Cancel it in the Play Store under Payments and subscriptions.",
               );
             }
-            // Cancel in Stripe
+            // Pro stays until the period ends. The customer.subscription.deleted
+            // webhook marks the account canceled then.
             await StripeService.cancelSubscription(
               sub.provider_subscription_id,
             );
-            // Update local DB
-            await SubscriptionService.cancelSubscription(
-              user.userId,
-              "stripe",
+            SubscriptionService.forgetStripeDetails(
               sub.provider_subscription_id,
             );
             logger.info(
@@ -258,12 +260,12 @@ export const billingRoutes = (app: Elysia) =>
                 userId: user.userId,
                 subscriptionId: sub.provider_subscription_id,
               },
-              "Canceled user subscription via API",
+              "Scheduled user subscription to cancel at period end via API",
             );
             return {
               success: true,
               message:
-                "Subscription canceled. You will retain access until the end of your billing period.",
+                "Your subscription will not renew. You keep Pro until the end of your billing period.",
             };
           } catch (error) {
             handleRouteError(error, "cancel_subscription", user.userId);
@@ -454,6 +456,9 @@ export const billingRoutes = (app: Elysia) =>
                     provider: subscriptionInfo.subscription.provider,
                     providerSubscriptionId:
                       subscriptionInfo.subscription.provider_subscription_id,
+                    cancelAtPeriodEnd:
+                      subscriptionInfo.stripeDetails?.cancel_at_period_end ===
+                      true,
                   }
                 : null,
             };
