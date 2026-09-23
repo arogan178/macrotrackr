@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Capacitor } from "@capacitor/core";
 import { PostHogProvider } from "@posthog/react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -172,6 +173,17 @@ async function bootstrap() {
 }
 
 void bootstrap();
+
+// Dynamic so the web build never downloads the Capacitor plugins.
+if (Capacitor.isNativePlatform()) {
+  void Promise.all([
+    import("./services/native/statusBar"),
+    import("./services/native/appLifecycle"),
+  ]).then(([{ setupStatusBar }, { initializeNativeAppLifecycle }]) => {
+    void setupStatusBar(true);
+    initializeNativeAppLifecycle();
+  });
+}
 
 // Registered before the worker so a stale chunk from a previous build can
 // recover even if service worker registration itself fails.
