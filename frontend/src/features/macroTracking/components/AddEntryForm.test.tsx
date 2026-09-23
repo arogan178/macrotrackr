@@ -156,6 +156,27 @@ describe("AddEntryForm", () => {
     expect(disclosure).toHaveAttribute("open");
   });
 
+  it("stamps each entry with the time it was added, not when the form opened", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 8, 22, 23, 50));
+    const handleSubmit = vi.fn();
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+
+    vi.setSystemTime(new Date(2026, 8, 23, 8, 5));
+    fireEvent.change(screen.getByPlaceholderText("e.g. Chicken Salad"), {
+      target: { value: "Oatmeal" },
+    });
+    fireEvent.change(screen.getByLabelText("Protein"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
+    fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+    vi.useRealTimers();
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ entryDate: "2026-09-23", entryTime: "08:05" }),
+    );
+  });
+
   it("uses parsed serving units from selected food search results", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 

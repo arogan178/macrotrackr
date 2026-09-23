@@ -1,4 +1,5 @@
 import { MealType } from "@/types/macro";
+import { todayISO } from "@/utils/dateUtilities";
 
 // Default values - re-export from centralized constants
 export { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";
@@ -22,5 +23,5 @@ export const getMealTypeDisplay = (mealType: MealType): string => {
 
 // Helper function to get today's date string
 export const getTodayDateString = (): string => {
-  return new Date().toISOString().split("T")[0];
+  return todayISO();
 };
