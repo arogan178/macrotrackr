@@ -25,6 +25,10 @@ export class CacheService {
     loggerHelpers.performance("Cache SET", 0, { key });
   }
 
+  delete(key: string) {
+    this.cache.delete(key);
+  }
+
   clear() {
     this.cache.clear();
   }

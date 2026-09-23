@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { billingApi, type BillingDetailsResponse } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
@@ -9,6 +10,7 @@ import {
   Modal,
   WarningIcon,
 } from "@/components/ui";
+import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 
 const PLAY_PACKAGE_NAME = "com.macrotrackr.app";
@@ -32,6 +34,7 @@ const ProBillingView: React.FC<{
   const [show, setShow] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const { showNotification } = useStore();
+  const queryClient = useQueryClient();
   // If user is needed, get from loader: const { user } = useLoaderData({ from: '/' });
 
   // Extract details from billingDetails
@@ -42,7 +45,10 @@ const ProBillingView: React.FC<{
         billingDetails.subscription.currentPeriodEnd,
       ).toLocaleDateString()
     : undefined;
-  const status = billingDetails?.subscription?.status ?? "unknown";
+  // A cancelled Stripe subscription stays active until the period it paid for ends.
+  const status = billingDetails?.subscription?.cancelAtPeriodEnd
+    ? "canceled"
+    : (billingDetails?.subscription?.status ?? "unknown");
   // Google owns the billing relationship for Play purchases. The Stripe
   // portal cannot show it and our cancel endpoint refuses it, so offering
   // either button here would just produce an error the user cannot act on.
@@ -134,7 +140,7 @@ const ProBillingView: React.FC<{
 
           <p className="text-sm leading-relaxed text-muted">
             {isCanceled
-              ? "Your Pro access will continue until the expiration date shown above. You can reactivate your subscription at any time."
+              ? "Your Pro access will continue until the expiration date shown above. You can resume your subscription from Manage Subscription before then."
               : "Enjoy unlimited access to all premium features. Manage your subscription, view invoices, or update payment methods below."}
           </p>
         </div>
@@ -202,8 +208,8 @@ const ProBillingView: React.FC<{
                 Are you sure you want to cancel?
               </h4>
               <p className="mb-3 text-sm text-muted">
-                This will immediately cancel your Pro subscription. You will
-                retain access until the end of your current billing period.
+                Your subscription will not renew. You will keep Pro until the
+                end of your current billing period.
               </p>
             </div>
           </div>
@@ -221,8 +227,9 @@ const ProBillingView: React.FC<{
                   const response = await billingApi.cancelSubscription();
                   setShowCancel(false);
                   showNotification(response.message, "success");
-                  // Refresh user details to update UI
-                  // No need to refetch user details, loader will handle updates if needed
+                  await queryClient.invalidateQueries({
+                    queryKey: queryKeys.settings.billing(),
+                  });
                 } catch (error) {
                   setShowCancel(false);
                   showNotification((error as Error).message, "error");

@@ -327,21 +327,24 @@ export class StripeService {
   }
 
   /**
-   * Cancel a subscription
+   * Stop a subscription renewing. It stays active until the paid period ends,
+   * when Stripe sends customer.subscription.deleted.
    */
   static async cancelSubscription(
     subscriptionId: string
   ): Promise<Stripe.Subscription> {
     try {
       const stripe = getStripeClient();
-      const subscription = await stripe.subscriptions.cancel(subscriptionId);
+      const subscription = await stripe.subscriptions.update(subscriptionId, {
+        cancel_at_period_end: true,
+      });
       logger.info(
         {
           operation: "stripe_cancel_subscription",
           subscriptionId,
           status: subscription.status,
         },
-        "Canceled Stripe subscription"
+        "Set Stripe subscription to cancel at period end"
       );
       return subscription;
     } catch (error) {

@@ -6,6 +6,7 @@ export interface BillingSubscriptionDetails {
   currentPeriodEnd: string | null;
   provider: "stripe" | "play";
   providerSubscriptionId: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 export interface BillingDetailsResponse {

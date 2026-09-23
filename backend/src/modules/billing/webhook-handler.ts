@@ -310,6 +310,8 @@ async function handleSubscriptionEvent(
       status,
       currentPeriodEnd,
     );
+    // Portal changes, like cancelling or resuming, arrive here.
+    SubscriptionService.forgetStripeDetails(subscriptionId);
     if (
       status === "active" &&
       normalizedEvent.type === "customer.subscription.created"
