@@ -340,7 +340,15 @@ export function useUpdateMacroEntry() {
         id,
       );
 
+      const movedToDate =
+        entry.entryDate && entry.entryDate !== entryDate
+          ? entry.entryDate
+          : undefined;
+
       const contextPromise = prepareOptimisticUpdate(queryClient, entryDate);
+      const movedToContextPromise = movedToDate
+        ? prepareOptimisticUpdate(queryClient, movedToDate)
+        : undefined;
 
       transformHistoryPages(queryClient, (page) => ({
         ...page,
@@ -389,20 +397,37 @@ export function useUpdateMacroEntry() {
           originalEntry.fats,
         );
 
-        adjustDailyTotals(queryClient, entryDate, {
-          protein: newProtein - originalEntry.protein,
-          carbs: newCarbs - originalEntry.carbs,
-          fats: newFats - originalEntry.fats,
-          calories: newCalories - oldCalories,
-        });
+        if (movedToDate) {
+          adjustDailyTotals(queryClient, entryDate, {
+            protein: -originalEntry.protein,
+            carbs: -originalEntry.carbs,
+            fats: -originalEntry.fats,
+            calories: -oldCalories,
+          });
+          adjustDailyTotals(queryClient, movedToDate, {
+            protein: newProtein,
+            carbs: newCarbs,
+            fats: newFats,
+            calories: newCalories,
+          });
+        } else {
+          adjustDailyTotals(queryClient, entryDate, {
+            protein: newProtein - originalEntry.protein,
+            carbs: newCarbs - originalEntry.carbs,
+            fats: newFats - originalEntry.fats,
+            calories: newCalories - oldCalories,
+          });
+        }
       }
 
       const context = await contextPromise;
+      const movedToContext = await movedToContextPromise;
 
-      return context;
+      return { ...context, movedToContext };
     },
     onError: (error, _variables, context) => {
       rollbackOptimisticUpdate(queryClient, context);
+      rollbackOptimisticUpdate(queryClient, context?.movedToContext);
       logUpdateMacroEntryError(error);
     },
     onSettled: (_data, _error, _variables, context) => {

@@ -223,6 +223,76 @@ describe("useMacroQueries", () => {
       const historyAfterError = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
       expect(historyAfterError.pages[0].entries[0].protein).toBe(10);
     });
+
+    it("moves totals between days when the entry date changes and reverts on error", async () => {
+      const { wrapper, queryClient } = createWrapper();
+
+      const oldDate = "2024-01-01";
+      const newDate = "2024-01-02";
+      const existingEntry = {
+        id: 1,
+        foodName: "Test Food",
+        protein: 10,
+        carbs: 20,
+        fats: 5,
+        mealType: "lunch" as const,
+        entryDate: oldDate,
+        entryTime: "12:00",
+      };
+
+      queryClient.setQueryData(queryKeys.macros.dailyTotals(oldDate), {
+        protein: 10, carbs: 20, fats: 5, calories: 165,
+      });
+      queryClient.setQueryData(queryKeys.macros.dailyTotals(newDate), {
+        protein: 30, carbs: 30, fats: 10, calories: 330,
+      });
+      queryClient.setQueryData(queryKeys.macros.historyInfinite(20, undefined, undefined), {
+        pages: [{ entries: [existingEntry], hasMore: false, totalCount: 1 }],
+        pageParams: [0],
+      });
+
+      let rejectPromise: (reason?: any) => void;
+      const promise = new Promise((_resolve, reject) => {
+        rejectPromise = reject;
+      });
+      (macrosApi.updateEntry as any).mockReturnValueOnce(promise);
+
+      const { result } = renderHook(() => useUpdateMacroEntry(), { wrapper });
+
+      act(() => {
+        result.current.mutate({
+          id: 1,
+          entry: { entryDate: newDate, entryTime: "09:30", mealType: "breakfast" },
+        });
+      });
+
+      await waitFor(() => {
+        const oldTotals = queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(oldDate));
+        const newTotals = queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(newDate));
+        expect(oldTotals).toEqual({ protein: 0, carbs: 0, fats: 0, calories: 0 });
+        expect(newTotals).toEqual({ protein: 40, carbs: 50, fats: 15, calories: 495 });
+      });
+
+      const historyDuringMutation = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
+      expect(historyDuringMutation.pages[0].entries[0]).toMatchObject({
+        entryDate: newDate,
+        entryTime: "09:30",
+        mealType: "breakfast",
+      });
+
+      act(() => {
+        rejectPromise!(new Error("API Error"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(oldDate))?.protein).toBe(10);
+      expect(queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(newDate))?.protein).toBe(30);
+      const historyAfterError = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
+      expect(historyAfterError.pages[0].entries[0].entryDate).toBe(oldDate);
+    });
   });
 
   describe("useDeleteMacroEntry", () => {
