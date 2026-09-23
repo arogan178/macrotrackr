@@ -194,8 +194,14 @@ const ProductPreview: React.FC = () => {
 
   const [scene, setScene] = useState(0);
   const [stopped, setStopped] = useState(false);
-  const [step, setStep] = useState(reducedMotion ? SCENES[0].steps : 0);
+  // Starts empty everywhere so hydration matches the prerendered HTML, which
+  // cannot know the visitor's motion preference.
+  const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (reducedMotion) setStep(SCENES[0].steps);
+  }, [reducedMotion]);
 
   const active = SCENES[scene];
 

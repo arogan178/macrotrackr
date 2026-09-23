@@ -13,7 +13,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, isSsrBuild }) => {
   const isDevServer = command === "serve";
   const isCapacitor = process.env.CAPACITOR === "true";
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -54,8 +54,8 @@ export default defineConfig(({ command }) => {
       react(),
       tailwindcss(),
       ...(isDevServer ? [checker({ typescript: true })] : []),
-      ...(!isCapacitor ? [viteCompression()] : []),
-      ...(!isCapacitor
+      ...(!isCapacitor && !isSsrBuild ? [viteCompression()] : []),
+      ...(!isCapacitor && !isSsrBuild
         ? [
             VitePWA({
               injectRegister: null,
@@ -140,18 +140,25 @@ export default defineConfig(({ command }) => {
         : []),
       tsconfigPaths(),
       // Bundle analyzer - generates stats.html in dist folder
-      visualizer({
-        open: false,
-        gzipSize: true,
-        brotliSize: true,
-        filename: "dist/stats.html",
-      }),
+      ...(!isSsrBuild
+        ? [
+            visualizer({
+              open: false,
+              gzipSize: true,
+              brotliSize: true,
+              filename: "dist/stats.html",
+            }),
+          ]
+        : []),
     ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
     },
+    // The prerender runs the SSR bundle straight from dist-ssr, so it must not
+    // depend on node_modules resolution at run time.
+    ssr: { noExternal: true },
     build: {
       target: "esnext",
       // Use esbuild for minification: much faster and far less memory-hungry than terser.
@@ -159,7 +166,7 @@ export default defineConfig(({ command }) => {
       minify: "esbuild",
       // Disable production sourcemaps to lower memory usage during build.
       sourcemap: false,
-      rollupOptions: {
+      rollupOptions: isSsrBuild ? {} : {
         output: {
           // Add hash to filenames for cache busting
           entryFileNames: `assets/[name].[hash].js`,

@@ -37,7 +37,19 @@ const htmlTemplate = `<!doctype html>
   </body>
 </html>`;
 
-function prerenderRoute(route: string): string {
+// Stand in for the SSR build of src/entry-prerender.tsx, which
+// entry-prerender.test.tsx covers against the real route tree.
+const RENDERS_PAGE = `export async function render(pathname) {
+  return "<main><h1>Rendered " + pathname + "</h1></main>";
+}`;
+const STUCK_LOADING = `export async function render() {
+  return "<div>Loading</div>";
+}`;
+
+function prerenderRoute(
+  route: string,
+  { render = RENDERS_PAGE, env = {} }: { render?: string; env?: NodeJS.ProcessEnv } = {},
+): string {
   const fixtureRoot = mkdtempSync(path.join(tmpdir(), "macrotrackr-prerender-"));
   temporaryDirectories.push(fixtureRoot);
 
@@ -54,10 +66,6 @@ function prerenderRoute(route: string): string {
     "page-metadata.json",
     "comparisons.json",
     "migrations.json",
-    "calculator-content.json",
-    "open-source.json",
-    "bmr-vs-tdee.json",
-    "contact.json",
   ]) {
     copyFileSync(
       path.join(FRONTEND_ROOT, "src", "data", dataFile),
@@ -66,10 +74,13 @@ function prerenderRoute(route: string): string {
   }
   writeFileSync(path.join(distributionDirectory, "index.html"), htmlTemplate);
   writeFileSync(path.join(dataDirectory, "blog-posts.json"), "[]");
+  mkdirSync(path.join(fixtureRoot, "dist-ssr"));
+  writeFileSync(path.join(fixtureRoot, "dist-ssr", "entry-prerender.js"), render);
 
   execFileSync(process.execPath, [fixtureScript], {
     cwd: fixtureRoot,
-    env: { ...process.env, VITE_APP_URL: "https://macrotrackr.test" },
+    env: { ...process.env, VITE_APP_URL: "https://macrotrackr.test", ...env },
+    stdio: "pipe",
   });
 
   return readFileSync(
@@ -85,43 +96,24 @@ afterEach(() => {
 });
 
 describe("pre-rendered HTML", () => {
-  it("keeps crawler copy inside noscript and leaves the React root empty", () => {
-    const html = prerenderRoute("");
-    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1];
+  it("writes the rendered page into the root, marked for hydration", () => {
+    const html = prerenderRoute("tools/tdee-calculator");
+
+    expect(html).toContain(
+      '<div id="root" data-prerendered="/tools/tdee-calculator"><main><h1>Rendered /tools/tdee-calculator</h1></main></div>',
+    );
+    expect(html).toContain("<noscript>MacroTrackr requires JavaScript to run.</noscript>");
+  });
+
+  it("leaves the root empty for the Capacitor build", () => {
+    const html = prerenderRoute("", { env: { CAPACITOR: "true" } });
 
     expect(html).toContain('<div id="root"></div>');
-    expect(noscript).toContain(
-      "MacroTrackr — Fast, Open Source Macro Tracking",
-    );
   });
 
-  it("gives crawlers the comparison table, not just a headline", () => {
-    // Retrieval crawlers for AI answers do not run JavaScript. This copy used
-    // to be a tagline and three FAQs while the rendered page carried a nine-row
-    // feature matrix, so they saw about a quarter of the page.
-    const html = prerenderRoute("compare/myfitnesspal");
-    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
-
-    expect(noscript).toContain("Barcode Scanner");
-    expect(noscript).toContain("Where MacroTrackr differs");
-    expect(noscript).toContain("How to import your MyFitnessPal history");
-  });
-
-  it("gives crawlers the calculator method and questions", () => {
-    const html = prerenderRoute("tools/tdee-calculator");
-    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
-
-    expect(noscript).toContain("Mifflin-St Jeor");
-    expect(noscript).toContain("How this is calculated");
-    expect(noscript).toContain("not medical advice");
-  });
-
-  it("gives crawlers the migration steps", () => {
-    const html = prerenderRoute("migrate/myfitnesspal");
-    const noscript = html.match(/<noscript>([\S\s]*?)<\/noscript>/)?.[1] ?? "";
-
-    expect(noscript).toContain("Export from MyFitnessPal");
-    expect(noscript).toContain("Before you export");
+  it("fails the build when a route renders no page", () => {
+    // A route stuck in a loading state would ship a spinner to crawlers.
+    expect(() => prerenderRoute("", { render: STUCK_LOADING })).toThrow(/has no <h1>/);
   });
 
   it("exempts the Vite entry module from Cloudflare Rocket Loader", () => {
