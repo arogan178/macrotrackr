@@ -79,6 +79,10 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
             onClick: onOpenModal, // Trigger modal open
             variant: "primary",
           }}
+          secondaryAction={{
+            label: "Log Weight",
+            onClick: handleOpenLogWeightModal,
+          }}
           size="md"
           className="py-10" // Adjust padding if needed
         />

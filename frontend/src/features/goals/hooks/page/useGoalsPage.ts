@@ -13,7 +13,6 @@ export function useGoalsController() {
     openWeightGoalModal: () => ui.setWeightGoalModalOpen(true),
     closeWeightGoalModal: () => ui.setWeightGoalModalOpen(false),
     closeLogWeightModal: () => ui.setLogWeightModalOpen(false),
-    closeResetGoalsModal: () => ui.setResetModalOpen(false),
     addHabit: () => ui.openHabitModal(undefined, "add"),
     editHabit: (id: string) => {
       const habitToEdit = data.habits?.find((h) => h.id === id);

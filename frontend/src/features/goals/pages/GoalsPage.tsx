@@ -89,18 +89,6 @@ export default function GoalsPage() {
         }
       >
         <Modal
-          isOpen={ui.isResetModalOpen}
-          onClose={() => ui.setResetModalOpen(false)}
-          title="Reset Goals"
-          variant="confirmation"
-          message="This will reset all your current goals and progress. Are you sure you want to continue?"
-          confirmLabel="Reset Goals"
-          cancelLabel="Cancel"
-          onConfirm={actions.closeResetGoalsModal}
-          isDanger
-          size="md"
-        />
-        <Modal
           isOpen={ui.isDeleteConfirmModalOpen}
           onClose={actions.closeDeleteConfirmModal}
           title="Delete Weight Goal"
