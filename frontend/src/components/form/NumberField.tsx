@@ -25,6 +25,12 @@ function NumberField({
 }: NumberFieldProps) {
   const autoId = useId();
   const inputId = id ?? name ?? (label ? `number-field-${label}` : `number-field-${autoId}`);
+  // Labels contain spaces, which would split an aria-describedby reference.
+  const errorId = `${autoId}-error`;
+  const describedBy =
+    [helperText && `${inputId}-helper`, error && errorId]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
@@ -110,7 +116,8 @@ function NumberField({
           required={required}
           placeholder={placeholder.toString()}
           disabled={disabled}
-          aria-describedby={helperText ? `${inputId}-helper` : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
         />
         {unit && (
           <div className={`${formStyles.unitContainer} text-muted`}>{unit}</div>
@@ -121,7 +128,11 @@ function NumberField({
           {helperText}
         </p>
       )}
-      {error && <p className={formStyles.error}>{error}</p>}
+      {error && (
+        <p id={errorId} className={formStyles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
