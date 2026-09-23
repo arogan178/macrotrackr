@@ -4,8 +4,6 @@ export function useGoalsUiState() {
   const {
     activeTab,
     setActiveTab,
-    isResetModalOpen,
-    setResetModalOpen,
     isHabitModalOpen,
     currentHabit,
     habitModalMode,
@@ -23,8 +21,6 @@ export function useGoalsUiState() {
   return {
     activeTab,
     setActiveTab,
-    isResetModalOpen,
-    setResetModalOpen,
     isHabitModalOpen,
     currentHabit,
     habitModalMode,

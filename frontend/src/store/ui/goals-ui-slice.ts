@@ -14,7 +14,6 @@ export interface GoalsUISlice {
   activeTab: GoalsTabType;
 
   // Modal states
-  isResetModalOpen: boolean;
   isHabitModalOpen: boolean;
   currentHabit: HabitGoal | undefined;
   habitModalMode: HabitModalMode;
@@ -26,7 +25,6 @@ export interface GoalsUISlice {
   setActiveTab: (tab: GoalsTabType) => void;
 
   // Modal actions
-  setResetModalOpen: (open: boolean) => void;
   setHabitModalOpen: (open: boolean) => void;
   setCurrentHabit: (habit: HabitGoal | undefined) => void;
   setHabitModalMode: (mode: HabitModalMode) => void;
@@ -48,7 +46,6 @@ export const createGoalsUISlice: StateCreator<
 > = (set) => ({
   // Initial State
   activeTab: "goals",
-  isResetModalOpen: false,
   isHabitModalOpen: false,
   currentHabit: undefined,
   habitModalMode: "add",
@@ -60,7 +57,6 @@ export const createGoalsUISlice: StateCreator<
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // Modal actions
-  setResetModalOpen: (open) => set({ isResetModalOpen: open }),
   setHabitModalOpen: (open) => set({ isHabitModalOpen: open }),
   setCurrentHabit: (habit) => set({ currentHabit: habit }),
   setHabitModalMode: (mode) => set({ habitModalMode: mode }),
@@ -85,7 +81,6 @@ export const createGoalsUISlice: StateCreator<
 
   closeAllModals: () =>
     set({
-      isResetModalOpen: false,
       isHabitModalOpen: false,
       currentHabit: undefined,
       habitModalMode: "add",
