@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import AddEntryForm from "./AddEntryForm";
@@ -314,5 +314,21 @@ describe("AddEntryForm", () => {
         saveAsMeal: true,
       }),
     );
+  });
+
+  it("keeps the values when the submit fails", async () => {
+    const handleSubmit = vi.fn().mockRejectedValue(new Error("Network down"));
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+
+    const mealNameInput = screen.getByPlaceholderText("e.g. Chicken Salad");
+    fireEvent.change(mealNameInput, { target: { value: "Oatmeal" } });
+    fireEvent.change(screen.getByLabelText("Protein"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
+    fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
+    expect(mealNameInput).toHaveValue("Oatmeal");
   });
 });

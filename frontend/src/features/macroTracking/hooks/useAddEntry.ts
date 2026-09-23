@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 
+import { useMutationErrorHandler } from "@/hooks";
 import { useAddMacroEntry } from "@/hooks/queries/useMacroQueries";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
+import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 
 import type { MacroEntryInput } from "../types/macro";
@@ -17,6 +19,10 @@ import type { MacroEntryInput } from "../types/macro";
 export function useAddEntry() {
   const addMacroEntryMutation = useAddMacroEntry();
   const createSavedMealMutation = useCreateSavedMeal();
+  const showNotification = useStore((state) => state.showNotification);
+  const { handleMutationError } = useMutationErrorHandler({
+    onError: (message) => showNotification(message, "error"),
+  });
 
   const saveAsMeal = useCallback(
     async (entry: MacroEntry) => {
@@ -42,21 +48,32 @@ export function useAddEntry() {
               },
             ];
 
-      await createSavedMealMutation.mutateAsync({
-        name: entryName,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fats: entry.fats,
-        mealType: entry.mealType,
-        ingredients,
-      });
+      try {
+        await createSavedMealMutation.mutateAsync({
+          name: entryName,
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: entry.mealType,
+          ingredients,
+        });
+      } catch (error) {
+        handleMutationError(error, "saving meal");
+      }
     },
-    [createSavedMealMutation],
+    [createSavedMealMutation, handleMutationError],
   );
 
   const addEntry = useCallback(
     async (entry: MacroEntryInput) => {
-      const newEntry = await addMacroEntryMutation.mutateAsync(entry);
+      let newEntry: MacroEntry;
+      try {
+        newEntry = await addMacroEntryMutation.mutateAsync(entry);
+      } catch (error) {
+        handleMutationError(error, "adding entry");
+        // Rethrow so the form keeps its values for a retry.
+        throw error;
+      }
       if (entry.saveAsMeal) {
         await saveAsMeal({
           id: (newEntry as MacroEntry | undefined)?.id ?? 0,
@@ -69,7 +86,7 @@ export function useAddEntry() {
         } as MacroEntry);
       }
     },
-    [addMacroEntryMutation, saveAsMeal],
+    [addMacroEntryMutation, saveAsMeal, handleMutationError],
   );
 
   return {

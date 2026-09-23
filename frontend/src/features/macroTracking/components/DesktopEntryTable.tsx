@@ -265,7 +265,7 @@ const DesktopEntryTable = memo(
                 <IconButtonGroup
                   onEdit={() => onEdit(entry)}
                   onDelete={() => deleteEntry(entry.id)}
-                  isDeleting={isDeleting}
+                  isDeleting={isDeleting(entry.id)}
                   onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
                   onUnsaveMeal={
                     onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined

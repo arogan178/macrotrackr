@@ -102,7 +102,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[todayEntry]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -146,7 +146,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[entry1]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -162,7 +162,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[entry1, entry2]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -177,7 +177,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[entry2]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -217,7 +217,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[optimisticEntry]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -232,7 +232,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[serverEntry]}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
         />
       </QueryClientProvider>,
@@ -277,7 +277,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={entries}
           deleteEntry={() => {}}
           onEdit={() => {}}
-          isDeleting={false}
+          isDeleting={() => false}
           isEditing={false}
           hasMore
           onLoadMore={() => {

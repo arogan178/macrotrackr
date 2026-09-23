@@ -38,7 +38,7 @@ interface EntryHistoryProps {
   history: MacroEntry[];
   deleteEntry: (id: number) => void;
   onEdit: (entry: MacroEntry) => void;
-  isDeleting: boolean;
+  isDeleting: (id: number) => boolean;
   isEditing: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -118,7 +118,12 @@ const EntryHistoryComponent = function EntryHistory({
     const selectedEntries = history.filter((entry) =>
       selectedEntryIds.has(entry.id),
     );
-    await onGroupMeals(groupMealName, groupMealType, selectedEntries);
+    try {
+      await onGroupMeals(groupMealName, groupMealType, selectedEntries);
+    } catch {
+      // The caller reports the failure; keep the modal open for a retry.
+      return;
+    }
 
     setIsGroupModalOpen(false);
     setIsSelectionMode(false);
