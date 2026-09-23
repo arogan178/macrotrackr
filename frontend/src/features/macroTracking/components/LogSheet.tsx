@@ -53,6 +53,7 @@ function LogSheetContent({ onClose }: { onClose: () => void }) {
             onClose();
           }}
           isSaving={isSaving}
+          focusSearchOnOpen
         />
       </Suspense>
     </Modal>

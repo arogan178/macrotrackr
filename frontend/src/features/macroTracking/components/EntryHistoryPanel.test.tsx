@@ -1,11 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { openLogSheet } from "@/lib/logSheet";
 import { todayISO } from "@/utils/dateUtilities";
 
 import { formatEntryDate } from "./EntryHistoryHelpers";
 import EntryHistoryPanel from "./EntryHistoryPanel";
+
+vi.mock("@/lib/logSheet", () => ({ openLogSheet: vi.fn() }));
 
 const createQueryClient = () =>
   new QueryClient({
@@ -15,6 +18,62 @@ const createQueryClient = () =>
       },
     },
   });
+
+const setViewportIsDesktop = (matches: boolean) => {
+  const matchMedia = globalThis.matchMedia;
+  vi.spyOn(globalThis, "matchMedia").mockImplementation((query: string) =>
+    query === "(min-width: 48rem)"
+      ? { ...matchMedia(query), matches }
+      : matchMedia(query),
+  );
+};
+
+const renderEmptyPanel = () =>
+  render(
+    <QueryClientProvider client={createQueryClient()}>
+      <EntryHistoryPanel
+        history={[]}
+        deleteEntry={() => {}}
+        onEdit={() => {}}
+        isDeleting={false}
+        isEditing={false}
+      />
+    </QueryClientProvider>,
+  );
+
+describe("EntryHistoryPanel empty state", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.mocked(openLogSheet).mockClear();
+  });
+
+  it("opens the log sheet below md, where the inline form is hidden", () => {
+    setViewportIsDesktop(false);
+    renderEmptyPanel();
+
+    fireEvent.click(screen.getByRole("button", { name: "Log a meal" }));
+
+    expect(openLogSheet).toHaveBeenCalledTimes(1);
+  });
+
+  it("focuses the inline meal name input on desktop", () => {
+    setViewportIsDesktop(true);
+    const input = document.createElement("input");
+    input.id = "meal-name-input";
+    input.scrollIntoView = vi.fn();
+    document.body.append(input);
+
+    try {
+      renderEmptyPanel();
+      fireEvent.click(screen.getByRole("button", { name: "Log a meal" }));
+
+      expect(openLogSheet).not.toHaveBeenCalled();
+      expect(input).toHaveFocus();
+    } finally {
+      input.remove();
+    }
+  });
+});
 
 describe("EntryHistoryHelpers & Panel", () => {
   it("formatEntryDate formats ISO date accurately without UTC off-by-one shifts", () => {

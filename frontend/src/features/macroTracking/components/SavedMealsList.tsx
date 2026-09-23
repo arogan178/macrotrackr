@@ -101,7 +101,7 @@ const SavedMealsList = memo(
                     deleteMeal.mutate(meal.id);
                   }}
                   disabled={deleteMeal.isPending}
-                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-hover:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
+                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
                   title="Delete saved meal"
                   aria-label={`Delete ${meal.name}`}
                 >
@@ -118,6 +118,9 @@ const SavedMealsList = memo(
               variant="ghost"
               buttonSize="sm"
               className="h-auto px-0 py-0 text-xs text-primary hover:text-primary/80"
+              onClick={() => {
+                globalThis.location.href = "/pricing";
+              }}
             >
               Upgrade to Pro
             </Button>{" "}

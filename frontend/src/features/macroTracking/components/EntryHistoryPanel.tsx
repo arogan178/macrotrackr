@@ -17,6 +17,7 @@ import {
   StateCard,
 } from "@/components/ui";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+import { openLogSheet } from "@/lib/logSheet";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
 
@@ -406,6 +407,12 @@ const EntryHistoryComponent = function EntryHistory({
           action={{
             label: "Log a meal",
             onClick: () => {
+              // Below md the inline form is hidden; logging lives in the sheet.
+              if (!globalThis.matchMedia("(min-width: 48rem)").matches) {
+                openLogSheet();
+
+                return;
+              }
               const input = document.querySelector<HTMLInputElement>(
                 "#meal-name-input",
               );

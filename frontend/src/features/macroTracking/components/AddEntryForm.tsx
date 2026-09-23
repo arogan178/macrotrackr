@@ -32,6 +32,7 @@ interface AddEntryProps {
     saveAsMeal?: boolean;
   }) => Promise<void>;
   isSaving: boolean;
+  focusSearchOnOpen?: boolean;
 }
 
 function currentDateTime() {
@@ -58,7 +59,11 @@ function getFactor(
   return qtyInGrams / 100;
 }
 
-function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
+function AddEntry({
+  onSubmit,
+  isSaving: _isSaving,
+  focusSearchOnOpen,
+}: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
   const [fats, setFats] = useState<number | undefined>();
@@ -513,6 +518,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
           <CalorieSearch
             onResult={handleSearchResult}
             onSelectSavedMeal={handleSelectSavedMeal}
+            focusOnOpen={focusSearchOnOpen}
           />
         </div>
 
