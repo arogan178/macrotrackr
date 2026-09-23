@@ -8,8 +8,7 @@ const ReportingPage = React.lazy(() => import("@/features/reporting/pages/Report
 
 export const Route = createFileRoute("/reporting")({
   validateSearch: (search: Record<string, unknown>) => ({
-    startDate: search.startDate as string | undefined,
-    endDate: search.endDate as string | undefined,
+    range: search.range as string | undefined,
   }),
   component: () => (
     <RequireAuth>

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 
+import { escapeCsvValue } from "@/features/macroTracking/utils/historyExport";
 import type { MacroEntry } from "@/types/macro";
 
 import {
@@ -70,6 +71,7 @@ function buildReportingData(
 
     return {
       name: formatDate(date),
+      date,
       calories: totals ? totals.calories : 0,
       protein: totals ? totals.protein : 0,
       carbs: totals ? totals.carbs : 0,
@@ -231,10 +233,17 @@ export function useReportingLogic(
     }
 
     const csvContent = [
-      "Period,Calories,Protein,Carbs,Fats",
-      ...aggregatedData.map(
-        (item) =>
-          `${item.name},${item.calories},${item.protein},${item.carbs},${item.fats}`,
+      "Date,Calories (kcal),Protein (g),Carbs (g),Fats (g)",
+      ...dailySeries.map((day) =>
+        [
+          day.date,
+          Math.round(day.calories),
+          Math.round(day.protein * 10) / 10,
+          Math.round(day.carbs * 10) / 10,
+          Math.round(day.fats * 10) / 10,
+        ]
+          .map((value) => escapeCsvValue(value))
+          .join(","),
       ),
     ].join("\n");
 
@@ -248,7 +257,7 @@ export function useReportingLogic(
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-  }, [aggregatedData, dateRange]);
+  }, [aggregatedData, dailySeries, dateRange]);
 
   return {
     aggregatedData,

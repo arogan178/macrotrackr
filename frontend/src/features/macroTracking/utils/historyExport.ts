@@ -19,7 +19,7 @@ function calculateCalories(entry: MacroEntry) {
   return Math.round(entry.protein * 4 + entry.carbs * 4 + entry.fats * 9);
 }
 
-function escapeCsvValue(value: string | number | undefined) {
+export function escapeCsvValue(value: string | number | undefined) {
   const normalized = value === undefined ? "" : String(value);
   const escaped = normalized.replaceAll('"', '""');
 
