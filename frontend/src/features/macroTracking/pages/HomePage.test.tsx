@@ -15,7 +15,7 @@ const mutations = vi.hoisted(() => ({
 }));
 
 interface PanelProps {
-  deleteEntry: (id: number) => Promise<void>;
+  deleteEntry: (id: number, options?: { undoable?: boolean }) => Promise<void>;
   isDeleting: (id: number) => boolean;
   onSaveMeal: (entry: MacroEntry) => Promise<void>;
   onExportCsv: () => Promise<void>;
@@ -27,6 +27,7 @@ interface FormProps {
 const captured = vi.hoisted(() => ({
   panel: undefined as PanelProps | undefined,
   form: undefined as FormProps | undefined,
+  history: [] as MacroEntry[],
 }));
 
 vi.mock("@/api/macros", () => ({
@@ -59,7 +60,7 @@ vi.mock("@/hooks/queries/useGoals", () => ({
 vi.mock("@/hooks/usePageDataSync", () => ({ usePageDataSync: () => {} }));
 vi.mock("@/features/macroTracking/hooks/useHomePage", () => ({
   useHistoryPagination: () => ({
-    history: [],
+    history: captured.history,
     historyHasMore: false,
     isHistoryLoading: false,
     isLoadingMore: false,
@@ -98,14 +99,18 @@ vi.mock("@/features/macroTracking/components/EntryHistoryPanel", () => ({
   },
 }));
 
-const entry = {
+const entry: MacroEntry = {
   id: 7,
+  createdAt: "2026-09-20T08:00:00Z",
   mealName: "Oatmeal",
   protein: 10,
   carbs: 40,
   fats: 5,
   mealType: "breakfast",
-} as MacroEntry;
+  entryDate: "2026-09-20",
+  entryTime: "08:15",
+  ingredients: [{ name: "Oats", protein: 10, carbs: 40, fats: 5 }],
+};
 
 function errorMessages() {
   return useStore
@@ -119,6 +124,7 @@ describe("HomePage error notifications", () => {
     vi.clearAllMocks();
     mutations.deleteState = { isPending: false, variables: undefined };
     useStore.setState({ notifications: [] });
+    captured.history = [entry];
     render(<HomePage />);
     expect(screen.getByText("history")).toBeInTheDocument();
   });
@@ -171,5 +177,41 @@ describe("HomePage error notifications", () => {
 
     expect(captured.panel!.isDeleting(7)).toBe(true);
     expect(captured.panel!.isDeleting(8)).toBe(false);
+  });
+
+  it("offers to undo a deleted entry and re-adds it from the snapshot", async () => {
+    mutations.delete.mockResolvedValue({ success: true, id: entry.id });
+    mutations.add.mockResolvedValue({ ...entry, id: 8 });
+
+    await act(() => captured.panel!.deleteEntry(entry.id));
+
+    const [notification] = useStore.getState().notifications;
+    expect(notification).toMatchObject({
+      message: "Entry deleted",
+      action: { label: "Undo" },
+    });
+
+    await act(async () => {
+      notification.action!.onClick();
+    });
+
+    expect(mutations.add).toHaveBeenCalledWith({
+      protein: 10,
+      carbs: 40,
+      fats: 5,
+      mealType: "breakfast",
+      mealName: "Oatmeal",
+      entryDate: "2026-09-20",
+      entryTime: "08:15",
+      ingredients: [{ name: "Oats", protein: 10, carbs: 40, fats: 5 }],
+    });
+  });
+
+  it("does not offer undo when a whole day is deleted", async () => {
+    mutations.delete.mockResolvedValue({ success: true, id: entry.id });
+
+    await act(() => captured.panel!.deleteEntry(entry.id, { undoable: false }));
+
+    expect(useStore.getState().notifications).toEqual([]);
   });
 });

@@ -40,6 +40,7 @@ function NotificationManager() {
               type={notification.type}
               duration={notification.duration}
               autoClose={notification.autoClose}
+              action={notification.action}
               onClose={() => hideNotification(notification.id)}
             />
           </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
+  Button,
   CheckIcon,
   CloseIcon,
   IconButton,
@@ -8,7 +9,7 @@ import {
   WarningIcon,
 } from "@/components/ui";
 
-import type { NotificationType } from "../NotificationTypes";
+import type { NotificationAction, NotificationType } from "../NotificationTypes";
 
 type TimerHandle = ReturnType<typeof globalThis.setTimeout>;
 
@@ -18,6 +19,7 @@ export interface FloatingNotificationProps {
   onClose: () => void;
   duration?: number;
   autoClose?: boolean;
+  action?: NotificationAction;
   /**
    * Optional top offset for per-instance vertical positioning.
    * Accepts number (px) or any valid CSS length string.
@@ -32,6 +34,7 @@ function FloatingNotification({
   onClose,
   duration = 5000,
   autoClose = true,
+  action,
   topOffset,
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -188,6 +191,20 @@ function FloatingNotification({
             {message}
           </p>
         </div>
+
+        {action && (
+          <div className="flex-shrink-0">
+            <Button
+              variant="outline"
+              buttonSize="sm"
+              text={action.label}
+              onClick={() => {
+                action.onClick();
+                handleClose();
+              }}
+            />
+          </div>
+        )}
 
         {/* Close button */}
         <div className="flex-shrink-0 p-2">
