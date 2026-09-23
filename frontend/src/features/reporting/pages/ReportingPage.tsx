@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { macrosApi } from "@/api/macros";
 import ProFeature from "@/components/billing/ProFeature";
@@ -7,6 +8,7 @@ import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { StateCard } from "@/components/ui";
+import { DATE_RANGE_OPTIONS } from "@/components/utils";
 import { MacroSnapshotModal } from "@/features/macroTracking/components";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -40,16 +42,22 @@ export default function ReportingPage() {
 
   const { hasProAccess } = useEntitlements();
 
-  // Primary date range state - used throughout the component
-  const [dateRange, setDateRange] = useState<string>("week");
+  const navigate = useNavigate();
+  const search = (useSearch({ strict: false }) ?? {}) as { range?: string };
+  const requestedRange = search.range ?? "week";
+  // Unknown ranges, and Pro ranges opened by free users, fall back to the week view.
+  const dateRange =
+    hasProAccess &&
+    DATE_RANGE_OPTIONS.some((option) => option.value === requestedRange)
+      ? requestedRange
+      : "week";
   const [isSnapshotOpen, setIsSnapshotOpen] = useState<boolean>(false);
 
-  // Redirect to week view if free user tries to access Pro ranges
   const handleRangeChange = (range: string) => {
     if (!hasProAccess && range !== "week") {
       return; // Don't allow free users to select Pro ranges
     }
-    setDateRange(range);
+    navigate({ to: "/reporting", search: { range }, replace: true });
   };
 
   // Prefetch other date ranges on mount for faster tab switching
