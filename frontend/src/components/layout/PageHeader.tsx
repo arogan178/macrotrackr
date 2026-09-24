@@ -25,7 +25,7 @@ export const PageHeader = ({
 
       {/* Right Side: Badges and Tabs */}
       {(hasChanges || children) && (
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex max-w-full shrink-0 items-center gap-2 sm:gap-3">
           {hasChanges && (
             <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning sm:px-3 sm:py-1">
               Unsaved Changes

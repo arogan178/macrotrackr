@@ -24,7 +24,7 @@ export interface TabBarProps {
   className?: string;
   size?: ButtonSizeKey; // aligns TabBar with BUTTON_SIZES
   ariaLabel?: string;
-  /** Below `sm`, spread the tabs across the full width instead of scrolling. */
+  /** Below `sm`, spread the tabs across the full width, scrolling if they still do not fit. */
   fullWidth?: boolean;
 }
 
@@ -47,7 +47,9 @@ function TabBar({
       className={cn(
         "relative items-center gap-1 border border-border bg-surface-2 p-1",
         rounded,
-        fullWidth ? "flex w-full sm:inline-flex sm:w-auto" : "inline-flex flex-wrap",
+        fullWidth
+          ? "flex w-full overflow-x-auto [scrollbar-width:none] sm:inline-flex sm:w-auto"
+          : "inline-flex flex-wrap",
         className,
       )}
     >

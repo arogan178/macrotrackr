@@ -4,6 +4,7 @@ import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { TrendIcon } from "@/components/ui";
 
 import type { TrendDisplayProps } from "../types/insightsTypes";
+import { TREND_AVG_DAYS } from "../utils/insightsCalculations";
 
 export default function TrendDisplay({
   label,
@@ -79,8 +80,9 @@ export default function TrendDisplay({
                   duration={0.5}
                 />
               </span>
+              {/* A recent-days average, so it differs from the period average above. */}
               <span className="text-xs font-medium text-muted">
-                {trend.unit ?? unit}/d
+                {trend.unit ?? unit}/d, last {TREND_AVG_DAYS} days
               </span>
             </div>
           ) : (

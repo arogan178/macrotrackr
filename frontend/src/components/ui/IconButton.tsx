@@ -51,10 +51,12 @@ const getActionConfigs = () =>
       className:
         "text-foreground bg-surface-2 hover:bg-surface-2 transition-colors duration-200",
     },
+    // Neutral at rest: the history repeats this on every row and day, and a
+    // column of red read as alarm before anything was touched.
     delete: {
       icon: TrashIcon,
       className:
-        "text-error bg-error/10 border border-transparent hover:bg-error/20 hover:border-error/30 transition-colors duration-200",
+        "text-muted bg-surface-2 border border-transparent hover:text-error hover:bg-error/10 hover:border-error/30 focus-visible:text-error transition-colors duration-200",
     },
     edit: {
       icon: EditIcon,

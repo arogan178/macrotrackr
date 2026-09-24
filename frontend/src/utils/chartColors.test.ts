@@ -42,6 +42,12 @@ describe("chartColors", () => {
     it("should have snack color defined", () => {
       expect(MEAL_COLORS.snack).toBeDefined();
     });
+
+    it("never reuses a macro colour, which sits beside it on Analytics", () => {
+      expect(JSON.stringify(MEAL_COLORS)).not.toMatch(
+        /--color-(protein|carbs|fats)/,
+      );
+    });
   });
 
   describe("STAT_COLORS", () => {

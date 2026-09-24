@@ -47,27 +47,26 @@ export const MACRO_COLORS: ColorPalette = {
 };
 
 /**
- * Meal types are four series that only need to be told apart, so they are not
- * macro tokens. They are still declared once, here, and reuse the declared hues
- * where one fits rather than inventing a fifth and sixth.
+ * Meal types run in time order, so they are one brand-green lightness ramp from
+ * breakfast to snack. They used to borrow the macro hues, which put a blue
+ * "Breakfast" beside a blue "Carbs" on the same Analytics row. The ends mix
+ * toward white and toward the panel so four steps stay apart at a legend dot.
  */
+function mealShade(color: string): ColorGradient {
+  return { base: color, gradient: [color, color] };
+}
+
 export const MEAL_COLORS: ColorPalette = {
-  breakfast: {
-    base: "var(--color-carbs)",
-    gradient: ["var(--color-carbs)", "var(--color-carbs)"],
-  },
-  lunch: {
-    base: "var(--color-protein)",
-    gradient: ["var(--color-protein)", "var(--color-protein)"],
-  },
-  dinner: {
-    base: "var(--color-fats)",
-    gradient: ["var(--color-fats)", "var(--color-fats)"],
-  },
-  snack: {
-    base: "var(--color-muted)",
-    gradient: ["var(--color-muted)", "var(--color-muted)"],
-  },
+  breakfast: mealShade(
+    "color-mix(in oklab, var(--color-primary) 45%, var(--color-foreground))",
+  ),
+  lunch: mealShade("var(--color-primary)"),
+  dinner: mealShade(
+    "color-mix(in oklab, var(--color-primary) 55%, var(--color-surface))",
+  ),
+  snack: mealShade(
+    "color-mix(in oklab, var(--color-primary) 28%, var(--color-surface))",
+  ),
 };
 
 // Stat type color mapping

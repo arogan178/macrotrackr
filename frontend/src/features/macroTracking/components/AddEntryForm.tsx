@@ -32,13 +32,30 @@ interface AddEntryProps {
     saveAsMeal?: boolean;
   }) => Promise<void>;
   isSaving: boolean;
-  focusSearchOnOpen?: boolean;
+  /** Inside the log sheet, which already supplies the card and the title. */
+  inSheet?: boolean;
 }
 
 function currentDateTime() {
   const now = new Date();
 
   return { date: todayISO(now), time: format(now, "HH:mm") };
+}
+
+function FormShell({
+  inSheet,
+  children,
+}: {
+  inSheet: boolean;
+  children: React.ReactNode;
+}) {
+  if (inSheet) return children;
+
+  return (
+    <CardContainer variant="interactive" className="relative overflow-hidden">
+      <div className="relative z-10 p-3.5 sm:p-5">{children}</div>
+    </CardContainer>
+  );
 }
 
 function getFactor(
@@ -62,7 +79,7 @@ function getFactor(
 function AddEntry({
   onSubmit,
   isSaving: _isSaving,
-  focusSearchOnOpen,
+  inSheet = false,
 }: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
@@ -508,22 +525,20 @@ function AddEntry({
   );
 
   return (
-    <CardContainer
-      variant="interactive"
-      className="relative overflow-hidden"
-    >
-      <div className="relative z-10 p-3.5 sm:p-5">
-        <div className="mb-4 sm:mb-5">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
-            Log a Meal
-          </h2>
-        </div>
+    <FormShell inSheet={inSheet}>
+        {!inSheet && (
+          <div className="mb-4 sm:mb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
+              Log a Meal
+            </h2>
+          </div>
+        )}
 
         <div className="mb-4 sm:mb-5">
           <CalorieSearch
             onResult={handleSearchResult}
             onSelectSavedMeal={handleSelectSavedMeal}
-            focusOnOpen={focusSearchOnOpen}
+            focusOnOpen={inSheet}
           />
         </div>
 
@@ -732,8 +747,7 @@ function AddEntry({
             </div>
           </div>
         </form>
-      </div>
-    </CardContainer>
+    </FormShell>
   );
 }
 

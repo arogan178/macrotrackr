@@ -137,9 +137,9 @@ export default function ReportingPage() {
       {
         dataKey: "calories",
         name: "Calories",
-        color: "hsl(231, 77%, 66%)",
+        color: "var(--color-primary)",
         isArea: true,
-      }, // primary approx
+      },
     ],
     [],
   );
@@ -149,21 +149,21 @@ export default function ReportingPage() {
       {
         dataKey: "protein",
         name: "Protein (g)",
-        color: "hsl(145, 63%, 49%)",
+        color: "var(--color-protein)",
         isArea: true,
-      }, // green-500 approx
+      },
       {
         dataKey: "carbs",
         name: "Carbs (g)",
-        color: "hsl(217, 91%, 60%)",
+        color: "var(--color-carbs)",
         isArea: true,
-      }, // blue-500 approx
+      },
       {
         dataKey: "fats",
         name: "Fats (g)",
-        color: "hsl(0, 84%, 60%)",
+        color: "var(--color-fats)",
         isArea: true,
-      }, // red-500 approx
+      },
     ],
     [],
   );

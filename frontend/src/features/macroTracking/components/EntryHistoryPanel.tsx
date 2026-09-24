@@ -131,13 +131,7 @@ const EntryHistoryComponent = function EntryHistory({
     setGroupMealName("");
   }, [onGroupMeals, groupMealName, groupMealType, selectedEntryIds, history]);
 
-  const todayFormatted = useMemo(() => {
-    return new Date().toLocaleDateString("en-UK", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }, []);
+  const todayFormatted = useMemo(() => formatEntryDate(todayISO()), []);
 
   const formatDate = useCallback(
     (dateString: string) => {
@@ -160,12 +154,14 @@ const EntryHistoryComponent = function EntryHistory({
           totals.protein += entry.protein || 0;
           totals.carbs += entry.carbs || 0;
           totals.fats += entry.fats || 0;
-          totals.calories += calculateCalories(
-            entry.protein,
-            entry.carbs,
-            entry.fats,
-          );
         }
+        // From the summed macros, as the daily totals endpoint does, so the
+        // day row matches the Today card instead of drifting by rounding.
+        totals.calories = calculateCalories(
+          totals.protein,
+          totals.carbs,
+          totals.fats,
+        );
 
         return {
           date,
