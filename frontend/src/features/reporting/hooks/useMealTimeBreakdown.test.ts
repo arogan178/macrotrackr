@@ -53,7 +53,7 @@ describe("useMealTimeBreakdown", () => {
     expect(dinner?.percentage).toBe(67);
 
     // Daily averages over 1 tracked day
-    expect(lunch?.value).toBe(500);
-    expect(dinner?.value).toBe(1000);
+    expect(lunch?.value).toBeCloseTo(500, 1);
+    expect(dinner?.value).toBeCloseTo(1000, 1);
   });
 });

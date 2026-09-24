@@ -87,11 +87,11 @@ function calculateMealTypeDistribution(
         ? Math.round((totalStatForMeal / totalPeriodStat) * 100)
         : 0;
 
-    // For count, value is raw count; for nutrients/calories, value is daily average
+    // For count, value is raw count; for nutrients/calories, value is daily
+    // average. Left unrounded: the donut's centre sums these, and summing
+    // rounded slices drifted from the period average printed above it.
     const value =
-      selectedStat === "count"
-        ? group.count
-        : Math.round(totalStatForMeal / trackedDays);
+      selectedStat === "count" ? group.count : totalStatForMeal / trackedDays;
 
     return {
       name: formatMealType(mealType),
