@@ -108,23 +108,9 @@ function WeightGoalProgressChart() {
     return getChartDomain(weights, weightGoals?.targetWeight);
   }, [chartData, weightGoals?.targetWeight]);
 
-  // Determine line color and gradient based on goal
-  const { lineColor, gradientId } = React.useMemo(() => {
-    switch (weightGoals?.weightGoal) {
-      case "lose": {
-        return { lineColor: "rgb(129, 140, 248)", gradientId: "loseGradient" };
-      } // Indigo
-      case "gain": {
-        return { lineColor: "rgb(52, 211, 153)", gradientId: "gainGradient" };
-      } // Green
-      default: {
-        return {
-          lineColor: "rgb(59, 130, 246)",
-          gradientId: "maintainGradient",
-        };
-      } // Blue
-    }
-  }, [weightGoals?.weightGoal]);
+  // Weight is a live value, not a macro, so it is the brand green whichever
+  // way the goal points.
+  const lineColor = "var(--color-primary)";
 
   const targetWeight = weightGoals?.targetWeight;
 
@@ -132,23 +118,15 @@ function WeightGoalProgressChart() {
   const chartElements = (
     <>
       <defs>
-        <linearGradient id="loseGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgb(129, 140, 248)" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="rgb(129, 140, 248)" stopOpacity={0} />
-        </linearGradient>
-        <linearGradient id="gainGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgb(52, 211, 153)" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="rgb(52, 211, 153)" stopOpacity={0} />
-        </linearGradient>
-        <linearGradient id="maintainGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity={0} />
+        <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={lineColor} stopOpacity={0.4} />
+          <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
         </linearGradient>
       </defs>
       <Area
         type="monotone"
         dataKey="weight"
-        fill={`url(#${gradientId})`}
+        fill="url(#weightGradient)"
         stroke="none"
         fillOpacity={0.3}
       />
@@ -161,7 +139,7 @@ function WeightGoalProgressChart() {
           label={{
             value: `Target: ${targetWeight} kg`,
             position: "insideTopRight",
-            fill: "rgb(156, 163, 175)",
+            fill: "var(--color-muted)",
             fontSize: 11,
             dy: -5,
             dx: -5,
@@ -178,13 +156,13 @@ function WeightGoalProgressChart() {
       strokeWidth: 2.5,
       dot: {
         r: 3,
-        fill: "rgb(17, 24, 39)",
+        fill: "var(--color-surface)",
         strokeWidth: 1.5,
         stroke: lineColor,
       },
       activeDot: {
         r: 5,
-        fill: "rgb(17, 24, 39)",
+        fill: "var(--color-surface)",
         strokeWidth: 2,
         stroke: lineColor,
       },
@@ -194,7 +172,7 @@ function WeightGoalProgressChart() {
 
   const xAxisProps = {
     dataKey: "name",
-    axisLine: { stroke: "rgba(255,255,255,0.1)" },
+    axisLine: { stroke: "var(--color-border)" },
     tickLine: false,
   };
 
@@ -208,7 +186,7 @@ function WeightGoalProgressChart() {
       value: "kg",
       angle: -90,
       position: "insideLeft",
-      fill: "rgb(156, 163, 175)",
+      fill: "var(--color-muted)",
       fontSize: 12,
       dy: 40,
       dx: -5,
