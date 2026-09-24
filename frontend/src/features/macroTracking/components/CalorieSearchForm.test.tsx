@@ -64,6 +64,11 @@ describe("CalorieSearchForm", () => {
         vi.advanceTimersByTime(300);
       });
       expect(input).toHaveFocus();
+      // Focusing for the user must not cover the form with suggestions.
+      expect(screen.queryByText("Recents")).not.toBeInTheDocument();
+
+      fireEvent.click(input);
+      expect(screen.getByText("Recents")).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }

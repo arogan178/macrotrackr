@@ -67,6 +67,7 @@ const CalorieSearch = memo(function CalorieSearch({
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const wrapperReference = useRef<HTMLDivElement>(null);
   const inputReference = useRef<HTMLInputElement>(null);
+  const isAutoFocusing = useRef(false);
 
   const { data: historyData, isLoading: isHistoryLoading } = useMacroHistory(
     15,
@@ -97,13 +98,24 @@ const CalorieSearch = memo(function CalorieSearch({
 
   const trimmedQuery = query.trim();
 
+  const openSuggestions = () => {
+    if (trimmedQuery.length === 0) {
+      setActivePanel("savedMeals");
+    } else if (results.length > 0) {
+      setActivePanel("results");
+    }
+  };
+
   useEffect(() => {
     if (!focusOnOpen) return;
 
-    const timer = setTimeout(
-      () => inputReference.current?.focus({ preventScroll: true }),
-      AUTO_FOCUS_DELAY_MS,
-    );
+    // Opening the suggestions here would cover the rest of the form before the
+    // user has asked for anything; a tap on the field still opens them.
+    const timer = setTimeout(() => {
+      isAutoFocusing.current = true;
+      inputReference.current?.focus({ preventScroll: true });
+      isAutoFocusing.current = false;
+    }, AUTO_FOCUS_DELAY_MS);
 
     return () => clearTimeout(timer);
   }, [focusOnOpen]);
@@ -357,12 +369,9 @@ const CalorieSearch = memo(function CalorieSearch({
               onChange={handleQueryChange}
               onKeyDown={handleKeyDown}
               onFocus={() => {
-                if (query.trim().length === 0) {
-                  setActivePanel("savedMeals");
-                } else if (results.length > 0) {
-                  setActivePanel("results");
-                }
+                if (!isAutoFocusing.current) openSuggestions();
               }}
+              onClick={openSuggestions}
               placeholder="e.g. 1 apple, 100g chicken breast"
               maxLength={50}
               className={cn(
