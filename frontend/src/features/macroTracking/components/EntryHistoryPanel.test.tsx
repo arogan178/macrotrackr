@@ -3,9 +3,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { openLogSheet } from "@/lib/logSheet";
+import type { MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
 
-import { formatEntryDate } from "./EntryHistoryHelpers";
+import { formatEntryDate, formatTimeFromEntry } from "./EntryHistoryHelpers";
 import EntryHistoryPanel from "./EntryHistoryPanel";
 
 vi.mock("@/lib/logSheet", () => ({ openLogSheet: vi.fn() }));
@@ -77,7 +78,13 @@ describe("EntryHistoryPanel empty state", () => {
 
 describe("EntryHistoryHelpers & Panel", () => {
   it("formatEntryDate formats ISO date accurately without UTC off-by-one shifts", () => {
-    expect(formatEntryDate("2026-07-27")).toContain("27 Jul 2026");
+    expect(formatEntryDate("2026-07-27")).toBe("Jul 27, 2026");
+  });
+
+  it("formatTimeFromEntry drops the seconds some stored times carry", () => {
+    const entry = { entryTime: "16:30:00", createdAt: "" } as MacroEntry;
+    expect(formatTimeFromEntry(entry)).toBe("16:30");
+    expect(formatTimeFromEntry({ ...entry, entryTime: "09:05" })).toBe("09:05");
   });
 
   it("renders today's entries without auto-collapsing", () => {

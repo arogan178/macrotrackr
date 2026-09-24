@@ -1,30 +1,19 @@
 import type { MacroEntry } from "@/types/macro";
+import { getDisplayDate } from "@/utils/dateUtilities";
 
 export const formatEntryDate = (dateString: string): string => {
   if (!dateString) return "";
-  const parts = dateString.split("-");
-  if (parts.length === 3) {
-    const year = Number.parseInt(parts[0], 10);
-    const month = Number.parseInt(parts[1], 10) - 1;
-    const day = Number.parseInt(parts[2], 10);
-    if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
-      return new Date(year, month, day).toLocaleDateString("en-UK", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }
+  const [year, month, day] = dateString.split("-").map(Number);
+  // Built from parts so a YYYY-MM-DD string is read as a local date, not UTC.
+  const date =
+    year && month && day ? new Date(year, month - 1, day) : new Date(dateString);
 
-  return new Date(dateString).toLocaleDateString("en-UK", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return getDisplayDate(date);
 };
 
+// Imported and older rows store HH:MM:SS; everything the app writes is HH:MM.
 export const formatTimeFromEntry = (entry: MacroEntry): string =>
-  entry.entryTime ||
+  entry.entryTime?.slice(0, 5) ||
   new Date(entry.createdAt).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",

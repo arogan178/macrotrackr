@@ -101,7 +101,7 @@ export default function MealDetailsSection({
         <TimeField
           id="edit-entry-time"
           label="Time"
-          value={entryTime}
+          value={entryTime.slice(0, 5)}
           onChange={onEntryTimeChange}
           required
         />
