@@ -73,7 +73,7 @@ function TabButton({
       )}
       {...rest}
     >
-      <span className="relative z-10 flex items-center justify-center gap-1.5">
+      <span className="relative z-10 flex items-center justify-center gap-1.5 whitespace-nowrap">
         {children}
       </span>
       {active && (
