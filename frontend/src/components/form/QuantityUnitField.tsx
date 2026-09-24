@@ -138,7 +138,7 @@ const QuantityUnitField = memo(function QuantityUnitField({
   return (
     <div className="space-y-2">
       <label className={formStyles.label}>
-        {label} {required && <span className="text-destructive">*</span>}
+        {label} {required && <span className="text-error">*</span>}
       </label>
       <div className="flex space-x-2 min-w-0">
         <div className="flex-1 min-w-[3.5rem]">

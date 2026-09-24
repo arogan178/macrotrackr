@@ -363,7 +363,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           </div>
         </div>
         {!tdee && (
-          <div className="rounded-control border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
+          <div className="rounded-control border border-warning/30 bg-warning/10 p-4 text-warning">
             <p className="text-sm font-semibold">Profile Details Incomplete</p>
             <p className="mt-1 text-xs">
               Please complete your profile details (Date of Birth, Gender,

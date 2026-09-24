@@ -32,7 +32,7 @@ export default function TrendsChartSection({
         key: "calories",
         label: (
           <div className="flex items-center gap-1.5 px-1">
-            <CalorieIcon className="h-3.5 w-3.5 text-amber-500" />
+            <CalorieIcon className="h-3.5 w-3.5 text-warning" />
             <span>Calories</span>
           </div>
         ),
