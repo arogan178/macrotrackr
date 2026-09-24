@@ -83,7 +83,10 @@ function ValueInner({
         )}
       </span>
       {unit ? (
-        <span className={cn(UNIT_CLASS[size], "text-muted")}>{unit}</span>
+        // A percent sign sets against its figure ("73%"); word units take a space.
+        <span className={cn(UNIT_CLASS[size], "text-muted", unit === "%" && "-ml-1")}>
+          {unit}
+        </span>
       ) : null}
       {suffix ? (
         <span className={cn(UNIT_CLASS[size], "text-muted")}>{suffix}</span>
