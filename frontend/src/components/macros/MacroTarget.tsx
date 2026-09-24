@@ -42,7 +42,7 @@ const MacroTarget = memo(
     return (
       <div className="space-y-6 py-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-md font-medium text-foreground">Macro Target</h3>
+          <h3 className="font-medium text-foreground">Macro Target</h3>
           <div className="flex items-center">
             <button
               type="button"

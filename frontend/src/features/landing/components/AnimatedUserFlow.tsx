@@ -268,11 +268,11 @@ export const MealGroupingFlow: React.FC = () => {
             <div className="space-y-2 p-3 pt-0">
               <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
                 <div className="h-2 w-16 rounded-control bg-foreground/60" />
-                <div className="bg-chart-2 h-2 w-10 rounded-control" />
+                <div className="h-2 w-10 rounded-control bg-primary/70" />
               </div>
               <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
                 <div className="h-2 w-14 rounded-control bg-foreground/60" />
-                <div className="bg-chart-4 h-2 w-8 rounded-control" />
+                <div className="h-2 w-8 rounded-control bg-primary/45" />
               </div>
               <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
                 <div className="h-2 w-18 rounded-control bg-foreground/60" />

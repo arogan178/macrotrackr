@@ -64,19 +64,19 @@ initializeAuthTokenProvider();
 
 function RuntimeConfigError() {
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+    <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-12">
         <h1 className="text-2xl font-semibold">Runtime configuration error</h1>
-        <p className="mt-4 text-zinc-300">
+        <p className="mt-4 text-foreground/80">
           Clerk authentication is enabled but
-          <code className="mx-1 rounded-control bg-zinc-800 px-1 py-0.5 text-zinc-100">
+          <code className="mx-1 rounded-control bg-surface-2 px-1 py-0.5 text-foreground">
             VITE_CLERK_PUBLISHABLE_KEY
           </code>
           is not set.
         </p>
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-2 text-muted">
           Set the variable and redeploy, or run self-hosted mode with
-          <code className="mx-1 rounded-control bg-zinc-800 px-1 py-0.5 text-zinc-100">
+          <code className="mx-1 rounded-control bg-surface-2 px-1 py-0.5 text-foreground">
             VITE_AUTH_MODE=local
           </code>
           .

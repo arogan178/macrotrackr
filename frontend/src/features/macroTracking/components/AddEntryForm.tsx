@@ -567,7 +567,7 @@ function AddEntry({
                       className={cn(
                         "flex items-center gap-1 rounded-control px-1.5 sm:px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
                         saveAsMeal
-                          ? "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 dark:bg-amber-400/20 dark:text-amber-300"
+                          ? "bg-primary/15 text-primary hover:bg-primary/25"
                           : "text-muted hover:bg-muted/10 hover:text-foreground",
                       )}
                       aria-label="Save as Meal"
@@ -576,7 +576,7 @@ function AddEntry({
                       <StarIcon
                         className={cn(
                           "h-3.5 w-3.5 transition-colors",
-                          saveAsMeal ? "fill-current text-amber-500 dark:text-amber-300" : "",
+                          saveAsMeal ? "fill-current text-primary" : "",
                         )}
                       />
                       <span>{saveAsMeal ? "Saved as Meal" : "Save as Meal"}</span>

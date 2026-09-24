@@ -10,6 +10,7 @@ import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
+import { plugin as shadcnLint } from "@shadcn/lint";
 
 export default [
   {
@@ -153,6 +154,26 @@ export default [
           noWarnOnMultipleProjects: true,
         },
       },
+    },
+  },
+  {
+    // Two of @shadcn/lint's rules: a Tailwind class that generates no CSS fails
+    // silently, and a raw palette colour slips past the hex budget. The others
+    // fight how this codebase composes classes, so they stay off.
+    name: "tailwind-classes",
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}"],
+    plugins: { shadcn: shadcnLint },
+    settings: {
+      shadcn: {
+        ui: "@/components/ui",
+        mergeFunctions: ["cn"],
+        note: "Colour tokens live in src/style.css; see .github/design-system.md.",
+      },
+    },
+    rules: {
+      "shadcn/no-unknown-classes": "error",
+      "shadcn/no-raw-colors": "error",
     },
   },
   {

@@ -8,6 +8,9 @@ import { usePageMetadata } from "@/hooks";
 import { getPageMetadata } from "@/lib/pageMetadata";
 import { buildCanonicalUrl, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
+// Change this when the policy text changes, not on every render.
+const LAST_UPDATED = "August 26, 2026";
+
 const PrivacyPolicyPage: React.FC = () => {
   usePageMetadata({
     ...getPageMetadata("/privacy"),
@@ -26,10 +29,10 @@ const PrivacyPolicyPage: React.FC = () => {
               </h1>
 
               <p className="mb-8 text-sm text-foreground/80">
-                <strong>Last updated:</strong> {new Date().toLocaleDateString()}
+                <strong>Last updated:</strong> {LAST_UPDATED}
               </p>
 
-              <div className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert max-w-none">
+              <div>
                 <section className="mb-8">
                   <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Information We Collect

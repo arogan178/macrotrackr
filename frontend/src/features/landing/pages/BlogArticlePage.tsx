@@ -486,7 +486,7 @@ const BlogArticlePage: React.FC = () => {
             </div>
 
             {post.slug === "v2-launch-complete-ui-overhaul" && (
-              <div className="not-prose mt-12 rounded-card border border-border bg-surface p-6">
+              <div className="mt-12 rounded-card border border-border bg-surface p-6">
                 <h3 className="text-center text-2xl font-semibold tracking-tight text-foreground">
                   See grouped meals in action
                 </h3>

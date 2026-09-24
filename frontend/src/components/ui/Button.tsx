@@ -40,11 +40,6 @@ export function getButtonClasses(
       "hover:border-border-2 hover:bg-surface-3",
       "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-surface-2",
     ),
-    neutral: cn(
-      "border border-neutral-700/50 bg-neutral-800 text-white",
-      "hover:border-neutral-500 hover:bg-neutral-700",
-      "focus-visible:ring-neutral-500 active:bg-neutral-600",
-    ),
     danger: cn(
       "border border-error/20 bg-error/10 text-error",
       "hover:border-error/30 hover:bg-error/20",

@@ -8,6 +8,9 @@ import { usePageMetadata } from "@/hooks";
 import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_URL, buildCanonicalUrl, SUPPORT_EMAIL } from "@/utils/appConstants";
 
+// Change this when the policy text changes, not on every render.
+const LAST_UPDATED = "August 26, 2026";
+
 const TermsAndConditionsPage: React.FC = () => {
   usePageMetadata({
     ...getPageMetadata("/terms"),
@@ -25,9 +28,9 @@ const TermsAndConditionsPage: React.FC = () => {
               Terms and Conditions
             </h1>
 
-            <div className="prose prose-slate prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert max-w-none">
+            <div>
               <p className="mb-8 text-lg text-foreground">
-                Last updated: {new Date().toLocaleDateString()}
+                Last updated: {LAST_UPDATED}
               </p>
 
               <section className="mb-8">

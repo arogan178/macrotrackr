@@ -55,7 +55,7 @@ export default function IngredientCard({
         <button
           type="button"
           onClick={() => onRemoveIngredient(index)}
-          className="hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/40 mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-transparent text-muted transition-[background-color,border-color,color,transform] duration-200 focus-visible:ring-2 focus-visible:outline-none"
+          className="hover:border-error/20 hover:bg-error/10 hover:text-error focus-visible:ring-error/40 mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-transparent text-muted transition-[background-color,border-color,color,transform] duration-200 focus-visible:ring-2 focus-visible:outline-none"
           title="Remove ingredient"
           aria-label={`Remove ${ingredient.name || "ingredient"}`}
         >

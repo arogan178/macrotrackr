@@ -212,7 +212,6 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
           {!isMaintenance && (
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-xs sm:text-sm text-muted hidden xs:inline">Progress:</span>
               <span className="text-base sm:text-lg font-semibold text-foreground">
                 {progressPercentage}%
               </span>

@@ -334,8 +334,8 @@ function UnifiedInsights({
               <div className="grid flex-1 grid-cols-2 gap-3">
                 {/* Current Streak */}
                 <div className="flex flex-col items-center justify-center gap-1 rounded-control bg-surface-2 p-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10">
-                    <CalorieIcon className="h-4 w-4 text-orange-500" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-warning/10">
+                    <CalorieIcon className="h-4 w-4 text-warning" />
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
@@ -443,8 +443,8 @@ function UnifiedInsights({
                   trend={caloriesTrend}
                   data={aggregatedData}
                   dataKey="calories"
-                  icon={<CalorieIcon className="h-4 w-4 text-orange-500" />}
-                  iconBgColor="bg-orange-500/10"
+                  icon={<CalorieIcon className="h-4 w-4 text-warning" />}
+                  iconBgColor="bg-warning/10"
                   unit="kcal"
                 />
                 <TrendDisplay

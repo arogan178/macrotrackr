@@ -35,7 +35,7 @@ function HabitTracker({
         {/* Header with title and add button */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="flex items-center text-lg font-semibold tracking-tight text-foreground/90">
-            <CheckCircleIcon size="md" className="mr-2 text-purple-400" />
+            <CheckCircleIcon size="md" className="mr-2 text-primary" />
             Habit Goals
           </h3>
 

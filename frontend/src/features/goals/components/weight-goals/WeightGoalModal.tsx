@@ -91,7 +91,7 @@ function WeightGoalModal({
       size="lg"
     >
       {errorMessage && (
-        <div className="mb-4 rounded-control bg-red-50 p-3 text-sm text-error">
+        <div className="mb-4 rounded-control bg-error/10 p-3 text-sm text-error">
           {errorMessage}
         </div>
       )}

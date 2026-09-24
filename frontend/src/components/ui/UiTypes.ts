@@ -5,7 +5,7 @@ import type { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/UiConstan
 export type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 export type IconSize = keyof typeof ICON_SIZES;
 
-type ButtonVariant = "primary" | "secondary" | "neutral" | "danger" | "success" | "ghost" | "outline";
+type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost" | "outline";
 type ButtonType = "button" | "submit" | "reset";
 
 export interface ButtonProps {
