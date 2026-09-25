@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { format, isValid, parse } from "date-fns";
+import { format, isValid, parse, parseISO } from "date-fns";
 
-import type { AddWeightLogPayload } from "@/api/goals";
+import type { AddWeightLogPayload, WeightLogEntry } from "@/api/goals";
 import DateField from "@/components/form/DateField";
 import TimeField from "@/components/form/TimeField";
 import WeightField from "@/components/form/WeightField";
 import Modal from "@/components/ui/Modal";
-import { useAddWeightLogEntry } from "@/hooks/queries/useGoals";
+import {
+  useAddWeightLogEntry,
+  useUpdateWeightLogEntry,
+} from "@/hooks/queries/useGoals";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 import {
   type UnitSystem,
@@ -19,6 +22,8 @@ interface LogWeightModalProps {
   onClose: () => void;
   initialWeight?: number | undefined;
   unitSystem?: UnitSystem;
+  /** Opens the modal on this entry and saves over it. */
+  entry?: WeightLogEntry;
 }
 
 // Helper to get current time in HH:mm format
@@ -29,6 +34,7 @@ function LogWeightModal({
   onClose,
   initialWeight,
   unitSystem = "metric",
+  entry,
 }: LogWeightModalProps) {
   const unit = weightUnit(unitSystem);
   const limits = weightLimits(
@@ -37,6 +43,9 @@ function LogWeightModal({
     unitSystem,
   );
   const addWeightLogMutation = useAddWeightLogEntry();
+  const updateWeightLogMutation = useUpdateWeightLogEntry();
+  const isPending =
+    addWeightLogMutation.isPending || updateWeightLogMutation.isPending;
 
   const today = format(new Date(), "yyyy-MM-dd");
   const nowTime = getCurrentTime();
@@ -64,13 +73,13 @@ function LogWeightModal({
 
   useEffect(() => {
     if (isOpen) {
-      const currentDateTime = new Date();
-      setDate(format(currentDateTime, "yyyy-MM-dd"));
-      setTime(format(currentDateTime, "HH:mm"));
-      setWeight(initialWeight ?? "");
+      const dateTime = entry ? parseISO(entry.timestamp) : new Date();
+      setDate(format(dateTime, "yyyy-MM-dd"));
+      setTime(format(dateTime, "HH:mm"));
+      setWeight(entry?.weight ?? initialWeight ?? "");
       setFormError(undefined);
     }
-  }, [isOpen, initialWeight]);
+  }, [isOpen, initialWeight, entry]);
 
   // Validation logic for Save button
   function validateForm(): boolean {
@@ -122,7 +131,9 @@ function LogWeightModal({
     const timestamp = localDateTime.toISOString();
     const payload: AddWeightLogPayload = { timestamp, weight: Number(weight) };
     try {
-      await addWeightLogMutation.mutateAsync(payload);
+      await (entry
+        ? updateWeightLogMutation.mutateAsync({ ...payload, id: entry.id })
+        : addWeightLogMutation.mutateAsync(payload));
       onClose();
     } catch {
       // Error state is handled by the mutation hook
@@ -133,17 +144,17 @@ function LogWeightModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Log Your Weight"
+      title={entry ? "Edit Weight Entry" : "Log Your Weight"}
       variant="form"
       onSave={handleSave}
       saveDisabled={
-        addWeightLogMutation.isPending ||
+        isPending ||
         !date ||
         !time ||
         !weight ||
         !!formError
       }
-      saveLabel="Log Weight"
+      saveLabel={entry ? "Save Changes" : "Log Weight"}
       buttonSize="lg"
     >
       <div className="space-y-4">
@@ -170,7 +181,7 @@ function LogWeightModal({
           minKg={USER_MINIMUM_WEIGHT}
           maxKg={USER_MAXIMUM_WEIGHT}
           placeholder={`Between ${limits.min}-${limits.max} ${unit}`}
-          disabled={addWeightLogMutation.isPending}
+          disabled={isPending}
         />
         {formError && <p className="text-sm text-error">{formError}</p>}
       </div>

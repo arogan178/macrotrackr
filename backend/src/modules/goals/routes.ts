@@ -548,6 +548,65 @@ export const goalRoutes = (app: Elysia) =>
         },
       )
 
+      // --- Update Weight Log Entry ---
+      .put(
+        "/weight-log/:id",
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { params, body, db } = context;
+          const internalUserId = context.authenticatedUser.userId;
+
+          const { timestamp, weight } = (body ?? {}) as {
+            timestamp?: string;
+            weight?: number;
+          };
+          if (timestamp === undefined && weight === undefined) {
+            throw new BadRequestError("Provide a weight or a timestamp");
+          }
+
+          const updatedEntry = withTransaction(db, () => {
+            const entry = safeQuery<
+              Pick<WeightLogRow, "id" | "timestamp" | "weight">
+            >(
+              db,
+              `UPDATE weight_log
+               SET weight = COALESCE(?, weight), timestamp = COALESCE(?, timestamp)
+               WHERE id = ? AND user_id = ?
+               RETURNING id, timestamp, weight`,
+              [weight ?? null, timestamp ?? null, params?.id ?? null, internalUserId],
+            );
+            if (entry) syncProfileWeightToLatestLog(db, internalUserId!);
+
+            return entry;
+          });
+
+          // Thrown outside the transaction, which would rewrap it as a 500.
+          if (!updatedEntry) {
+            throw new NotFoundError(
+              "Weight log entry not found or access denied.",
+            );
+          }
+
+          publishUserSyncEvent(internalUserId!, "goals");
+
+          return updatedEntry;
+        },
+        {
+          params: GoalSchemas.deleteWeightLogParams,
+          body: GoalSchemas.updateWeightLogBody,
+          response: {
+            200: GoalSchemas.weightLogEntry,
+            400: t.Object({ code: t.String(), message: t.String() }),
+            404: t.Object({ code: t.String(), message: t.String() }),
+          },
+          detail: {
+            summary:
+              "Change the weight or time of a weight log entry and update user details",
+            tags: ["Goals", "Weight Log"],
+          },
+        },
+      )
+
       // --- Delete Weight Log Entry ---
       .delete(
         "/weight-log/:id",

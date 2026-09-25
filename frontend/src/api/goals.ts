@@ -132,6 +132,20 @@ export const goalsApi = {
   /**
    * @throws {ApiError}
    */
+  updateWeightLogEntry: async ({
+    id,
+    timestamp,
+    weight,
+  }: WeightLogEntry): Promise<WeightLogEntry> => {
+    return apiClient.put<WeightLogEntry>(`/api/goals/weight-log/${id}`, {
+      timestamp,
+      weight,
+    });
+  },
+
+  /**
+   * @throws {ApiError}
+   */
   deleteWeightLogEntry: async (
     idOrParameters: string | { id: string },
   ): Promise<{ success: boolean; id: string }> => {

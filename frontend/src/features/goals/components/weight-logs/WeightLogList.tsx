@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 
+import type { WeightLogEntry } from "@/api/goals";
 import {
   IconButton,
   LoadingSpinner,
@@ -15,6 +16,8 @@ import {
 } from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
 import { formatWeight, type UnitSystem } from "@/utils/unitConversion";
+
+import LogWeightModal from "./LogWeightModal";
 
 interface WeightLogListProps {
   isBulkConfirmModalOpen?: boolean;
@@ -49,6 +52,8 @@ function WeightLogList({
       }
     | undefined
   >();
+
+  const [entryToEdit, setEntryToEdit] = useState<WeightLogEntry | undefined>();
 
   // State for scroll position detection
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -176,34 +181,47 @@ function WeightLogList({
                       {formatWeight(entry.weight, unitSystem)}
                     </span>
                   </div>
-                  <IconButton
-                    variant="delete"
-                    ariaLabel={
-                      isValidDate
-                        ? `Delete entry from ${format(entryDate, "PPPp")}`
-                        : "Cannot delete entry with invalid date"
-                    }
-                    onClick={() => {
-                      if (isValidDate)
-                        handleDeleteClick(
-                          entry.id,
-                          entry.timestamp,
-                          entry.weight,
-                        );
-                    }}
-                    disabled={isSaving || !isValidDate}
-                    icon={
-                      isSaving && itemToDelete?.id === entry.id ? (
-                        <LoadingSpinner size="sm" />
-                      ) : undefined
-                    }
-                    className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 ${
-                      (isSaving && itemToDelete?.id === entry.id) ||
-                      !isValidDate
-                        ? "cursor-not-allowed opacity-50"
-                        : ""
-                    }`}
-                  />
+                  <div className="flex items-center gap-2">
+                    <IconButton
+                      variant="edit"
+                      ariaLabel={
+                        isValidDate
+                          ? `Edit entry from ${format(entryDate, "PPPp")}`
+                          : "Cannot edit entry with invalid date"
+                      }
+                      onClick={() => setEntryToEdit(entry)}
+                      disabled={isSaving || !isValidDate}
+                      className="opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100"
+                    />
+                    <IconButton
+                      variant="delete"
+                      ariaLabel={
+                        isValidDate
+                          ? `Delete entry from ${format(entryDate, "PPPp")}`
+                          : "Cannot delete entry with invalid date"
+                      }
+                      onClick={() => {
+                        if (isValidDate)
+                          handleDeleteClick(
+                            entry.id,
+                            entry.timestamp,
+                            entry.weight,
+                          );
+                      }}
+                      disabled={isSaving || !isValidDate}
+                      icon={
+                        isSaving && itemToDelete?.id === entry.id ? (
+                          <LoadingSpinner size="sm" />
+                        ) : undefined
+                      }
+                      className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100 ${
+                        (isSaving && itemToDelete?.id === entry.id) ||
+                        !isValidDate
+                          ? "cursor-not-allowed opacity-50"
+                          : ""
+                      }`}
+                    />
+                  </div>
                 </li>
               );
             })}
@@ -240,6 +258,13 @@ function WeightLogList({
           isDanger
         />
       )}
+
+      <LogWeightModal
+        isOpen={entryToEdit !== undefined}
+        onClose={() => setEntryToEdit(undefined)}
+        entry={entryToEdit}
+        unitSystem={unitSystem}
+      />
 
       {/* Bulk Delete Confirmation Modal */}
       {isBulkConfirmModalOpen && (
