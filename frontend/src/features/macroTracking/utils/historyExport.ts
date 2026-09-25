@@ -72,8 +72,7 @@ export function buildHistoryCsv(entries: MacroEntry[]) {
   return [HISTORY_EXPORT_HEADERS.join(","), ...rows].join("\n");
 }
 
-export function downloadHistoryCsv(entries: MacroEntry[]) {
-  const csvContent = buildHistoryCsv(entries);
+export function downloadCsv(csvContent: string, name: string) {
   const blob = new Blob([csvContent], {
     type: "text/csv;charset=utf-8;",
   });
@@ -82,10 +81,14 @@ export function downloadHistoryCsv(entries: MacroEntry[]) {
   const date = new Date().toISOString().slice(0, 10);
 
   anchor.href = url;
-  anchor.download = `macrotrackr-history-${date}.csv`;
+  anchor.download = `macrotrackr-${name}-${date}.csv`;
   anchor.style.visibility = "hidden";
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
   globalThis.URL.revokeObjectURL(url);
+}
+
+export function downloadHistoryCsv(entries: MacroEntry[]) {
+  downloadCsv(buildHistoryCsv(entries), "history");
 }

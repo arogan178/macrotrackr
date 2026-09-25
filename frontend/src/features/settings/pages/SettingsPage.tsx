@@ -21,6 +21,7 @@ import {
   BillingForm,
   ChangePasswordForm,
   ConnectedAccountsForm,
+  DataExporter,
   DataImporter,
   ProfileForm,
   SettingsLoadingSkeleton,
@@ -240,7 +241,7 @@ export default function SettingsPage() {
                 label: (
                   <>
                     <UploadIcon className="h-4 w-4" />
-                    Import Data
+                    Data
                   </>
                 ),
               },
@@ -313,7 +314,10 @@ export default function SettingsPage() {
             )}
             {activeTab === "data" && (
               <PageTransition key="data">
-                <DataImporter />
+                <div className="space-y-6">
+                  <DataExporter />
+                  <DataImporter />
+                </div>
               </PageTransition>
             )}
             {BILLING_TAB_ENABLED && activeTab === "billing" && (
