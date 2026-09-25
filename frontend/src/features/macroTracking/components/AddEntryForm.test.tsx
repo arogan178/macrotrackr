@@ -190,7 +190,7 @@ describe("AddEntryForm", () => {
     );
 
     expect(screen.getByText(/^Logged/).textContent).toContain(
-      "2026-09-20 at 13:40",
+      "Sep 20, 2026 at 13:40",
     );
     fireEvent.change(screen.getByPlaceholderText("e.g. Chicken Salad"), {
       target: { value: "Oatmeal" },

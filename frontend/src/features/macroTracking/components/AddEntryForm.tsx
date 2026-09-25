@@ -19,6 +19,8 @@ import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { UnitConverter, type UnitType } from "../utils/units";
 
+import { formatEntryDate } from "./EntryHistoryHelpers";
+
 interface AddEntryProps {
   onSubmit: (entry: {
     protein: number;
@@ -652,7 +654,7 @@ function AddEntry({
               Logged{" "}
               {isLoggedNow
                 ? "now"
-                : `${shownDateTime.date} at ${shownDateTime.time}`}
+                : `${formatEntryDate(shownDateTime.date)} at ${shownDateTime.time}`}
               <span
                 className={cn(
                   "ml-1.5 underline decoration-border underline-offset-4",
