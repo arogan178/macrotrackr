@@ -4,7 +4,7 @@ import { memo } from "react";
 import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/UiConstants";
 
 import IconButton from "./IconButton";
-import { LoadingSpinnerIcon, StarIcon, TrashIcon } from "./Icons";
+import { LoadingSpinnerIcon, RepeatIcon, StarIcon, TrashIcon } from "./Icons";
 
 type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 type IconSize = keyof typeof ICON_SIZES;
@@ -14,12 +14,14 @@ export interface IconButtonGroupProps {
   onDelete: (event?: React.MouseEvent) => void;
   onSaveMeal?: () => void;
   onUnsaveMeal?: () => void;
+  onLogAgain?: () => void;
   isDeleting?: boolean;
   isMealSaved?: boolean;
   editLabel?: string;
   deleteLabel?: string;
   saveMealLabel?: string;
   unsaveMealLabel?: string;
+  logAgainLabel?: string;
   buttonSize?: ButtonSize;
   iconSize?: IconSize;
 }
@@ -33,17 +35,30 @@ const IconButtonGroup = memo(
     onDelete,
     onSaveMeal,
     onUnsaveMeal,
+    onLogAgain,
     isDeleting,
     isMealSaved,
     editLabel = "Edit entry",
     deleteLabel = "Delete entry",
     saveMealLabel = "Save meal for quick re-entry",
     unsaveMealLabel = "Remove from saved meals",
+    logAgainLabel = "Log again",
     buttonSize = "md",
     iconSize,
   }: IconButtonGroupProps) => {
     return (
       <div className="flex justify-center space-x-1">
+        {onLogAgain && (
+          <IconButton
+            variant="custom"
+            buttonSize={buttonSize}
+            iconSize={iconSize}
+            onClick={onLogAgain}
+            ariaLabel={logAgainLabel}
+            className="text-muted hover:text-foreground"
+            icon={<RepeatIcon />}
+          />
+        )}
         {onSaveMeal && (
           <IconButton
             variant="custom"

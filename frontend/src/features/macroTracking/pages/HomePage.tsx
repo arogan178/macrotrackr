@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { format, parseISO } from "date-fns";
 
 import { macrosApi } from "@/api/macros";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
@@ -42,6 +43,7 @@ import {
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
+import { getDisplayDate } from "@/utils/dateUtilities";
 import type { NutritionProfileSource } from "@/utils/userConstants";
 
 export default function HomePage() {
@@ -292,6 +294,70 @@ export default function HomePage() {
     ],
   );
 
+  const handleLogAgain = useCallback(
+    async (entry: MacroEntry) => {
+      try {
+        await handleAddEntry({
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: entry.mealType,
+          mealName: entry.mealName,
+          entryDate: date,
+          entryTime: format(new Date(), "HH:mm"),
+          ingredients: entry.ingredients,
+        });
+      } catch {
+        // addEntry has already shown the error.
+        return;
+      }
+      showNotification(
+        isToday
+          ? "Logged again"
+          : `Logged again on ${getDisplayDate(parseISO(date))}`,
+        "success",
+      );
+    },
+    [handleAddEntry, date, isToday, showNotification],
+  );
+
+  const handleCopyDayToToday = useCallback(
+    async (entries: MacroEntry[]) => {
+      let copied = 0;
+      for (const entry of entries) {
+        try {
+          await handleAddEntry({
+            protein: entry.protein,
+            carbs: entry.carbs,
+            fats: entry.fats,
+            mealType: entry.mealType,
+            mealName: entry.mealName,
+            entryDate: today,
+            entryTime: entry.entryTime,
+            ingredients: entry.ingredients,
+          });
+          copied += 1;
+        } catch {
+          // addEntry has already shown the error; carry on with the rest.
+        }
+      }
+
+      const total = entries.length;
+      if (copied === total) {
+        showNotification(
+          `Copied ${total} ${total === 1 ? "entry" : "entries"} to today`,
+          "success",
+        );
+      } else {
+        showNotification(
+          `Copied ${copied} of ${total} entries to today. ${total - copied} failed.`,
+          "error",
+        );
+      }
+    },
+    [handleAddEntry, today, showNotification],
+  );
+
   const handleExportHistory = useCallback(async () => {
     setIsExportingHistory(true);
     try {
@@ -401,6 +467,8 @@ export default function HomePage() {
                   onGroupMeals={handleGroupMeals}
                   onExportCsv={handleExportHistory}
                   isExportingCsv={isExportingHistory}
+                  onLogAgain={handleLogAgain}
+                  onCopyDayToToday={handleCopyDayToToday}
                 />
               )}
           </Panel>

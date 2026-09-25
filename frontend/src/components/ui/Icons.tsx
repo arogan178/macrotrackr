@@ -48,6 +48,7 @@ import {
   PieChart,
   Plus,
   PlusCircle,
+  Repeat,
   RotateCcw,
   Scale as BalanceScale,
   Scale,
@@ -183,6 +184,7 @@ export const MoveLeftIcon = createIcon(MoveLeft);
 export const CircleHelpIcon = createIcon(CircleHelp);
 export const SparklesIcon = createIcon(Sparkles);
 export const CopyIcon = createIcon(Copy);
+export const RepeatIcon = createIcon(Repeat);
 export const Link2Icon = createIcon(Link2);
 export const BarcodeIcon = createIcon(ScanBarcode);
 export const CameraIcon = createIcon(Camera);

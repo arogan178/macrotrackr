@@ -1,7 +1,12 @@
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { ChevronDownIcon, IconButtonGroup } from "@/components/ui";
+import {
+  ChevronDownIcon,
+  IconButton,
+  IconButtonGroup,
+  RepeatIcon,
+} from "@/components/ui";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
@@ -15,6 +20,7 @@ interface EntryCardProps {
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
+  onLogAgain?: (entry: MacroEntry) => void;
   isMealSaved?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -32,6 +38,7 @@ export const EntryCard = memo(
     calculateCalories,
     onSaveMeal,
     onUnsaveMeal,
+    onLogAgain,
     isMealSaved,
     isSelectionMode,
     isSelected,
@@ -119,6 +126,17 @@ export const EntryCard = memo(
             {entry.fats}
             <span className="ml-0.5 text-xs text-muted">g F</span>
           </span>
+          {/* Beside the values: the header's three buttons already fill a phone row. */}
+          {onLogAgain && (
+            <IconButton
+              variant="custom"
+              buttonSize="sm"
+              className="ml-auto self-center text-muted hover:text-foreground"
+              icon={<RepeatIcon className="h-4 w-4" />}
+              onClick={() => onLogAgain(entry)}
+              ariaLabel="Log again"
+            />
+          )}
         </div>
 
         <AnimatePresence>

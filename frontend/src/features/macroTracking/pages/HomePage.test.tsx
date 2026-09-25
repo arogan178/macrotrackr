@@ -19,6 +19,8 @@ interface PanelProps {
   isDeleting: (id: number) => boolean;
   onSaveMeal: (entry: MacroEntry) => Promise<void>;
   onExportCsv: () => Promise<void>;
+  onLogAgain: (entry: MacroEntry) => Promise<void>;
+  onCopyDayToToday: (entries: MacroEntry[]) => Promise<void>;
 }
 interface FormProps {
   onSubmit: (entry: unknown) => Promise<void>;
@@ -299,6 +301,110 @@ describe("HomePage selected day", () => {
     expect(captured.navigate.mock.calls).toEqual([
       [{ to: "/home", search: { date: "2026-09-23" }, replace: true }],
       [{ to: "/home", search: { date: undefined }, replace: true }],
+    ]);
+  });
+});
+
+describe("HomePage logging entries again", () => {
+  const dinner: MacroEntry = {
+    ...entry,
+    id: 9,
+    mealName: "Pasta",
+    mealType: "dinner",
+    entryTime: "19:30",
+    ingredients: undefined,
+  };
+
+  function notifications() {
+    return useStore
+      .getState()
+      .notifications.map(({ message, type }) => ({ message, type }));
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useStore.setState({ notifications: [] });
+    captured.history = [entry];
+    captured.homeDate = {
+      date: "2026-09-22",
+      today: "2026-09-25",
+      oldestDate: undefined,
+      isToday: false,
+    };
+    render(<HomePage />);
+  });
+
+  it("logs an entry again on the day shown, at the current time", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 8, 25, 13, 5));
+    mutations.add.mockResolvedValue({ ...entry, id: 10 });
+
+    await act(() => captured.panel!.onLogAgain(entry));
+    vi.useRealTimers();
+
+    expect(mutations.add).toHaveBeenCalledWith({
+      protein: 10,
+      carbs: 40,
+      fats: 5,
+      mealType: "breakfast",
+      mealName: "Oatmeal",
+      entryDate: "2026-09-22",
+      entryTime: "13:05",
+      ingredients: [{ name: "Oats", protein: 10, carbs: 40, fats: 5 }],
+    });
+    expect(notifications()).toEqual([
+      { message: "Logged again on Sep 22, 2026", type: "success" },
+    ]);
+  });
+
+  it("shows only the error when logging again fails", async () => {
+    mutations.add.mockRejectedValue(new Error("Log again failed on server"));
+
+    await act(() => captured.panel!.onLogAgain(entry));
+
+    expect(notifications()).toEqual([
+      { message: "Log again failed on server", type: "error" },
+    ]);
+  });
+
+  it("copies a day to today, keeping each entry's time and meal", async () => {
+    mutations.add.mockResolvedValue({ ...entry, id: 10 });
+
+    await act(() => captured.panel!.onCopyDayToToday([entry, dinner]));
+
+    expect(mutations.add.mock.calls.map(([input]) => input)).toEqual([
+      expect.objectContaining({
+        mealName: "Oatmeal",
+        mealType: "breakfast",
+        entryDate: "2026-09-25",
+        entryTime: "08:15",
+      }),
+      expect.objectContaining({
+        mealName: "Pasta",
+        mealType: "dinner",
+        entryDate: "2026-09-25",
+        entryTime: "19:30",
+      }),
+    ]);
+    expect(notifications()).toEqual([
+      { message: "Copied 2 entries to today", type: "success" },
+    ]);
+  });
+
+  it("says how many entries failed when a copy partly fails", async () => {
+    mutations.add
+      .mockRejectedValueOnce(new Error("Copy failed on server"))
+      .mockResolvedValueOnce({ ...dinner, id: 10 });
+
+    await act(() => captured.panel!.onCopyDayToToday([entry, dinner]));
+
+    expect(mutations.add).toHaveBeenCalledTimes(2);
+    expect(notifications()).toEqual([
+      { message: "Copy failed on server", type: "error" },
+      {
+        message: "Copied 1 of 2 entries to today. 1 failed.",
+        type: "error",
+      },
     ]);
   });
 });

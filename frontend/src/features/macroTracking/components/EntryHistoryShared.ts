@@ -22,12 +22,15 @@ export interface EntryHistoryController {
   isDateCollapsed: (date: string) => boolean;
   toggleDateCollapse: (date: string) => void;
   handleDeleteDate: (date: string, event: MouseEvent) => void;
+  canCopyDate: (date: string) => boolean;
+  handleCopyDate: (date: string, event: MouseEvent) => void;
 
   onEdit: (entry: MacroEntry) => void;
   deleteEntry: (id: number) => void;
 
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
+  onLogAgain?: (entry: MacroEntry) => void;
 
   isMealSaved: (entryId: number) => boolean;
 

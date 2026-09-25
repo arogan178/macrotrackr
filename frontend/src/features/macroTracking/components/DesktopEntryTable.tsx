@@ -10,7 +10,12 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
 import { MacroCell } from "@/components/macros/MacroComponents";
-import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
+import {
+  ChevronDownIcon,
+  CopyIcon,
+  IconButton,
+  IconButtonGroup,
+} from "@/components/ui";
 
 import { useEntryHistoryController } from "./EntryHistoryContext";
 import type {
@@ -29,6 +34,10 @@ type TableRowData = GroupedEntry & {
 
 const columnHelper = createColumnHelper<TableRowData>();
 
+// Wider actions column so a row's four buttons fit beside the six figures.
+const columnWidth = (columnId: string) =>
+  columnId === "actions" ? "22%" : "13%";
+
 const DesktopEntryTable = memo(
   ({ groupedEntries }: DesktopEntryTableProps) => {
     const controller = useEntryHistoryController();
@@ -40,10 +49,13 @@ const DesktopEntryTable = memo(
       isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
+      canCopyDate,
+      handleCopyDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
+      onLogAgain,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -247,7 +259,19 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex w-full items-center justify-center">
+                <div className="flex w-full items-center justify-center gap-1">
+                  {canCopyDate(data.date) && (
+                    <IconButton
+                      variant="custom"
+                      buttonSize="sm"
+                      className="text-muted hover:text-foreground"
+                      icon={<CopyIcon className="h-4 w-4" />}
+                      onClick={(event: React.MouseEvent) =>
+                        handleCopyDate(data.date, event)
+                      }
+                      ariaLabel={`Copy ${formatDate(data.date)} to today`}
+                    />
+                  )}
                   <IconButton
                     variant="delete"
                     buttonSize="sm"
@@ -271,6 +295,8 @@ const DesktopEntryTable = memo(
                     onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
                   }
                   isMealSaved={isMealSaved(entry.id)}
+                  onLogAgain={onLogAgain ? () => onLogAgain(entry) : undefined}
+                  buttonSize="sm"
                 />
               );
             }
@@ -285,11 +311,14 @@ const DesktopEntryTable = memo(
         calculateCalories,
         isDateCollapsed,
         handleDeleteDate,
+        canCopyDate,
+        handleCopyDate,
         onEdit,
         deleteEntry,
         isDeleting,
         onSaveMeal,
         onUnsaveMeal,
+        onLogAgain,
         isMealSaved,
         isSelectionMode,
         isEntrySelected,
@@ -403,7 +432,7 @@ const DesktopEntryTable = memo(
               <div
                 key={cell.id}
                 className="flex min-h-12 items-center justify-center px-4 py-2.5 text-center"
-                style={{ width: "14.285%" }}
+                style={{ width: columnWidth(cell.column.id) }}
               >
                 <div className="w-full">
                   {
@@ -489,7 +518,7 @@ const DesktopEntryTable = memo(
                     <div
                       key={header.id}
                       className="flex items-center justify-center px-4 py-3 text-center text-[10px] font-medium tracking-wider text-muted uppercase"
-                      style={{ width: "14.285%" }}
+                      style={{ width: columnWidth(header.column.id) }}
                     >
                       {header.isPlaceholder
                         ? undefined
