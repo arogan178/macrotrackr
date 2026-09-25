@@ -35,6 +35,11 @@ jobs:
       working-directory: ./backend
       run: bun run test
 
+    # Vitest skips these: they need bun:sqlite, so they run under bun test.
+    - name: Integration tests
+      working-directory: ./backend
+      run: bun run test:integration
+
   frontend:
     runs-on: ubuntu-latest
     steps:
