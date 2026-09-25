@@ -81,24 +81,24 @@
     "description": "Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into MacroTrackr with a preview before anything is saved."
   },
   "/migrate/myfitnesspal": {
-    "title": "How to Import MyFitnessPal History into MacroTrackr",
-    "description": "Move your MyFitnessPal meal history into MacroTrackr from the official nutrition CSV export, with a preview before anything is saved.",
-    "h1": "How to Import MyFitnessPal History into MacroTrackr"
+    "title": "Export Your MyFitnessPal Data and Import It into MacroTrackr",
+    "description": "Download your MyFitnessPal nutrition CSV, then import it into MacroTrackr and preview every meal before anything is saved.",
+    "h1": "Export Your MyFitnessPal Data and Import It into MacroTrackr"
   },
   "/migrate/cronometer": {
-    "title": "How to Import Cronometer History into MacroTrackr",
-    "description": "Move Cronometer diary entries into MacroTrackr using Cronometer's CSV export and review the parsed meals before saving them.",
-    "h1": "How to Import Cronometer History into MacroTrackr"
+    "title": "Export Your Cronometer Data and Import It into MacroTrackr",
+    "description": "Export your Cronometer diary as a CSV, then import it into MacroTrackr and review the parsed meals before saving them.",
+    "h1": "Export Your Cronometer Data and Import It into MacroTrackr"
   },
   "/migrate/macrofactor": {
-    "title": "How to Import MacroFactor History into MacroTrackr",
-    "description": "Move MacroFactor nutrition history into MacroTrackr from a granular data export, with a full preview before import.",
-    "h1": "How to Import MacroFactor History into MacroTrackr"
+    "title": "Export Your MacroFactor Data and Import It into MacroTrackr",
+    "description": "Export your MacroFactor nutrition history from Data Management, then import it into MacroTrackr with a full preview first.",
+    "h1": "Export Your MacroFactor Data and Import It into MacroTrackr"
   },
   "/migrate/lose-it": {
-    "title": "How to Import Lose It! History into MacroTrackr",
-    "description": "Move Lose It! food history into MacroTrackr from the official account download and verify every detected meal before saving.",
-    "h1": "How to Import Lose It! History into MacroTrackr"
+    "title": "Export Your Lose It! Data and Import It into MacroTrackr",
+    "description": "Download your Lose It! food log from your account, then import it into MacroTrackr and check every meal before saving.",
+    "h1": "Export Your Lose It! Data and Import It into MacroTrackr"
   },
   "/open-source": {
     "title": "Open Source Macro Tracker, Self-Hostable — MacroTrackr",

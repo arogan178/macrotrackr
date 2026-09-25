@@ -2,8 +2,8 @@
   {
     "slug": "myfitnesspal",
     "sourceName": "MyFitnessPal",
-    "title": "How to Import MyFitnessPal History into MacroTrackr",
-    "description": "Move your MyFitnessPal meal history into MacroTrackr from the official nutrition CSV export, with a preview before anything is saved.",
+    "title": "Export Your MyFitnessPal Data and Import It into MacroTrackr",
+    "description": "Download your MyFitnessPal nutrition CSV, then import it into MacroTrackr and preview every meal before anything is saved.",
     "summary": "Keep the history you already built, then continue tracking without banner ads or a barcode paywall.",
     "exportSteps": [
       "In MyFitnessPal, open Nutrition or Progress and choose Export. On the website, open Reports and choose Export.",
@@ -17,8 +17,8 @@
   {
     "slug": "cronometer",
     "sourceName": "Cronometer",
-    "title": "How to Import Cronometer History into MacroTrackr",
-    "description": "Move Cronometer diary entries into MacroTrackr using Cronometer's CSV export and review the parsed meals before saving them.",
+    "title": "Export Your Cronometer Data and Import It into MacroTrackr",
+    "description": "Export your Cronometer diary as a CSV, then import it into MacroTrackr and review the parsed meals before saving them.",
     "summary": "Bring your diary history with you while moving to a faster, macro-focused tracker.",
     "exportSteps": [
       "Open Cronometer Account Settings and find Account Data.",
@@ -32,8 +32,8 @@
   {
     "slug": "macrofactor",
     "sourceName": "MacroFactor",
-    "title": "How to Import MacroFactor History into MacroTrackr",
-    "description": "Move MacroFactor nutrition history into MacroTrackr from a granular data export, with a full preview before import.",
+    "title": "Export Your MacroFactor Data and Import It into MacroTrackr",
+    "description": "Export your MacroFactor nutrition history from Data Management, then import it into MacroTrackr with a full preview first.",
     "summary": "Retain your logged history and move to transparent targets with an open-source core.",
     "exportSteps": [
       "In MacroFactor, tap More, then Data Management, then Data Export.",
@@ -47,8 +47,8 @@
   {
     "slug": "lose-it",
     "sourceName": "Lose It!",
-    "title": "How to Import Lose It! History into MacroTrackr",
-    "description": "Move Lose It! food history into MacroTrackr from the official account download and verify every detected meal before saving.",
+    "title": "Export Your Lose It! Data and Import It into MacroTrackr",
+    "description": "Download your Lose It! food log from your account, then import it into MacroTrackr and check every meal before saving.",
     "summary": "Bring your existing logs into an ad-free tracker with custom macro targets and optional self-hosting.",
     "exportSteps": [
       "Sign in to my.loseit.com from a desktop web browser.",

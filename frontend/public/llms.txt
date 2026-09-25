@@ -9,8 +9,12 @@ and all calculators are free. Barcode scanning uses the OpenFoodFacts database
 and is free with no premium tier. There are no banner ads and no third-party ad
 trackers.
 
-The site renders client-side, so pages fetched without JavaScript return a
-reduced fallback. The summaries below carry the substance of each page.
+The hosted free plan shows the last 7 days of history and keeps 5 saved meals.
+Pro adds the full history, 30 and 90 day trends and unlimited saved meals.
+Self-hosting has no plan limits.
+
+Every page listed here is rendered to HTML at build time, so it reads the same
+with or without JavaScript.
 
 ## Calculators
 
@@ -28,6 +32,9 @@ reduced fallback. The summaries below carry the substance of each page.
 - [Protein Calculator](https://macrotrackr.com/tools/protein-calculator): daily
   protein in grams from 1.2 to 2.4 g/kg depending on training context, plus a
   per-meal figure.
+- [BMR vs TDEE](https://macrotrackr.com/tools/bmr-vs-tdee): BMR is what you
+  burn at rest, TDEE is what you burn across the day. Which one to set calorie
+  targets from, and the activity factors that connect them.
 
 ## Comparisons
 
@@ -46,16 +53,37 @@ rather than here, where they would be quoted long after they stopped being true.
 
 ## Switching from another tracker
 
-CSV import with a preview before anything is written:
+How to export your data from each app, then import the CSV into MacroTrackr
+with a preview before anything is written:
 [MyFitnessPal](https://macrotrackr.com/migrate/myfitnesspal),
 [Cronometer](https://macrotrackr.com/migrate/cronometer),
 [MacroFactor](https://macrotrackr.com/migrate/macrofactor),
 [Lose It!](https://macrotrackr.com/migrate/lose-it).
 
+## Guides
+
+- [How to Estimate Restaurant Meals Without Guessing Blind](https://macrotrackr.com/blog/how-to-estimate-restaurant-meals-without-guessing-blind):
+  logging restaurant meals with no label, no recipe and no time for
+  perfectionism.
+- [Why Weekly Averages Beat Perfect Days](https://macrotrackr.com/blog/why-weekly-averages-beat-perfect-days):
+  the weekly average as the metric that settles all-or-nothing swings.
+- [Macro Tracking Tips for Beginners](https://macrotrackr.com/blog/macro-tracking-tips-for-beginners):
+  seven practical habits for staying consistent.
+- [Understanding Protein Intake](https://macrotrackr.com/blog/understanding-protein-intake):
+  how much protein you need, the best sources, and hitting the target.
+- [Meal Prep Strategies for Accurate Macro Tracking](https://macrotrackr.com/blog/meal-prep-for-macro-tracking):
+  meal prep that makes a week of logging easier and more accurate.
+- [Finding Your Optimal Carb-to-Fat Ratio](https://macrotrackr.com/blog/carbs-fats-balance):
+  balancing carbohydrates and fats for goals, lifestyle and preference.
+
 ## Other
 
+- [Open source and self-hosting](https://macrotrackr.com/open-source): AGPLv3,
+  self-hostable with Docker on Unraid, CasaOS, Umbrel, TrueNAS or a VPS.
+  SQLite, local accounts, no telemetry, no licence key.
 - [Pricing](https://macrotrackr.com/pricing)
 - [Blog](https://macrotrackr.com/blog)
+- [Contact](https://macrotrackr.com/contact)
 - [Source code](https://github.com/arogan178/macrotrackr) (AGPLv3, Docker)
 - [Privacy policy](https://macrotrackr.com/privacy)
 

@@ -52,7 +52,7 @@ describe("MigrationGuidePage", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /import myfitnesspal history/i,
+        name: /export your myfitnesspal data/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/limits file export to premium/i)).toBeVisible();
