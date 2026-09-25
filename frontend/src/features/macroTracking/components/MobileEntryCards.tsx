@@ -2,7 +2,7 @@ import { memo, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
-import { ChevronDownIcon, IconButton } from "@/components/ui";
+import { Button, ChevronDownIcon, CopyIcon, IconButton } from "@/components/ui";
 import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroEntry } from "@/types/macro";
 
@@ -27,10 +27,13 @@ const MobileEntryCards = memo(
       isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
+      canCopyDate,
+      handleCopyDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
+      onLogAgain,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -124,6 +127,20 @@ const MobileEntryCards = memo(
       </motion.div>
     );
 
+    // In the open day rather than its header, which has no room left on a phone.
+    const renderCopyDay = (group: GroupedEntry) =>
+      canCopyDate(group.date) && (
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            buttonSize="sm"
+            leftIcon={<CopyIcon className="h-4 w-4" />}
+            text="Copy to today"
+            onClick={(event) => handleCopyDate(group.date, event)}
+          />
+        </div>
+      );
+
     const renderEntryCard = (entry: MacroEntry, index?: number) => {
       const card = (
         <EntryCard
@@ -136,6 +153,7 @@ const MobileEntryCards = memo(
           calculateCalories={calculateCalories}
           onSaveMeal={onSaveMeal}
           onUnsaveMeal={onUnsaveMeal}
+          onLogAgain={onLogAgain}
           isMealSaved={isMealSaved(entry.id)}
           isSelectionMode={isSelectionMode}
           isSelected={isEntrySelected(entry.id)}
@@ -197,6 +215,12 @@ const MobileEntryCards = memo(
                   {item.type === "header" ? (
                     <div className="border-b border-border">
                       {renderDateHeader(item.group)}
+                      {!isDateCollapsed(item.group.date) &&
+                        canCopyDate(item.group.date) && (
+                        <div className="px-4 pt-3">
+                          {renderCopyDay(item.group)}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="p-4 pt-0">
@@ -248,6 +272,7 @@ const MobileEntryCards = memo(
                     }}
                   >
                     <div className="space-y-3 p-4">
+                      {renderCopyDay(group)}
                       {group.entries.map((entry, index) =>
                         renderEntryCard(entry, index),
                       )}

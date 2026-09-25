@@ -54,6 +54,8 @@ interface EntryHistoryProps {
   ) => Promise<void>;
   onExportCsv?: () => Promise<void> | void;
   isExportingCsv?: boolean;
+  onLogAgain?: (entry: MacroEntry) => void;
+  onCopyDayToToday?: (entries: MacroEntry[]) => void;
 }
 
 const EntryHistoryComponent = function EntryHistory({
@@ -71,6 +73,8 @@ const EntryHistoryComponent = function EntryHistory({
   onGroupMeals,
   onExportCsv,
   isExportingCsv = false,
+  onLogAgain,
+  onCopyDayToToday,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const initializedDatesReference = useRef<Set<string>>(new Set());
@@ -78,6 +82,7 @@ const EntryHistoryComponent = function EntryHistory({
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
+  const [dateToCopy, setDateToCopy] = useState<string | undefined>();
 
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedEntryIds, setSelectedEntryIds] = useState<Set<number>>(
@@ -258,6 +263,19 @@ const EntryHistoryComponent = function EntryHistory({
     [],
   );
 
+  const canCopyDate = useCallback(
+    (date: string) => Boolean(onCopyDayToToday) && date !== todayFormatted,
+    [onCopyDayToToday, todayFormatted],
+  );
+
+  const handleCopyDate = useCallback(
+    (date: string, event: React.MouseEvent) => {
+      event.stopPropagation();
+      setDateToCopy(date);
+    },
+    [],
+  );
+
   const isDateCollapsed = useCallback(
     (date: string) => collapsedDates.has(date),
     [collapsedDates],
@@ -282,10 +300,13 @@ const EntryHistoryComponent = function EntryHistory({
       isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
+      canCopyDate,
+      handleCopyDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
+      onLogAgain,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -297,10 +318,13 @@ const EntryHistoryComponent = function EntryHistory({
       isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
+      canCopyDate,
+      handleCopyDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
+      onLogAgain,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -320,6 +344,17 @@ const EntryHistoryComponent = function EntryHistory({
     setIsDeleteModalOpen(false);
     setDateToDelete(undefined);
   }, [dateToDelete, totalEntries, deleteEntry]);
+
+  const entriesToCopy = useMemo(
+    () =>
+      totalEntries.find((group) => group.date === dateToCopy)?.entries ?? [],
+    [totalEntries, dateToCopy],
+  );
+
+  const confirmCopyDate = useCallback(() => {
+    onCopyDayToToday?.(entriesToCopy);
+    setDateToCopy(undefined);
+  }, [onCopyDayToToday, entriesToCopy]);
 
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
@@ -551,6 +586,19 @@ const EntryHistoryComponent = function EntryHistory({
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
         isDanger
+      />
+
+      <Modal
+        isOpen={dateToCopy !== undefined}
+        onClose={() => setDateToCopy(undefined)}
+        title="Copy to today"
+        variant="confirmation"
+        message={`Add ${entriesToCopy.length} ${
+          entriesToCopy.length === 1 ? "entry" : "entries"
+        } from ${dateToCopy ?? ""} to today, at the same times and meals?`}
+        confirmLabel="Copy"
+        cancelLabel="Cancel"
+        onConfirm={confirmCopyDate}
       />
 
       <Modal

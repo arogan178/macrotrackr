@@ -340,3 +340,87 @@ describe("EntryHistoryHelpers & Panel", () => {
     expect(deleteEntry).toHaveBeenCalledWith(41, { undoable: false });
   });
 });
+
+describe("EntryHistoryPanel re-logging", () => {
+  const today = todayISO();
+  const todayEntry: MacroEntry = {
+    id: 51,
+    mealName: "Toast",
+    mealType: "breakfast",
+    protein: 5,
+    carbs: 20,
+    fats: 2,
+    entryDate: today,
+    entryTime: "08:00",
+    createdAt: new Date().toISOString(),
+  };
+  const pastEntries: MacroEntry[] = [
+    { ...todayEntry, id: 52, mealName: "Eggs", entryDate: "2026-07-30" },
+    {
+      ...todayEntry,
+      id: 53,
+      mealName: "Pasta",
+      mealType: "dinner",
+      entryDate: "2026-07-30",
+      entryTime: "19:30",
+    },
+  ];
+
+  const renderPanel = (
+    history: MacroEntry[],
+    handlers: {
+      onLogAgain?: (entry: MacroEntry) => void;
+      onCopyDayToToday?: (entries: MacroEntry[]) => void;
+    },
+  ) =>
+    render(
+      <QueryClientProvider client={createQueryClient()}>
+        <EntryHistoryPanel
+          history={history}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={() => false}
+          isEditing={false}
+          {...handlers}
+        />
+      </QueryClientProvider>,
+    );
+
+  it("logs an entry again from its row", () => {
+    const onLogAgain = vi.fn();
+    renderPanel([todayEntry], { onLogAgain });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Log again" })[0]);
+
+    expect(onLogAgain).toHaveBeenCalledWith(todayEntry);
+  });
+
+  it("offers to copy past days to today, but not today itself", () => {
+    renderPanel([todayEntry, ...pastEntries], { onCopyDayToToday: vi.fn() });
+
+    expect(
+      screen.getAllByLabelText("Copy Jul 30, 2026 to today").length,
+    ).toBeGreaterThan(0);
+    expect(screen.queryByLabelText("Copy Today to today")).toBeNull();
+  });
+
+  it("copies every entry of a past day once confirmed", async () => {
+    const modalRoot = document.createElement("div");
+    modalRoot.setAttribute("id", "modal-root");
+    document.body.append(modalRoot);
+    const onCopyDayToToday = vi.fn();
+    renderPanel(pastEntries, { onCopyDayToToday });
+
+    fireEvent.click(screen.getAllByLabelText("Copy Jul 30, 2026 to today")[0]);
+    expect(
+      await screen.findByText(
+        "Add 2 entries from Jul 30, 2026 to today, at the same times and meals?",
+      ),
+    ).toBeInTheDocument();
+    expect(onCopyDayToToday).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    expect(onCopyDayToToday).toHaveBeenCalledWith(pastEntries);
+  });
+});
