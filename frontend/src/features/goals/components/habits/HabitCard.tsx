@@ -175,11 +175,12 @@ export default function HabitCard({
           paddingClass
         )}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center">
+        {/* The actions wrap onto their own row when the title would not fit beside them */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-auto items-center">
             <div
               className={cn(
-                "mr-3 rounded-control",
+                "mr-3 shrink-0 rounded-control",
                 iconWrapperPadding,
                 getAccentClass(accentColor)
               )}
@@ -189,16 +190,9 @@ export default function HabitCard({
               />
             </div>
             {resolvedShow.title && (
-              <h4 className="mr-2 font-semibold tracking-tight text-foreground/90">{title}</h4>
+              <h4 className="min-w-0 font-semibold tracking-tight text-foreground/90">{title}</h4>
             )}
           </div>
-
-          {resolvedShow.completionBadge && isComplete && (
-            <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs text-success">
-              <CheckIcon size="sm" />
-              Complete
-            </span>
-          )}
 
           {actions &&
             id &&
@@ -252,6 +246,12 @@ export default function HabitCard({
                 ) : (
                   <AnimatedNumber value={progress} suffix="%" />
                 )}
+              </span>
+            )}
+            {resolvedShow.completionBadge && isComplete && (
+              <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs text-success">
+                <CheckIcon size="sm" />
+                Complete
               </span>
             )}
           </div>

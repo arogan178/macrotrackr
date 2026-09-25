@@ -136,28 +136,14 @@ function HabitActions({
         >
           <CheckIcon size="sm" />
         </button>
-      )}{" "}
-      {/* Delete button - outside menu for completed habits */}
-      {isComplete && (
-        <button
-          onClick={handleDelete}
-          disabled={isActionInProgress}
-          className="rounded-full p-1.5 text-primary hover:bg-primary/10"
-          title="Delete habit"
-        >
-          <TrashIcon size="sm" />
-        </button>
-      )}{" "}
-      {/* More actions menu button - completed habits only need it to reset */}
-      {(!isComplete || handleReset) && (
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
-          title="More actions"
-        >
-          <MoreVerticalIcon size="sm" />
-        </button>
-      )}{" "}
+      )}
+      <button
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
+        title="More actions"
+      >
+        <MoreVerticalIcon size="sm" />
+      </button>
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
         <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-control border border-border bg-surface py-0.5 text-xs">
@@ -182,17 +168,14 @@ function HabitActions({
             </button>
           )}
 
-          {/* Only show delete in dropdown if habit is NOT completed */}
-          {!isComplete && (
-            <button
-              onClick={handleDelete}
-              disabled={isActionInProgress}
-              className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface-2"
-            >
-              <TrashIcon size="sm" className="mr-1.5" />
-              Delete
-            </button>
-          )}
+          <button
+            onClick={handleDelete}
+            disabled={isActionInProgress}
+            className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface-2"
+          >
+            <TrashIcon size="sm" className="mr-1.5" />
+            Delete
+          </button>
         </div>
       )}
     </div>
