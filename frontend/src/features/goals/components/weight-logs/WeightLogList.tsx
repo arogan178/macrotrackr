@@ -191,7 +191,7 @@ function WeightLogList({
                       }
                       onClick={() => setEntryToEdit(entry)}
                       disabled={isSaving || !isValidDate}
-                      className="opacity-0 transition-opacity duration-200 group-hover/item:opacity-100"
+                      className="opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100"
                     />
                     <IconButton
                       variant="delete"
@@ -214,7 +214,7 @@ function WeightLogList({
                           <LoadingSpinner size="sm" />
                         ) : undefined
                       }
-                      className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 ${
+                      className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100 ${
                         (isSaving && itemToDelete?.id === entry.id) ||
                         !isValidDate
                           ? "cursor-not-allowed opacity-50"
