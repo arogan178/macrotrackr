@@ -29,6 +29,7 @@ export default function BmrCalculatorPage() {
       title="BMR Calculator"
       subtitle="Estimate the calories your body uses at complete rest to keep essential functions running."
       canonicalPath="/tools/bmr-calculator"
+      shareInputs={stats.shareInputs}
       ctaResult={
         statsReady
           ? {

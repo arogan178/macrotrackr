@@ -19,6 +19,7 @@ import {
   calculatorStatValueClass,
 } from "../tools/calculatorStyles";
 import ResultHeadline from "../tools/ResultHeadline";
+import { useSharedInputs } from "../tools/sharedInputs";
 import { useBodyStats } from "../tools/useBodyStats";
 
 const TRAINING_GOAL_OPTIONS = [
@@ -73,6 +74,19 @@ export default function ProteinCalculatorPage() {
   const [proteinRatio, setProteinRatio] = useState(2.2);
   const [mealsPerDay, setMealsPerDay] = useState(4);
 
+  useSharedInputs((read) => {
+    const ratio = read.number("ratio", 1.2, 2.4);
+    const meals = read.number("meals", 1, 8);
+
+    if (
+      ratio !== undefined &&
+      TRAINING_GOAL_OPTIONS.some((option) => Number(option.value) === ratio)
+    ) {
+      setProteinRatio(ratio);
+    }
+    if (meals !== undefined && Number.isInteger(meals)) setMealsPerDay(meals);
+  });
+
   const weightReady = weightKg > 0;
   const totalProteinGrams = Math.round(weightKg * proteinRatio);
   const safeMealsPerDay = Math.max(1, mealsPerDay);
@@ -86,6 +100,7 @@ export default function ProteinCalculatorPage() {
       title="Protein Intake Calculator"
       subtitle="Estimate a practical daily protein target for muscle building, fat loss, or endurance training."
       canonicalPath="/tools/protein-calculator"
+      shareInputs={{ ...stats.shareInputs, ratio: proteinRatio, meals: mealsPerDay }}
       ctaResult={
         weightReady
           ? {

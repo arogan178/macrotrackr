@@ -24,6 +24,7 @@ import {
   calculatorStatValueClass,
 } from "../tools/calculatorStyles";
 import ResultHeadline from "../tools/ResultHeadline";
+import { useSharedInputs } from "../tools/sharedInputs";
 import { useBodyStats } from "../tools/useBodyStats";
 
 // ~7,700 kcal per kg of body fat, spread across seven days.
@@ -43,6 +44,16 @@ export default function WeightLossCalculatorPage() {
 
   const [targetWeightKg, setTargetWeightKg] = useState(75);
   const [weeklyPaceKg, setWeeklyPaceKg] = useState(0.5);
+
+  useSharedInputs((read) => {
+    const target = read.number("target", 15, 500);
+    const pace = read.number("pace", 0.25, 1);
+
+    if (target !== undefined) setTargetWeightKg(target);
+    if (pace !== undefined && PACE_OPTIONS.some((option) => Number(option.value) === pace)) {
+      setWeeklyPaceKg(pace);
+    }
+  });
 
   const bmr = statsReady ? calculateBMR(weightKg, heightCm, age, gender) : 0;
   const activityNumber = getActivityLevelFromString(activityLevel);
@@ -88,6 +99,11 @@ export default function WeightLossCalculatorPage() {
       title="Weight Loss & Timeline Calculator"
       subtitle="Estimate a daily calorie target, a realistic pace, and a projected date for your goal weight."
       canonicalPath="/tools/weight-loss-calculator"
+      shareInputs={{
+        ...stats.shareInputs,
+        target: Math.round(targetWeightKg * 10) / 10,
+        pace: weeklyPaceKg,
+      }}
       ctaResult={
         statsReady
           ? {
