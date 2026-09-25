@@ -2,6 +2,8 @@
 // Usage example:
 // import { UserSettings, Gender, ActivityLevel } from '@/types/user';
 
+import type { UnitSystem } from "@/utils/unitConversion";
+
 import type { Gender } from "./activity";
 
 export type { ActivityLevel, Gender } from "./activity";
@@ -17,6 +19,7 @@ export interface UserSettings {
   weight: number | undefined;
   activityLevel: number | undefined;
   gender: Gender | undefined;
+  unitSystem?: UnitSystem;
   subscription?: {
     status: "free" | "pro" | "canceled";
   };

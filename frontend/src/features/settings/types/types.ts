@@ -8,6 +8,8 @@
 // Re-export for backwards compatibility
 
 
+import type { UnitSystem } from "@/utils/unitConversion";
+
 export type Gender = "male" | "female";
 
 // Represents core user settings / details (camelCase)
@@ -21,6 +23,7 @@ export interface UserSettings {
   weight: number | undefined;
   activityLevel: number | undefined; // Store the number (1-5) consistent with backend
   gender: Gender | undefined;
+  unitSystem?: UnitSystem;
 }
 
 // Represents calculated nutritional info based on UserSettings

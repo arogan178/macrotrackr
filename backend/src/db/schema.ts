@@ -33,6 +33,7 @@ const SCHEMA_SQL = `
             gender TEXT CHECK(gender IN ('male', 'female')),
             activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5),
             switching_source TEXT CHECK(switching_source IN ('cronometer', 'loseit', 'macrofactor', 'myfitnesspal', 'new_to_tracking', 'other', 'spreadsheet', 'unknown')),
+            unit_system TEXT DEFAULT 'metric' CHECK(unit_system IN ('metric', 'imperial')), -- display only; values are always stored metric
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -234,6 +235,12 @@ function applyMigrations(db: Database) {
     "user_details",
     "switching_source",
     "TEXT CHECK(switching_source IN ('cronometer', 'loseit', 'macrofactor', 'myfitnesspal', 'new_to_tracking', 'other', 'spreadsheet', 'unknown'))",
+  );
+  checkAndAddColumn(
+    db,
+    "user_details",
+    "unit_system",
+    "TEXT DEFAULT 'metric' CHECK(unit_system IN ('metric', 'imperial'))",
   );
   checkAndAddColumn(
     db,

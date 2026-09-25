@@ -11,14 +11,22 @@ import LineChartComponent from "@/components/chart/LineChartComponent";
 import { BarChartIcon, StateCard } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
+import { formatGrouped } from "@/lib/formatNumber";
 import { useStore } from "@/store/store";
+import {
+  formatWeight,
+  fromKg,
+  type UnitSystem,
+  weightUnit,
+} from "@/utils/unitConversion";
 
 // Custom Tooltip specific to Weight Goal Progress
 function WeightCustomTooltip({
   active,
   payload,
   label,
-}: TooltipProps<ValueType, NameType>) {
+  unit,
+}: TooltipProps<ValueType, NameType> & { unit: string }) {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
     const entryDate =
@@ -45,8 +53,9 @@ function WeightCustomTooltip({
               className="font-semibold"
               style={{ color: payload[0].color ?? payload[0].stroke }}
             >
-              {typeof data.weight === "number" ? data.weight.toFixed(1) : "N/A"}{" "}
-              kg
+              {typeof data.weight === "number"
+                ? `${formatGrouped(data.weight, 1)} ${unit}`
+                : "N/A"}
             </span>
           </span>
         </div>
@@ -57,7 +66,13 @@ function WeightCustomTooltip({
   return;
 }
 
-function WeightGoalProgressChart() {
+// Plotted in the user's unit so the axis, target line and tooltip agree.
+function WeightGoalProgressChart({
+  unitSystem = "metric",
+}: {
+  unitSystem?: UnitSystem;
+}) {
+  const unit = weightUnit(unitSystem);
   const { data: weightLog = [], isLoading: weightLogLoading } = useWeightLog();
   const { data: weightGoals, isLoading: weightGoalsLoading } = useWeightGoals();
   const setLogWeightModalOpen = useStore(
@@ -94,25 +109,27 @@ function WeightGoalProgressChart() {
 
         return {
           name: format(parseISO(dateKey), "MMM d"),
-          weight: avgWeight,
+          weight: fromKg(avgWeight, unitSystem),
           fullDate: sortedTimestamps[0],
           id: ids[0],
         };
       });
-  }, [weightLog]);
+  }, [weightLog, unitSystem]);
+
+  const targetWeight = weightGoals?.targetWeight;
+  const plottedTarget =
+    targetWeight === undefined ? undefined : fromKg(targetWeight, unitSystem);
 
   // Calculate Y-axis domain using shared helper for identical behavior
   const { domainMin, domainMax } = React.useMemo(() => {
     const weights = chartData.map((d) => d.weight);
 
-    return getChartDomain(weights, weightGoals?.targetWeight);
-  }, [chartData, weightGoals?.targetWeight]);
+    return getChartDomain(weights, plottedTarget);
+  }, [chartData, plottedTarget]);
 
   // Weight is a live value, not a macro, so it is the brand green whichever
   // way the goal points.
   const lineColor = "var(--color-primary)";
-
-  const targetWeight = weightGoals?.targetWeight;
 
   // Define chart elements (gradients, area, reference line)
   const chartElements = (
@@ -132,12 +149,12 @@ function WeightGoalProgressChart() {
       />
       {targetWeight && (
         <ReferenceLine
-          y={targetWeight}
+          y={plottedTarget}
           stroke={lineColor}
           strokeOpacity={0.5}
           strokeDasharray="4 4"
           label={{
-            value: `Target: ${targetWeight} kg`,
+            value: `Target: ${formatWeight(targetWeight, unitSystem)}`,
             position: "insideTopRight",
             fill: "var(--color-muted)",
             fontSize: 11,
@@ -183,7 +200,7 @@ function WeightGoalProgressChart() {
     tickFormatter: (value: number) => `${value}`,
     width: 35,
     label: {
-      value: "kg",
+      value: unit,
       angle: -90,
       position: "insideLeft",
       fill: "var(--color-muted)",
@@ -232,7 +249,7 @@ function WeightGoalProgressChart() {
           error={error}
           emptyState={emptyStateComponent}
           showNoDataMessage={chartData.length === 0}
-          tooltipContent={<WeightCustomTooltip />}
+          tooltipContent={<WeightCustomTooltip unit={unit} />}
           chartElements={chartElements}
           xAxisProps={xAxisProps}
           yAxisProps={yAxisProps}

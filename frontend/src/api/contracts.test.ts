@@ -92,6 +92,7 @@ describe("apiServices contracts", () => {
       gender: undefined,
       activityLevel: 3,
       switchingSource: undefined,
+      unitSystem: "metric",
       analyticsTrafficType: "customer",
       isProfileComplete: true,
       subscription: {

@@ -13,8 +13,9 @@ import { userApi } from "@/api/user";
 import Reveal from "@/components/animation/Reveal";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
+import HeightField from "@/components/form/HeightField";
 import InfoCard from "@/components/form/InfoCard";
-import NumberField from "@/components/form/NumberField";
+import WeightField from "@/components/form/WeightField";
 import Button from "@/components/ui/Button";
 import { TYPE_SCALE } from "@/components/ui/Heading";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
@@ -45,9 +46,17 @@ import {
 import { todayISO } from "@/utils/dateUtilities";
 import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
 import {
+  formatHeightRange,
+  formatWeightRange,
+  fromKg,
+  type UnitSystem,
+  weightUnit,
+} from "@/utils/unitConversion";
+import {
   ACTIVITY_LEVELS,
   createNutritionProfile,
   GENDER_OPTIONS,
+  UNIT_SYSTEM_OPTIONS,
 } from "@/utils/userConstants";
 
 const TOTAL_STEPS = 3;
@@ -108,6 +117,7 @@ export function ProfileCreationForm() {
   const [height, setHeight] = useState<number | null>(null);
   const [weight, setWeight] = useState<number | null>(null);
   const [activityLevel, setActivityLevel] = useState<number | null>(null);
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>("metric");
 
   // Goal data
   const [weightGoal, setWeightGoal] = useState<WeightGoalChoice | "">("");
@@ -127,7 +137,13 @@ export function ProfileCreationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateStep1 = (): Record<string, string> => {
-    const newErrors = checkStep1(dateOfBirth, gender, height, weight);
+    const newErrors = checkStep1(
+      dateOfBirth,
+      gender,
+      height,
+      weight,
+      unitSystem,
+    );
     setErrors(newErrors);
 
     return newErrors;
@@ -142,7 +158,7 @@ export function ProfileCreationForm() {
 
   const validateGoalStep = (): Record<string, string> => {
     const newErrors = {
-      ...checkGoalStep(weightGoal, targetWeight, weight),
+      ...checkGoalStep(weightGoal, targetWeight, weight, unitSystem),
       ...(switchingSource
         ? {}
         : { switchingSource: "Choose the option that fits best" }),
@@ -183,7 +199,12 @@ export function ProfileCreationForm() {
   // direction from the two weights alone meant a target left over from "Lose
   // weight" kept printing deficit numbers after the user switched to "Gain",
   // and the whole card sat frozen until submit finally rejected it.
-  const liveGoalErrors = checkGoalStep(weightGoal, targetWeight, weight);
+  const liveGoalErrors = checkGoalStep(
+    weightGoal,
+    targetWeight,
+    weight,
+    unitSystem,
+  );
 
   // "Required" is not feedback while the field is still untouched, so the live
   // check only speaks once there is a number to disagree with.
@@ -281,6 +302,7 @@ export function ProfileCreationForm() {
         gender,
         activityLevel: activityLevel ?? undefined,
         switchingSource: switchingSource || undefined,
+        unitSystem,
       });
 
       // Step 3: Record the weight goal so the dashboard opens with a real
@@ -393,10 +415,20 @@ export function ProfileCreationForm() {
             <FieldError message={errors.gender} />
           </div>
 
+          <Dropdown
+            label="Units"
+            value={unitSystem}
+            onChange={(value: string | number) => {
+              setUnitSystem(value === "imperial" ? "imperial" : "metric");
+            }}
+            options={UNIT_SYSTEM_OPTIONS}
+          />
+
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <NumberField
-                label={`Height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`}
+            {/* Feet and inches are two inputs, too narrow to share a row. */}
+            <div className={unitSystem === "imperial" ? "col-span-2" : undefined}>
+              <HeightField
+                label={`Height (${formatHeightRange(USER_MINIMUM_HEIGHT, USER_MAXIMUM_HEIGHT, unitSystem)})`}
                 value={height ?? undefined}
                 onChange={(value: number | undefined) => {
                   setHeight(value ?? null);
@@ -404,18 +436,17 @@ export function ProfileCreationForm() {
                     setErrors((previous) => ({ ...previous, height: "" }));
                   }
                 }}
+                unitSystem={unitSystem}
                 min={USER_MINIMUM_HEIGHT}
                 max={USER_MAXIMUM_HEIGHT}
-                step={1}
-                unit="cm"
                 required
               />
               <FieldError message={errors.height} />
             </div>
 
             <div>
-              <NumberField
-                label={`Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
+              <WeightField
+                label={`Weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`}
                 value={weight ?? undefined}
                 onChange={(value: number | undefined) => {
                   setWeight(value ?? null);
@@ -423,10 +454,9 @@ export function ProfileCreationForm() {
                     setErrors((previous) => ({ ...previous, weight: "" }));
                   }
                 }}
-                min={USER_MINIMUM_WEIGHT}
-                max={USER_MAXIMUM_WEIGHT}
-                step={0.1}
-                unit="kg"
+                unitSystem={unitSystem}
+                minKg={USER_MINIMUM_WEIGHT}
+                maxKg={USER_MAXIMUM_WEIGHT}
                 required
               />
               <FieldError message={errors.weight} />
@@ -575,8 +605,8 @@ export function ProfileCreationForm() {
         <Reveal key={weightGoal || "unset"} className="space-y-4">
           {weightGoal !== "" && weightGoal !== "maintain" && (
             <div>
-              <NumberField
-                label={`Target Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
+              <WeightField
+                label={`Target Weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`}
                 value={targetWeight ?? undefined}
                 onChange={(value: number | undefined) => {
                   setTargetWeight(value ?? null);
@@ -587,10 +617,9 @@ export function ProfileCreationForm() {
                     }));
                   }
                 }}
-                min={USER_MINIMUM_WEIGHT}
-                max={USER_MAXIMUM_WEIGHT}
-                step={0.1}
-                unit="kg"
+                unitSystem={unitSystem}
+                minKg={USER_MINIMUM_WEIGHT}
+                maxKg={USER_MAXIMUM_WEIGHT}
                 required
               />
               <FieldError message={targetWeightError} />
@@ -617,8 +646,11 @@ export function ProfileCreationForm() {
                         <dt className={SUMMARY_LABEL}>Expected change</dt>
                         <dd>
                           <Value
-                            value={Math.abs(goalCalculations.weeklyChange)}
-                            unit="kg"
+                            value={fromKg(
+                              Math.abs(goalCalculations.weeklyChange),
+                              unitSystem,
+                            )}
+                            unit={weightUnit(unitSystem)}
                             suffix="per week"
                           />
                         </dd>

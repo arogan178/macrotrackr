@@ -25,6 +25,8 @@ import {
   type SwitchingSource,
 } from "@shared/product-analytics";
 
+type UnitSystem = "metric" | "imperial";
+
 type UserRouteContext = AuthenticatedRouteContextWithUser<
   Record<string, unknown>
 > & {
@@ -57,6 +59,7 @@ interface UserDetailsResult {
   gender: "male" | "female" | null;
   activity_level: number | null;
   switching_source: SwitchingSource | null;
+  unit_system: UnitSystem | null;
 }
 
 function normalizeSubscriptionStatus(
@@ -105,7 +108,7 @@ export const userRoutes = (app: Elysia) =>
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                     u.subscription_status,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
-                      ud.switching_source
+                      ud.switching_source, ud.unit_system
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
                WHERE u.id = ?
@@ -129,6 +132,7 @@ export const userRoutes = (app: Elysia) =>
               gender: dbResult.gender,
               activityLevel: dbResult.activity_level,
               switchingSource: dbResult.switching_source ?? null,
+              unitSystem: dbResult.unit_system ?? "metric",
               analyticsTrafficType: resolveAnalyticsTrafficType(
                 dbResult.email,
                 getConfig().ANALYTICS_INTERNAL_EMAILS,
@@ -200,6 +204,7 @@ export const userRoutes = (app: Elysia) =>
               weight,
               gender,
               activityLevel,
+              unitSystem,
             } = body as {
               firstName?: string;
               lastName?: string;
@@ -209,6 +214,7 @@ export const userRoutes = (app: Elysia) =>
               weight?: number;
               gender?: "male" | "female";
               activityLevel?: number;
+              unitSystem?: UnitSystem;
             };
 
             return await withTransactionAsync(db, async () => {
@@ -269,15 +275,16 @@ export const userRoutes = (app: Elysia) =>
               safeExecute(
                 db,
                 `INSERT INTO user_details (
-                   user_id, date_of_birth, height, weight, gender, activity_level, updated_at
+                   user_id, date_of_birth, height, weight, gender, activity_level, unit_system, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(user_id) DO UPDATE SET
                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
                    height = COALESCE(excluded.height, user_details.height),
                    weight = COALESCE(excluded.weight, user_details.weight),
                    gender = COALESCE(excluded.gender, user_details.gender),
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
+                   unit_system = COALESCE(excluded.unit_system, user_details.unit_system),
                    updated_at = CURRENT_TIMESTAMP`,
                 [
                   internalUserId,
@@ -286,6 +293,7 @@ export const userRoutes = (app: Elysia) =>
                   nullify(weight),
                   nullify(gender),
                   nullify(activityLevel),
+                  nullify(unitSystem),
                 ],
               );
 
@@ -375,6 +383,7 @@ export const userRoutes = (app: Elysia) =>
               gender,
               activityLevel,
               switchingSource,
+              unitSystem,
             } = body as {
               dateOfBirth?: string;
               height?: number;
@@ -382,6 +391,7 @@ export const userRoutes = (app: Elysia) =>
               gender?: "male" | "female";
               activityLevel?: number;
               switchingSource?: SwitchingSource;
+              unitSystem?: UnitSystem;
             };
 
             const { profileCompleted, response } = await withTransactionAsync(
@@ -399,9 +409,9 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   `INSERT INTO user_details (
-                   user_id, date_of_birth, height, weight, gender, activity_level, switching_source, updated_at
+                   user_id, date_of_birth, height, weight, gender, activity_level, switching_source, unit_system, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(user_id) DO UPDATE SET
                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
                    height = COALESCE(excluded.height, user_details.height),
@@ -409,6 +419,7 @@ export const userRoutes = (app: Elysia) =>
                    gender = COALESCE(excluded.gender, user_details.gender),
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
                    switching_source = COALESCE(excluded.switching_source, user_details.switching_source),
+                   unit_system = COALESCE(excluded.unit_system, user_details.unit_system),
                    updated_at = CURRENT_TIMESTAMP`,
                   [
                     internalUserId,
@@ -418,6 +429,7 @@ export const userRoutes = (app: Elysia) =>
                     nullify(gender),
                     nullify(activityLevel),
                     nullify(switchingSource),
+                    nullify(unitSystem),
                   ],
                 );
 

@@ -7,6 +7,7 @@ import {
 } from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
+import type { UnitSystem } from "@/utils/unitConversion";
 
 import { WeightGoalFormValues } from "../../types";
 
@@ -19,6 +20,7 @@ interface WeightGoalModalProps {
   targetWeight?: number;
   tdee: number;
   weightGoals: WeightGoals | undefined | null;
+  unitSystem?: UnitSystem;
 }
 
 function WeightGoalModal({
@@ -28,6 +30,7 @@ function WeightGoalModal({
   targetWeight,
   tdee,
   weightGoals,
+  unitSystem = "metric",
 }: WeightGoalModalProps) {
   const createWeightGoalMutation = useCreateWeightGoal();
   const updateWeightGoalMutation = useUpdateWeightGoal();
@@ -104,6 +107,7 @@ function WeightGoalModal({
         isLoading={isLoading}
         onSave={handleSave}
         onCanSaveChange={setCanSave}
+        unitSystem={unitSystem}
       />
     </Modal>
   );

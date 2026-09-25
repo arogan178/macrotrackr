@@ -39,6 +39,8 @@ export default function GoalsPage() {
     hasErrors,
   } = data;
 
+  const unitSystem = user?.unitSystem ?? "metric";
+
   const safeTargetWeight =
     currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
 
@@ -111,6 +113,7 @@ export default function GoalsPage() {
           isOpen={ui.isLogWeightModalOpen}
           onClose={actions.closeLogWeightModal}
           initialWeight={user?.weight}
+          unitSystem={unitSystem}
         />
         <WeightGoalModal
           isOpen={ui.isWeightGoalModalOpen}
@@ -119,6 +122,7 @@ export default function GoalsPage() {
           targetWeight={safeTargetWeight}
           tdee={nutritionProfile?.tdee ?? 0}
           weightGoals={normalizedWeightGoals}
+          unitSystem={unitSystem}
         />
         <div className="relative">
           {hasErrors ? (
@@ -141,9 +145,10 @@ export default function GoalsPage() {
                         onDelete={actions.openDeleteConfirmModal}
                         macroTarget={macroTarget ?? undefined}
                         tdee={nutritionProfile?.tdee ?? 0}
+                        unitSystem={unitSystem}
                       />
                     )}
-                    <WeightProgressTabs />
+                    <WeightProgressTabs unitSystem={unitSystem} />
                     <HabitTracker
                       habits={habits || []}
                       isLoading={habitsLoading}

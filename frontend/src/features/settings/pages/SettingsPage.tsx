@@ -137,6 +137,7 @@ export default function SettingsPage() {
         weight: settingsData.weight,
         gender: settingsData.gender as "male" | "female" | undefined,
         activityLevel: settingsData.activityLevel,
+        unitSystem: settingsData.unitSystem,
         subscription: settingsData.subscription,
       };
 
@@ -192,6 +193,7 @@ export default function SettingsPage() {
         weight: settings.weight,
         gender: settings.gender === "" ? undefined : settings.gender,
         activityLevel: settings.activityLevel,
+        unitSystem: settings.unitSystem,
       };
 
       try {

@@ -6,6 +6,7 @@ import {
   USER_MINIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
+import { formatHeightRange, formatWeightRange } from "@/utils/unitConversion";
 import { isOldEnough } from "@/utils/validation";
 
 import type { UserSettings } from "../types/types";
@@ -16,6 +17,7 @@ export function validateUserSettings(
   settings: UserSettings | undefined,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
+  const unitSystem = settings?.unitSystem ?? "metric";
 
   // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,7 +41,7 @@ export function validateUserSettings(
     (settings.height < USER_MINIMUM_HEIGHT ||
       settings.height > USER_MAXIMUM_HEIGHT)
   ) {
-    errors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
+    errors.height = `Please enter a valid height (${formatHeightRange(USER_MINIMUM_HEIGHT, USER_MAXIMUM_HEIGHT, unitSystem)})`;
   }
 
   // Weight validation
@@ -48,7 +50,7 @@ export function validateUserSettings(
     (settings.weight < USER_MINIMUM_WEIGHT ||
       settings.weight > USER_MAXIMUM_WEIGHT)
   ) {
-    errors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
+    errors.weight = `Please enter a valid weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`;
   }
 
   return errors;

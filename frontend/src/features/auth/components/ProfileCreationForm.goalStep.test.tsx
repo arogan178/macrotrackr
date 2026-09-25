@@ -131,7 +131,7 @@ describe("ProfileCreationForm goal step", () => {
     await user.type(screen.getByLabelText(/target weight/i), "85");
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      /target must be over 90 kg/i,
+      /target must be over 90.0 kg/i,
     );
     expect(screen.queryByText(/daily calorie target/i)).not.toBeInTheDocument();
   });
