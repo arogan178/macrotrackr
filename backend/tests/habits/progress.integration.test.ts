@@ -144,4 +144,13 @@ describe("habit progress", () => {
 
     expect(response.status).toBe(422);
   });
+
+  it("lists a habit saved without a colour", async () => {
+    db.run("UPDATE habits SET accent_color = NULL WHERE id = 'water'");
+    try {
+      expect(await readHabit("2026-09-25")).toMatchObject({ id: "water" });
+    } finally {
+      db.run("UPDATE habits SET accent_color = 'cyan' WHERE id = 'water'");
+    }
+  });
 });

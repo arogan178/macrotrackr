@@ -38,7 +38,8 @@ function toHabitResponse(habit: HabitRow, date: string) {
       habit.target > 0
         ? Math.min(100, Math.round((current / habit.target) * 100))
         : 0,
-    accentColor: habit.accent_color as
+    // Optional on create, so the column can be NULL; the response allows absent, not null.
+    accentColor: (habit.accent_color ?? undefined) as
       | "indigo"
       | "blue"
       | "cyan"
