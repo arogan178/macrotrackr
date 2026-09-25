@@ -17,6 +17,7 @@ import {
 } from "@/features/settings/utils/dataExport";
 import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
+import { todayISO } from "@/utils/dateUtilities";
 
 type ExportKind = "history" | "weight" | "habits";
 
@@ -48,7 +49,7 @@ const EXPORTS: {
     label: "Habits",
     description: "Each habit with its target and current progress.",
     run: async () => {
-      downloadCsv(buildHabitsCsv(await habitsApi.getHabits()), "habits");
+      downloadCsv(buildHabitsCsv(await habitsApi.getHabits(todayISO())), "habits");
     },
   },
 ];
