@@ -8,6 +8,7 @@ import {
   ProteinIcon,
 } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { formatWeight, type UnitSystem } from "@/utils/unitConversion";
 
 import type { InsightsData, NutritionAverage } from "../types/insightsTypes";
 
@@ -24,6 +25,7 @@ const PROTEIN_G_PER_KG = 1.6;
 function getProteinSuggestion(
   proteinAverage: number,
   bodyWeight: number | undefined,
+  unitSystem: UnitSystem,
 ): string | undefined {
   if (!proteinAverage || !bodyWeight) return undefined;
 
@@ -31,7 +33,7 @@ function getProteinSuggestion(
   const actual = Math.round(proteinAverage);
   if (actual >= target) return undefined;
 
-  return `Protein averaged ${actual} g/day, ${target - actual} g under the ${target} g that ${PROTEIN_G_PER_KG} g/kg works out to at ${bodyWeight} kg.`;
+  return `Protein averaged ${actual} g/day, ${target - actual} g under the ${target} g that ${PROTEIN_G_PER_KG} g/kg works out to at ${formatWeight(bodyWeight, unitSystem)}.`;
 }
 
 function getTrackingSuggestion(
@@ -50,7 +52,11 @@ export default function RecommendationsSection({
   const { macroBalance, macroDensity, dataQuality } = insights;
   const { data: user } = useUser();
 
-  const protein = getProteinSuggestion(averages.protein, user?.weight);
+  const protein = getProteinSuggestion(
+    averages.protein,
+    user?.weight,
+    user?.unitSystem ?? "metric",
+  );
   const tracking = getTrackingSuggestion(
     dataQuality.missedDays,
     dataQuality.totalDaysInPeriod,

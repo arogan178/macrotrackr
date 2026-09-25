@@ -14,15 +14,18 @@ import {
   useWeightLog,
 } from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
+import { formatWeight, type UnitSystem } from "@/utils/unitConversion";
 
 interface WeightLogListProps {
   isBulkConfirmModalOpen?: boolean;
   onBulkCancel?: () => void;
+  unitSystem?: UnitSystem;
 }
 
 function WeightLogList({
   isBulkConfirmModalOpen = false,
   onBulkCancel = () => {},
+  unitSystem = "metric",
 }: WeightLogListProps) {
   // Use TanStack Query hooks instead of Zustand store
   const { data: weightLog = [], isLoading } = useWeightLog();
@@ -170,7 +173,7 @@ function WeightLogList({
                         : "Invalid Date"}
                     </span>
                     <span className="mt-1 text-lg font-bold tracking-tight text-foreground/90">
-                      {entry.weight.toFixed(1)} kg
+                      {formatWeight(entry.weight, unitSystem)}
                     </span>
                   </div>
                   <IconButton
@@ -222,9 +225,10 @@ function WeightLogList({
           onClose={handleCancelDelete}
           title="Confirm Deletion"
           variant="confirmation"
-          message={`Are you sure you want to delete the weight entry (${itemToDelete.weight.toFixed(
-            1,
-          )} kg) from ${
+          message={`Are you sure you want to delete the weight entry (${formatWeight(
+            itemToDelete.weight,
+            unitSystem,
+          )}) from ${
             // Safely format the date in the modal message
             isValid(parseISO(itemToDelete.timestamp))
               ? format(parseISO(itemToDelete.timestamp), "PPPp")

@@ -7,12 +7,18 @@ import {
   useState,
 } from "react";
 
-import NumberField from "@/components/form/NumberField";
+import WeightField from "@/components/form/WeightField";
 import { RangeSlider } from "@/components/ui";
 import { formatGrouped } from "@/lib/formatNumber";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
 import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
+import {
+  formatWeight,
+  type UnitSystem,
+  weightLimits,
+  weightUnit,
+} from "@/utils/unitConversion";
 
 import { CALORIE_RANGE_LABELS } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
@@ -31,6 +37,7 @@ interface WeightGoalFormProps {
   onCancel?: () => void;
   /** Callback to report whether the form can be saved */
   onCanSaveChange?: (canSave: boolean) => void;
+  unitSystem?: UnitSystem;
 }
 
 type GoalType = keyof typeof CALORIE_RANGE_LABELS;
@@ -87,6 +94,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       isLoading = false,
       onSave,
       onCanSaveChange,
+      unitSystem = "metric",
     },
     reference,
   ) {
@@ -172,13 +180,15 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
 
     const validateWeight = useCallback(
       (value: number | undefined, fieldName: string): string | undefined => {
+        const { min, max } = weightLimits(30, 300, unitSystem);
+        const unit = weightUnit(unitSystem);
         if (value == undefined) return `${fieldName} is required`;
-        if (value < 30) return `${fieldName} must be at least 30 kg`;
-        if (value > 300) return `${fieldName} must be at most 300 kg`;
+        if (value < 30) return `${fieldName} must be at least ${min} ${unit}`;
+        if (value > 300) return `${fieldName} must be at most ${max} ${unit}`;
 
         return undefined;
       },
-      [],
+      [unitSystem],
     );
 
     const handleSave = useCallback(() => {
@@ -311,7 +321,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       <div className="space-y-5">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <NumberField
+            <WeightField
               label="Starting Weight"
               value={formValues.startingWeight}
               onChange={(value: number | undefined) => {
@@ -322,10 +332,9 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                   startingWeight: error,
                 }));
               }}
-              unit="kg"
-              min={30}
-              max={300}
-              step={0.1}
+              unitSystem={unitSystem}
+              minKg={30}
+              maxKg={300}
               required
               // Disable only if editing an existing goal (weightGoals is not undefined)
               disabled={Boolean(weightGoals)}
@@ -338,7 +347,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           </div>
 
           <div>
-            <NumberField
+            <WeightField
               label="Target Weight"
               value={formValues.targetWeight}
               onChange={(value: number | undefined) => {
@@ -349,10 +358,9 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                   targetWeight: error,
                 }));
               }}
-              unit="kg"
-              min={30}
-              max={300}
-              step={0.1}
+              unitSystem={unitSystem}
+              minKg={30}
+              maxKg={300}
               required
             />
             {fieldErrors.targetWeight && (
@@ -425,8 +433,8 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                   Expected change:{" "}
                   {typeof weeklyWeightChange === "number" &&
                   !Number.isNaN(weeklyWeightChange)
-                    ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
-                    : "0 kg per week"}
+                    ? `${formatWeight(Math.abs(weeklyWeightChange), unitSystem, 2)} per week`
+                    : `0 ${weightUnit(unitSystem)} per week`}
                 </p>
                 <p className="mt-1 text-xs text-muted">
                   Estimated duration:{" "}

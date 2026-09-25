@@ -24,6 +24,7 @@ import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { formatDateShort } from "@/utils/dateUtilities";
+import { fromKg, type UnitSystem, weightUnit } from "@/utils/unitConversion";
 
 import MacroNutrient from "../macros/MacroNutrient";
 
@@ -38,6 +39,7 @@ interface WeightGoalStatusProps {
   onLogWeight: () => void;
   targetCalories?: number;
   macroTarget?: MacroTargetSettings;
+  unitSystem?: UnitSystem;
 }
 
 const WeightGoalStatus = memo(function WeightGoalStatus({
@@ -51,7 +53,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   onLogWeight,
   targetCalories,
   macroTarget,
+  unitSystem = "metric",
 }: WeightGoalStatusProps) {
+  const unit = weightUnit(unitSystem);
   const goalStartingWeight = weightGoals?.startingWeight ?? startingWeight;
   const progressPercentage = weightGoals
     ? calculateGoalProgress(weightGoals).progress
@@ -187,9 +191,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           <div className="flex items-baseline space-x-1.5 min-w-0">
             <span className="text-lg sm:text-2xl font-bold text-foreground">
               <AnimatedNumber
-                value={startingWeight}
+                value={fromKg(startingWeight, unitSystem)}
                 toFixedValue={1}
-                suffix=" kg"
+                suffix={` ${unit}`}
               />
             </span>
             {!isMaintenance && (
@@ -197,9 +201,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
                 <ChevronRightIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5 shrink-0 text-muted" />
                 <span className="text-lg sm:text-2xl font-bold text-foreground">
                   <AnimatedNumber
-                    value={targetWeight}
+                    value={fromKg(targetWeight, unitSystem)}
                     toFixedValue={1}
-                    suffix=" kg"
+                    suffix={` ${unit}`}
                   />
                 </span>
               </>
@@ -225,9 +229,12 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               <span className={`${goalTextColor} font-medium`}>
                 {isWeightLoss ? "↓ " : "↑ "}
                 <AnimatedNumber
-                  value={Math.abs(targetWeight - goalStartingWeight)}
+                  value={fromKg(
+                    Math.abs(targetWeight - goalStartingWeight),
+                    unitSystem,
+                  )}
                   toFixedValue={1}
-                  suffix=" kg goal"
+                  suffix={` ${unit} goal`}
                 />
               </span>
             </div>
@@ -241,17 +248,17 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               <span>
                 Start:{" "}
                 <AnimatedNumber
-                  value={goalStartingWeight}
+                  value={fromKg(goalStartingWeight, unitSystem)}
                   toFixedValue={1}
-                  suffix=" kg"
+                  suffix={` ${unit}`}
                 />
               </span>
               <span>
                 Target:{" "}
                 <AnimatedNumber
-                  value={targetWeight}
+                  value={fromKg(targetWeight, unitSystem)}
                   toFixedValue={1}
-                  suffix=" kg"
+                  suffix={` ${unit}`}
                 />
               </span>
             </div>
@@ -274,9 +281,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               {isMaintenance ? "Maintain" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
                 <AnimatedNumber
-                  value={Math.abs(weeklyChange)}
+                  value={fromKg(Math.abs(weeklyChange), unitSystem)}
                   toFixedValue={2}
-                  suffix=" kg/wk"
+                  suffix={` ${unit}/wk`}
                 />
               )}
             </p>

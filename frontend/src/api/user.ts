@@ -7,6 +7,7 @@ import {
 import { authApi } from "@/api/auth";
 import { apiClient, ApiError } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
+import type { UnitSystem } from "@/utils/unitConversion";
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
 export interface UserDetailsResponse {
@@ -21,6 +22,7 @@ export interface UserDetailsResponse {
   gender?: string;
   activityLevel?: number;
   switchingSource?: SwitchingSource;
+  unitSystem: UnitSystem;
   analyticsTrafficType: AnalyticsTrafficType;
   isProfileComplete: boolean;
   subscription: {
@@ -60,6 +62,7 @@ function normalizeUserDetailsResponse(
     activityLevel: candidateRaw.activityLevel ?? candidateRaw.activity_level,
     switchingSource:
       candidateRaw.switchingSource ?? candidateRaw.switching_source,
+    unitSystem: candidateRaw.unitSystem ?? candidateRaw.unit_system,
   };
 
   if (!isUserDetailsResponse(candidate)) {
@@ -87,6 +90,7 @@ function normalizeUserDetailsResponse(
     switchingSource: isSwitchingSource(candidate.switchingSource)
       ? candidate.switchingSource
       : undefined,
+    unitSystem: candidate.unitSystem === "imperial" ? "imperial" : "metric",
     analyticsTrafficType:
       candidate.analyticsTrafficType === "internal" ||
       candidate.analyticsTrafficType === "synthetic"
@@ -113,6 +117,7 @@ export type UserSettingsPayload = Partial<{
   gender: string;
   activityLevel: string | number;
   switchingSource: SwitchingSource;
+  unitSystem: UnitSystem;
 }>;
 
 export const userApi = {
@@ -196,6 +201,7 @@ export const userApi = {
         | "gender"
         | "activityLevel"
         | "switchingSource"
+        | "unitSystem"
       >
     >,
   ): Promise<{ success: boolean; message: string }> => {

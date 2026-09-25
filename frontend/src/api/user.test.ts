@@ -42,6 +42,7 @@ describe("userApi", () => {
         weight: 77,
         gender: "male",
         activity_level: 4,
+        unit_system: "imperial",
         analyticsTrafficType: "internal",
         isProfileComplete: true,
         subscription: {
@@ -61,6 +62,7 @@ describe("userApi", () => {
       weight: 77,
       gender: "male",
       activityLevel: 4,
+      unitSystem: "imperial",
       analyticsTrafficType: "internal",
       isProfileComplete: true,
       subscription: {

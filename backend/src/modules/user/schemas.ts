@@ -26,6 +26,7 @@ const SwitchingSource = t.Union([
   t.Literal("spreadsheet"),
   t.Literal("unknown"),
 ]);
+const UnitSystem = t.Union([t.Literal("metric"), t.Literal("imperial")]);
 
 export const UserSchemas = {
   userDetailsResponse: t.Object({
@@ -40,6 +41,7 @@ export const UserSchemas = {
     gender: t.Nullable(t.Union([t.Literal("male"), t.Literal("female")])),
     activityLevel: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
     switchingSource: t.Nullable(SwitchingSource),
+    unitSystem: UnitSystem,
     analyticsTrafficType: t.Union([
       t.Literal("customer"),
       t.Literal("internal"),
@@ -67,6 +69,7 @@ export const UserSchemas = {
     weight: OptionalPositiveNumber,
     gender: OptionalGender,
     activityLevel: OptionalActivityLevel,
+    unitSystem: t.Optional(UnitSystem),
   }),
 
   // Schema for the simplified profile completion endpoint - USE camelCase
@@ -77,6 +80,7 @@ export const UserSchemas = {
     gender: OptionalGender,
     activityLevel: OptionalActivityLevel,
     switchingSource: t.Optional(SwitchingSource),
+    unitSystem: t.Optional(UnitSystem),
   }),
 
   // Schema for changing a user's password

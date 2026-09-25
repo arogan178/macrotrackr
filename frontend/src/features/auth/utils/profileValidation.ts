@@ -6,6 +6,12 @@ import {
   USER_MINIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
+import {
+  formatHeightRange,
+  formatWeight,
+  formatWeightRange,
+  type UnitSystem,
+} from "@/utils/unitConversion";
 import { isOldEnough } from "@/utils/validation";
 
 export interface ProfileFormData {
@@ -25,6 +31,7 @@ export function validateStep1(
   gender: string,
   height: number | null,
   weight: number | null,
+  unitSystem: UnitSystem = "metric",
 ): ValidationErrors {
   const errors: ValidationErrors = {};
 
@@ -41,13 +48,13 @@ export function validateStep1(
   if (!height) {
     errors.height = AUTH_ERROR_MESSAGES.heightRequired;
   } else if (height < USER_MINIMUM_HEIGHT || height > USER_MAXIMUM_HEIGHT) {
-    errors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
+    errors.height = `Please enter a valid height (${formatHeightRange(USER_MINIMUM_HEIGHT, USER_MAXIMUM_HEIGHT, unitSystem)})`;
   }
 
   if (!weight) {
     errors.weight = AUTH_ERROR_MESSAGES.weightRequired;
   } else if (weight < USER_MINIMUM_WEIGHT || weight > USER_MAXIMUM_WEIGHT) {
-    errors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
+    errors.weight = `Please enter a valid weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`;
   }
 
   return errors;
@@ -67,6 +74,7 @@ export function validateGoalStep(
   weightGoal: "lose" | "maintain" | "gain" | "",
   targetWeight: number | null,
   currentWeight: number | null,
+  unitSystem: UnitSystem = "metric",
 ): ValidationErrors {
   const errors: ValidationErrors = {};
 
@@ -86,13 +94,13 @@ export function validateGoalStep(
     targetWeight < USER_MINIMUM_WEIGHT ||
     targetWeight > USER_MAXIMUM_WEIGHT
   ) {
-    errors.targetWeight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
+    errors.targetWeight = `Please enter a valid weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`;
   } else if (currentWeight) {
     if (weightGoal === "lose" && targetWeight >= currentWeight) {
-      errors.targetWeight = `To lose weight, your target must be under ${currentWeight} kg`;
+      errors.targetWeight = `To lose weight, your target must be under ${formatWeight(currentWeight, unitSystem)}`;
     }
     if (weightGoal === "gain" && targetWeight <= currentWeight) {
-      errors.targetWeight = `To gain weight, your target must be over ${currentWeight} kg`;
+      errors.targetWeight = `To gain weight, your target must be over ${formatWeight(currentWeight, unitSystem)}`;
     }
   }
 

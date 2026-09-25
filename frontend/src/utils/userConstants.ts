@@ -28,6 +28,11 @@ export const GENDER_OPTIONS = [
   { value: "female", label: "Female" },
 ] as const;
 
+export const UNIT_SYSTEM_OPTIONS = [
+  { value: "metric", label: "Metric (kg, cm)" },
+  { value: "imperial", label: "Imperial (lb, ft/in)" },
+];
+
 // Primary source of truth for activity levels
 // Backend uses 1-5 numbers, conversion happens at API boundary
 export const ACTIVITY_LEVELS: Record<

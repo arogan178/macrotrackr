@@ -1,11 +1,17 @@
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
-import NumberField from "@/components/form/NumberField";
+import HeightField from "@/components/form/HeightField";
 import TextField from "@/components/form/TextField";
+import WeightField from "@/components/form/WeightField";
 import { Button } from "@/components/ui";
 import Panel from "@/components/ui/Panel";
 import { type Gender, type UserSettings } from "@/types/user";
-import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
+import type { UnitSystem } from "@/utils/unitConversion";
+import {
+  ACTIVITY_LEVELS,
+  GENDER_OPTIONS,
+  UNIT_SYSTEM_OPTIONS,
+} from "@/utils/userConstants";
 
 interface ProfileFormProps {
   settings: UserSettings;
@@ -36,6 +42,7 @@ export default function ProfileForm({
 }: ProfileFormProps) {
   // Convert string activity level to number if needed
   const activityLevelValue = settings.activityLevel;
+  const unitSystem = settings.unitSystem ?? "metric";
 
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
@@ -108,27 +115,34 @@ export default function ProfileForm({
             required
           />
 
-          <NumberField
-            label="Height (cm)"
+          <Dropdown
+            label="Units"
+            value={unitSystem}
+            onChange={(value) => {
+              updateSetting("unitSystem", value as UnitSystem);
+            }}
+            options={UNIT_SYSTEM_OPTIONS}
+          />
+
+          <HeightField
+            label="Height"
             value={settings.height ?? undefined}
             onChange={handleHeightChange}
             error={formErrors.height}
+            unitSystem={unitSystem}
             min={100}
             max={250}
-            step={1}
-            unit="cm"
             required
           />
 
-          <NumberField
-            label="Weight (kg)"
+          <WeightField
+            label="Weight"
             value={settings.weight ?? undefined}
             onChange={handleWeightChange}
             error={formErrors.weight}
-            min={30}
-            max={300}
-            step={0.1}
-            unit="kg"
+            unitSystem={unitSystem}
+            minKg={30}
+            maxKg={300}
             required
           />
 

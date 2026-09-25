@@ -3,16 +3,22 @@ import { format, isValid, parse } from "date-fns";
 
 import type { AddWeightLogPayload } from "@/api/goals";
 import DateField from "@/components/form/DateField";
-import NumberField from "@/components/form/NumberField";
 import TimeField from "@/components/form/TimeField";
+import WeightField from "@/components/form/WeightField";
 import Modal from "@/components/ui/Modal";
 import { useAddWeightLogEntry } from "@/hooks/queries/useGoals";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
+import {
+  type UnitSystem,
+  weightLimits,
+  weightUnit,
+} from "@/utils/unitConversion";
 
 interface LogWeightModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialWeight?: number | undefined;
+  unitSystem?: UnitSystem;
 }
 
 // Helper to get current time in HH:mm format
@@ -22,7 +28,14 @@ function LogWeightModal({
   isOpen,
   onClose,
   initialWeight,
+  unitSystem = "metric",
 }: LogWeightModalProps) {
+  const unit = weightUnit(unitSystem);
+  const limits = weightLimits(
+    USER_MINIMUM_WEIGHT,
+    USER_MAXIMUM_WEIGHT,
+    unitSystem,
+  );
   const addWeightLogMutation = useAddWeightLogEntry();
 
   const today = format(new Date(), "yyyy-MM-dd");
@@ -85,12 +98,12 @@ function LogWeightModal({
       return false;
     }
     if (weightNumber < USER_MINIMUM_WEIGHT) {
-      setFormError(`Weight must be at least ${USER_MINIMUM_WEIGHT} kg.`);
+      setFormError(`Weight must be at least ${limits.min} ${unit}.`);
 
       return false;
     }
     if (weightNumber > USER_MAXIMUM_WEIGHT) {
-      setFormError(`Weight cannot exceed ${USER_MAXIMUM_WEIGHT} kg.`);
+      setFormError(`Weight cannot exceed ${limits.max} ${unit}.`);
 
       return false;
     }
@@ -148,15 +161,15 @@ function LogWeightModal({
             required
           />
         </div>
-        <NumberField
-          label="Weight (kg)"
-          value={weight}
+        <WeightField
+          label="Weight"
+          value={weight === "" ? undefined : Number(weight)}
           onChange={handleWeightChange}
           required
-          min={USER_MINIMUM_WEIGHT}
-          max={USER_MAXIMUM_WEIGHT}
-          step={0.1}
-          placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
+          unitSystem={unitSystem}
+          minKg={USER_MINIMUM_WEIGHT}
+          maxKg={USER_MAXIMUM_WEIGHT}
+          placeholder={`Between ${limits.min}-${limits.max} ${unit}`}
           disabled={addWeightLogMutation.isPending}
         />
         {formError && <p className="text-sm text-error">{formError}</p>}

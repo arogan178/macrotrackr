@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { BarChartIcon, BookIcon, IconButton, TabBar } from "@/components/ui";
 import { useWeightLog } from "@/hooks/queries/useGoals";
+import type { UnitSystem } from "@/utils/unitConversion";
 
 import WeightGoalProgressChart from "../weight-goals/WeightGoalProgressChart";
 
@@ -10,7 +11,11 @@ import WeightLogList from "./WeightLogList";
 
 type TabId = "chart" | "list";
 
-function WeightProgressTabs() {
+function WeightProgressTabs({
+  unitSystem = "metric",
+}: {
+  unitSystem?: UnitSystem;
+}) {
   const [activeTab, setActiveTab] = useState<TabId>("chart");
 
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
@@ -71,9 +76,12 @@ function WeightProgressTabs() {
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
           >
-            {activeTab === "chart" && <WeightGoalProgressChart />}
+            {activeTab === "chart" && (
+              <WeightGoalProgressChart unitSystem={unitSystem} />
+            )}
             {activeTab === "list" && (
               <WeightLogList
+                unitSystem={unitSystem}
                 isBulkConfirmModalOpen={isBulkConfirmModalOpen}
                 onBulkCancel={handleBulkCancel}
               />

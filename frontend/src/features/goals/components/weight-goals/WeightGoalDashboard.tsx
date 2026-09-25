@@ -8,6 +8,7 @@ import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
+import type { UnitSystem } from "@/utils/unitConversion";
 
 import WeightGoalStatus from "./WeightGoalStatus";
 
@@ -21,6 +22,7 @@ interface WeightGoalDashboardProps {
   onDelete: () => void;
   className?: string;
   macroTarget?: MacroTargetSettings;
+  unitSystem?: UnitSystem;
 }
 
 const WeightGoalDashboard = memo(function WeightGoalDashboard({
@@ -33,6 +35,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   onDelete,
   className = "",
   macroTarget,
+  unitSystem = "metric",
 }: WeightGoalDashboardProps) {
   // Use new loading state hooks
   const { isLoading: _isGoalsLoading } = useFeatureLoading("goals");
@@ -106,6 +109,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
           Number.isFinite(effectiveTargetCalories) ? effectiveTargetCalories : 0
         }
         macroTarget={macroTarget}
+        unitSystem={unitSystem}
       />
     </div>
   );
