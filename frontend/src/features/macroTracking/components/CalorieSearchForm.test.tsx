@@ -6,9 +6,12 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MotionGlobalConfig } from "motion/react";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { macrosApi } from "@/api/macros";
+import { type SavedMeal, savedMealsApi } from "@/api/savedMeals";
+import { useStore } from "@/store/store";
 
 import CalorieSearchForm from "./CalorieSearchForm";
 
@@ -18,6 +21,59 @@ vi.mock("@/api/macros", () => ({
     getByBarcode: vi.fn(),
   },
 }));
+
+vi.mock("@/api/savedMeals", () => ({
+  savedMealsApi: {
+    getAll: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+const oats: SavedMeal = {
+  id: 5,
+  name: "Oats",
+  mealType: "breakfast",
+  protein: 10,
+  carbs: 50,
+  fats: 5,
+  calories: 285,
+  ingredients: [
+    {
+      name: "Oats",
+      protein: 10,
+      carbs: 50,
+      fats: 5,
+      quantity: 100,
+      unit: "g",
+      baseProtein: 10,
+      baseCarbs: 50,
+      baseFats: 5,
+      baseQuantity: 100,
+      baseUnit: "g",
+    },
+  ],
+  createdAt: "2026-09-01T08:00:00Z",
+};
+
+const mockSavedMeals = (meals: SavedMeal[]) => {
+  vi.mocked(savedMealsApi.getAll).mockResolvedValue({
+    meals,
+    count: meals.length,
+    limit: 5,
+    isPro: true,
+  });
+};
+
+const openSavedMealEditor = async (mealName: string) => {
+  fireEvent.focus(screen.getByRole("textbox", { name: "Search for food" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: `Edit ${mealName}` }),
+  );
+
+  return screen.getByRole("dialog");
+};
 
 const createQueryClient = () =>
   new QueryClient({
@@ -37,8 +93,19 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 describe("CalorieSearchForm", () => {
+  // jsdom never finishes the tab's exit animation, so the Saved Meals tab
+  // would never mount.
+  beforeAll(() => {
+    MotionGlobalConfig.skipAnimations = true;
+  });
+
+  afterAll(() => {
+    MotionGlobalConfig.skipAnimations = false;
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSavedMeals([]);
     let modalRoot = document.querySelector("#modal-root");
     if (!modalRoot) {
       modalRoot = document.createElement("div");
@@ -228,5 +295,112 @@ describe("CalorieSearchForm", () => {
         }),
       );
     });
+  });
+
+  it("edits a single-ingredient saved meal and keeps the list open behind it", async () => {
+    mockSavedMeals([oats]);
+    vi.mocked(savedMealsApi.update).mockResolvedValue({
+      ...oats,
+      name: "Overnight oats",
+    });
+
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
+    );
+
+    const dialog = await openSavedMealEditor("Oats");
+    // The modal is portalled outside the search wrapper.
+    fireEvent.mouseDown(dialog);
+
+    fireEvent.change(screen.getByLabelText(/^Name/), {
+      target: { value: "Overnight oats" },
+    });
+    fireEvent.change(screen.getByLabelText("Protein (g)"), {
+      target: { value: "12" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+    expect(savedMealsApi.update).toHaveBeenCalledWith(5, {
+      name: "Overnight oats",
+      mealType: "breakfast",
+      protein: 12,
+      carbs: 50,
+      fats: 5,
+      ingredients: [
+        expect.objectContaining({
+          name: "Oats",
+          protein: 12,
+          quantity: 100,
+          baseProtein: undefined,
+          baseCarbs: undefined,
+          baseFats: undefined,
+        }),
+      ],
+    });
+    expect(screen.getByRole("tab", { name: "Saved Meals" })).toBeInTheDocument();
+  });
+
+  it("only renames and retypes a multi-ingredient saved meal", async () => {
+    mockSavedMeals([
+      {
+        ...oats,
+        name: "Chicken bowl",
+        ingredients: [
+          { name: "Chicken", protein: 30, carbs: 0, fats: 3 },
+          { name: "Rice", protein: 4, carbs: 45, fats: 1 },
+        ],
+      },
+    ]);
+    vi.mocked(savedMealsApi.update).mockResolvedValue(oats);
+
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
+    );
+
+    await openSavedMealEditor("Chicken bowl");
+
+    expect(screen.queryByLabelText("Protein (g)")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Macros come from its 2 ingredients."),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Meal Type"), {
+      target: { value: "dinner" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(savedMealsApi.update).toHaveBeenCalledWith(5, {
+        name: "Chicken bowl",
+        mealType: "dinner",
+      });
+    });
+  });
+
+  it("shows an error toast and stays open when the update fails", async () => {
+    const showNotification = vi.fn();
+    useStore.setState({ showNotification });
+    mockSavedMeals([oats]);
+    vi.mocked(savedMealsApi.update).mockRejectedValue(
+      new Error("Saved meal not found"),
+    );
+
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
+    );
+
+    await openSavedMealEditor("Oats");
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(showNotification).toHaveBeenCalledWith(
+        "Saved meal not found",
+        "error",
+      );
+    });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });

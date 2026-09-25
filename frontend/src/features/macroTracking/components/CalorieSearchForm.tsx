@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { FoodSearchResult } from "@/api/macros";
+import type { SavedMeal } from "@/api/savedMeals";
 import { formStyles } from "@/components/form/FormStyles";
 import {
   ArrowRightIcon,
@@ -22,6 +23,7 @@ import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
 
 import BarcodeScannerModal from "./BarcodeScannerModal";
+import SavedMealEditModal from "./SavedMealEditModal";
 import SavedMealsList from "./SavedMealsList";
 
 interface CalorieSearchProps {
@@ -65,6 +67,7 @@ const CalorieSearch = memo(function CalorieSearch({
   const [activeTab, setActiveTab] = useState<ActiveTab>("recents");
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<SavedMeal | null>(null);
   const wrapperReference = useRef<HTMLDivElement>(null);
   const inputReference = useRef<HTMLInputElement>(null);
   const isAutoFocusing = useRef(false);
@@ -122,6 +125,9 @@ const CalorieSearch = memo(function CalorieSearch({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // The edit modal is portalled outside the wrapper; keep the list open
+      // behind it so the user lands back on the meal they edited.
+      if (editingMeal) return;
       if (
         wrapperReference.current &&
         !wrapperReference.current.contains(event.target as Node)
@@ -132,7 +138,7 @@ const CalorieSearch = memo(function CalorieSearch({
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [editingMeal]);
 
   useEffect(() => {
     if (!submittedQuery || isSearching) {
@@ -569,6 +575,7 @@ const CalorieSearch = memo(function CalorieSearch({
                       setQuery("");
                       setActivePanel(null);
                     }}
+                    onEditMeal={setEditingMeal}
                   />
                 </motion.div>
               )}
@@ -591,6 +598,14 @@ const CalorieSearch = memo(function CalorieSearch({
         onClose={() => setIsBarcodeScannerOpen(false)}
         onProductFound={handleSelect}
       />
+
+      {editingMeal && (
+        <SavedMealEditModal
+          key={editingMeal.id}
+          meal={editingMeal}
+          onClose={() => setEditingMeal(null)}
+        />
+      )}
     </div>
   );
 });
