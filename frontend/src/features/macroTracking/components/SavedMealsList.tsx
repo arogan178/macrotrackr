@@ -25,14 +25,18 @@ interface SavedMealsListProps {
     ingredients?: Ingredient[];
   }) => void;
   onEditMeal: (meal: SavedMeal) => void;
+  query?: string;
   className?: string;
 }
 
 const SavedMealsList = memo(
-  ({ onSelectMeal, onEditMeal, className }: SavedMealsListProps) => {
+  ({ onSelectMeal, onEditMeal, query = "", className }: SavedMealsListProps) => {
     const { data, isLoading } = useSavedMeals();
     const deleteMeal = useDeleteSavedMeal();
     const meals = data?.meals ?? [];
+    const matchingMeals = meals.filter((meal) =>
+      meal.name.toLowerCase().includes(query.toLowerCase()),
+    );
     const isPro = isLocalAuthMode || data?.isPro === true;
     const count = data?.count ?? 0;
     const limit = data?.limit ?? 5;
@@ -72,7 +76,10 @@ const SavedMealsList = memo(
           )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {meals.map((meal) => {
+          {matchingMeals.length === 0 && (
+            <div className="text-sm text-muted">No saved meals match</div>
+          )}
+          {matchingMeals.map((meal) => {
             const calories = Math.round(
               calculateCaloriesFromMacros(meal.protein, meal.carbs, meal.fats),
             );
