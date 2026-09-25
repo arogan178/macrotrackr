@@ -28,6 +28,7 @@ import {
 } from "../tools/calculatorStyles";
 import { redistributeMacroPercentages } from "../tools/macroRedistribution";
 import ResultHeadline from "../tools/ResultHeadline";
+import { useSharedInputs } from "../tools/sharedInputs";
 import { useBodyStats } from "../tools/useBodyStats";
 
 const GOAL_OPTIONS = [
@@ -36,6 +37,8 @@ const GOAL_OPTIONS = [
   { value: "gain", label: "Muscle Gain (+300 kcal)" },
   { value: "custom", label: "Custom Calorie Target" },
 ];
+
+const MACRO_GOALS = ["lose", "maintain", "gain", "custom"] as const;
 
 export default function MacroCalculatorPage() {
   const stats = useBodyStats();
@@ -53,6 +56,29 @@ export default function MacroCalculatorPage() {
     fatsPercentage: 30,
   });
   const [lockedMacros, setLockedMacros] = useState<MacroType[]>([]);
+
+  useSharedInputs((read) => {
+    const sharedGoal = read.oneOf("goal", MACRO_GOALS);
+    const calories = read.number("calories", 800, 10_000);
+    const protein = read.number("protein", 0, 100);
+    const carbs = read.number("carbs", 0, 100);
+    const fats = read.number("fats", 0, 100);
+
+    if (sharedGoal) setGoal(sharedGoal);
+    if (calories !== undefined) setCustomCalories(calories);
+    if (
+      protein !== undefined &&
+      carbs !== undefined &&
+      fats !== undefined &&
+      protein + carbs + fats === 100
+    ) {
+      setPercentages({
+        proteinPercentage: protein,
+        carbsPercentage: carbs,
+        fatsPercentage: fats,
+      });
+    }
+  });
 
   const bmr = statsReady ? calculateBMR(weightKg, heightCm, age, gender) : 0;
   const activityNumber = getActivityLevelFromString(activityLevel);
@@ -119,6 +145,14 @@ export default function MacroCalculatorPage() {
       title="Macro Calculator"
       subtitle="Build a daily macronutrient target with adjustable protein, carbohydrate, and fat ratios."
       canonicalPath="/tools/macro-calculator"
+      shareInputs={{
+        ...stats.shareInputs,
+        goal,
+        ...(goal === "custom" ? { calories: customCalories } : {}),
+        protein: percentages.proteinPercentage,
+        carbs: percentages.carbsPercentage,
+        fats: percentages.fatsPercentage,
+      }}
       ctaResult={
         resultReady
           ? {

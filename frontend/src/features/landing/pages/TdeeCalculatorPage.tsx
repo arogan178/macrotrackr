@@ -77,6 +77,7 @@ export default function TdeeCalculatorPage() {
       title="TDEE Calculator"
       subtitle="Estimate your Total Daily Energy Expenditure and explore calorie targets for fat loss, maintenance, or muscle gain."
       canonicalPath="/tools/tdee-calculator"
+      shareInputs={stats.shareInputs}
       ctaResult={
         statsReady
           ? {

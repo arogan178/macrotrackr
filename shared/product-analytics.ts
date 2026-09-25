@@ -62,6 +62,10 @@ export type ProductEvent =
       };
     }
   | {
+      event: "calculator_result_shared";
+      properties: { calculator: string; method: "clipboard" | "native" };
+    }
+  | {
       event: "signup_started";
       properties: {
         authMethod: "email" | "oauth_apple" | "oauth_google";
@@ -165,6 +169,7 @@ export function serializeProductProperties(
 ): SerializedProductProperties {
   switch (productEvent.event) {
     case "landing_cta_clicked":
+    case "calculator_result_shared":
       return productEvent.properties;
     case "signup_started":
       return {

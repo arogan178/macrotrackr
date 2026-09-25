@@ -16,6 +16,8 @@ import { CALCULATOR_DISCLAIMER, getCalculatorContent } from "./calculatorContent
 import CalculatorResultBar from "./CalculatorResultBar";
 import { calculatorCardClass } from "./calculatorStyles";
 import RelatedTools from "./RelatedTools";
+import { buildShareUrl, type SharedInputs } from "./sharedInputs";
+import ShareResultButton from "./ShareResultButton";
 import { TOOLS_HUB_PATH } from "./toolsCatalog";
 import ToolsCtaBanner from "./ToolsCtaBanner";
 
@@ -29,6 +31,8 @@ interface CalculatorLayoutProps {
    * the sticky mobile result bar.
    */
   ctaResult?: { label: string; value: string };
+  /** The inputs behind that figure, for a link that reopens it. */
+  shareInputs?: SharedInputs;
   children: React.ReactNode;
 }
 
@@ -38,6 +42,7 @@ export default function CalculatorLayout({
   canonicalPath,
   badge,
   ctaResult,
+  shareInputs,
   children,
 }: CalculatorLayoutProps) {
   const canonicalUrl = buildCanonicalUrl(canonicalPath);
@@ -110,6 +115,16 @@ export default function CalculatorLayout({
 
           {/* Calculator main content */}
           <div className="space-y-8">{children}</div>
+
+          {ctaResult && shareInputs ? (
+            <div className="mt-8">
+              <ShareResultButton
+                url={buildShareUrl(canonicalUrl, shareInputs)}
+                title={`${title}: ${ctaResult.value}`}
+                calculator={canonicalPath}
+              />
+            </div>
+          ) : null}
 
           {/* Directly under the result: this is the one moment the reader has a
               number they care about, and it used to sit below the FAQ and the
