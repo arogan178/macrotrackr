@@ -21,6 +21,42 @@ import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 type HabitsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
+type HabitProgressAction = "increment" | "decrement" | "reset" | "complete";
+
+// Progress only counts on the day it was recorded, so a daily habit starts each day at 0.
+function toHabitResponse(habit: HabitRow, date: string) {
+  const isCurrentPeriod = habit.period_date === date;
+  const current = isCurrentPeriod ? habit.current : 0;
+
+  return {
+    id: habit.id,
+    title: habit.title,
+    iconName: habit.icon_name,
+    current,
+    target: habit.target,
+    progress:
+      habit.target > 0
+        ? Math.min(100, Math.round((current / habit.target) * 100))
+        : 0,
+    accentColor: habit.accent_color as
+      | "indigo"
+      | "blue"
+      | "cyan"
+      | "teal"
+      | "green"
+      | "lime"
+      | "yellow"
+      | "orange"
+      | "red"
+      | "pink"
+      | "purple"
+      | undefined,
+    isComplete: isCurrentPeriod && Boolean(habit.is_complete),
+    createdAt: habit.created_at,
+    completedAt: isCurrentPeriod ? habit.completed_at : null,
+  };
+}
+
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
     group
@@ -32,9 +68,12 @@ export const habitRoutes = (app: Elysia) =>
           const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
+          // The server has no user timezone; the client names its local day.
+          const date = context.query.date ?? new Date().toISOString().slice(0, 10);
+
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
-                   is_complete, created_at, completed_at
+                   is_complete, created_at, completed_at, period_date
             FROM habits
             WHERE user_id = ?
             ORDER BY created_at DESC
@@ -42,40 +81,10 @@ export const habitRoutes = (app: Elysia) =>
 
           const habitsResult = safeQueryAll(db, query, [internalUserId]) as HabitRow[];
 
-          const apiResponse = habitsResult.map((habit) => ({
-            id: habit.id,
-            title: habit.title,
-            iconName: habit.icon_name,
-            current: habit.current,
-            target: habit.target,
-            progress:
-              habit.target > 0
-                ? Math.min(
-                    100,
-                    Math.round((habit.current / habit.target) * 100)
-                  )
-                : 0,
-            accentColor: habit.accent_color as
-              | "indigo"
-              | "blue"
-              | "cyan"
-              | "teal"
-              | "green"
-              | "lime"
-              | "yellow"
-              | "orange"
-              | "red"
-              | "pink"
-              | "purple"
-              | undefined,
-            isComplete: Boolean(habit.is_complete),
-            createdAt: habit.created_at,
-            completedAt: habit.completed_at,
-          }));
-
-          return apiResponse;
+          return habitsResult.map((habit) => toHabitResponse(habit, date));
         },
         {
+          query: HabitSchemas.getHabitsQuery,
           response: HabitSchemas.getHabitsResponse,
           detail: {
             summary: "Get all habit goals for the user",
@@ -349,29 +358,82 @@ export const habitRoutes = (app: Elysia) =>
         }
       )
 
-      // --- Reset All Habits ---
-      .delete(
-        "/",
+      // --- Update Habit Progress ---
+      .post(
+        "/:id/progress",
         async (rawContext: unknown) => {
           const context = rawContext as HabitsRouteContext;
-          const { db } = context;
+          const { params, body, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
-          const query = `
-            DELETE FROM habits
-            WHERE user_id = ?
-          `;
+          const habitId = params?.id;
+          if (!habitId) {
+            throw new NotFoundError("Habit ID is required");
+          }
 
-          safeExecute(db, query, [internalUserId]);
+          const { action, date } = body as {
+            action: HabitProgressAction;
+            date: string;
+          };
+
+          const habit = safeQuery<HabitRow>(
+            db,
+            "SELECT * FROM habits WHERE id = ? AND user_id = ?",
+            [habitId, internalUserId]
+          );
+
+          if (!habit) {
+            throw new NotFoundError("Habit not found");
+          }
+
+          const previous = toHabitResponse(habit, date);
+          const requested = {
+            increment: previous.current + 1,
+            decrement: previous.current - 1,
+            reset: 0,
+            complete: habit.target,
+          }[action];
+          const current = Math.min(habit.target, Math.max(0, requested));
+          const isComplete = current >= habit.target;
+          const completedAt = isComplete
+            ? previous.isComplete && previous.completedAt
+              ? previous.completedAt
+              : new Date().toISOString()
+            : null;
+
+          safeExecute(
+            db,
+            `UPDATE habits
+             SET current = ?, is_complete = ?, completed_at = ?, period_date = ?
+             WHERE id = ? AND user_id = ?`,
+            [
+              current,
+              isComplete ? 1 : 0,
+              completedAt,
+              date,
+              habitId,
+              internalUserId,
+            ]
+          );
 
           publishUserSyncEvent(internalUserId, "habits");
 
-          return { success: true, count: 0 };
+          return toHabitResponse(
+            {
+              ...habit,
+              current,
+              is_complete: isComplete ? 1 : 0,
+              completed_at: completedAt,
+              period_date: date,
+            },
+            date
+          );
         },
         {
-          response: HabitSchemas.resetHabitsResponse,
+          body: HabitSchemas.habitProgressBody,
+          response: HabitSchemas.habitData,
           detail: {
-            summary: "Reset all habit goals",
+            summary: "Increment, decrement, reset or complete today's habit progress",
             tags: ["Habits"],
           },
         }
