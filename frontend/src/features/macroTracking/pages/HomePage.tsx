@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 import { macrosApi } from "@/api/macros";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
@@ -7,6 +8,7 @@ import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
 import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
 import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
+import DayNavigator from "@/features/macroTracking/components/DayNavigator";
 import EditModal from "@/features/macroTracking/components/EditModal";
 import EntryHistoryPanel from "@/features/macroTracking/components/EntryHistoryPanel";
 import {
@@ -17,6 +19,7 @@ import {
 import { useAddEntry } from "@/features/macroTracking/hooks/useAddEntry";
 import {
   useHistoryPagination,
+  useHomeDate,
   useHomeHeader,
   useNutritionProfile,
 } from "@/features/macroTracking/hooks/useHomePage";
@@ -39,7 +42,6 @@ import {
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
-import { todayISO } from "@/utils/dateUtilities";
 import type { NutritionProfileSource } from "@/utils/userConstants";
 
 export default function HomePage() {
@@ -47,10 +49,21 @@ export default function HomePage() {
 
   const { data: user } = useUser();
 
-  const today = todayISO();
+  const navigate = useNavigate();
+  const { date, today, oldestDate, isToday } = useHomeDate();
+  const handleDateChange = useCallback(
+    (next: string) => {
+      navigate({
+        to: "/home",
+        search: { date: next === today ? undefined : next },
+        replace: true,
+      });
+    },
+    [navigate, today],
+  );
   const {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
-  } = useMacroDailyTotals(today);
+  } = useMacroDailyTotals(date);
   const { data: macroTarget } = useMacroTargetQuery();
   const { data: weightGoals } = useWeightGoals();
 
@@ -309,11 +322,23 @@ export default function HomePage() {
     user ?? undefined,
     isLoading,
     history.length > 0,
+    date,
   );
 
   return (
     <DashboardPageContainer>
-      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
+      <FeaturePage
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        headerChildren={
+          <DayNavigator
+            date={date}
+            today={today}
+            oldestDate={oldestDate}
+            onChange={handleDateChange}
+          />
+        }
+      >
         <div className="space-y-3.5 sm:space-y-6">
           {/* The day comes first. On a phone the summary is what the user
               opened the app to see; the form used to push it below the fold. */}
@@ -327,6 +352,7 @@ export default function HomePage() {
                     macroDailyTotals={macroDailyTotals}
                     macroTarget={macroTarget ?? undefined}
                     calorieTarget={effectiveCalorieTarget}
+                    date={isToday ? undefined : date}
                   />
                 )
               )}
@@ -345,7 +371,12 @@ export default function HomePage() {
               {isLoading ? (
                 <AddEntryLoadingSkeleton />
               ) : (
-                <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+                <AddEntryForm
+                  key={date}
+                  onSubmit={handleAddEntry}
+                  isSaving={isSaving}
+                  defaultDate={isToday ? undefined : date}
+                />
               )}
             </div>
           </div>

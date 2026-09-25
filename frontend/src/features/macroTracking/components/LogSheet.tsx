@@ -1,10 +1,12 @@
 import { lazy, Suspense } from "react";
+import { useLocation } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Modal from "@/components/ui/Modal";
 import { useLogSheet } from "@/lib/logSheet";
 
 import { useAddEntry } from "../hooks/useAddEntry";
+import { useHomeDate } from "../hooks/useHomePage";
 
 /** The form is the heaviest thing on Home; the layout should not pay for it
  *  until someone actually asks to log something. */
@@ -30,6 +32,8 @@ export default function LogSheet() {
 
 function LogSheetContent({ onClose }: { onClose: () => void }) {
   const { addEntry, isSaving } = useAddEntry();
+  const isOnHome = useLocation({ select: (location) => location.pathname === "/home" });
+  const { date, isToday } = useHomeDate();
 
   return (
     <Modal
@@ -54,6 +58,7 @@ function LogSheetContent({ onClose }: { onClose: () => void }) {
           }}
           isSaving={isSaving}
           inSheet
+          defaultDate={isOnHome && !isToday ? date : undefined}
         />
       </Suspense>
     </Modal>

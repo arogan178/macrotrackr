@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { macrosApi } from "@/api/macros";
@@ -22,12 +22,26 @@ interface PanelProps {
 }
 interface FormProps {
   onSubmit: (entry: unknown) => Promise<void>;
+  defaultDate?: string;
 }
 
 const captured = vi.hoisted(() => ({
   panel: undefined as PanelProps | undefined,
   form: undefined as FormProps | undefined,
+  summary: undefined as { date?: string } | undefined,
   history: [] as MacroEntry[],
+  homeDate: {
+    date: "2026-09-25",
+    today: "2026-09-25",
+    oldestDate: undefined as string | undefined,
+    isToday: true,
+  },
+  navigate: vi.fn(),
+  dailyTotals: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => captured.navigate,
 }));
 
 vi.mock("@/api/macros", () => ({
@@ -41,7 +55,11 @@ vi.mock("@/hooks/queries/useMacroQueries", () => ({
     mutateAsync: mutations.delete,
     ...mutations.deleteState,
   }),
-  useMacroDailyTotals: () => ({ data: undefined }),
+  useMacroDailyTotals: (date: string) => {
+    captured.dailyTotals(date);
+
+    return { data: undefined };
+  },
   useMacroTargetQuery: () => ({ data: undefined }),
 }));
 
@@ -67,6 +85,7 @@ vi.mock("@/features/macroTracking/hooks/useHomePage", () => ({
     loadMoreHistory: vi.fn(),
     limits: undefined,
   }),
+  useHomeDate: () => captured.homeDate,
   useHomeHeader: () => ({ title: "Home", subtitle: "" }),
   useNutritionProfile: () => undefined,
 }));
@@ -75,11 +94,26 @@ vi.mock("@/components/layout/DashboardPageContainer", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock("@/components/layout/FeaturePage", () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  default: ({
+    children,
+    headerChildren,
+  }: {
+    children: React.ReactNode;
+    headerChildren?: React.ReactNode;
+  }) => (
+    <div>
+      {headerChildren}
+      {children}
+    </div>
+  ),
 }));
 vi.mock("@/components/metrics/UserMetricsPanel", () => ({ default: () => null }));
 vi.mock("@/features/macroTracking/components/DailySummaryPanel", () => ({
-  default: () => null,
+  default: (properties: { date?: string }) => {
+    captured.summary = properties;
+
+    return null;
+  },
 }));
 vi.mock("@/features/macroTracking/components/EditModal", () => ({
   default: () => null,
@@ -213,5 +247,58 @@ describe("HomePage error notifications", () => {
     await act(() => captured.panel!.deleteEntry(entry.id, { undoable: false }));
 
     expect(useStore.getState().notifications).toEqual([]);
+  });
+});
+
+describe("HomePage selected day", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    captured.history = [];
+  });
+
+  it("shows today by default", () => {
+    captured.homeDate = {
+      date: "2026-09-25",
+      today: "2026-09-25",
+      oldestDate: undefined,
+      isToday: true,
+    };
+    render(<HomePage />);
+
+    expect(captured.dailyTotals).toHaveBeenCalledWith("2026-09-25");
+    expect(captured.summary!.date).toBeUndefined();
+    expect(captured.form!.defaultDate).toBeUndefined();
+  });
+
+  it("shows and logs to the selected past day", () => {
+    captured.homeDate = {
+      date: "2026-09-20",
+      today: "2026-09-25",
+      oldestDate: undefined,
+      isToday: false,
+    };
+    render(<HomePage />);
+
+    expect(captured.dailyTotals).toHaveBeenCalledWith("2026-09-20");
+    expect(captured.summary!.date).toBe("2026-09-20");
+    expect(captured.form!.defaultDate).toBe("2026-09-20");
+  });
+
+  it("puts the day in the URL, and drops it for today", () => {
+    captured.homeDate = {
+      date: "2026-09-24",
+      today: "2026-09-25",
+      oldestDate: undefined,
+      isToday: false,
+    };
+    render(<HomePage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Previous day" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next day" }));
+
+    expect(captured.navigate.mock.calls).toEqual([
+      [{ to: "/home", search: { date: "2026-09-23" }, replace: true }],
+      [{ to: "/home", search: { date: undefined }, replace: true }],
+    ]);
   });
 });

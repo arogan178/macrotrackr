@@ -19,6 +19,8 @@ import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { UnitConverter, type UnitType } from "../utils/units";
 
+import { formatEntryDate } from "./EntryHistoryHelpers";
+
 interface AddEntryProps {
   onSubmit: (entry: {
     protein: number;
@@ -34,6 +36,8 @@ interface AddEntryProps {
   isSaving: boolean;
   /** Inside the log sheet, which already supplies the card and the title. */
   inSheet?: boolean;
+  /** A day other than today to log to, at the current time of day. Read on mount. */
+  defaultDate?: string;
 }
 
 function currentDateTime() {
@@ -80,6 +84,7 @@ function AddEntry({
   onSubmit,
   isSaving: _isSaving,
   inSheet = false,
+  defaultDate,
 }: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
@@ -136,10 +141,13 @@ function AddEntry({
   const [mealName, setMealName] = useState<string>("");
 
   // Unset means "now", resolved at submit so an open form never goes stale.
-  const [pickedDateTime, setPickedDateTime] = useState<{
-    date: string;
-    time: string;
-  }>();
+  const [pickedDateTime, setPickedDateTime] = useState<
+    { date: string; time: string } | undefined
+  >(() =>
+    defaultDate
+      ? { date: defaultDate, time: currentDateTime().time }
+      : undefined,
+  );
   const shownDateTime = pickedDateTime ?? currentDateTime();
   const [isDateTimeExpanded, setIsDateTimeExpanded] = useState(false);
   const [isDateTimeRendered, setIsDateTimeRendered] = useState(false);
@@ -646,7 +654,7 @@ function AddEntry({
               Logged{" "}
               {isLoggedNow
                 ? "now"
-                : `${shownDateTime.date} at ${shownDateTime.time}`}
+                : `${formatEntryDate(shownDateTime.date)} at ${shownDateTime.time}`}
               <span
                 className={cn(
                   "ml-1.5 underline decoration-border underline-offset-4",
