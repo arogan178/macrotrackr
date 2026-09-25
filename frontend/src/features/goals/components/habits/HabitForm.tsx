@@ -159,7 +159,7 @@ function HabitForm({
           required
         />
         <p className="mt-1 text-xs text-muted">
-          Set how many times you need to complete this habit to reach your goal
+          How many times a day. Progress resets at midnight.
         </p>
       </div>
 

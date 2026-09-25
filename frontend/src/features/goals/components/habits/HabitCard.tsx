@@ -16,6 +16,8 @@ type Variant = "sm" | "md";
 interface HabitCardActions {
   onIncrement?: (id: string) => Promise<void>;
   onComplete?: (id: string) => Promise<void>;
+  onDecrement?: (id: string) => Promise<void>;
+  onReset?: (id: string) => Promise<void>;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => Promise<void>;
 }
@@ -207,9 +209,12 @@ export default function HabitCard({
               <div className="ml-auto">
                 <HabitActions
                   habitId={id}
+                  current={current}
                   isComplete={isComplete}
                     onIncrement={actions.onIncrement ?? (async () => {})}
                     onComplete={actions.onComplete ?? (async () => {})}
+                    onDecrement={actions.onDecrement}
+                    onReset={actions.onReset}
                     onEdit={actions.onEdit}
                     onDelete={actions.onDelete ?? (async () => {})}
                 />

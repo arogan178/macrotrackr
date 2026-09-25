@@ -13,6 +13,8 @@ interface HabitTrackerProps {
   onAddHabit?: () => void;
   onIncrementHabit?: (id: string) => Promise<void>;
   onCompleteHabit?: (id: string) => Promise<void>;
+  onDecrementHabit?: (id: string) => Promise<void>;
+  onResetHabit?: (id: string) => Promise<void>;
   onEditHabit?: (id: string) => void;
   onDeleteHabit?: (id: string) => Promise<void>;
 }
@@ -23,6 +25,8 @@ function HabitTracker({
   onAddHabit,
   onIncrementHabit,
   onCompleteHabit,
+  onDecrementHabit,
+  onResetHabit,
   onEditHabit,
   onDeleteHabit,
 }: HabitTrackerProps) {
@@ -115,6 +119,8 @@ function HabitTracker({
                 actions={{
                   onIncrement: onIncrementHabit,
                   onComplete: onCompleteHabit,
+                  onDecrement: onDecrementHabit,
+                  onReset: onResetHabit,
                   onEdit: onEditHabit,
                   onDelete: onDeleteHabit,
                 }}

@@ -28,13 +28,15 @@ describe("habitsApi", () => {
     apiClient.setGetToken(async () => null);
   });
 
-  it("fetches all habits with include credentials", async () => {
+  it("fetches all habits for the local day with include credentials", async () => {
     fetchMock.mockResolvedValueOnce(createJsonResponse([{ id: "h1", title: "Walk" }]));
 
-    await expect(habitsApi.getHabits()).resolves.toEqual([{ id: "h1", title: "Walk" }]);
+    await expect(habitsApi.getHabits("2026-09-25")).resolves.toEqual([
+      { id: "h1", title: "Walk" },
+    ]);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3000/api/habits",
+      "http://localhost:3000/api/habits?date=2026-09-25",
       expect.objectContaining({
         credentials: "include",
         headers: {},
@@ -78,7 +80,21 @@ describe("habitsApi", () => {
     );
   });
 
-  it("supports deleting a single habit and resetting all habits", async () => {
+  it("sends progress changes with the local day", async () => {
+    fetchMock.mockResolvedValueOnce(createJsonResponse({ id: "habit-1", current: 0 }));
+
+    await habitsApi.updateHabitProgress("habit-1", "decrement", "2026-09-25");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3000/api/habits/habit-1/progress",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ action: "decrement", date: "2026-09-25" }),
+      }),
+    );
+  });
+
+  it("supports deleting a single habit", async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve(createJsonResponse({ success: true, id: "habit-2" })),
     );
@@ -98,14 +114,6 @@ describe("habitsApi", () => {
     });
     expect(fetchMock).toHaveBeenLastCalledWith(
       "http://localhost:3000/api/habits/habit-2",
-      expect.objectContaining({ method: "DELETE" }),
-    );
-
-    fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, count: 3 }));
-    await expect(habitsApi.resetHabit()).resolves.toEqual({ success: true, count: 3 });
-
-    expect(fetchMock).toHaveBeenLastCalledWith(
-      "http://localhost:3000/api/habits",
       expect.objectContaining({ method: "DELETE" }),
     );
   });

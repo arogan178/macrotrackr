@@ -225,6 +225,7 @@ export interface HabitRow {
   is_complete: number;
   created_at: string;
   completed_at: string | null;
+  period_date: string | null;
 }
 
 export interface SubscriptionRow {

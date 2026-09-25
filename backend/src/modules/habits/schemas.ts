@@ -23,6 +23,8 @@ const PositiveNumber = t.Number({ minimum: 0 });
 const DateString = t.String({ format: "date-time" });
 const DateStringOrNull = t.Nullable(t.String({ format: "date-time" }));
 const BooleanOrNull = t.Nullable(t.Boolean());
+// The user's local day. A strict pattern because progress matches on the exact string.
+const LocalDate = t.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" });
 
 // Habit schemas for API responses and requests
 export const HabitSchemas = {
@@ -38,6 +40,20 @@ export const HabitSchemas = {
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),
+  }),
+
+  getHabitsQuery: t.Object({
+    date: t.Optional(LocalDate),
+  }),
+
+  habitProgressBody: t.Object({
+    action: t.Union([
+      t.Literal("increment"),
+      t.Literal("decrement"),
+      t.Literal("reset"),
+      t.Literal("complete"),
+    ]),
+    date: LocalDate,
   }),
 
   // Schema for GET /api/habits response
@@ -114,11 +130,5 @@ export const HabitSchemas = {
   deleteHabitResponse: t.Object({
     success: t.Boolean(),
     id: StringRequired,
-  }),
-
-  // Schema for response after resetting all habits
-  resetHabitsResponse: t.Object({
-    success: t.Boolean(),
-    count: t.Number({ minimum: 0 }),
   }),
 };

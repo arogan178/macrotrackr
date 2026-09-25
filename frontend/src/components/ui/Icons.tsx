@@ -41,12 +41,14 @@ import {
   type LucideProps,
   Mail,
   Menu,
+  MinusCircle,
   Moon,
   MoreVertical,
   MoveLeft,
   PieChart,
   Plus,
   PlusCircle,
+  RotateCcw,
   Scale as BalanceScale,
   Scale,
   ScanBarcode,
@@ -142,6 +144,8 @@ export const UploadIcon = createIcon(Upload);
 export const ImportIcon = createIcon(Upload);
 export const WarningIcon = createIcon(AlertCircle);
 export const PlusCircleIcon = createIcon(PlusCircle);
+export const MinusCircleIcon = createIcon(MinusCircle);
+export const ResetIcon = createIcon(RotateCcw);
 export const CalorieIcon = createIcon(Flame);
 export const ArrowRightIcon = createIcon(ArrowRight);
 export const ChevronDownIcon = createIcon(ChevronDown);

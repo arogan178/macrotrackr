@@ -231,8 +231,8 @@ function main() {
     for (const [index, habit] of HABITS.entries()) {
       const complete = habit.current >= habit.target;
       db.run(
-        `INSERT INTO habits (id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO habits (id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at, period_date)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           `demo-habit-${index}`,
           userId,
@@ -244,6 +244,7 @@ function main() {
           complete ? 1 : 0,
           nowIso,
           complete ? nowIso : null,
+          TODAY,
         ],
       );
     }

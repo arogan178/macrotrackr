@@ -36,12 +36,14 @@ export interface HabitGoalUpdatePayload {
   completedAt?: string;
 }
 
+export type HabitProgressAction = "increment" | "decrement" | "reset" | "complete";
+
 export const habitsApi = {
   /**
    * @throws {ApiError}
    */
-  getHabits: async (): Promise<HabitGoalPayload[]> => {
-    return apiClient.get<HabitGoalPayload[]>("/api/habits");
+  getHabits: async (date: string): Promise<HabitGoalPayload[]> => {
+    return apiClient.get<HabitGoalPayload[]>(`/api/habits?date=${date}`);
   },
 
   /**
@@ -86,7 +88,14 @@ export const habitsApi = {
   /**
    * @throws {ApiError}
    */
-  resetHabit: async (): Promise<{ success: boolean; count: number }> => {
-    return apiClient.del<{ success: boolean; count: number }>("/api/habits", { headers: true });
+  updateHabitProgress: async (
+    id: string,
+    action: HabitProgressAction,
+    date: string,
+  ): Promise<HabitGoalPayload> => {
+    return apiClient.post<HabitGoalPayload>(`/api/habits/${id}/progress`, {
+      action,
+      date,
+    });
   },
 };
