@@ -69,14 +69,14 @@
       },
       {
         "feature": "Data Export",
-        "macrotrackr": "Free",
+        "macrotrackr": "Last 7 days free, all on Pro",
         "competitor": "Paywalled"
       }
     ],
     "faqs": [
       {
         "question": "Why switch from MyFitnessPal to MacroTrackr?",
-        "answer": "MacroTrackr keeps essential nutrition tracking tools—like barcode scanning, gram-accurate macro targets, and rolling averages—completely free and ad-free. Plus, you can self-host your own instance for total privacy."
+        "answer": "Barcode scanning, gram-accurate macro targets and weekly averages are on the free plan, with no ads on any plan. The hosted free plan shows your last 7 days; Pro opens your full history. Self-hosting has no plan limits and keeps your data on your own server."
       },
       {
         "question": "Does MacroTrackr have an open food database?",
@@ -84,7 +84,7 @@
       },
       {
         "question": "Is MacroTrackr free?",
-        "answer": "MacroTrackr is fully open source (AGPLv3) and free to self-host with Docker. We also offer an affordable hosted cloud version with automatic sync and backups."
+        "answer": "MacroTrackr is open source (AGPLv3) and free to self-host with Docker, with no plan limits. The hosted version has a free plan that shows your last 7 days and keeps 5 saved meals, and Pro at $3.99 a month for full history, unlimited saved meals and 30 and 90 day trends."
       }
     ]
   },

@@ -94,7 +94,7 @@ export const MASTER_COMPARISON_MATRIX: readonly MasterComparisonRow[] = [
   },
   {
     feature: "Saved Multi-Item Meals",
-    macrotrackr: "Free",
+    macrotrackr: "5 free, unlimited on Pro",
     myfitnesspal: "Included",
     macrofactor: "Included",
     cronometer: "Included",

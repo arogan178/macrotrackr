@@ -215,8 +215,8 @@ export default function ComparisonArticlePage() {
             }))}
           />
 
-          {/* "Ad-free" and "no paywall" are visual claims, and the page made
-              them in prose against competitors whose pages show a screenshot. */}
+          {/* "Ad-free" is a visual claim, and the page made it in prose against
+              competitors whose pages show a screenshot. */}
           <section className="mb-12" aria-labelledby="preview-heading">
             <Heading level="panel" id="preview-heading" className="mb-4 text-xl">
               What {APP_NAME} looks like
@@ -231,8 +231,8 @@ export default function ComparisonArticlePage() {
                 alt={`A day logged in ${APP_NAME}: four meals totalling 1,494 of 2,200 calories, with protein, carbs and fats against their targets. No advertisements anywhere on the screen.`}
               />
               <figcaption className="mt-3 text-sm text-muted">
-                Four meals, about twenty seconds of typing. No banner ads, and
-                no feature behind a paywall.
+                Four meals, about twenty seconds of typing, and no banner ads
+                on any plan.
               </figcaption>
             </figure>
             <figure className="mt-8">
@@ -320,7 +320,7 @@ export default function ComparisonArticlePage() {
           {/* CTA Banner */}
           <ToolsCtaBanner
             heading={`Try ${APP_NAME}`}
-            body="The free tier has no ads and no feature locks. Self-hosting runs the same build."
+            body="No ads on any plan. The hosted free plan shows your last 7 days; self-hosting has no limits."
           />
 
           {/* Other Comparisons Navigation */}
