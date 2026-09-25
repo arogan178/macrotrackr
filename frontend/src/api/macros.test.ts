@@ -106,6 +106,20 @@ describe("macrosApi", () => {
     });
   });
 
+  it("asks for the full history only when fullExport is set", async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(createJsonResponse({ entries: [], hasMore: false })),
+    );
+
+    await macrosApi.getHistory();
+    await macrosApi.getHistory({ fullExport: true });
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "http://localhost:3000/api/macros/history?limit=20&offset=0",
+      "http://localhost:3000/api/macros/history?limit=20&offset=0&fullExport=true",
+    ]);
+  });
+
   it("rejects saveMacroTargetPercentages when payload is malformed", async () => {
     await expect(
       macrosApi.saveMacroTargetPercentages({ macroTarget: undefined }),

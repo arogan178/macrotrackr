@@ -1,14 +1,23 @@
 import React, { useCallback, useState } from "react";
 
 import { ApiError } from "@/api/core";
+import { goalsApi } from "@/api/goals";
+import { habitsApi } from "@/api/habits";
 import { macrosApi } from "@/api/macros";
 import { userApi } from "@/api/user";
 import { getButtonClasses } from "@/components/ui/Button";
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
-import { downloadHistoryCsv } from "@/features/macroTracking/utils/historyExport";
+import {
+  downloadCsv,
+  downloadHistoryCsv,
+} from "@/features/macroTracking/utils/historyExport";
+import {
+  buildHabitsCsv,
+  buildWeightLogCsv,
+} from "@/features/settings/utils/dataExport";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
-import type { MacroEntry } from "@/types/macro";
+import { todayISO } from "@/utils/dateUtilities";
 
 /** Typed exactly, or the button stays disabled. */
 const CONFIRM_WORD = "DELETE";
@@ -30,16 +39,22 @@ const DeleteAccountForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const logout = useLogout();
 
-  // Same call and same CSV writer the Entry History export uses, rather than a
-  // second implementation that could drift from it.
+  // Same CSV writers as Settings > Data, but the meal history ignores the free
+  // plan's window: someone leaving gets everything they logged.
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     setError(null);
     try {
-      const response = await macrosApi.getAllHistory();
-      downloadHistoryCsv(response.entries as MacroEntry[]);
+      const [history, weightLog, habits] = await Promise.all([
+        macrosApi.getAllHistory({ fullExport: true }),
+        goalsApi.getWeightLog(),
+        habitsApi.getHabits(todayISO()),
+      ]);
+      downloadHistoryCsv(history.entries);
+      downloadCsv(buildWeightLogCsv(weightLog), "weight");
+      downloadCsv(buildHabitsCsv(habits), "habits");
     } catch {
-      setError("Could not export your history. Try again before deleting.");
+      setError("Could not export your data. Try again before deleting.");
     } finally {
       setIsExporting(false);
     }

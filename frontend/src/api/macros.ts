@@ -36,6 +36,8 @@ export interface MacroHistoryOptions {
   offset?: number;
   startDate?: string;
   endDate?: string;
+  /** Skips the free-plan history window. Only for the delete-account export. */
+  fullExport?: boolean;
 }
 
 interface MacroHistoryResponse {
@@ -117,12 +119,13 @@ export const macrosApi = {
   getHistory: async (
     options: MacroHistoryOptions = {},
   ) => {
-    const { limit = 20, offset = 0, startDate, endDate } = options;
+    const { limit = 20, offset = 0, startDate, endDate, fullExport } = options;
     const searchParameters = new URLSearchParams();
     searchParameters.append("limit", limit.toString());
     searchParameters.append("offset", offset.toString());
     if (startDate) searchParameters.append("startDate", startDate);
     if (endDate) searchParameters.append("endDate", endDate);
+    if (fullExport) searchParameters.append("fullExport", "true");
     
     const url = `/api/macros/history?${searchParameters.toString()}`;
 
@@ -133,7 +136,7 @@ export const macrosApi = {
    * @throws {ApiError}
    */
   getAllHistory: async (
-    options: { startDate?: string; endDate?: string } = {},
+    options: { startDate?: string; endDate?: string; fullExport?: boolean } = {},
   ): Promise<{ entries: MacroEntry[]; limits?: unknown }> => {
     const pageSize = 100;
     let offset = 0;

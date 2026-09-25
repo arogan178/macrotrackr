@@ -120,7 +120,9 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         const startDate = query.startDate;
         const endDate = query.endDate;
 
-        const isProUser = await checkProStatus(userId);
+        // The delete-account export must hand over every entry, not just the free window.
+        const isRestricted =
+          query.fullExport !== "true" && !(await checkProStatus(userId));
         const visibleDays = FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS;
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - visibleDays);
@@ -153,7 +155,7 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           };
         };
 
-        const visibleWhere = buildWhereClause(!isProUser);
+        const visibleWhere = buildWhereClause(isRestricted);
         const totalWhere = buildWhereClause(false);
 
         const countResult = safeQuery<{ count: number }>(
@@ -201,7 +203,7 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           hasMore: offset + limit < visibleTotal,
         };
 
-        if (!isProUser && totalAvailable > visibleTotal) {
+        if (isRestricted && totalAvailable > visibleTotal) {
           const hiddenCount = totalAvailable - visibleTotal;
           response.limits = {
             totalAvailable,
@@ -219,6 +221,7 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           offset: t.Optional(t.Numeric()),
           startDate: t.Optional(t.String()),
           endDate: t.Optional(t.String()),
+          fullExport: t.Optional(t.Literal("true")),
         }),
         response: t.Object({
           entries: t.Array(MacroSchemas.macroEntryResponse),
