@@ -315,6 +315,56 @@ export function useAddWeightLogEntry() {
   });
 }
 
+// Mutation hook for editing a weight log entry with optimistic updates
+export function useUpdateWeightLogEntry() {
+  const queryClient = useQueryClient();
+  const logUpdateWeightEntryError = createMutationErrorLogger(
+    "Failed to update weight log entry",
+  );
+
+  return useMutation({
+    mutationKey: [...queryKeys.goals.weightLog(), "update"],
+    mutationFn: async (entry: WeightLogEntry): Promise<WeightLogEntry> => {
+      return await goalsApi.updateWeightLogEntry(entry);
+    },
+    onMutate: async (entry: WeightLogEntry) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.goals.weightLog(),
+      });
+
+      const previousWeightLog = queryClient.getQueryData<WeightLogEntry[]>(
+        queryKeys.goals.weightLog(),
+      );
+
+      queryClient.setQueryData<WeightLogEntry[]>(
+        queryKeys.goals.weightLog(),
+        (oldData) =>
+          oldData?.map((existing) =>
+            existing.id === entry.id ? entry : existing,
+          ),
+      );
+
+      return { previousWeightLog };
+    },
+    onError: (error, _entry, context) => {
+      if (context?.previousWeightLog) {
+        queryClient.setQueryData(
+          queryKeys.goals.weightLog(),
+          context.previousWeightLog,
+        );
+      }
+      logUpdateWeightEntryError(error);
+    },
+    onSettled: () => {
+      // The server moves the profile weight to whichever entry is now newest.
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
+      broadcastLocalDataChange("goals");
+    },
+  });
+}
+
 // Mutation hook for deleting weight log entry
 export function useDeleteWeightLogEntry() {
   const queryClient = useQueryClient();

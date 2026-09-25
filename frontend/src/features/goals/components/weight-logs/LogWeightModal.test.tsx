@@ -5,9 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LogWeightModal from "./LogWeightModal";
 
 const addWeightLog = vi.fn();
+const updateWeightLog = vi.fn();
 
 vi.mock("@/hooks/queries/useGoals", () => ({
   useAddWeightLogEntry: () => ({ isPending: false, mutateAsync: addWeightLog }),
+  useUpdateWeightLogEntry: () => ({
+    isPending: false,
+    mutateAsync: updateWeightLog,
+  }),
 }));
 
 vi.mock("@/components/ui/Modal", () => ({
@@ -38,6 +43,8 @@ describe("LogWeightModal", () => {
   beforeEach(() => {
     addWeightLog.mockReset();
     addWeightLog.mockResolvedValue({});
+    updateWeightLog.mockReset();
+    updateWeightLog.mockResolvedValue({});
   });
 
   it("takes a weight in lb and logs it in kg", async () => {
@@ -77,5 +84,52 @@ describe("LogWeightModal", () => {
 
     expect(screen.getByText("Weight must be at least 111 lb.")).toBeInTheDocument();
     expect(addWeightLog).not.toHaveBeenCalled();
+  });
+
+  it("edits an entry in place, prefilled in the user's unit", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const timestamp = "2026-09-20T08:30:00.000Z";
+    render(
+      <LogWeightModal
+        isOpen
+        onClose={onClose}
+        unitSystem="imperial"
+        entry={{ id: "entry-1", timestamp, weight: 80 }}
+      />,
+    );
+
+    const input = screen.getByLabelText("Weight");
+    expect(input).toHaveValue(176.4);
+
+    await user.clear(input);
+    await user.type(input, "175");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(updateWeightLog).toHaveBeenCalledTimes(1));
+    expect(updateWeightLog).toHaveBeenCalledWith({
+      id: "entry-1",
+      weight: 79.38,
+      timestamp,
+    });
+    expect(addWeightLog).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("keeps an untouched weight exact when saving an edit", async () => {
+    const user = userEvent.setup();
+    render(
+      <LogWeightModal
+        isOpen
+        onClose={vi.fn()}
+        unitSystem="imperial"
+        entry={{ id: "entry-1", timestamp: "2026-09-20T08:30:00.000Z", weight: 80 }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(updateWeightLog).toHaveBeenCalledTimes(1));
+    expect(updateWeightLog.mock.calls[0][0].weight).toBe(80);
   });
 });

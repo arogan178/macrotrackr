@@ -79,6 +79,12 @@ const addWeightLogResponse = t.Object({
   weight: t.Number(),
 });
 
+// --- PUT Weight Log ---
+const updateWeightLogBody = t.Object({
+  timestamp: t.Optional(t.String({ format: "date-time" })),
+  weight: t.Optional(t.Number()),
+});
+
 // --- DELETE Weight Log ---
 const deleteWeightLogParams = t.Object({
   id: t.String(), // ID of the weight log entry to delete
@@ -99,6 +105,8 @@ export const GoalSchemas = {
   getWeightLogResponse,
   addWeightLogBody,
   addWeightLogResponse,
+  updateWeightLogBody,
+  weightLogEntry: WeightLogEntry,
   deleteWeightLogParams, // ADDED
   deleteWeightLogResponse, // ADDED
 };
