@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 
 import Dropdown from "@/components/form/Dropdown";
 import { formStyles } from "@/components/form/FormStyles";
@@ -135,14 +135,20 @@ const QuantityUnitField = memo(function QuantityUnitField({
     onUnitChange(newUnit);
   };
 
+  const quantityId = useId();
+
   return (
     <div className="space-y-2">
-      <label className={formStyles.label}>
+      <label htmlFor={quantityId} className={formStyles.label}>
         {label} {required && <span className="text-error">*</span>}
+      </label>
+      <label htmlFor={`${quantityId}-unit`} className="sr-only">
+        {label} unit
       </label>
       <div className="flex space-x-2 min-w-0">
         <div className="flex-1 min-w-[3.5rem]">
           <NumberField
+            id={quantityId}
             value={quantity}
             onChange={handleQuantityChange}
             min={0}
@@ -155,6 +161,7 @@ const QuantityUnitField = memo(function QuantityUnitField({
         </div>
         <div className="w-18 shrink-0">
           <Dropdown
+            id={`${quantityId}-unit`}
             value={unit}
             onChange={handleUnitChange}
             options={unitOptions}
