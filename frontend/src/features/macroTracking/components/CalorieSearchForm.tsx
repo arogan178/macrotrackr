@@ -19,6 +19,7 @@ import { formatGrouped } from "@/lib/formatNumber";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
+import { rankFrequentFoods } from "../utils/frequentFoods";
 import { UnitConverter, type UnitType } from "../utils/units";
 
 import BarcodeScannerModal from "./BarcodeScannerModal";
@@ -69,8 +70,9 @@ const CalorieSearch = memo(function CalorieSearch({
   const inputReference = useRef<HTMLInputElement>(null);
   const isAutoFocusing = useRef(false);
 
+  // 100 is the history endpoint's page cap: one request, enough to rank by frequency.
   const { data: historyData, isLoading: isHistoryLoading } = useMacroHistory(
-    15,
+    100,
     0,
   );
 
@@ -82,19 +84,10 @@ const CalorieSearch = memo(function CalorieSearch({
   } = useFoodSearch(submittedQuery);
 
   const rawRecents = recentEntries ?? historyData?.entries ?? [];
-  const displayRecents = useMemo(() => {
-    const seen = new Set<string>();
-    const unique: MacroEntry[] = [];
-    for (const item of rawRecents) {
-      const name = (item.foodName ?? item.mealName)?.trim();
-      if (name && !seen.has(name.toLowerCase())) {
-        seen.add(name.toLowerCase());
-        unique.push(item);
-      }
-    }
-
-    return unique.slice(0, 10);
-  }, [rawRecents]);
+  const displayRecents = useMemo(
+    () => rankFrequentFoods(rawRecents, 10),
+    [rawRecents],
+  );
 
   const trimmedQuery = query.trim();
 
@@ -505,7 +498,7 @@ const CalorieSearch = memo(function CalorieSearch({
                     </div>
                   ) : (
                     <div className="divide-y divide-border">
-                      {displayRecents.map((entry) => {
+                      {displayRecents.map(({ entry, count }) => {
                         const entryName = entry.foodName ?? entry.mealName;
                         const cals = Math.round(
                           calculateCaloriesFromMacros(
@@ -537,6 +530,11 @@ const CalorieSearch = memo(function CalorieSearch({
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-foreground">
                                 {entryName}
+                                {count > 1 && (
+                                  <span className="ml-2 text-xs text-muted">
+                                    ×{count}
+                                  </span>
+                                )}
                               </span>
                               <span className="text-xs text-muted capitalize">
                                 {entry.mealType}
