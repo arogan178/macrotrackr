@@ -3,7 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import IngredientsPanel from "@/features/macroTracking/components/edit-modal/IngredientsPanel";
 import MealDetailsSection from "@/features/macroTracking/components/edit-modal/MealDetailsSection";
-import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
+import {
+  calculateTotalsFromIngredients,
+  getGramsEquivalent,
+  roundValue,
+  scaleIngredient,
+} from "@/features/macroTracking/utils/ingredientScaling";
+import type { UnitType } from "@/features/macroTracking/utils/units";
 import { useBeforeUnload } from "@/hooks";
 import { Ingredient, MacroEntry } from "@/types/macro";
 import { handleApiError } from "@/utils/errorHandling";
@@ -15,54 +21,6 @@ interface EditModalProps {
   isSaving: boolean;
   isOpen: boolean;
 }
-
-// Calculate totals from ingredients outside component
-const calculateTotalsFromIngredients = (ingredients: Ingredient[]) => {
-  let totalProtein = 0;
-  let totalCarbs = 0;
-  let totalFats = 0;
-
-  for (const ingredient of ingredients) {
-    totalProtein += ingredient.protein || 0;
-    totalCarbs += ingredient.carbs || 0;
-    totalFats += ingredient.fats || 0;
-  }
-
-  return {
-    protein: Number(totalProtein.toFixed(1)),
-    carbs: Number(totalCarbs.toFixed(1)),
-    fats: Number(totalFats.toFixed(1)),
-  };
-};
-
-const roundValue = (value: number) => Number(value.toFixed(1));
-
-const getGramsEquivalent = (
-  quantity: number | undefined,
-  unit: string | undefined,
-): number => {
-  if (!quantity || quantity <= 0) return 0;
-  const unitString =
-    unit === "l"
-      ? "L"
-      : unit === "pcs" || unit === "pc" || unit === "piece" || unit === "pieces"
-        ? "unit"
-        : unit ?? "g";
-
-  if (unitString === "unit") {
-    return quantity * 100;
-  }
-
-  if (UnitConverter.isWeightUnit(unitString as UnitType)) {
-    return UnitConverter.convert(quantity, unitString as UnitType, "g");
-  }
-
-  if (UnitConverter.isVolumeUnit(unitString as UnitType)) {
-    return UnitConverter.convert(quantity, unitString as UnitType, "ml");
-  }
-
-  return quantity * 100;
-};
 
 export default function EditModal({
   entry,
@@ -433,12 +391,6 @@ export default function EditModal({
         let updatedIng = { ...ing };
 
         if (field === "quantity" || field === "unit") {
-          const isPcs = (unit_?: string) =>
-            unit_ === "unit" ||
-            unit_ === "pcs" ||
-            unit_ === "pc" ||
-            unit_ === "piece" ||
-            unit_ === "pieces";
           const newQuantity =
             field === "quantity"
               ? typeof value === "number"
@@ -449,32 +401,7 @@ export default function EditModal({
               : ing.quantity;
           const newUnit = field === "unit" ? String(value) : ing.unit;
 
-          const defaultBase = isPcs(ing.unit) ? 1 : 100;
-          const baseQty = ing.baseQuantity ?? ing.quantity ?? defaultBase;
-          const baseU = ing.baseUnit ?? ing.unit ?? "g";
-          const baseP = ing.baseProtein ?? ing.protein;
-          const baseC = ing.baseCarbs ?? ing.carbs;
-          const baseF = ing.baseFats ?? ing.fats;
-
-          const baseGrams = getGramsEquivalent(baseQty, baseU);
-          const targetGrams = getGramsEquivalent(
-            newQuantity ?? (isPcs(newUnit) ? 1 : 100),
-            newUnit ?? "g",
-          );
-
-          let localScaleFactor = 1;
-          if (baseGrams > 0) {
-            localScaleFactor = targetGrams / baseGrams;
-          }
-
-          updatedIng = {
-            ...updatedIng,
-            quantity: newQuantity,
-            unit: newUnit,
-            protein: roundValue(baseP * localScaleFactor),
-            carbs: roundValue(baseC * localScaleFactor),
-            fats: roundValue(baseF * localScaleFactor),
-          };
+          updatedIng = scaleIngredient(ing, newQuantity, newUnit);
         } else {
           const stringFields = ["name", "unit"];
           const isStringField = stringFields.includes(field as string);

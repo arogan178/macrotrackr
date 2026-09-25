@@ -3,14 +3,22 @@ import { useState } from "react";
 import type { SavedMeal, UpdateSavedMealPayload } from "@/api/savedMeals";
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
+import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TextField from "@/components/form/TextField";
 import Modal from "@/components/ui/Modal";
 import { useMutationErrorHandler } from "@/hooks";
 import { useUpdateSavedMeal } from "@/hooks/queries/useSavedMeals";
+import { formatGrouped } from "@/lib/formatNumber";
 import { useStore } from "@/store/store";
 import type { MealType } from "@/types/macro";
 
+import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
+import {
+  calculateTotalsFromIngredients,
+  scaleIngredient,
+} from "../utils/ingredientScaling";
+import type { UnitType } from "../utils/units";
 
 interface SavedMealEditModalProps {
   meal: SavedMeal;
@@ -26,6 +34,7 @@ export default function SavedMealEditModal({
   const [protein, setProtein] = useState<number | undefined>(meal.protein);
   const [carbs, setCarbs] = useState<number | undefined>(meal.carbs);
   const [fats, setFats] = useState<number | undefined>(meal.fats);
+  const [ingredients, setIngredients] = useState(meal.ingredients);
   const updateMeal = useUpdateSavedMeal();
   const showNotification = useStore((state) => state.showNotification);
   const { handleMutationError } = useMutationErrorHandler({
@@ -36,9 +45,24 @@ export default function SavedMealEditModal({
   const canEditMacros = ingredientCount <= 1;
   const trimmedName = name.trim();
 
+  const handleIngredientChange = (
+    index: number,
+    quantity: number | undefined,
+    unit: string,
+  ) => {
+    // Scale from the saved ingredient so repeated edits do not compound rounding.
+    setIngredients((previous) =>
+      previous.map((ingredient, index_) =>
+        index_ === index
+          ? scaleIngredient(meal.ingredients[index], quantity, unit)
+          : ingredient,
+      ),
+    );
+  };
+
   const handleSave = async () => {
     const macros = { protein: protein ?? 0, carbs: carbs ?? 0, fats: fats ?? 0 };
-    const payload: UpdateSavedMealPayload = canEditMacros
+    let payload: UpdateSavedMealPayload = canEditMacros
       ? { name: trimmedName, mealType, ...macros }
       : { name: trimmedName, mealType };
 
@@ -57,6 +81,12 @@ export default function SavedMealEditModal({
           },
         ];
       }
+    } else if (ingredients !== meal.ingredients) {
+      payload = {
+        ...payload,
+        ...calculateTotalsFromIngredients(ingredients),
+        ingredients,
+      };
     }
 
     try {
@@ -120,9 +150,40 @@ export default function SavedMealEditModal({
             />
           </div>
         ) : (
-          <p className="text-sm text-muted">
-            Macros come from its {ingredientCount} ingredients.
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              Macros come from its {ingredientCount} ingredients.
+            </p>
+            {ingredients.map((ingredient, index) => {
+              const unit = (ingredient.unit as UnitType) || "g";
+              const calories = Math.round(
+                calculateCaloriesFromMacros(
+                  ingredient.protein,
+                  ingredient.carbs,
+                  ingredient.fats,
+                ),
+              );
+
+              return (
+                <QuantityUnitField
+                  key={index}
+                  label={ingredient.name}
+                  quantity={ingredient.quantity}
+                  unit={unit}
+                  onQuantityChange={(quantity) =>
+                    handleIngredientChange(index, quantity, unit)
+                  }
+                  onUnitChange={(newUnit) =>
+                    handleIngredientChange(index, ingredient.quantity, newUnit)
+                  }
+                  onQuantityUnitChange={(quantity, newUnit) =>
+                    handleIngredientChange(index, quantity, newUnit)
+                  }
+                  helperText={`${formatGrouped(calories)} kcal`}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
     </Modal>
