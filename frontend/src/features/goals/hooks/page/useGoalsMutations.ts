@@ -2,9 +2,8 @@ import { useMutationErrorHandler } from "@/hooks";
 import { useDeleteWeightGoal } from "@/hooks/queries/useGoals";
 import {
   useAddHabit,
-  useCompleteHabit,
   useDeleteHabit,
-  useIncrementHabitProgress,
+  useHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
 import { useStore } from "@/store/store";
@@ -15,8 +14,7 @@ export function useGoalsMutations() {
   const addHabitMutation = useAddHabit();
   const updateHabitMutation = useUpdateHabit();
   const deleteHabitMutation = useDeleteHabit();
-  const incrementProgressMutation = useIncrementHabitProgress();
-  const completeHabitMutation = useCompleteHabit();
+  const habitProgressMutation = useHabitProgress();
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
@@ -55,7 +53,10 @@ export function useGoalsMutations() {
 
   async function incrementHabit(originalHabit: HabitGoal) {
     try {
-      await incrementProgressMutation.mutateAsync(originalHabit);
+      await habitProgressMutation.mutateAsync({
+        id: originalHabit.id,
+        action: "increment",
+      });
       if (originalHabit.current + 1 >= originalHabit.target) {
         handleMutationSuccess(
           `Congratulations! You've completed your ${originalHabit.title}!`,
@@ -69,10 +70,28 @@ export function useGoalsMutations() {
 
   async function completeHabit(id: string) {
     try {
-      await completeHabitMutation.mutateAsync(id);
+      await habitProgressMutation.mutateAsync({ id, action: "complete" });
       handleMutationSuccess("Congratulations! You've completed your habit!");
     } catch (error) {
       handleMutationError(error, "completing habit");
+      throw error;
+    }
+  }
+
+  async function decrementHabit(id: string) {
+    try {
+      await habitProgressMutation.mutateAsync({ id, action: "decrement" });
+    } catch (error) {
+      handleMutationError(error, "updating habit progress");
+      throw error;
+    }
+  }
+
+  async function resetHabit(id: string) {
+    try {
+      await habitProgressMutation.mutateAsync({ id, action: "reset" });
+    } catch (error) {
+      handleMutationError(error, "resetting habit progress");
       throw error;
     }
   }
@@ -92,6 +111,8 @@ export function useGoalsMutations() {
     deleteHabit,
     incrementHabit,
     completeHabit,
+    decrementHabit,
+    resetHabit,
     deleteWeightGoal,
   };
 }

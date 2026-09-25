@@ -150,6 +150,8 @@ export default function GoalsPage() {
                       onAddHabit={actions.addHabit}
                       onIncrementHabit={actions.incrementHabit}
                       onCompleteHabit={actions.completeHabit}
+                      onDecrementHabit={actions.decrementHabit}
+                      onResetHabit={actions.resetHabit}
                       onEditHabit={actions.editHabit}
                       onDeleteHabit={actions.deleteHabit}
                     />

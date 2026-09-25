@@ -4,6 +4,7 @@ import {
   buildHabitUpdatePayload,
   createNewHabit,
   filterHabitsByCompletion,
+  incrementHabitProgress,
   sortHabitsByProgress,
 } from "./habitUtilities";
 
@@ -38,6 +39,36 @@ describe("habitUtilities", () => {
     it("uses default color when not provided", () => {
       const habit = createNewHabit({ title: "Exercise", target: 10 });
       expect(habit.accentColor).toBeDefined();
+    });
+  });
+
+  describe("incrementHabitProgress", () => {
+    const habit = {
+      id: "h1",
+      title: "Water, 2L",
+      iconName: "droplet",
+      current: 8,
+      target: 8,
+      progress: 100,
+      isComplete: true,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      completedAt: "2026-09-25T10:00:00.000Z",
+    };
+
+    it("undoes completion when decremented", () => {
+      expect(incrementHabitProgress(habit, -1)).toMatchObject({
+        current: 7,
+        isComplete: false,
+        completedAt: undefined,
+      });
+    });
+
+    it("stays within 0 and the target", () => {
+      expect(incrementHabitProgress(habit).current).toBe(8);
+      expect(
+        incrementHabitProgress({ ...habit, current: 0, isComplete: false }, -1)
+          .current,
+      ).toBe(0);
     });
   });
 

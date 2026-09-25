@@ -63,7 +63,10 @@ export const incrementHabitProgress = (
   habit: HabitGoal,
   incrementBy = 1,
 ): HabitGoal => {
-  const newCurrent = habit.current + incrementBy;
+  const newCurrent = Math.min(
+    habit.target,
+    Math.max(0, habit.current + incrementBy),
+  );
   const newProgress = calculateProgress(newCurrent, habit.target);
   const wasComplete = habit.isComplete;
   const isNowComplete = isHabitComplete(newCurrent, habit.target);
@@ -73,10 +76,11 @@ export const incrementHabitProgress = (
     current: newCurrent,
     progress: newProgress,
     isComplete: isNowComplete,
-    completedAt:
-      !wasComplete && isNowComplete
-        ? new Date().toISOString()
-        : habit.completedAt,
+    completedAt: !isNowComplete
+      ? undefined
+      : wasComplete
+        ? habit.completedAt
+        : new Date().toISOString(),
   };
 };
 

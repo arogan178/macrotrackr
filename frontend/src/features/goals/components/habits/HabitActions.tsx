@@ -3,26 +3,34 @@ import { useEffect, useRef, useState } from "react";
 import {
   CheckIcon,
   EditIcon,
+  MinusCircleIcon,
   MoreVerticalIcon,
   PlusCircleIcon,
+  ResetIcon,
   TrashIcon,
 } from "@/components/ui";
 import { logger } from "@/lib/logger";
 
 interface HabitActionsProps {
   habitId: string;
+  current: number;
   isComplete: boolean;
   onIncrement: (id: string) => Promise<void>;
   onComplete: (id: string) => Promise<void>;
+  onDecrement?: (id: string) => Promise<void>;
+  onReset?: (id: string) => Promise<void>;
   onEdit?: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
 }
 
 function HabitActions({
   habitId,
+  current,
   isComplete,
   onIncrement,
   onComplete,
+  onDecrement,
+  onReset,
   onEdit,
   onDelete,
 }: HabitActionsProps) {
@@ -74,6 +82,16 @@ function HabitActions({
 
   const handleDelete = () => handleAction(() => onDelete(habitId), "delete");
 
+  const handleDecrement =
+    onDecrement && current > 0
+      ? () => handleAction(() => onDecrement(habitId), "decrement")
+      : undefined;
+
+  const handleReset =
+    onReset && current > 0
+      ? () => handleAction(() => onReset(habitId), "reset")
+      : undefined;
+
   const handleEdit = () => {
     if (onEdit) {
       onEdit(habitId);
@@ -86,6 +104,17 @@ function HabitActions({
       className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
       ref={menuReference}
     >
+      {handleDecrement && (
+        <button
+          onClick={handleDecrement}
+          disabled={isActionInProgress}
+          className="rounded-full p-1.5 text-foreground hover:bg-primary/10 hover:text-primary"
+          title="Remove progress"
+          aria-label="Remove progress"
+        >
+          <MinusCircleIcon size="sm" />
+        </button>
+      )}
       {/* Progress increment button */}
       {!isComplete && (
         <button
@@ -119,8 +148,8 @@ function HabitActions({
           <TrashIcon size="sm" />
         </button>
       )}{" "}
-      {/* More actions menu button - only show for incomplete habits */}
-      {!isComplete && (
+      {/* More actions menu button - completed habits only need it to reset */}
+      {(!isComplete || handleReset) && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
@@ -132,13 +161,24 @@ function HabitActions({
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
         <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-control border border-border bg-surface py-0.5 text-xs">
-          {onEdit && (
+          {onEdit && !isComplete && (
             <button
               onClick={handleEdit}
               className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
             >
               <EditIcon size="sm" className="mr-1.5" />
               Edit
+            </button>
+          )}
+
+          {handleReset && (
+            <button
+              onClick={handleReset}
+              disabled={isActionInProgress}
+              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
+            >
+              <ResetIcon size="sm" className="mr-1.5" />
+              Reset today
             </button>
           )}
 

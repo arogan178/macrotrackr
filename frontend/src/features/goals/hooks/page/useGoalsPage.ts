@@ -39,6 +39,12 @@ export function useGoalsController() {
     completeHabit: async (id: string) => {
       await mutations.completeHabit(id);
     },
+    decrementHabit: async (id: string) => {
+      await mutations.decrementHabit(id);
+    },
+    resetHabit: async (id: string) => {
+      await mutations.resetHabit(id);
+    },
     deleteHabit: async (id: string) => {
       await mutations.deleteHabit(id);
     },
