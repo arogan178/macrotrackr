@@ -42,7 +42,8 @@ function WeightProgressTabs({
             key: tab.id,
             label: (
               <span className="flex items-center gap-2">
-                <tab.icon className="h-4 w-4" />
+                {/* On a phone the icons push the tabs onto two rows. */}
+                <tab.icon className="hidden h-4 w-4 sm:block" />
                 {tab.label}
               </span>
             ),
