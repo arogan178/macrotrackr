@@ -20,6 +20,10 @@ import { TYPE_SCALE } from "@/components/ui/Heading";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import Panel, { RULE_HAIRLINE } from "@/components/ui/Panel";
 import Value from "@/components/ui/Value";
+import {
+  clearOnboardingDraft,
+  useOnboardingDraft,
+} from "@/features/auth/hooks/useOnboardingDraft";
 import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
 import {
   getFirstErrorMessage,
@@ -125,6 +129,31 @@ export function ProfileCreationForm() {
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useOnboardingDraft(
+    {
+      step,
+      dateOfBirth,
+      gender,
+      height,
+      weight,
+      activityLevel,
+      weightGoal,
+      targetWeightByGoal,
+      switchingSource,
+    },
+    (saved) => {
+      setStep(saved.step);
+      setDateOfBirth(saved.dateOfBirth);
+      setGender(saved.gender);
+      setHeight(saved.height);
+      setWeight(saved.weight);
+      setActivityLevel(saved.activityLevel);
+      setWeightGoal(saved.weightGoal);
+      setTargetWeightByGoal(saved.targetWeightByGoal);
+      setSwitchingSource(saved.switchingSource);
+    },
+  );
 
   const validateStep1 = (): Record<string, string> => {
     const newErrors = checkStep1(dateOfBirth, gender, height, weight);
@@ -300,6 +329,7 @@ export function ProfileCreationForm() {
       // Clear social data on success
       sessionStorage.removeItem("socialProfileData");
       sessionStorage.removeItem("postAuthRedirect");
+      clearOnboardingDraft();
 
       // Refresh cached user state before navigation so guards see profile as complete.
       await Promise.all([

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProfileCreationForm } from "@/features/auth/components/ProfileCreationForm";
 
@@ -76,6 +76,11 @@ const summaryValue = (label: RegExp) =>
   screen.getByText(label).nextElementSibling!.textContent!;
 
 describe("ProfileCreationForm goal step", () => {
+  // The form saves a draft, which would otherwise resume the next test mid-flow.
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
   it("moves the calorie target when the goal changes", async () => {
     const user = userEvent.setup();
     await reachGoalStep(user);

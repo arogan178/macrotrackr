@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { authApi } from "@/api/auth";
 import { apiClient } from "@/api/core";
 import { userApi, type UserDetailsResponse } from "@/api/user";
+import { clearOnboardingDraft } from "@/features/auth/hooks/useOnboardingDraft";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -64,6 +65,7 @@ export function useLogout() {
     mutationFn: async (): Promise<void> => {
       // Remove token from storage
       removeToken();
+      clearOnboardingDraft();
       apiClient.setAuthToken(null);
       // Drop any opt-in biometric credentials from the KeyStore/Keychain
       await clearBiometricCredentials();

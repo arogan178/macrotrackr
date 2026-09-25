@@ -16,8 +16,10 @@ export function useSocialProfileData() {
       try {
         const parsed = JSON.parse(storedData) as SocialProfileData;
         setSocialData(parsed);
-        if (parsed.dateOfBirth) {
-          setDateOfBirth(parsed.dateOfBirth);
+        const socialDateOfBirth = parsed.dateOfBirth;
+        if (socialDateOfBirth) {
+          // A pre-fill: a date restored from the onboarding draft wins.
+          setDateOfBirth((current) => current || socialDateOfBirth);
         }
       } catch {
         // Invalid JSON, ignore
