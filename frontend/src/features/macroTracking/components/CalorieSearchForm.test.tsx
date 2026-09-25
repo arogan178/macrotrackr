@@ -250,6 +250,42 @@ describe("CalorieSearchForm", () => {
     );
   });
 
+  it("orders Recents by how often a food was logged and shows the count", () => {
+    const logged = (id: number, foodName: string) => ({
+      id,
+      foodName,
+      mealName: "Snack",
+      protein: 1,
+      carbs: 20,
+      fats: 0.5,
+      mealType: "snack" as const,
+      entryDate: "2026-09-20",
+      entryTime: "10:00",
+      createdAt: "2026-09-20T10:00:00Z",
+    });
+
+    renderWithQueryClient(
+      <CalorieSearchForm
+        onResult={() => {}}
+        onSelectSavedMeal={() => {}}
+        recentEntries={[
+          logged(1, "Apple"),
+          logged(2, "Oats"),
+          logged(3, "Oats"),
+          logged(4, "Oats"),
+        ]}
+      />,
+    );
+
+    fireEvent.focus(screen.getByRole("textbox", { name: "Search for food" }));
+
+    const recents = screen.getAllByRole("button", { name: /kcal/ });
+    expect(recents.map((button) => button.textContent)).toEqual([
+      expect.stringMatching(/^Oats×3/),
+      expect.stringMatching(/^Apple(?!×)/),
+    ]);
+  });
+
   it("opens barcode scanner and populates food result on scan/manual lookup", async () => {
     (macrosApi.getByBarcode as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       name: "Oat Milk Barcode Item",
