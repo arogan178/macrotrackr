@@ -1,8 +1,17 @@
 import { useCallback, useMemo } from "react";
+import { FREE_TIER_LIMITS } from "@shared/entitlements";
+import { useSearch } from "@tanstack/react-router";
+import { parseISO } from "date-fns";
 
 import { useMacroHistoryInfinite } from "@/hooks/queries/useMacroQueries";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import type { MacroEntry } from "@/types/macro";
-import { getDisplayDate } from "@/utils/dateUtilities";
+import {
+  addDaysISO,
+  getDisplayDate,
+  isValidDateString,
+  todayISO,
+} from "@/utils/dateUtilities";
 import {
   createNutritionProfile,
   type NutritionProfileSource,
@@ -37,6 +46,7 @@ export function useHomeHeader(
   user: { firstName?: string } | undefined,
   isLoading: boolean,
   hasLoggedBefore = true,
+  date?: string,
 ) {
   const title = useMemo(() => {
     const name = user?.firstName?.trim();
@@ -52,9 +62,40 @@ export function useHomeHeader(
     return name ? `Welcome back, ${name}` : "Today";
   }, [isLoading, user?.firstName, hasLoggedBefore]);
 
-  const subtitle = useMemo(() => getDisplayDate(new Date()), []);
+  const subtitle = useMemo(
+    () => getDisplayDate(date ? parseISO(date) : new Date()),
+    [date],
+  );
 
   return { title, subtitle };
+}
+
+/** Invalid, future and (for free accounts) locked days fall back to today. */
+export function resolveHomeDate(
+  requested: string | undefined,
+  today: string,
+  oldestDate: string | undefined,
+): string {
+  if (!requested || !isValidDateString(requested) || requested > today) {
+    return today;
+  }
+  if (oldestDate && requested < oldestDate) return today;
+
+  return requested;
+}
+
+/** The day Home shows, from `/home?date=YYYY-MM-DD`. */
+export function useHomeDate() {
+  const search = (useSearch({ strict: false }) ?? {}) as { date?: string };
+  const { hasProAccess } = useEntitlements();
+  const today = todayISO();
+  // Same cutoff as the history endpoint, so Home never opens a day it hides.
+  const oldestDate = hasProAccess
+    ? undefined
+    : addDaysISO(today, -FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS);
+  const date = resolveHomeDate(search.date, today, oldestDate);
+
+  return { date, today, oldestDate, isToday: date === today };
 }
 
 export function useHistoryPagination(pageSize: number) {

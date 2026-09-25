@@ -177,6 +177,35 @@ describe("AddEntryForm", () => {
     );
   });
 
+  it("logs to the day given as defaultDate, at the current time of day", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 8, 25, 13, 40));
+    const handleSubmit = vi.fn();
+    render(
+      <AddEntryForm
+        onSubmit={handleSubmit}
+        isSaving={false}
+        defaultDate="2026-09-20"
+      />,
+    );
+
+    expect(screen.getByText(/^Logged/).textContent).toContain(
+      "2026-09-20 at 13:40",
+    );
+    fireEvent.change(screen.getByPlaceholderText("e.g. Chicken Salad"), {
+      target: { value: "Oatmeal" },
+    });
+    fireEvent.change(screen.getByLabelText("Protein"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
+    fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+    vi.useRealTimers();
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ entryDate: "2026-09-20", entryTime: "13:40" }),
+    );
+  });
+
   it("uses parsed serving units from selected food search results", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 

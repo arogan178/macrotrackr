@@ -1,4 +1,5 @@
 import { memo, useMemo, useState } from "react";
+import { parseISO } from "date-fns";
 
 import {
   MacroDistributionBar,
@@ -47,12 +48,15 @@ interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
   macroTarget?: MacroTargetSettings;
   calorieTarget?: number;
+  /** The day shown, when it is not today. */
+  date?: string;
 }
 
 function DailySummaryInner({
   macroDailyTotals,
   macroTarget,
   calorieTarget,
+  date,
 }: DailySummaryProps) {
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
@@ -180,8 +184,8 @@ function DailySummaryInner({
 
   const snapshotData: MacroSnapshotData = useMemo(
     () => ({
-      title: "Today's Macros",
-      dateLabel: getDisplayDate(new Date()),
+      title: date ? "Daily Macros" : "Today's Macros",
+      dateLabel: getDisplayDate(date ? parseISO(date) : new Date()),
       calories: macroCalories.total,
       calorieTarget: dailyCalorieTarget,
       protein: safeTotal.protein,
@@ -193,6 +197,7 @@ function DailySummaryInner({
       badgeLabel: `${completionPercentages.calories}% of Goal`,
     }),
     [
+      date,
       macroCalories.total,
       dailyCalorieTarget,
       safeTotal.protein,
@@ -211,7 +216,9 @@ function DailySummaryInner({
           dividers. It used to be six bordered boxes. */}
       <div className="p-4 sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <Heading level="panel">Today</Heading>
+          <Heading level="panel">
+            {date ? getDisplayDate(parseISO(date)) : "Today"}
+          </Heading>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted">
               {completionPercentages.calories}% of target
