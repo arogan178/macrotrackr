@@ -5,6 +5,7 @@ import {
   type SavedMeal,
   savedMealsApi,
   type SavedMealsResponse,
+  type UpdateSavedMealPayload,
 } from "@/api/savedMeals";
 import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
@@ -39,6 +40,34 @@ export function useCreateSavedMeal() {
       broadcastLocalDataChange("saved-meals");
     },
     onError: logCreateSavedMealError,
+  });
+}
+
+// Mutation hook for updating a saved meal
+export function useUpdateSavedMeal() {
+  const queryClient = useQueryClient();
+  const logUpdateSavedMealError = createMutationErrorLogger(
+    "Error updating saved meal",
+  );
+
+  return useMutation({
+    mutationKey: [...queryKeys.savedMeals.all(), "update"],
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: UpdateSavedMealPayload;
+    }) => {
+      return await savedMealsApi.update(id, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.savedMeals.list(),
+      });
+      broadcastLocalDataChange("saved-meals");
+    },
+    onError: logUpdateSavedMealError,
   });
 }
 

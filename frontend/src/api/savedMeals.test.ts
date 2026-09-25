@@ -85,6 +85,24 @@ describe("savedMealsApi", () => {
     );
   });
 
+  it("updates a saved meal by id with a partial payload", async () => {
+    const payload = { name: "Chicken Rice Bowl", mealType: "dinner" as const };
+
+    fetchMock.mockResolvedValueOnce(createJsonResponse({ id: 77, ...payload }));
+
+    await savedMealsApi.update(77, payload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3000/api/saved-meals/77",
+      expect.objectContaining({
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
   it("deletes a saved meal by id", async () => {
     fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, id: 77 }));
 

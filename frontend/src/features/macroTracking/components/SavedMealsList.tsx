@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 
+import type { SavedMeal } from "@/api/savedMeals";
 import Button from "@/components/ui/Button";
-import { TrashIcon } from "@/components/ui/Icons";
+import { EditIcon, TrashIcon } from "@/components/ui/Icons";
 import { isLocalAuthMode } from "@/config/runtime";
 import {
   useDeleteSavedMeal,
@@ -23,11 +24,12 @@ interface SavedMealsListProps {
     mealType: MealType;
     ingredients?: Ingredient[];
   }) => void;
+  onEditMeal: (meal: SavedMeal) => void;
   className?: string;
 }
 
 const SavedMealsList = memo(
-  ({ onSelectMeal, className }: SavedMealsListProps) => {
+  ({ onSelectMeal, onEditMeal, className }: SavedMealsListProps) => {
     const { data, isLoading } = useSavedMeals();
     const deleteMeal = useDeleteSavedMeal();
     const meals = data?.meals ?? [];
@@ -93,6 +95,18 @@ const SavedMealsList = memo(
                   <span className="text-xs text-muted">
                     {formatGrouped(calories)} kcal
                   </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event_) => {
+                    event_.stopPropagation();
+                    onEditMeal(meal);
+                  }}
+                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,color] duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100 hover:text-foreground"
+                  title="Edit saved meal"
+                  aria-label={`Edit ${meal.name}`}
+                >
+                  <EditIcon className="h-3.5 w-3.5" />
                 </button>
                 <button
                   type="button"

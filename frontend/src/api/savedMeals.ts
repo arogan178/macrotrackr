@@ -31,6 +31,8 @@ export interface CreateSavedMealPayload {
   ingredients?: unknown[];
 }
 
+export type UpdateSavedMealPayload = Partial<CreateSavedMealPayload>;
+
 export const savedMealsApi = {
   /**
    * @throws {ApiError}
@@ -53,6 +55,16 @@ export const savedMealsApi = {
    */
   create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
     return apiClient.post<SavedMeal>("/api/saved-meals", payload);
+  },
+
+  /**
+   * @throws {ApiError}
+   */
+  update: async (
+    id: number,
+    payload: UpdateSavedMealPayload,
+  ): Promise<SavedMeal> => {
+    return apiClient.put<SavedMeal>(`/api/saved-meals/${id}`, payload);
   },
 
   /**
