@@ -1,5 +1,5 @@
 import { apiClient } from "@/api/core";
-import type { HabitAccentColor } from "@/types/habit";
+import type { HabitAccentColor, HabitFrequency } from "@/types/habit";
 
 export interface HabitGoalPayload {
   id: string;
@@ -20,6 +20,7 @@ export interface HabitGoalPayload {
     | "red"
     | "pink"
     | "purple";
+  frequency?: HabitFrequency;
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;
@@ -31,6 +32,7 @@ export interface HabitGoalUpdatePayload {
   current: number;
   target: number;
   accentColor?: HabitAccentColor;
+  frequency?: HabitFrequency;
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;

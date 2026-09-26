@@ -23,9 +23,21 @@ type HabitsRouteContext =
 
 type HabitProgressAction = "increment" | "decrement" | "reset" | "complete";
 
-// Progress only counts on the day it was recorded, so a daily habit starts each day at 0.
+// A weekly habit's period is its ISO week, keyed by the Monday. UTC is only a
+// timezone-free calendar here: the date is already the user's local day.
+function periodKey(frequency: HabitRow["frequency"], date: string): string {
+  if (frequency !== "weekly") return date;
+
+  const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
+  const monday = new Date(Date.UTC(year, month - 1, day));
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
+
+  return monday.toISOString().slice(0, 10);
+}
+
+// Progress only counts in the period it was recorded, so a habit starts each day or week at 0.
 function toHabitResponse(habit: HabitRow, date: string) {
-  const isCurrentPeriod = habit.period_date === date;
+  const isCurrentPeriod = habit.period_date === periodKey(habit.frequency, date);
   const current = isCurrentPeriod ? habit.current : 0;
 
   return {
@@ -52,6 +64,7 @@ function toHabitResponse(habit: HabitRow, date: string) {
       | "pink"
       | "purple"
       | undefined,
+    frequency: habit.frequency,
     isComplete: isCurrentPeriod && Boolean(habit.is_complete),
     createdAt: habit.created_at,
     completedAt: isCurrentPeriod ? habit.completed_at : null,
@@ -74,7 +87,7 @@ export const habitRoutes = (app: Elysia) =>
 
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
-                   is_complete, created_at, completed_at, period_date
+                   is_complete, created_at, completed_at, period_date, frequency
             FROM habits
             WHERE user_id = ?
             ORDER BY created_at DESC
@@ -137,6 +150,7 @@ export const habitRoutes = (app: Elysia) =>
             current,
             target,
             accentColor,
+            frequency = "daily",
             isComplete,
             createdAt,
             completedAt,
@@ -147,6 +161,7 @@ export const habitRoutes = (app: Elysia) =>
             current: number;
             target: number;
             accentColor: string | undefined;
+            frequency: HabitRow["frequency"] | undefined;
             isComplete: boolean;
             createdAt: string;
             completedAt: string | undefined;
@@ -158,8 +173,8 @@ export const habitRoutes = (app: Elysia) =>
           const query = `
             INSERT INTO habits (
               id, user_id, title, icon_name, current, target, 
-              accent_color, is_complete, created_at, completed_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              accent_color, is_complete, created_at, completed_at, frequency
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
 
           safeExecute(db, query, [
@@ -173,6 +188,7 @@ export const habitRoutes = (app: Elysia) =>
             isComplete ? 1 : 0,
             createdAt,
             completedAt ?? null,
+            frequency,
           ]);
 
           publishUserSyncEvent(internalUserId, "habits");
@@ -187,6 +203,7 @@ export const habitRoutes = (app: Elysia) =>
             target,
             progress: target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0,
             accentColor: normalizedAccent as "indigo" | "blue" | "green" | "purple" | "cyan" | "teal" | "lime" | "yellow" | "orange" | "red" | "pink" | undefined,
+            frequency,
             isComplete,
             createdAt,
             completedAt,
@@ -225,6 +242,7 @@ export const habitRoutes = (app: Elysia) =>
             current,
             target,
             accentColor,
+            frequency: requestedFrequency,
             isComplete,
             createdAt,
             completedAt,
@@ -234,6 +252,7 @@ export const habitRoutes = (app: Elysia) =>
             current: number;
             target: number;
             accentColor: string | undefined;
+            frequency: HabitRow["frequency"] | undefined;
             isComplete: boolean;
             createdAt: string;
             completedAt: string | undefined;
@@ -243,22 +262,27 @@ export const habitRoutes = (app: Elysia) =>
           const normalizedAccent = accentColor && accentColor.length > 0 ? accentColor : null;
 
           const checkQuery = `
-            SELECT id FROM habits 
+            SELECT id, frequency, period_date FROM habits 
             WHERE id = ? AND user_id = ?
           `;
-          const existingHabit = safeQuery(db, checkQuery, [
-            habitId,
-            internalUserId,
-          ]);
+          const existingHabit = safeQuery<
+            Pick<HabitRow, "id" | "frequency" | "period_date">
+          >(db, checkQuery, [habitId, internalUserId]);
 
           if (!existingHabit) {
             throw new NotFoundError("Habit not found");
           }
 
+          const frequency = requestedFrequency ?? existingHabit.frequency;
+          // A day's count is not a week's, so switching frequency starts the new period at 0.
+          const periodDate =
+            frequency === existingHabit.frequency ? existingHabit.period_date : null;
+
           const updateQuery = `
             UPDATE habits
             SET title = ?, icon_name = ?, current = ?, target = ?, 
-                accent_color = ?, is_complete = ?, created_at = ?, completed_at = ?
+                accent_color = ?, is_complete = ?, created_at = ?, completed_at = ?,
+                frequency = ?, period_date = ?
             WHERE id = ? AND user_id = ?
           `;
 
@@ -271,6 +295,8 @@ export const habitRoutes = (app: Elysia) =>
             isComplete ? 1 : 0,
             createdAt,
             completedAt ?? null,
+            frequency,
+            periodDate,
             habitId,
             internalUserId,
           ]);
@@ -298,6 +324,7 @@ export const habitRoutes = (app: Elysia) =>
               | "pink"
               | "purple"
               | undefined,
+            frequency,
             isComplete,
             createdAt,
             completedAt: completedAt ?? null,
@@ -388,6 +415,7 @@ export const habitRoutes = (app: Elysia) =>
           }
 
           const previous = toHabitResponse(habit, date);
+          const periodDate = periodKey(habit.frequency, date);
           const requested = {
             increment: previous.current + 1,
             decrement: previous.current - 1,
@@ -411,7 +439,7 @@ export const habitRoutes = (app: Elysia) =>
               current,
               isComplete ? 1 : 0,
               completedAt,
-              date,
+              periodDate,
               habitId,
               internalUserId,
             ]
@@ -425,7 +453,7 @@ export const habitRoutes = (app: Elysia) =>
               current,
               is_complete: isComplete ? 1 : 0,
               completed_at: completedAt,
-              period_date: date,
+              period_date: periodDate,
             },
             date
           );
@@ -434,7 +462,7 @@ export const habitRoutes = (app: Elysia) =>
           body: HabitSchemas.habitProgressBody,
           response: HabitSchemas.habitData,
           detail: {
-            summary: "Increment, decrement, reset or complete today's habit progress",
+            summary: "Increment, decrement, reset or complete the current day's or week's habit progress",
             tags: ["Habits"],
           },
         }

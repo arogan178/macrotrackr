@@ -13,6 +13,7 @@ const DEFAULT_HABIT_VALUES: HabitGoalFormValues = {
   iconName: "target",
   target: 10,
   accentColor: "indigo",
+  frequency: "daily",
 };
 
 interface HabitModalProps {
@@ -73,6 +74,7 @@ function HabitModal({
           iconName: habit.iconName,
           target: habit.target,
           accentColor: habit.accentColor ?? "indigo",
+          frequency: habit.frequency ?? "daily",
         };
       }
       setFormValues(initialValues);
@@ -144,8 +146,13 @@ function HabitModal({
         values={formValues}
         onChange={handleFormChange}
         errors={errors}
-        // Pass the current progress from the original habit when editing
-        currentProgress={isEditMode ? habit?.current : 0}
+        // Switching frequency restarts progress, so the preview does too
+        currentProgress={
+          isEditMode &&
+          formValues.frequency === (habit?.frequency ?? "daily")
+            ? habit?.current
+            : 0
+        }
       />
     </Modal>
   );

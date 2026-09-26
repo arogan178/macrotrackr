@@ -11,6 +11,7 @@ import { habitRoutes } from "../../src/modules/habits/routes";
 
 interface HabitResponse {
   id: string;
+  frequency: "daily" | "weekly";
   current: number;
   progress: number;
   isComplete: boolean;
@@ -64,8 +65,35 @@ describe("habit progress", () => {
       .use(habitRoutes) as unknown as Elysia;
   });
 
+  const storedPeriod = () =>
+    (db.query("SELECT period_date FROM habits WHERE id = 'water'").get() as {
+      period_date: string | null;
+    }).period_date;
+
+  const editHabit = async (frequency?: "daily" | "weekly") => {
+    const response = await app.handle(
+      new Request("http://localhost/api/habits/water", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Water, 2L",
+          iconName: "droplet",
+          current: 1,
+          target: 2,
+          accentColor: "cyan",
+          isComplete: false,
+          createdAt: "2026-09-01T08:00:00.000Z",
+          frequency,
+        }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    return (await response.json()) as HabitResponse;
+  };
+
   beforeEach(() => {
     setStoredProgress(0, null);
+    db.run("UPDATE habits SET frequency = 'daily' WHERE id = 'water'");
   });
 
   afterAll(() => {
@@ -143,6 +171,89 @@ describe("habit progress", () => {
     );
 
     expect(response.status).toBe(422);
+  });
+
+  it("reads a habit saved before frequency existed as daily", async () => {
+    await updateProgress("increment", "2026-09-25");
+
+    expect(await readHabit("2026-09-25")).toMatchObject({ frequency: "daily", current: 1 });
+    expect(storedPeriod()).toBe("2026-09-25");
+  });
+
+  describe("weekly", () => {
+    beforeEach(() => {
+      db.run("UPDATE habits SET frequency = 'weekly' WHERE id = 'water'");
+    });
+
+    it("keeps progress across the days of one week and resets on Monday", async () => {
+      await updateProgress("increment", "2026-09-21");
+      expect(await updateProgress("increment", "2026-09-23")).toMatchObject({
+        frequency: "weekly",
+        current: 2,
+        isComplete: true,
+      });
+
+      expect(await readHabit("2026-09-27")).toMatchObject({ current: 2, isComplete: true });
+      expect(await readHabit("2026-09-28")).toMatchObject({
+        current: 0,
+        isComplete: false,
+        completedAt: null,
+      });
+    });
+
+    it("counts a Sunday in the week that began the Monday before", async () => {
+      await updateProgress("increment", "2026-09-27");
+      expect(storedPeriod()).toBe("2026-09-21");
+      expect(await readHabit("2026-09-21")).toMatchObject({ current: 1 });
+
+      expect(await updateProgress("increment", "2026-09-28")).toMatchObject({ current: 1 });
+      expect(storedPeriod()).toBe("2026-09-28");
+    });
+
+    it("keys a week that spans the new year by its Monday", async () => {
+      await updateProgress("increment", "2027-01-03");
+
+      expect(storedPeriod()).toBe("2026-12-28");
+      expect(await readHabit("2026-12-28")).toMatchObject({ current: 1 });
+    });
+
+    it("keeps this week's progress through an edit that leaves frequency alone", async () => {
+      await updateProgress("increment", "2026-09-22");
+
+      expect(await editHabit()).toMatchObject({ frequency: "weekly" });
+      expect(await readHabit("2026-09-24")).toMatchObject({ frequency: "weekly", current: 1 });
+    });
+
+    it("starts from 0 when switched to daily", async () => {
+      await updateProgress("increment", "2026-09-21");
+
+      expect(await editHabit("daily")).toMatchObject({ frequency: "daily" });
+      expect(await readHabit("2026-09-21")).toMatchObject({ frequency: "daily", current: 0 });
+    });
+  });
+
+  it("adds frequency to an existing habits table as daily", () => {
+    const legacy = new Database(":memory:");
+    legacy.exec(`
+      CREATE TABLE habits (
+        id TEXT PRIMARY KEY NOT NULL, user_id INTEGER NOT NULL, title TEXT NOT NULL,
+        icon_name TEXT NOT NULL, current INTEGER NOT NULL DEFAULT 0,
+        target INTEGER NOT NULL DEFAULT 1, accent_color TEXT,
+        is_complete INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL,
+        completed_at TEXT, period_date TEXT
+      );
+      INSERT INTO habits (id, user_id, title, icon_name, created_at)
+      VALUES ('old', 1, 'Old', 'target', '2026-01-01T00:00:00.000Z');
+    `);
+
+    try {
+      initializeSchema(legacy);
+
+      expect(legacy.query("SELECT frequency FROM habits").get()).toEqual({ frequency: "daily" });
+      expect(() => legacy.run("UPDATE habits SET frequency = 'monthly'")).toThrow();
+    } finally {
+      legacy.close();
+    }
   });
 
   it("lists a habit saved without a colour", async () => {

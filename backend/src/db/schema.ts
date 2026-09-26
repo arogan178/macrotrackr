@@ -100,7 +100,8 @@ const SCHEMA_SQL = `
             is_complete INTEGER NOT NULL DEFAULT 0, -- SQLite boolean (0=false, 1=true)
             created_at TEXT NOT NULL, -- Store as ISO 8601 date-time string
             completed_at TEXT, -- Store as ISO 8601 date-time string, NULL until completed
-            period_date TEXT, -- User's local YYYY-MM-DD that current belongs to; any other day reads as 0
+            period_date TEXT, -- User's local YYYY-MM-DD that current belongs to (the Monday for weekly); any other period reads as 0
+            frequency TEXT NOT NULL DEFAULT 'daily' CHECK(frequency IN ('daily', 'weekly')),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
@@ -418,6 +419,12 @@ function applyMigrations(db: Database) {
 
   // Existing rows stay NULL: their progress is from an unknown day, so it reads as 0.
   checkAndAddColumn(db, "habits", "period_date", "TEXT");
+  checkAndAddColumn(
+    db,
+    "habits",
+    "frequency",
+    "TEXT NOT NULL DEFAULT 'daily' CHECK(frequency IN ('daily', 'weekly'))",
+  );
 
   // Apply ingredients column additions for hybrid meal support
   checkAndAddColumn(db, "macro_entries", "ingredients", "TEXT DEFAULT '[]'");

@@ -129,6 +129,7 @@ export default function HabitCard({
     progress: progressValue,
     accentColor = "primary",
     isComplete = false,
+    frequency,
   } = habit;
 
   const defaultsByVariant: Record<Variant, HabitCardShowToggles> = {
@@ -170,7 +171,7 @@ export default function HabitCard({
     <CardContainer variant="interactive" className="overflow-hidden bg-surface-2 p-0">
       <div
         className={cn(
-          "bg-gradient-to-r",
+          "h-full bg-gradient-to-r",
           getGradientClass(accentColor),
           paddingClass
         )}
@@ -205,6 +206,7 @@ export default function HabitCard({
                   habitId={id}
                   current={current}
                   isComplete={isComplete}
+                  frequency={frequency}
                     onIncrement={actions.onIncrement ?? (async () => {})}
                     onComplete={actions.onComplete ?? (async () => {})}
                     onDecrement={actions.onDecrement}
@@ -236,6 +238,7 @@ export default function HabitCard({
                   ) : (
                     <AnimatedNumber value={target} />
                   )}
+                  {frequency === "weekly" && " this week"}
                 </span>
               )}
             </div>
