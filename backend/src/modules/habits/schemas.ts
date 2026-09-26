@@ -17,6 +17,8 @@ const AccentColor = t.Union([
   t.Literal("purple"),
 ]);
 
+const Frequency = t.Union([t.Literal("daily"), t.Literal("weekly")]);
+
 // Define reusable primitives
 const StringRequired = t.String({ minLength: 1 });
 const PositiveNumber = t.Number({ minimum: 0 });
@@ -37,6 +39,7 @@ export const HabitSchemas = {
     target: PositiveNumber,
     progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
+    frequency: Frequency,
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),
@@ -66,6 +69,7 @@ export const HabitSchemas = {
       target: PositiveNumber,
       progress: PositiveNumber,
       accentColor: t.Optional(AccentColor),
+      frequency: Frequency,
       isComplete: t.Optional(t.Boolean()),
       createdAt: DateString,
       completedAt: t.Optional(DateStringOrNull),
@@ -81,6 +85,7 @@ export const HabitSchemas = {
     target: PositiveNumber,
     progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
+    frequency: t.Optional(Frequency),
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),
@@ -95,6 +100,7 @@ export const HabitSchemas = {
     target: PositiveNumber,
     progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
+    frequency: Frequency,
     isComplete: t.Optional(BooleanOrNull),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),
@@ -107,6 +113,7 @@ export const HabitSchemas = {
     current: PositiveNumber,
     target: PositiveNumber,
     accentColor: t.Optional(AccentColor),
+    frequency: t.Optional(Frequency),
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),
@@ -121,6 +128,7 @@ export const HabitSchemas = {
     target: PositiveNumber,
     progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
+    frequency: Frequency,
     isComplete: t.Boolean(),
     createdAt: DateString,
     completedAt: t.Optional(DateStringOrNull),

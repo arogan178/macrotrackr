@@ -15,6 +15,8 @@ export type HabitAccentColor =
   | "pink"
   | "purple";
 
+export type HabitFrequency = "daily" | "weekly";
+
 export interface HabitGoal {
   id: string;
   title: string;
@@ -23,6 +25,7 @@ export interface HabitGoal {
   target: number;
   progress: number;
   accentColor?: HabitAccentColor;
+  frequency?: HabitFrequency;
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;
@@ -40,6 +43,7 @@ export interface HabitGoalFormValues {
   iconName: string;
   target: number;
   accentColor?: HabitAccentColor;
+  frequency?: HabitFrequency;
 }
 
 export interface HabitCardProps {

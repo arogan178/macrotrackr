@@ -9,7 +9,7 @@ const actions = {
   onDelete: vi.fn(async () => {}),
 };
 
-function renderCard(current: number) {
+function renderCard(current: number, frequency?: "weekly") {
   render(
     <HabitCard
       habit={{
@@ -19,6 +19,7 @@ function renderCard(current: number) {
         current,
         target: 3,
         isComplete: current >= 3,
+        frequency,
       }}
       actions={actions}
     />,
@@ -45,5 +46,11 @@ describe("HabitCard", () => {
 
     expect(header).not.toContainElement(badge);
     expect(badge.parentElement).toHaveTextContent(/3\s*\/\s*3/);
+  });
+
+  it("says a weekly figure counts this week", () => {
+    renderCard(1, "weekly");
+
+    expect(screen.getByText(/this week/)).toBeInTheDocument();
   });
 });

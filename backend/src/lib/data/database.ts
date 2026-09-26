@@ -226,6 +226,7 @@ export interface HabitRow {
   created_at: string;
   completed_at: string | null;
   period_date: string | null;
+  frequency: "daily" | "weekly";
 }
 
 export interface SubscriptionRow {

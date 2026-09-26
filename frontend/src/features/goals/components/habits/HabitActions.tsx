@@ -10,11 +10,13 @@ import {
   TrashIcon,
 } from "@/components/ui";
 import { logger } from "@/lib/logger";
+import type { HabitFrequency } from "@/types/habit";
 
 interface HabitActionsProps {
   habitId: string;
   current: number;
   isComplete: boolean;
+  frequency?: HabitFrequency;
   onIncrement: (id: string) => Promise<void>;
   onComplete: (id: string) => Promise<void>;
   onDecrement?: (id: string) => Promise<void>;
@@ -27,6 +29,7 @@ function HabitActions({
   habitId,
   current,
   isComplete,
+  frequency,
   onIncrement,
   onComplete,
   onDecrement,
@@ -164,7 +167,7 @@ function HabitActions({
               className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
             >
               <ResetIcon size="sm" className="mr-1.5" />
-              Reset today
+              {frequency === "weekly" ? "Reset this week" : "Reset today"}
             </button>
           )}
 

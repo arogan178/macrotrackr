@@ -6,6 +6,7 @@ import {
   filterHabitsByCompletion,
   incrementHabitProgress,
   sortHabitsByProgress,
+  updateHabitFromForm,
 } from "./habitUtilities";
 
 describe("habitUtilities", () => {
@@ -39,6 +40,34 @@ describe("habitUtilities", () => {
     it("uses default color when not provided", () => {
       const habit = createNewHabit({ title: "Exercise", target: 10 });
       expect(habit.accentColor).toBeDefined();
+    });
+  });
+
+  describe("updateHabitFromForm", () => {
+    const habit = {
+      id: "h1",
+      title: "Run",
+      iconName: "dumbbell",
+      current: 2,
+      target: 3,
+      progress: 67,
+      createdAt: "2026-09-01T08:00:00.000Z",
+    };
+    const values = { title: "Run", iconName: "dumbbell", target: 3 };
+
+    it("keeps progress when the frequency stays the same", () => {
+      expect(updateHabitFromForm(habit, { ...values, frequency: "daily" })).toMatchObject({
+        current: 2,
+        frequency: "daily",
+      });
+    });
+
+    it("starts from 0 when the frequency changes", () => {
+      expect(updateHabitFromForm(habit, { ...values, frequency: "weekly" })).toMatchObject({
+        current: 0,
+        progress: 0,
+        frequency: "weekly",
+      });
     });
   });
 
