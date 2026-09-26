@@ -1,3 +1,4 @@
+import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import TextField from "@/components/form/TextField";
 import { HabitGoalFormValues } from "@/types/habit";
@@ -19,6 +20,11 @@ const COLOR_OPTIONS = [
   { value: "pink", label: "Pink", class: "bg-pink-500" },
   { value: "purple", label: "Purple", class: "bg-purple-500" },
 ] as const;
+
+const FREQUENCY_OPTIONS = [
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+];
 
 const COLOR_TEXT_RING_MAP = {
   indigo: { text: "text-indigo-400", ring: "ring-indigo-400" },
@@ -147,19 +153,30 @@ function HabitForm({
       </div>
 
       <div>
-        <NumberField
-          label="Target"
-          value={values.target}
-          onChange={(value: number | undefined) =>
-            handleChange("target", value)
-          }
-          min={1}
-          max={100}
-          error={errors.target}
-          required
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <NumberField
+            label="Target"
+            value={values.target}
+            onChange={(value: number | undefined) =>
+              handleChange("target", value)
+            }
+            min={1}
+            max={100}
+            error={errors.target}
+            required
+          />
+          <Dropdown
+            id="habit-frequency"
+            label="Frequency"
+            options={FREQUENCY_OPTIONS}
+            value={values.frequency ?? "daily"}
+            onChange={(value) => handleChange("frequency", value)}
+          />
+        </div>
         <p className="mt-1 text-xs text-muted">
-          How many times a day. Progress resets at midnight.
+          {values.frequency === "weekly"
+            ? "How many times a week. Progress resets on Monday."
+            : "How many times a day. Progress resets at midnight."}
         </p>
       </div>
 
@@ -267,6 +284,7 @@ function HabitForm({
               target: values.target,
               progress: undefined,
               accentColor: values.accentColor ?? "indigo",
+              frequency: values.frequency,
               isComplete: false,
             }}
             show={{ completionBadge: false }}

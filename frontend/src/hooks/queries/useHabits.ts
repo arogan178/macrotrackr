@@ -84,11 +84,12 @@ export function useUpdateHabit() {
         throw new Error("Completed habits cannot be edited");
       }
 
-      if (values.target < existingHabit.current) {
+      const updatedHabit = updateHabitFromForm(existingHabit, values);
+
+      if (updatedHabit.target < updatedHabit.current) {
         throw new Error("Target cannot be lower than current progress");
       }
 
-      const updatedHabit = updateHabitFromForm(existingHabit, values);
       const payload = buildHabitUpdatePayload(existingHabit, updatedHabit);
 
       return await habitsApi.updateHabit(id, payload);

@@ -88,6 +88,37 @@ describe("HabitForm", () => {
     expect(onChange).toHaveBeenCalledWith("accentColor", "red");
   });
 
+  it("offers a weekly frequency and explains when it resets", () => {
+    const onChange = vi.fn();
+
+    const { rerender } = render(
+      <HabitForm values={baseValues} onChange={onChange} errors={{}} />,
+    );
+
+    expect(screen.getByLabelText("Frequency")).toHaveValue("daily");
+    expect(
+      screen.getByText("How many times a day. Progress resets at midnight."),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Frequency"), {
+      target: { value: "weekly" },
+    });
+    expect(onChange).toHaveBeenCalledWith("frequency", "weekly");
+
+    rerender(
+      <HabitForm
+        values={{ ...baseValues, frequency: "weekly" }}
+        onChange={onChange}
+        errors={{}}
+      />,
+    );
+
+    expect(
+      screen.getByText("How many times a week. Progress resets on Monday."),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/this week/)).toBeInTheDocument();
+  });
+
   it("shows validation errors passed from parent", () => {
     const onChange = vi.fn();
 

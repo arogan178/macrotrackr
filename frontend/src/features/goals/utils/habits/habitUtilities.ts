@@ -17,6 +17,7 @@ export const buildHabitUpdatePayload = (
   current: updatedHabit.current,
   target: updatedHabit.target,
   accentColor: updatedHabit.accentColor,
+  frequency: updatedHabit.frequency,
   isComplete: updatedHabit.isComplete,
   createdAt: existingHabit.createdAt,
   completedAt: updatedHabit.completedAt,
@@ -35,6 +36,7 @@ export const createNewHabit = (values: HabitGoalFormValues): HabitGoal => {
     target: values.target,
     progress,
     accentColor: values.accentColor ?? DEFAULT_HABIT_COLOR,
+    frequency: values.frequency ?? "daily",
     isComplete: isHabitComplete(current, values.target),
     createdAt: new Date().toISOString(),
   };
@@ -44,17 +46,22 @@ export const updateHabitFromForm = (
   existingHabit: HabitGoal,
   values: HabitGoalFormValues,
 ): HabitGoal => {
-  const progress = calculateProgress(existingHabit.current, values.target);
+  const previousFrequency = existingHabit.frequency ?? "daily";
+  const frequency = values.frequency ?? previousFrequency;
+  // The server starts a habit at 0 when its frequency changes.
+  const current = frequency === previousFrequency ? existingHabit.current : 0;
 
   return {
     ...existingHabit,
     title: values.title,
     iconName: values.iconName,
+    current,
     target: values.target,
-    progress,
+    progress: calculateProgress(current, values.target),
     accentColor:
       values.accentColor ?? existingHabit.accentColor ?? DEFAULT_HABIT_COLOR,
-    isComplete: isHabitComplete(existingHabit.current, values.target),
+    frequency,
+    isComplete: isHabitComplete(current, values.target),
   };
 };
 
