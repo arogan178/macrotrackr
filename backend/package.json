@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:integration": "bun test .integration.test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
