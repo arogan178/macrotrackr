@@ -86,19 +86,26 @@ const CalorieSearch = memo(function CalorieSearch({
     error: searchError,
   } = useFoodSearch(submittedQuery);
 
-  const rawRecents = recentEntries ?? historyData?.entries ?? [];
-  const displayRecents = useMemo(
-    () => rankFrequentFoods(rawRecents, 10),
-    [rawRecents],
-  );
-
   const trimmedQuery = query.trim();
 
+  const rawRecents = recentEntries ?? historyData?.entries ?? [];
+  const displayRecents = useMemo(() => {
+    const filter = trimmedQuery.toLowerCase();
+    // Filter before ranking so a match outside the top 10 still shows.
+    const matching = filter
+      ? rawRecents.filter((entry) =>
+          (entry.foodName ?? entry.mealName)?.toLowerCase().includes(filter),
+        )
+      : rawRecents;
+
+    return rankFrequentFoods(matching, 10);
+  }, [rawRecents, trimmedQuery]);
+
   const openSuggestions = () => {
-    if (trimmedQuery.length === 0) {
-      setActivePanel("savedMeals");
-    } else if (results.length > 0) {
+    if (trimmedQuery.length > 0 && results.length > 0) {
       setActivePanel("results");
+    } else {
+      setActivePanel("savedMeals");
     }
   };
 
@@ -151,14 +158,8 @@ const CalorieSearch = memo(function CalorieSearch({
     const value = e.target.value;
     setQuery(value);
     setSubmittedQuery("");
-
-    if (value.trim().length === 0) {
-      setActivePanel("savedMeals");
-
-      return;
-    }
-
-    setActivePanel(null);
+    // Typing filters the local lists; only Enter or Search calls the rate-limited API.
+    setActivePanel("savedMeals");
   }, []);
 
   const handleSearch = useCallback(async () => {
@@ -457,7 +458,7 @@ const CalorieSearch = memo(function CalorieSearch({
           </motion.div>
         )}
 
-        {activePanel === "savedMeals" && query.length === 0 && (
+        {activePanel === "savedMeals" && (
           <motion.div
             key="saved-meals-overlay"
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
@@ -500,7 +501,7 @@ const CalorieSearch = memo(function CalorieSearch({
                     </div>
                   ) : displayRecents.length === 0 ? (
                     <div className="py-4 text-center text-sm text-muted">
-                      No recent entries found.
+                      {trimmedQuery ? "No recents match" : "No recent entries found."}
                     </div>
                   ) : (
                     <div className="divide-y divide-border">
@@ -567,6 +568,7 @@ const CalorieSearch = memo(function CalorieSearch({
                   transition={{ duration: 0.15, ease: "easeOut" }}
                 >
                   <SavedMealsList
+                    query={trimmedQuery}
                     onSelectMeal={(meal) => {
                       onSelectSavedMeal(meal);
                       setSubmittedQuery("");

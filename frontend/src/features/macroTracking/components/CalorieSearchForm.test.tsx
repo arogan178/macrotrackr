@@ -286,6 +286,87 @@ describe("CalorieSearchForm", () => {
     ]);
   });
 
+  describe("typing a query", () => {
+    const logged = (id: number, foodName: string) => ({
+      id,
+      foodName,
+      mealName: "Snack",
+      protein: 1,
+      carbs: 20,
+      fats: 0.5,
+      mealType: "snack" as const,
+      entryDate: "2026-09-20",
+      entryTime: "10:00",
+      createdAt: "2026-09-20T10:00:00Z",
+    });
+
+    const renderAndType = (value: string) => {
+      renderWithQueryClient(
+        <CalorieSearchForm
+          onResult={() => {}}
+          onSelectSavedMeal={() => {}}
+          recentEntries={[logged(1, "Banana"), logged(2, "Greek Yogurt")]}
+        />,
+      );
+      const input = screen.getByRole("textbox", { name: "Search for food" });
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value } });
+
+      return input;
+    };
+
+    it("keeps Recents open and filters them by name without searching", () => {
+      renderAndType("yog");
+
+      expect(screen.getByText("Greek Yogurt")).toBeInTheDocument();
+      expect(screen.queryByText("Banana")).not.toBeInTheDocument();
+      expect(macrosApi.search).not.toHaveBeenCalled();
+    });
+
+    it("filters Saved Meals by name without searching", async () => {
+      mockSavedMeals([oats, { ...oats, id: 6, name: "Chicken bowl" }]);
+      renderAndType("CHICK");
+
+      fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+
+      expect(await screen.findByText("Chicken bowl")).toBeInTheDocument();
+      expect(screen.queryByText("Oats")).not.toBeInTheDocument();
+      expect(macrosApi.search).not.toHaveBeenCalled();
+    });
+
+    it("says so when nothing matches", async () => {
+      mockSavedMeals([oats]);
+      renderAndType("pizza");
+
+      expect(screen.getByText("No recents match")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+      expect(await screen.findByText("No saved meals match")).toBeInTheDocument();
+    });
+
+    it("still searches the API on Enter", async () => {
+      vi.mocked(macrosApi.search).mockResolvedValue([
+        {
+          name: "Banana chips",
+          protein: 2,
+          carbs: 58,
+          fats: 34,
+          energyKcal: 520,
+          categories: "Snacks",
+          servingQuantity: 100,
+          servingUnit: "g",
+        },
+      ]);
+      const input = renderAndType("banana");
+
+      fireEvent.keyDown(input, { key: "Enter" });
+
+      expect(await screen.findByText("Banana chips")).toBeInTheDocument();
+      expect(macrosApi.search).toHaveBeenCalledTimes(1);
+      expect(macrosApi.search).toHaveBeenCalledWith({ query: "banana" });
+      expect(screen.queryByRole("tab", { name: "Recents" })).not.toBeInTheDocument();
+    });
+  });
+
   it("opens barcode scanner and populates food result on scan/manual lookup", async () => {
     (macrosApi.getByBarcode as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       name: "Oat Milk Barcode Item",
