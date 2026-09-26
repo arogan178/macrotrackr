@@ -3,9 +3,10 @@
 // for the store listing and the vertical video cut.
 //
 //   1. Seed and serve the demo backend (see backend/scripts/seed-demo.ts)
-//   2. Build and install:  CAPACITOR=true CAPACITOR_HOSTNAME=localhost \
-//        VITE_API_URL=http://<lan-ip>:3001 bun run build && bunx cap sync android
+//   2. Build and install:  adb reverse tcp:3000 tcp:3000 && bun run cap:sync:local
 //        && (cd android && ./gradlew assembleDebug) && adb install -r <apk>
+//      The app runs at https://localhost, so the API must be http://localhost
+//      (tunnelled by adb reverse): a LAN http:// address is blocked as mixed content.
 //   3. Unlock the phone, then:  node scripts/capture-device.mjs
 //
 // The webview is driven over CDP (Capacitor debug builds expose
