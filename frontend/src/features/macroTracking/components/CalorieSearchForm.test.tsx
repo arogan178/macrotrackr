@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { MotionGlobalConfig } from "motion/react";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -493,6 +494,56 @@ describe("CalorieSearchForm", () => {
       expect(savedMealsApi.update).toHaveBeenCalledWith(5, {
         name: "Chicken bowl",
         mealType: "dinner",
+      });
+    });
+  });
+
+  it("rescales an ingredient of a multi-ingredient saved meal and saves the new totals", async () => {
+    const chicken = {
+      name: "Chicken",
+      protein: 30,
+      carbs: 0,
+      fats: 3,
+      quantity: 100,
+      unit: "g",
+    };
+    const rice = {
+      name: "Rice",
+      protein: 4,
+      carbs: 45,
+      fats: 1,
+      quantity: 150,
+      unit: "g",
+    };
+    mockSavedMeals([
+      { ...oats, name: "Chicken bowl", ingredients: [chicken, rice] },
+    ]);
+    vi.mocked(savedMealsApi.update).mockResolvedValue(oats);
+
+    renderWithQueryClient(
+      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
+    );
+
+    const dialog = await openSavedMealEditor("Chicken bowl");
+    const [chickenQuantity] = within(dialog).getAllByRole("spinbutton");
+    fireEvent.change(chickenQuantity, { target: { value: "250" } });
+
+    // 75g protein and 7.5g fat: 300 + 67.5 kcal.
+    expect(within(dialog).getByText("368 kcal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(savedMealsApi.update).toHaveBeenCalledWith(5, {
+        name: "Chicken bowl",
+        mealType: "breakfast",
+        protein: 79,
+        carbs: 45,
+        fats: 8.5,
+        ingredients: [
+          { ...chicken, quantity: 250, protein: 75, fats: 7.5 },
+          rice,
+        ],
       });
     });
   });
