@@ -61,4 +61,17 @@ describe("HabitActions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reset today" }));
     await waitFor(() => expect(onReset).toHaveBeenCalledWith("h1"));
   });
+
+  it("keeps delete in the menu for a completed habit", async () => {
+    const { onDelete } = renderActions(8, true);
+
+    expect(
+      screen.queryByRole("button", { name: "Delete habit" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "More actions" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith("h1"));
+  });
 });
