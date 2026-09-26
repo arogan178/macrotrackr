@@ -17,7 +17,7 @@
     "test:e2e:headed": "playwright test --config ./playwright.config.ts --headed",
     "test:growth-canary": "playwright test --config ./e2e/growth-canary.config.ts",
     "cap:sync": "CAPACITOR=true bun run build && bunx cap sync",
-    "cap:sync:local": "CAPACITOR_HOSTNAME=\"localhost\" VITE_API_URL=\"http://192.168.0.166:3000\" CAPACITOR=true bun run build && bunx cap sync",
+    "cap:sync:local": "CAPACITOR=true CAPACITOR_HOSTNAME=localhost VITE_AUTH_MODE=clerk sh -c 'bunx vite build --mode development && bunx cap sync'",
     "cap:sync:prod": "CAPACITOR_HOSTNAME=\"app.macrotrackr.com\" VITE_API_URL=\"https://macrotrackr.com\" CAPACITOR=true bun run build && bunx cap sync",
     "cap:open:ios": "bunx cap open ios",
     "cap:open:android": "CAPACITOR_ANDROID_STUDIO_PATH=\"${CAPACITOR_ANDROID_STUDIO_PATH:-/opt/android-studio/bin/studio.sh}\" bunx cap open android",
