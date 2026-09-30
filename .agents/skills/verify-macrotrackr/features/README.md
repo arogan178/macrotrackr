@@ -8,5 +8,6 @@ Start with the feature closest to the change:
 - `data-import.md`: importer preview, execution, and activation events.
 - `billing.md`: paywall and checkout-session creation.
 
-Authenticated features use the disposable-user managed canary. Public pages
-use the lightweight landing helper.
+Authenticated features run locally with the saved session from
+`scripts/sign-in.mjs`, or in production with the disposable-user managed canary.
+Public pages use the lightweight landing helper.

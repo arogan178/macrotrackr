@@ -20,6 +20,30 @@ bunx --cwd frontend vite preview --host 127.0.0.1 --port 4173
 
 Record the preview process ID. Do not kill processes by name.
 
+For local dev, start `bun run dev:backend` and `bun run dev:frontend` and
+record both process IDs. Both default to local auth, not Clerk.
+
+## Sign in
+
+Local dev skips the login form with a persistent test account:
+
+```sh
+bun .agents/skills/verify-macrotrackr/scripts/sign-in.mjs
+```
+
+It logs in `verify-agent@example.com` (registering it on first run) and saves
+the session to `.artifacts/verify-macrotrackr/auth-state.json`. Load that file
+as Playwright `storageState` in any script that drives signed-in pages, or open
+a signed-in browser with:
+
+```sh
+bunx playwright open --load-storage=.artifacts/verify-macrotrackr/auth-state.json http://localhost:5173/home
+```
+
+Rerun the script if pages redirect to `/login`. Pass `--email` for a separate
+account when a check needs fresh state. The account has no profile until you
+complete `features/profile-onboarding.md` once.
+
 Authenticated managed checks require the secrets documented by
 `.github/workflows/growth-health.yml`. Run them with:
 
@@ -53,7 +77,7 @@ events directly when the user journey can produce them.
 Public landing verification:
 
 ```sh
-bun .cursor/skills/verify-macrotrackr/scripts/verify-public-landing.mjs \
+bun .agents/skills/verify-macrotrackr/scripts/verify-public-landing.mjs \
   --base-url "${BASE_URL:-https://macrotrackr.com}" \
   --output-dir .artifacts/verify-macrotrackr/public-landing
 ```
@@ -80,6 +104,8 @@ reviewed. It is ignored by Git.
 
 ## Helpers
 
+- `scripts/sign-in.mjs`: signs the local test account in and saves its session
+  as Playwright storage state.
 - `scripts/verify-public-landing.mjs`: verifies the rendered public landing
   headline and primary CTA, then saves a screenshot and JSON result.
 - `frontend/e2e/growth-canary.test.ts`: drives disposable managed-account and
