@@ -94,12 +94,18 @@ See the full [Self-Hosting & Templates Guide](docs/self-hosting.md) for detailed
 This repository includes a self-host starter compose stack.
 
 ```bash
+git clone https://github.com/arogan178/macrotrackr.git
+cd macrotrackr
 mkdir -p data
 docker compose pull
 docker compose up -d
 ```
 
-The default compose file uses prebuilt GHCR images in local-auth mode (`VITE_AUTH_MODE=local`),
+The backend runs as UID 1000, so `data/` must be writable by it. If your user is not
+UID 1000, run `sudo chown 1000:1000 data` before starting. `backend/.env` is optional:
+copy `backend/.env.example` to override settings such as `APP_URL`.
+
+The default compose file uses prebuilt Docker Hub images in local-auth mode (`VITE_AUTH_MODE=local`),
 so no Clerk publishable key is required for self-hosted deployments.
 It also uses same-origin API requests (`/api`) through nginx proxying, so clients do not
 need to reach backend on `localhost`.

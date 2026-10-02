@@ -1,7 +1,7 @@
 # TrueNAS SCALE (24.10+ Electric Eel) / Dockge Compose Template
 services:
   backend:
-    image: ghcr.io/arogan178/macrotrackr-backend:latest
+    image: docker.io/arogan178/macrotrackr-backend:latest
     container_name: macrotrackr-backend
     restart: unless-stopped
     volumes:
@@ -22,7 +22,7 @@ services:
       - macrotrackr_net
 
   frontend:
-    image: ghcr.io/arogan178/macrotrackr-frontend:latest
+    image: docker.io/arogan178/macrotrackr-frontend:latest
     container_name: macrotrackr-frontend
     restart: unless-stopped
     depends_on:
