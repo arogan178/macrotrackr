@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>MacroTrackr</Name>
-  <Repository>ghcr.io/arogan178/macrotrackr-backend:latest</Repository>
-  <Registry>https://ghcr.io/arogan178/macrotrackr-backend</Registry>
+  <Repository>docker.io/arogan178/macrotrackr-backend:latest</Repository>
+  <Registry>https://hub.docker.com/r/arogan178/macrotrackr-backend</Registry>
   <Network>bridge</Network>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
@@ -11,8 +11,8 @@
   <Overview>MacroTrackr is an open-source, modern nutrition and macronutrient tracking application designed for self-hosters. Track calories, macros, custom meals, and daily fitness goals with local SQLite data storage and full privacy.</Overview>
   <Category>Productivity: Tools: Health:</Category>
   <WebUI>http://[IP]:[PORT:5173]</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/arogan178/macrotrackr/main/templates/unraid/macrotrackr.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/arogan178/macrotrackr/master/templates/unraid/macrotrackr.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/icon.png</Icon>
   <ExtraParams></ExtraParams>
   <PostArgs></PostArgs>
   <CPUset></CPUset>

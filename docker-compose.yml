@@ -1,8 +1,11 @@
 services:
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/arogan178/macrotrackr-backend:latest}
+    # Docker Hub: the GHCR packages are not public, so an anonymous pull fails.
+    image: ${BACKEND_IMAGE:-docker.io/arogan178/macrotrackr-backend:latest}
+    restart: unless-stopped
     env_file:
-      - backend/.env
+      - path: backend/.env
+        required: false
     volumes:
       - ./data:/data
     environment:
@@ -24,7 +27,8 @@ services:
       - "3000"
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ghcr.io/arogan178/macrotrackr-frontend:latest}
+    image: ${FRONTEND_IMAGE:-docker.io/arogan178/macrotrackr-frontend:latest}
+    restart: unless-stopped
     depends_on:
       - backend
     volumes:

@@ -1,7 +1,7 @@
 name: macrotrackr
 services:
   backend:
-    image: ghcr.io/arogan178/macrotrackr-backend:latest
+    image: docker.io/arogan178/macrotrackr-backend:latest
     container_name: macrotrackr-backend
     restart: unless-stopped
     volumes:
@@ -40,7 +40,7 @@ services:
             en_us: Persistent storage directory for SQLite database and user data.
 
   frontend:
-    image: ghcr.io/arogan178/macrotrackr-frontend:latest
+    image: docker.io/arogan178/macrotrackr-frontend:latest
     container_name: macrotrackr-frontend
     restart: unless-stopped
     depends_on:
@@ -70,12 +70,12 @@ x-casaos:
     en_us: Modern self-hosted nutrition and macronutrient tracker
   developer: arogan178
   author: arogan178
-  icon: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
-  thumbnail: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
+  icon: https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/icon.png
+  thumbnail: https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/icon.png
   screenshot_link:
-    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/dashboard.png
-    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/food-entry.png
-    - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/progress.png
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/dashboard.png
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/food-entry.png
+    - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/progress.png
   category: Health
   port_map: "5173"
   scheme: http

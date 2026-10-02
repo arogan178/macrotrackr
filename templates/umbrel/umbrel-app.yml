@@ -2,7 +2,7 @@ manifestVersion: 1.1
 id: macrotrackr
 name: MacroTrackr
 tagline: Modern self-hosted nutrition and macronutrient tracker
-icon: https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png
+icon: https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/icon.png
 category: Health
 version: "1.0.0"
 port: 5173
@@ -20,9 +20,9 @@ website: https://github.com/arogan178/macrotrackr
 repo: https://github.com/arogan178/macrotrackr
 support: https://github.com/arogan178/macrotrackr/issues
 gallery:
-  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/dashboard.png
-  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/food-entry.png
-  - https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/screens/progress.png
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/dashboard.png
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/food-entry.png
+  - https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/screens/progress.png
 releaseNotes: >-
   Initial release of MacroTrackr for Umbrel App Store.
 dependencies: []

@@ -1,7 +1,7 @@
 {
   "name": "MacroTrackr",
   "description": "MacroTrackr is an open-source nutrition and macronutrient tracking application designed for self-hosting with local SQLite storage.",
-  "icon": "https://raw.githubusercontent.com/arogan178/macrotrackr/main/frontend/public/icon.png",
+  "icon": "https://raw.githubusercontent.com/arogan178/macrotrackr/master/frontend/public/icon.png",
   "category": "Health",
   "tags": [
     "nutrition",
@@ -24,7 +24,7 @@
     "version": "3.8",
     "services": {
       "backend": {
-        "image": "ghcr.io/arogan178/macrotrackr-backend:latest",
+        "image": "docker.io/arogan178/macrotrackr-backend:latest",
         "container_name": "macrotrackr-backend",
         "restart": "unless-stopped",
         "volumes": [
@@ -43,7 +43,7 @@
         ]
       },
       "frontend": {
-        "image": "ghcr.io/arogan178/macrotrackr-frontend:latest",
+        "image": "docker.io/arogan178/macrotrackr-frontend:latest",
         "container_name": "macrotrackr-frontend",
         "restart": "unless-stopped",
         "depends_on": [
