@@ -169,3 +169,11 @@ docker compose down
 cp data/macrotrackr.db.bak data/macrotrackr.db
 docker compose up -d
 ```
+
+### Upgrade
+Pull the new image and restart. The backend applies any pending database migrations to `data/macrotrackr.db` when it starts. Take a backup first.
+
+```bash
+docker compose pull
+docker compose up -d
+```
