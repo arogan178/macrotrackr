@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { ApiError } from "@/api/core";
 import { goalsApi } from "@/api/goals";
@@ -22,6 +23,11 @@ import { todayISO } from "@/utils/dateUtilities";
 /** Typed exactly, or the button stays disabled. */
 const CONFIRM_WORD = "DELETE";
 
+const validateConfirm = ({ value }: { value: { confirm: string } }) =>
+  value.confirm.trim() === CONFIRM_WORD
+    ? undefined
+    : `Type ${CONFIRM_WORD} to confirm`;
+
 /**
  * Irreversible account deletion.
  *
@@ -33,8 +39,6 @@ const CONFIRM_WORD = "DELETE";
  *    the server's message names where to go and cancel.
  */
 const DeleteAccountForm: React.FC = () => {
-  const [confirmText, setConfirmText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const logout = useLogout();
@@ -60,26 +64,34 @@ const DeleteAccountForm: React.FC = () => {
     }
   }, []);
 
-  const canDelete = confirmText.trim() === CONFIRM_WORD && !isDeleting;
-
-  const handleDelete = useCallback(async () => {
-    if (!canDelete) return;
-    setIsDeleting(true);
-    setError(null);
-    try {
-      await userApi.deleteAccount();
-      // The account is gone, so the session is meaningless. Clear it rather
-      // than leaving the app holding a token for a user that no longer exists.
-      logout.mutate();
-    } catch (deleteError) {
-      setError(
-        deleteError instanceof ApiError
-          ? deleteError.message
-          : "Could not delete your account. Please try again.",
-      );
-      setIsDeleting(false);
-    }
-  }, [canDelete, logout]);
+  const form = useForm({
+    defaultValues: { confirm: "" },
+    // onMount keeps the button disabled before anything is typed.
+    validators: { onMount: validateConfirm, onChange: validateConfirm },
+    onSubmit: async () => {
+      setError(null);
+      try {
+        await userApi.deleteAccount();
+        // The account is gone, so the session is meaningless. Clear it rather
+        // than leaving the app holding a token for a user that no longer exists.
+        logout.mutate();
+      } catch (deleteError) {
+        setError(
+          deleteError instanceof ApiError
+            ? deleteError.message
+            : "Could not delete your account. Please try again.",
+        );
+      }
+    },
+  });
+  const canSubmit = useStore(form.store, (state) => state.canSubmit);
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+  const isSubmitSuccessful = useStore(
+    form.store,
+    (state) => state.isSubmitSuccessful,
+  );
+  // Once the account is gone the button stays locked, even if sign-out stalls.
+  const isDeleting = isSubmitting || (isSubmitSuccessful && !error);
 
   return (
     <Panel className="border-error/40">
@@ -106,22 +118,27 @@ const DeleteAccountForm: React.FC = () => {
           equal options. The field carries its own affordance via the
           placeholder, so the floating label above it is gone. */}
       <div className="flex flex-wrap items-center gap-3">
-        <input
-          id="delete-confirm"
-          type="text"
-          value={confirmText}
-          onChange={(event) => setConfirmText(event.target.value)}
-          autoComplete="off"
-          placeholder={`Type ${CONFIRM_WORD}`}
-          aria-label={`Type ${CONFIRM_WORD} to confirm account deletion`}
-          aria-describedby={error ? "delete-error" : undefined}
-          className="w-40 rounded-control border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder:text-muted"
-        />
+        <form.Field name="confirm">
+          {(field) => (
+            <input
+              id="delete-confirm"
+              type="text"
+              value={field.state.value}
+              onChange={(event) => field.handleChange(event.target.value)}
+              onBlur={field.handleBlur}
+              autoComplete="off"
+              placeholder={`Type ${CONFIRM_WORD}`}
+              aria-label={`Type ${CONFIRM_WORD} to confirm account deletion`}
+              aria-describedby={error ? "delete-error" : undefined}
+              className="w-40 rounded-control border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder:text-muted"
+            />
+          )}
+        </form.Field>
 
         <button
           type="button"
-          onClick={handleDelete}
-          disabled={!canDelete}
+          onClick={() => void form.handleSubmit()}
+          disabled={!canSubmit || isDeleting}
           aria-label="Permanently delete my account"
           className={getButtonClasses("danger", "md", false)}
         >

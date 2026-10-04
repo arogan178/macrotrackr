@@ -4,8 +4,8 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useState,
 } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import WeightField from "@/components/form/WeightField";
 import { RangeSlider } from "@/components/ui";
@@ -41,6 +41,22 @@ interface WeightGoalFormProps {
 }
 
 type GoalType = keyof typeof CALORIE_RANGE_LABELS;
+
+const MIN_WEIGHT_KG = 30;
+const MAX_WEIGHT_KG = 300;
+
+// Weights are stored in kg; the messages speak the user's unit.
+const validateWeight =
+  (label: string, unitSystem: UnitSystem) =>
+  ({ value }: { value: number | undefined }) => {
+    const { min, max } = weightLimits(MIN_WEIGHT_KG, MAX_WEIGHT_KG, unitSystem);
+    const unit = weightUnit(unitSystem);
+    if (value === undefined) return `${label} is required`;
+    if (value < MIN_WEIGHT_KG) return `${label} must be at least ${min} ${unit}`;
+    if (value > MAX_WEIGHT_KG) return `${label} must be at most ${max} ${unit}`;
+
+    return undefined;
+  };
 
 // Determine goal type from weights
 const getGoalType = (
@@ -101,22 +117,38 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
     const todayString = todayISO();
     const isEditing = Boolean(weightGoals);
 
-    const [formValues, setFormValues] = useState<WeightGoalFormValues>(() => ({
-      startingWeight: weightGoals?.startingWeight ?? startingWeight,
-      targetWeight: weightGoals?.targetWeight ?? targetWeight,
-      startDate: weightGoals?.startDate ?? todayString,
-    }));
+    const form = useForm({
+      defaultValues: {
+        startingWeight: (weightGoals?.startingWeight ?? startingWeight) as
+          | number
+          | undefined,
+        targetWeight: (weightGoals?.targetWeight ?? targetWeight) as
+          | number
+          | undefined,
+        calorieTarget: weightGoals?.calorieTarget,
+      },
+      onSubmit: ({ value }) => {
+        if (!value.targetWeight || !value.calorieTarget) return;
 
-    useEffect(() => {
-      setFormValues({
-        startingWeight: weightGoals?.startingWeight ?? startingWeight,
-        targetWeight: weightGoals?.targetWeight ?? targetWeight,
-        startDate: weightGoals?.startDate ?? todayString,
-      });
-    }, [weightGoals, startingWeight, targetWeight, todayString]);
-
-    const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-      weightGoals?.calorieTarget,
+        onSave({
+          ...(isEditing ? {} : { startingWeight: value.startingWeight! }),
+          targetWeight: value.targetWeight,
+          calorieTarget: value.calorieTarget,
+          startDate: weightGoals?.startDate ?? todayString,
+          targetDate: calculatedTargetDate,
+          weeklyChange: weeklyWeightChange,
+          calculatedWeeks,
+          dailyChange: value.calorieTarget - tdee,
+          weightGoal: getGoalType(value.startingWeight, value.targetWeight),
+        });
+      },
+    });
+    const formValues = useStore(form.store, (state) => state.values);
+    const isFormValid = useStore(form.store, (state) => state.isValid);
+    const calorieIntake = formValues.calorieTarget;
+    const setCalorieIntake = useCallback(
+      (calories: number) => form.setFieldValue("calorieTarget", calories),
+      [form],
     );
 
     const calculations = useMemo(() => {
@@ -164,6 +196,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       tdee,
       formValues.startingWeight,
       formValues.targetWeight,
+      setCalorieIntake,
     ]);
 
     const {
@@ -172,81 +205,42 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       calculatedWeeks,
     } = calculations ?? {};
 
-    const [hasChanges, setHasChanges] = useState(false);
-    const [fieldErrors, setFieldErrors] = useState<{
-      startingWeight?: string;
-      targetWeight?: string;
-    }>({});
+    const hasChanges =
+      isEditing && weightGoals
+        ? formValues.startingWeight !== weightGoals.startingWeight ||
+          formValues.targetWeight !== weightGoals.targetWeight ||
+          calorieIntake !== weightGoals.calorieTarget
+        : formValues.startingWeight != undefined &&
+          formValues.targetWeight != undefined &&
+          calorieIntake != undefined &&
+          formValues.startingWeight > 0 &&
+          formValues.targetWeight > 0 &&
+          calorieIntake > 0;
 
-    const validateWeight = useCallback(
-      (value: number | undefined, fieldName: string): string | undefined => {
-        const { min, max } = weightLimits(30, 300, unitSystem);
-        const unit = weightUnit(unitSystem);
-        if (value == undefined) return `${fieldName} is required`;
-        if (value < 30) return `${fieldName} must be at least ${min} ${unit}`;
-        if (value > 300) return `${fieldName} must be at most ${max} ${unit}`;
-
-        return undefined;
-      },
-      [unitSystem],
-    );
-
-    const handleSave = useCallback(() => {
-      if (!formValues.targetWeight || !calorieIntake) return;
-
-      const dailyChange = calorieIntake - tdee;
-      const goalType = getGoalType(
-        formValues.startingWeight,
-        formValues.targetWeight,
-      );
-
-      onSave({
-        ...(isEditing ? {} : { startingWeight: formValues.startingWeight! }),
-        targetWeight: formValues.targetWeight,
-        calorieTarget: calorieIntake,
-        startDate: formValues.startDate ?? todayString,
-        targetDate: calculatedTargetDate,
-        weeklyChange: weeklyWeightChange,
-        calculatedWeeks,
-        dailyChange,
-        weightGoal: goalType,
-      });
-    }, [
-      formValues,
-      calorieIntake,
-      tdee,
-      calculatedTargetDate,
-      weeklyWeightChange,
-      calculatedWeeks,
-      onSave,
-      todayString,
-      isEditing,
-    ]);
+    const canSave =
+      hasChanges &&
+      !isLoading &&
+      formValues.targetWeight != undefined &&
+      isFormValid;
 
     // Expose save method to parent via ref
     useImperativeHandle(
       reference,
       () => ({
-        save: handleSave,
+        save: () => void form.handleSubmit(),
       }),
-      [handleSave],
+      [form],
     );
 
     // Keyboard shortcut: Ctrl+Enter to save
     const handleKeyDown = useCallback(
       (event: KeyboardEvent) => {
-        if (
-          event.ctrlKey &&
-          event.key === "Enter" &&
-          hasChanges &&
-          !isLoading &&
-          formValues.targetWeight
-        ) {
+        if (event.ctrlKey && event.key === "Enter" && canSave) {
           event.preventDefault();
-          handleSave();
+          void form.handleSubmit();
         }
       },
-      [hasChanges, isLoading, formValues.targetWeight, handleSave],
+      [canSave, form],
     );
 
     useEffect(() => {
@@ -254,34 +248,6 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
 
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
-
-    // Track form changes
-    useEffect(() => {
-      if (isEditing && weightGoals) {
-        setHasChanges(
-          formValues.startingWeight !== weightGoals.startingWeight ||
-            formValues.targetWeight !== weightGoals.targetWeight ||
-            calorieIntake !== weightGoals.calorieTarget,
-        );
-      } else {
-        setHasChanges(
-          formValues.startingWeight != undefined &&
-            formValues.targetWeight != undefined &&
-            calorieIntake != undefined &&
-            formValues.startingWeight > 0 &&
-            formValues.targetWeight > 0 &&
-            calorieIntake > 0,
-        );
-      }
-    }, [formValues, calorieIntake, weightGoals, isEditing]);
-
-    // Notify parent about save state
-    const canSave =
-      hasChanges &&
-      !isLoading &&
-      formValues.targetWeight != undefined &&
-      !fieldErrors.startingWeight &&
-      !fieldErrors.targetWeight;
 
     useEffect(() => {
       onCanSaveChange?.(canSave);
@@ -309,7 +275,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       if (clamped !== calorieIntake) {
         setCalorieIntake(clamped);
       }
-    }, [calorieIntake, minCalorieIntake, maxCalorieIntake]);
+    }, [calorieIntake, minCalorieIntake, maxCalorieIntake, setCalorieIntake]);
 
     const calorieLabels = CALORIE_RANGE_LABELS[goalType];
     const adjustmentInfo =
@@ -320,55 +286,47 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
     return (
       <div className="space-y-5">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div>
-            <WeightField
-              label="Starting Weight"
-              value={formValues.startingWeight}
-              onChange={(value: number | undefined) => {
-                setFormValues({ ...formValues, startingWeight: value ?? 0 });
-                const error = validateWeight(value, "Starting weight");
-                setFieldErrors((previous) => ({
-                  ...previous,
-                  startingWeight: error,
-                }));
-              }}
-              unitSystem={unitSystem}
-              minKg={30}
-              maxKg={300}
-              required
-              // Disable only if editing an existing goal (weightGoals is not undefined)
-              disabled={Boolean(weightGoals)}
-            />
-            {fieldErrors.startingWeight && (
-              <p className="mt-1 text-sm text-error">
-                {fieldErrors.startingWeight}
-              </p>
+          <form.Field
+            name="startingWeight"
+            validators={{
+              onChange: validateWeight("Starting weight", unitSystem),
+            }}
+          >
+            {(field) => (
+              <WeightField
+                label="Starting Weight"
+                value={field.state.value}
+                onChange={field.handleChange}
+                unitSystem={unitSystem}
+                minKg={MIN_WEIGHT_KG}
+                maxKg={MAX_WEIGHT_KG}
+                required
+                // Disable only if editing an existing goal (weightGoals is not undefined)
+                disabled={Boolean(weightGoals)}
+                error={field.state.meta.errors[0]}
+              />
             )}
-          </div>
+          </form.Field>
 
-          <div>
-            <WeightField
-              label="Target Weight"
-              value={formValues.targetWeight}
-              onChange={(value: number | undefined) => {
-                setFormValues({ ...formValues, targetWeight: value });
-                const error = validateWeight(value, "Target weight");
-                setFieldErrors((previous) => ({
-                  ...previous,
-                  targetWeight: error,
-                }));
-              }}
-              unitSystem={unitSystem}
-              minKg={30}
-              maxKg={300}
-              required
-            />
-            {fieldErrors.targetWeight && (
-              <p className="mt-1 text-sm text-error">
-                {fieldErrors.targetWeight}
-              </p>
+          <form.Field
+            name="targetWeight"
+            validators={{
+              onChange: validateWeight("Target weight", unitSystem),
+            }}
+          >
+            {(field) => (
+              <WeightField
+                label="Target Weight"
+                value={field.state.value}
+                onChange={field.handleChange}
+                unitSystem={unitSystem}
+                minKg={MIN_WEIGHT_KG}
+                maxKg={MAX_WEIGHT_KG}
+                required
+                error={field.state.meta.errors[0]}
+              />
             )}
-          </div>
+          </form.Field>
         </div>
         {!tdee && (
           <div className="rounded-control border border-warning/30 bg-warning/10 p-4 text-warning">

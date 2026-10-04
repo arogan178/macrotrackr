@@ -165,7 +165,11 @@ export default function GoalsPage() {
               ) : (
                 <PageTransition key="macro-targets">
                   <div className="space-y-6">
-                    <MacroTargetForm macroTarget={macroTarget ?? null} />
+                    {/* Remount once targets load so the form starts from them. */}
+                    <MacroTargetForm
+                      key={macroTarget ? "loaded" : "loading"}
+                      macroTarget={macroTarget ?? null}
+                    />
                   </div>
                 </PageTransition>
               )}

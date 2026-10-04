@@ -1,9 +1,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ApiError } from "@/api/core";
 import { goalsApi } from "@/api/goals";
 import { habitsApi } from "@/api/habits";
 import { macrosApi } from "@/api/macros";
+import { userApi } from "@/api/user";
 import {
   downloadCsv,
   downloadHistoryCsv,
@@ -12,8 +15,9 @@ import type { MacroEntry } from "@/types/macro";
 
 import DeleteAccountForm from "./DeleteAccountForm";
 
+const logout = vi.hoisted(() => vi.fn());
 vi.mock("@/hooks/auth/useAuthQueries", () => ({
-  useLogout: () => ({ mutate: vi.fn() }),
+  useLogout: () => ({ mutate: logout, isPending: false }),
 }));
 vi.mock("@/api/user", () => ({ userApi: { deleteAccount: vi.fn() } }));
 vi.mock("@/api/macros", () => ({ macrosApi: { getAllHistory: vi.fn() } }));
@@ -73,5 +77,71 @@ describe("DeleteAccountForm", () => {
     );
     expect(downloadHistoryCsv).not.toHaveBeenCalled();
     expect(downloadCsv).not.toHaveBeenCalled();
+  });
+
+  it("keeps delete disabled until DELETE is typed exactly", async () => {
+    const user = userEvent.setup();
+    render(<DeleteAccountForm />);
+    const field = screen.getByLabelText(
+      "Type DELETE to confirm account deletion",
+    );
+    const button = screen.getByRole("button", {
+      name: "Permanently delete my account",
+    });
+
+    expect(button).toBeDisabled();
+    await user.type(field, "delete");
+    expect(button).toBeDisabled();
+    await user.clear(field);
+    await user.type(field, " DELETE ");
+    expect(button).toBeEnabled();
+  });
+
+  it("deletes the account and signs out", async () => {
+    const user = userEvent.setup();
+    vi.mocked(userApi.deleteAccount).mockResolvedValue({ success: true, message: "" });
+    render(<DeleteAccountForm />);
+
+    await user.type(
+      screen.getByLabelText("Type DELETE to confirm account deletion"),
+      "DELETE",
+    );
+    const button = screen.getByRole("button", {
+      name: "Permanently delete my account",
+    });
+    await user.click(button);
+
+    expect(userApi.deleteAccount).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent("Deleting…");
+  });
+
+  it("shows the server's message and stays signed in when deletion is refused", async () => {
+    const user = userEvent.setup();
+    vi.mocked(userApi.deleteAccount).mockRejectedValue(
+      new ApiError(
+        "Cancel your subscription in Billing first.",
+        409,
+        "CONFLICT",
+      ),
+    );
+    render(<DeleteAccountForm />);
+
+    await user.type(
+      screen.getByLabelText("Type DELETE to confirm account deletion"),
+      "DELETE",
+    );
+    const button = screen.getByRole("button", {
+      name: "Permanently delete my account",
+    });
+    await user.click(button);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Cancel your subscription in Billing first.",
+    );
+    expect(logout).not.toHaveBeenCalled();
+    expect(button).toBeEnabled();
+    expect(button).toHaveTextContent("Delete my account");
   });
 });
