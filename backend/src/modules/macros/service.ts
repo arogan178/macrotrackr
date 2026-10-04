@@ -46,6 +46,8 @@ export interface MacroEntryResponse {
   entryDate: string;
   entryTime: string;
   ingredients?: unknown;
+  clientId: string;
+  clientUpdatedAt: number | null;
   createdAt: string;
 }
 

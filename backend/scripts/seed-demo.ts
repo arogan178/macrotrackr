@@ -274,8 +274,8 @@ function main() {
 
       for (const meal of meals) {
         db.run(
-          `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, client_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             userId,
             round1(jitter(meal.protein, 0.08)),
@@ -285,6 +285,7 @@ function main() {
             meal.name,
             entryDate,
             `${meal.time}:00`,
+            crypto.randomUUID(),
           ],
         );
         entryCount += 1;

@@ -43,6 +43,9 @@ const macroEntryBase = t.Object({
   ingredients: t.Optional(t.Nullable(t.Array(t.Unknown()))), // Store parsed JSON ingredients
 });
 
+const ClientIdSchema = t.String({ format: "uuid" });
+const ClientUpdatedAtSchema = t.Integer({ minimum: 0 });
+
 // --- Macro Target Percentages Schema (Moved from goals/schemas.ts) ---
 const MacroTargetPercentagesSchema = t.Object(
   {
@@ -80,8 +83,17 @@ export type MacroTargetPercentages = typeof MacroTargetPercentagesSchema.static;
 // --- Exported Schemas Object ---
 export const MacroSchemas = {
   // --- Macro Entry Schemas ---
-  macroEntryCreate: macroEntryBase,
+  macroEntryCreate: t.Object({
+    ...macroEntryBase.properties,
+    clientId: t.Optional(ClientIdSchema),
+    clientUpdatedAt: t.Optional(ClientUpdatedAtSchema),
+  }),
   macroEntryUpdate: t.Partial(macroEntryBase),
+  // The whole entry, not a patch: partial fields would pick up the base defaults.
+  macroEntryClientUpdate: t.Object({
+    ...macroEntryBase.properties,
+    clientUpdatedAt: ClientUpdatedAtSchema,
+  }),
   macroEntryResponse: t.Object({
     // Use camelCase for API consistency
     id: t.Number(),
@@ -93,6 +105,8 @@ export const MacroSchemas = {
     entryDate: DateSchema,
     entryTime: TimeSchema,
     ingredients: t.Optional(t.Nullable(t.Array(t.Unknown()))),
+    clientId: t.String(),
+    clientUpdatedAt: t.Nullable(t.Number()),
     createdAt: t.String(), // Accept any string format for timestamp
   }),
   macroTotals: t.Object({
@@ -107,6 +121,13 @@ export const MacroSchemas = {
   deleteMacroEntryResponse: t.Object({
     success: t.Boolean(),
     id: t.Numeric(),
+  }),
+  macroClientIdParam: t.Object({
+    clientId: ClientIdSchema,
+  }),
+  deleteMacroEntryByClientIdResponse: t.Object({
+    success: t.Boolean(),
+    clientId: t.String(),
   }),
 
   // --- Macro Target Schemas (Moved from goals/schemas.ts) ---

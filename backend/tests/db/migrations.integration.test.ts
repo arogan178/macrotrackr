@@ -138,6 +138,22 @@ describe("initializeSchema", () => {
       { user_id: 2, entry_date: "2025-04-02", entry_time: "12:00:00", meal_type: "snack", ingredients: "[]" },
     ]);
     expect(
+      db
+        .query(
+          "SELECT COUNT(DISTINCT client_id) AS ids, COUNT(*) - COUNT(client_id) AS missing FROM macro_entries",
+        )
+        .get(),
+    ).toEqual({ ids: 2, missing: 0 });
+    expect(
+      db
+        .query(
+          "SELECT sql FROM sqlite_master WHERE name = 'idx_macro_entries_user_client_id'",
+        )
+        .get(),
+    ).toEqual({
+      sql: "CREATE UNIQUE INDEX idx_macro_entries_user_client_id ON macro_entries(user_id, client_id)",
+    });
+    expect(
       db.query("SELECT id, accent_color, frequency FROM habits").all(),
     ).toEqual([{ id: "h1", accent_color: "blue", frequency: "daily" }]);
     expect(

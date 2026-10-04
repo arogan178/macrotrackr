@@ -176,6 +176,8 @@ export interface MacroEntryRow {
   meal_name: string | null;
   entry_date: string;
   entry_time: string;
+  client_id: string;
+  client_updated_at: number | null;
   created_at: string;
 }
 
