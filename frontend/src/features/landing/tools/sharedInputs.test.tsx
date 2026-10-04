@@ -18,10 +18,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   };
 });
 
-vi.mock("@posthog/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
-
 vi.mock("@/hooks/auth/useAuthState", () => ({
   useAppAuthState: () => ({ isLoaded: true, isSignedIn: false }),
 }));

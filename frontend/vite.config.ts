@@ -13,6 +13,16 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
+// Vendor chunks, split by library for better caching.
+const vendorChunks = {
+  "vendor-react": ["react", "react-dom", "scheduler"],
+  "vendor-router": ["@tanstack/react-router"],
+  "vendor-query": ["@tanstack/react-query"],
+  "vendor-charts": ["recharts"],
+  "vendor-motion": ["motion"],
+  "vendor-ui": ["lucide-react", "clsx", "tailwind-merge"],
+};
+
 export default defineConfig(({ command, isSsrBuild }) => {
   const isDevServer = command === "serve";
   const isCapacitor = process.env.CAPACITOR === "true";
@@ -172,18 +182,12 @@ export default defineConfig(({ command, isSsrBuild }) => {
           entryFileNames: `assets/[name].[hash].js`,
           chunkFileNames: `assets/[name].[hash].js`,
           assetFileNames: `assets/[name].[hash].[ext]`,
-          manualChunks: {
-            // Vendor chunks - split by library for better caching
-            "vendor-react": ["react", "react-dom"],
-            "vendor-router": ["@tanstack/react-router"],
-            "vendor-query": ["@tanstack/react-query"],
-            "vendor-charts": ["recharts"],
-            "vendor-motion": ["motion"],
-            "vendor-ui": [
-              "lucide-react",
-              "clsx",
-              "tailwind-merge",
-            ],
+          // Claim every file by path. Naming only package entries let other
+          // vendor chunks sweep up React, which put recharts on the first load.
+          manualChunks(id) {
+            return Object.entries(vendorChunks).find(([, packages]) =>
+              packages.some((name) => id.includes(`/node_modules/${name}/`)),
+            )?.[0];
           },
         },
       },
