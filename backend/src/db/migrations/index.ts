@@ -22,6 +22,7 @@ import { habitsFrequency } from "./0019_habits_frequency";
 import { macroEntriesIngredients } from "./0020_macro_entries_ingredients";
 import { savedMealsIngredients } from "./0021_saved_meals_ingredients";
 import { indexes } from "./0022_indexes";
+import { usersNullablePassword } from "./0023_users_nullable_password";
 
 export type Migration = (db: Database) => void;
 
@@ -50,4 +51,5 @@ export const migrations: readonly Migration[] = [
   macroEntriesIngredients,
   savedMealsIngredients,
   indexes,
+  usersNullablePassword,
 ];

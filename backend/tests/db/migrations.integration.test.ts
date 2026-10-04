@@ -103,6 +103,12 @@ describe("initializeSchema", () => {
       "weight_goals",
       "weight_log",
     ]);
+    db.run(
+      "INSERT INTO users (first_name, last_name, email, clerk_id) VALUES ('A', 'B', 'a@example.com', 'user_1')",
+    );
+    expect(db.query("SELECT password FROM users").get()).toEqual({
+      password: null,
+    });
     expect(db.query("PRAGMA foreign_keys").get()).toEqual({ foreign_keys: 1 });
     db.close();
   });
@@ -119,7 +125,7 @@ describe("initializeSchema", () => {
       db.query("SELECT id, password FROM users ORDER BY id").all(),
     ).toEqual([
       { id: 1, password: "$2b$10$hash" },
-      { id: 2, password: "clerk-auth" },
+      { id: 2, password: null },
     ]);
     expect(
       db
@@ -166,11 +172,17 @@ describe("initializeSchema", () => {
     const existing = new Database(":memory:");
     initializeSchema(existing, migrations.slice(0, 22));
     existing.exec("PRAGMA user_version = 0;");
+    existing.run(
+      "INSERT INTO users (first_name, last_name, email, password, clerk_id) VALUES ('C', 'U', 'c@example.com', 'clerk-auth', 'user_c')",
+    );
 
     initializeSchema(existing);
 
     expect(userVersion(existing)).toBe(LATEST);
     expect(schemaOf(existing)).toEqual(schemaOf(fresh));
+    expect(existing.query("SELECT password FROM users").get()).toEqual({
+      password: null,
+    });
     fresh.close();
     existing.close();
   });

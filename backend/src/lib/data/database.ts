@@ -127,7 +127,7 @@ export interface UserRow {
   first_name: string;
   last_name: string;
   email: string;
-  password: string;
+  password: string | null;
   created_at: string;
   password_reset_token?: string;
   password_reset_expires?: string | Date;
