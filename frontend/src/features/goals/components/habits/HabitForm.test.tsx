@@ -1,9 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
 
 import type { HabitGoalFormValues } from "@/types/habit";
 
-import HabitForm from "./HabitForm";
+import HabitForm, { useHabitForm } from "./HabitForm";
 
 const baseValues: HabitGoalFormValues = {
   title: "Drink Water",
@@ -12,18 +13,19 @@ const baseValues: HabitGoalFormValues = {
   accentColor: "indigo",
 };
 
+function renderForm(currentProgress?: number) {
+  function Harness() {
+    const form = useHabitForm(baseValues, async () => {});
+
+    return <HabitForm form={form} currentProgress={currentProgress} />;
+  }
+
+  return render(<Harness />);
+}
+
 describe("HabitForm", () => {
   it("renders form fields, preview, and hidden progress inputs", () => {
-    const onChange = vi.fn();
-
-    const { container } = render(
-      <HabitForm
-        values={baseValues}
-        onChange={onChange}
-        errors={{}}
-        currentProgress={7}
-      />,
-    );
+    const { container } = renderForm(7);
 
     expect(screen.getByLabelText("Habit Title")).toHaveValue("Drink Water");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
@@ -46,96 +48,97 @@ describe("HabitForm", () => {
     expect(progressHidden).toHaveAttribute("value", "70");
   });
 
-  it("propagates title changes through onChange", () => {
-    const onChange = vi.fn();
+  it("shows the typed title in the preview", async () => {
+    const user = userEvent.setup();
+    renderForm();
 
-    render(<HabitForm values={baseValues} onChange={onChange} errors={{}} />);
+    const title = screen.getByLabelText("Habit Title");
+    await user.clear(title);
+    await user.type(title, "Read 20 pages");
 
-    fireEvent.change(screen.getByLabelText("Habit Title"), {
-      target: { value: "Read 20 pages" },
-    });
-
-    expect(onChange).toHaveBeenCalledWith("title", "Read 20 pages");
+    expect(title).toHaveValue("Read 20 pages");
+    expect(screen.getByText("Read 20 pages")).toBeInTheDocument();
   });
 
-  it("clamps target values to at least 1", () => {
-    const onChange = vi.fn();
+  it("clamps target values to at least 1", async () => {
+    const user = userEvent.setup();
+    const { container } = renderForm(5);
+    const target = screen.getByLabelText("Target");
 
-    render(<HabitForm values={baseValues} onChange={onChange} errors={{}} />);
+    await user.clear(target);
+    expect(target).toHaveValue(1);
 
-    fireEvent.change(screen.getByLabelText("Target"), {
-      target: { value: "0" },
+    await user.type(target, "0", {
+      initialSelectionStart: 0,
+      initialSelectionEnd: 1,
     });
+    expect(target).toHaveValue(1);
 
-    expect(onChange).toHaveBeenCalledWith("target", 1);
-
-    fireEvent.change(screen.getByLabelText("Target"), {
-      target: { value: "22" },
-    });
-
-    expect(onChange).toHaveBeenCalledWith("target", 22);
-  });
-
-  it("updates selected icon and color via button groups", () => {
-    const onChange = vi.fn();
-
-    render(<HabitForm values={baseValues} onChange={onChange} errors={{}} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Calendar icon" }));
-    fireEvent.click(screen.getByRole("button", { name: "Select Red color" }));
-
-    expect(onChange).toHaveBeenCalledWith("iconName", "calendar");
-    expect(onChange).toHaveBeenCalledWith("accentColor", "red");
-  });
-
-  it("offers a weekly frequency and explains when it resets", () => {
-    const onChange = vi.fn();
-
-    const { rerender } = render(
-      <HabitForm values={baseValues} onChange={onChange} errors={{}} />,
+    await user.type(target, "2");
+    expect(target).toHaveValue(12);
+    expect(container.querySelector('input[name="progress"]')).toHaveAttribute(
+      "value",
+      "42",
     );
+  });
+
+  it("updates selected icon and color via button groups", async () => {
+    const user = userEvent.setup();
+    const { container } = renderForm();
+
+    await user.click(screen.getByRole("button", { name: "Calendar icon" }));
+    await user.click(screen.getByRole("button", { name: "Select Red color" }));
+
+    expect(
+      screen.getByRole("button", { name: "Calendar icon" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Target icon" }),
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(
+      screen.getByRole("button", { name: "Select Red color" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(container.querySelector('input[name="iconName"]')).toHaveAttribute(
+      "value",
+      "calendar",
+    );
+    expect(
+      container.querySelector('input[name="accentColor"]'),
+    ).toHaveAttribute("value", "red");
+  });
+
+  it("offers a weekly frequency and explains when it resets", async () => {
+    const user = userEvent.setup();
+    renderForm();
 
     expect(screen.getByLabelText("Frequency")).toHaveValue("daily");
     expect(
       screen.getByText("How many times a day. Progress resets at midnight."),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Frequency"), {
-      target: { value: "weekly" },
-    });
-    expect(onChange).toHaveBeenCalledWith("frequency", "weekly");
+    await user.selectOptions(screen.getByLabelText("Frequency"), "weekly");
 
-    rerender(
-      <HabitForm
-        values={{ ...baseValues, frequency: "weekly" }}
-        onChange={onChange}
-        errors={{}}
-      />,
-    );
-
+    expect(screen.getByLabelText("Frequency")).toHaveValue("weekly");
     expect(
       screen.getByText("How many times a week. Progress resets on Monday."),
     ).toBeInTheDocument();
     expect(screen.getByText(/this week/)).toBeInTheDocument();
   });
 
-  it("shows validation errors passed from parent", () => {
-    const onChange = vi.fn();
+  it("requires a title that is more than whitespace", async () => {
+    const user = userEvent.setup();
+    renderForm();
+    const title = screen.getByLabelText("Habit Title");
 
-    render(
-      <HabitForm
-        values={baseValues}
-        onChange={onChange}
-        errors={{
-          title: "Title is required",
-          target: "Target must be greater than 0",
-        }}
-      />,
-    );
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
 
+    await user.clear(title);
+    expect(title).toHaveAccessibleDescription("Title is required");
+
+    await user.type(title, "   ");
     expect(screen.getByText("Title is required")).toBeInTheDocument();
-    expect(
-      screen.getByText("Target must be greater than 0"),
-    ).toBeInTheDocument();
+
+    await user.type(title, "Walk");
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
   });
 });

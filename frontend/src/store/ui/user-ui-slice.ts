@@ -1,8 +1,6 @@
 import { StateCreator } from "zustand";
 
 import type { NotificationType } from "@/components/notifications/NotificationTypes";
-import { validateSettingsComplete as validateSettings } from "@/features/settings/utils/validation";
-import { UserSettings } from "@/types/user";
 
 // User UI slice for managing all UI state in the settings page
 export interface UserUISlice {
@@ -18,24 +16,6 @@ export interface UserUISlice {
   // Subscription status for UI (derived from server data)
   subscriptionStatus: "free" | "pro" | "canceled";
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") => void;
-
-  // Form state and UI state only
-  settings: UserSettings | undefined;
-  originalSettings: UserSettings | undefined;
-  hasSettingsChanges: boolean;
-  formErrors: Record<string, string>;
-
-  // Form actions
-  initializeSettings: (data: { settings: UserSettings }) => void;
-  updateSetting: <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K],
-  ) => void;
-  validateSettingsForm: () => boolean;
-  resetSettings: () => void;
-
-  // Weight update for other components that might need it
-  updateCurrentUserWeight: (newWeight: number) => void;
 }
 
 export const createUserUISlice: StateCreator<
@@ -56,88 +36,7 @@ export const createUserUISlice: StateCreator<
 
   // Initial UI state only
   subscriptionStatus: "free",
-  settings: undefined,
-  originalSettings: undefined,
-  formErrors: {},
-  hasSettingsChanges: false,
 
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") =>
     set({ subscriptionStatus: status }),
-
-  initializeSettings: (data) => {
-    const { settings } = data;
-
-    set({
-      settings,
-      originalSettings: structuredClone(settings),
-      hasSettingsChanges: false,
-      formErrors: {},
-    });
-  },
-
-  updateSetting: <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K],
-  ) => {
-    set((state: UserUISlice & Record<string, unknown>) => {
-      if (!state.settings || !(key in state.settings)) {
-        console.warn(`Attempted to update unknown setting key: ${String(key)}`);
-
-        return state;
-      }
-
-      const updatedSettings = { ...state.settings, [key]: value };
-      const hasChanged = state.originalSettings
-        ? JSON.stringify(updatedSettings) !==
-          JSON.stringify(state.originalSettings)
-        : true;
-
-      // Keep form errors in sync with edits so stale validation doesn't lock the Save button.
-      const settingsForValidation = {
-        ...updatedSettings,
-        gender: updatedSettings.gender === "" ? undefined : updatedSettings.gender,
-      };
-      const formErrors = validateSettings(settingsForValidation);
-
-      return {
-        ...state,
-        settings: updatedSettings,
-        hasSettingsChanges: hasChanged,
-        formErrors,
-      };
-    });
-  },
-
-  validateSettingsForm: () => {
-    const state = get();
-    // Sanitize gender property for validation
-    const settingsForValidation = state.settings && {
-      ...state.settings,
-      gender: state.settings.gender === "" ? undefined : state.settings.gender,
-    };
-    const errors = validateSettings(settingsForValidation);
-    set({ formErrors: errors });
-
-    return Object.keys(errors).length === 0;
-  },
-
-  resetSettings: () => {
-    set((state: UserUISlice) => ({
-      ...state,
-      settings: state.originalSettings
-        ? structuredClone(state.originalSettings)
-        : undefined,
-      hasSettingsChanges: false,
-      formErrors: {},
-    }));
-  },
-
-  updateCurrentUserWeight: (newWeight: number) => {
-    set((state: UserUISlice) => ({
-      ...state,
-      settings: state.settings
-        ? { ...state.settings, weight: newWeight }
-        : undefined,
-    }));
-  },
 });

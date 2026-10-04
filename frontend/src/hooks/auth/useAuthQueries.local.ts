@@ -50,7 +50,14 @@ export function useLogout() {
       apiClient.setAuthToken(null);
       // Drop any opt-in biometric credentials from the KeyStore/Keychain
       await clearBiometricCredentials();
-      await authApi.logout();
+      try {
+        await authApi.logout();
+      } catch (error) {
+        // 401: the server session is already gone, e.g. the account was just deleted.
+        if (!(error instanceof Error && hasStatus(error) && error.status === 401)) {
+          throw error;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.clear();

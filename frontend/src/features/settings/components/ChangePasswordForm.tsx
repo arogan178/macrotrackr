@@ -1,14 +1,25 @@
 import { useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import CardContainer from "@/components/form/CardContainer";
 import TextField from "@/components/form/TextField";
 import { Button } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
-import { useStore } from "@/store/store";
+import { useStore as useAppStore } from "@/store/store";
+
+const passwordRequirements = (password: string) => [
+  { met: password.length >= 8, text: "At least 8 characters" },
+  { met: /[A-Z]/.test(password), text: "One uppercase letter" },
+  { met: /[a-z]/.test(password), text: "One lowercase letter" },
+  { met: /\d/.test(password), text: "One number" },
+];
+
+const strengthOf = (password: string) =>
+  passwordRequirements(password).filter((request) => request.met).length;
 
 const ChangePasswordForm = () => {
-  const { showNotification } = useStore();
+  const { showNotification } = useAppStore();
   const changePasswordMutation = useChangePassword();
 
   const { handleMutationError, handleMutationSuccess } =
@@ -22,21 +33,28 @@ const ChangePasswordForm = () => {
       },
     });
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
 
-  const passwordRequirements = [
-    { met: newPassword.length >= 8, text: "At least 8 characters" },
-    { met: /[A-Z]/.test(newPassword), text: "One uppercase letter" },
-    { met: /[a-z]/.test(newPassword), text: "One lowercase letter" },
-    { met: /\d/.test(newPassword), text: "One number" },
-  ];
-
-  const passwordStrength = passwordRequirements.filter(
-    (request) => request.met,
-  ).length;
+  const form = useForm({
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await changePasswordMutation.mutateAsync({
+          currentPassword: value.currentPassword,
+          newPassword: value.newPassword,
+        });
+        handleMutationSuccess("Password changed successfully.");
+        formApi.reset();
+      } catch (error) {
+        handleMutationError(error, "changing password");
+      }
+    },
+  });
+  const { currentPassword, newPassword, confirmPassword } = useStore(
+    form.store,
+    (state) => state.values,
+  );
+  const passwordStrength = strengthOf(newPassword);
 
   const getStrengthColor = () => {
     if (passwordStrength <= 1) return "bg-error";
@@ -54,49 +72,16 @@ const ChangePasswordForm = () => {
     return "Strong";
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setFormError(undefined);
-
-    if (!currentPassword) {
-      setFormError("Current password is required.");
-      showNotification("Current password is required.", "error");
-
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setFormError("New passwords do not match.");
-      showNotification("New passwords do not match.", "error");
-
-      return;
-    }
-
-    if (passwordStrength < 3) {
-      setFormError("Please choose a stronger password.");
-      showNotification("Please choose a stronger password.", "error");
-
-      return;
-    }
-
-    try {
-      await changePasswordMutation.mutateAsync({
-        currentPassword,
-        newPassword,
-      });
-      handleMutationSuccess("Password changed successfully.");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setFormError(undefined);
-    } catch (error) {
-      handleMutationError(error, "changing password");
-    }
-  };
-
   return (
     <CardContainer className="p-3.5 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          setFormError(undefined);
+          void form.handleSubmit();
+        }}
+        className="space-y-4 sm:space-y-5"
+      >
         <div className="rounded-card border border-border bg-surface-2 p-3.5 sm:p-4">
           <p className="text-xs sm:text-sm text-muted">
             <strong className="text-foreground">Security note:</strong> For your
@@ -105,28 +90,52 @@ const ChangePasswordForm = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-3.5 sm:gap-4">
-          <TextField
-            label="Current Password"
-            type="password"
-            value={currentPassword}
-            onChange={setCurrentPassword}
-            required
+          <form.Field
             name="currentPassword"
-            autoComplete="current-password"
-            helperText="Enter your current password to verify your identity"
-          />
+            validators={{
+              onSubmit: ({ value }) =>
+                value ? undefined : "Current password is required.",
+            }}
+          >
+            {(field) => (
+              <TextField
+                label="Current Password"
+                type="password"
+                value={field.state.value}
+                onChange={field.handleChange}
+                required
+                error={field.state.meta.errors[0]}
+                name="currentPassword"
+                autoComplete="current-password"
+                helperText="Enter your current password to verify your identity"
+              />
+            )}
+          </form.Field>
 
           <div className="space-y-2">
-            <TextField
-              label="New Password"
-              type="password"
-              value={newPassword}
-              onChange={setNewPassword}
-              required
-              minLength={8}
+            <form.Field
               name="newPassword"
-              autoComplete="new-password"
-            />
+              validators={{
+                onSubmit: ({ value }) =>
+                  strengthOf(value) < 3
+                    ? "Please choose a stronger password."
+                    : undefined,
+              }}
+            >
+              {(field) => (
+                <TextField
+                  label="New Password"
+                  type="password"
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  required
+                  minLength={8}
+                  error={field.state.meta.errors[0]}
+                  name="newPassword"
+                  autoComplete="new-password"
+                />
+              )}
+            </form.Field>
 
             {newPassword && (
               <div className="space-y-2">
@@ -142,7 +151,7 @@ const ChangePasswordForm = () => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {passwordRequirements.map((request, index) => (
+                  {passwordRequirements(newPassword).map((request, index) => (
                     <span
                       key={index}
                       className={`text-xs ${
@@ -157,20 +166,34 @@ const ChangePasswordForm = () => {
             )}
           </div>
 
-          <TextField
-            label="Confirm New Password"
-            type="password"
-            value={confirmPassword}
-            onChange={setConfirmPassword}
-            required
-            error={formError?.includes("match") ? formError : undefined}
+          {/* Field-level so each submit rechecks it; a form-level error here
+              outlives a fix made in the new password field. */}
+          <form.Field
             name="confirmPassword"
-            autoComplete="new-password"
-            helperText="Re-enter your new password to confirm"
-          />
+            validators={{
+              onSubmit: ({ value, fieldApi }) =>
+                value === fieldApi.form.getFieldValue("newPassword")
+                  ? undefined
+                  : "New passwords do not match.",
+            }}
+          >
+            {(field) => (
+              <TextField
+                label="Confirm New Password"
+                type="password"
+                value={field.state.value}
+                onChange={field.handleChange}
+                required
+                error={field.state.meta.errors[0]}
+                name="confirmPassword"
+                autoComplete="new-password"
+                helperText="Re-enter your new password to confirm"
+              />
+            )}
+          </form.Field>
         </div>
 
-        {formError && !formError.includes("match") && (
+        {formError && (
           <div className="rounded-card border border-error/30 bg-error/10 p-3.5 sm:p-4">
             <p className="text-xs sm:text-sm text-error">{formError}</p>
           </div>

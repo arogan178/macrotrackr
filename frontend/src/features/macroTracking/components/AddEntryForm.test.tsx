@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import AddEntryForm from "./AddEntryForm";
@@ -143,6 +144,64 @@ describe("AddEntryForm", () => {
     expect(submit).toBeEnabled();
   });
 
+  it("tells the user what is missing, one thing at a time, until the entry can be added", async () => {
+    const user = userEvent.setup();
+    const handleSubmit = vi.fn();
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+    const submit = screen.getByRole("button", { name: /add entry/i });
+
+    await user.type(screen.getByLabelText("Protein"), "0");
+    expect(screen.getByText("Enter protein, carbs and fats")).toBeInTheDocument();
+    expect(submit).toBeDisabled();
+
+    await user.type(screen.getByLabelText("Carbs"), "0");
+    await user.type(screen.getByLabelText("Fats"), "0");
+    expect(screen.getByText("Macros must add up to more than 0")).toBeInTheDocument();
+    expect(submit).toBeDisabled();
+
+    // Zero macros outrank a missing name, so a name alone does not clear the hint.
+    const mealName = screen.getByPlaceholderText("e.g. Chicken Salad");
+    await user.type(mealName, "Black coffee");
+    expect(screen.getByText("Macros must add up to more than 0")).toBeInTheDocument();
+    expect(submit).toBeDisabled();
+
+    await user.clear(screen.getByLabelText("Fats"));
+    await user.type(screen.getByLabelText("Fats"), "1");
+    await user.clear(mealName);
+    expect(screen.getByText("Name this meal to save it")).toBeInTheDocument();
+    expect(submit).toBeDisabled();
+
+    await user.type(mealName, "Coffee with cream");
+    expect(screen.queryByText("Name this meal to save it")).not.toBeInTheDocument();
+    await user.click(submit);
+
+    await waitFor(() =>
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mealName: "Coffee with cream",
+          protein: 0,
+          carbs: 0,
+          fats: 1,
+        }),
+      ),
+    );
+  });
+
+  it("hides the hint again when the user empties the form", async () => {
+    const user = userEvent.setup();
+    render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
+    const mealName = screen.getByPlaceholderText("e.g. Chicken Salad");
+
+    await user.type(mealName, "Toast");
+    expect(screen.getByText("Enter protein, carbs and fats")).toBeInTheDocument();
+
+    await user.clear(mealName);
+    expect(
+      screen.queryByText("Enter protein, carbs and fats"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add entry/i })).toBeDisabled();
+  });
+
   it("keeps date and time collapsed until asked for and expands on click", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 
@@ -156,7 +215,7 @@ describe("AddEntryForm", () => {
     expect(disclosure).toHaveAttribute("open");
   });
 
-  it("stamps each entry with the time it was added, not when the form opened", () => {
+  it("stamps each entry with the time it was added, not when the form opened", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date(2026, 8, 22, 23, 50));
     const handleSubmit = vi.fn();
@@ -170,14 +229,16 @@ describe("AddEntryForm", () => {
     fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
     fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
     fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
-    vi.useRealTimers();
 
-    expect(handleSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ entryDate: "2026-09-23", entryTime: "08:05" }),
+    await waitFor(() =>
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ entryDate: "2026-09-23", entryTime: "08:05" }),
+      ),
     );
+    vi.useRealTimers();
   });
 
-  it("logs to the day given as defaultDate, at the current time of day", () => {
+  it("logs to the day given as defaultDate, at the current time of day", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date(2026, 8, 25, 13, 40));
     const handleSubmit = vi.fn();
@@ -199,11 +260,13 @@ describe("AddEntryForm", () => {
     fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
     fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
     fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
-    vi.useRealTimers();
 
-    expect(handleSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ entryDate: "2026-09-20", entryTime: "13:40" }),
+    await waitFor(() =>
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ entryDate: "2026-09-20", entryTime: "13:40" }),
+      ),
     );
+    vi.useRealTimers();
   });
 
   it("uses parsed serving units from selected food search results", () => {
@@ -261,6 +324,7 @@ describe("AddEntryForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
 
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         mealName: "Big Breakfast",
@@ -299,6 +363,7 @@ describe("AddEntryForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
 
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         mealName: "Custom Chicken",
@@ -337,6 +402,7 @@ describe("AddEntryForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
 
+    await waitFor(() => expect(handleSubmit).toHaveBeenCalled());
     expect(handleSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         mealName: "Oatmeal",

@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import CardContainer from "@/components/form/CardContainer";
 import InfoCard from "@/components/form/InfoCard";
@@ -14,103 +15,62 @@ interface MacroTargetFormProps {
   macroTarget: MacroTargetSettings | null;
 }
 
+const validateTarget = ({ value }: { value: { target: MacroTargetState } }) => {
+  const { proteinPercentage, carbsPercentage, fatsPercentage } = value.target;
+
+  return proteinPercentage + carbsPercentage + fatsPercentage === 100
+    ? undefined
+    : "Macro percentages must add up to 100%";
+};
+
+const toMacroTargetState = (
+  settings: MacroTargetSettings,
+): MacroTargetState => ({
+  proteinPercentage: settings.proteinPercentage,
+  carbsPercentage: settings.carbsPercentage,
+  fatsPercentage: settings.fatsPercentage,
+  lockedMacros: settings.lockedMacros ?? [],
+});
+
 function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
   const { mutateAsync, isPending } = useUpdateMacroTarget();
-  // Local state for edited values
-  const [localTarget, setLocalTarget] = useState<
-    MacroTargetState | undefined
-  >();
-  const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  // The sliders keep their own state, so a reset remounts them.
+  const [resetCount, setResetCount] = useState(0);
 
-  // Helper function to convert MacroTargetSettings to MacroTargetState
-  const toMacroTargetState = (
-    settings: MacroTargetSettings,
-  ): MacroTargetState => ({
-    proteinPercentage: settings.proteinPercentage,
-    carbsPercentage: settings.carbsPercentage,
-    fatsPercentage: settings.fatsPercentage,
-    lockedMacros: settings.lockedMacros ?? [],
-  });
-
-  // Initialize local target from prop value
-  useEffect(() => {
-    if (macroTarget) {
-      setLocalTarget(toMacroTargetState(macroTarget));
-      setHasChanges(false);
-    }
-  }, [macroTarget]);
-
-  // Handle local changes from the slider component
-  const handleMacroTargetChange = useCallback(
-    (target: MacroTargetState) => {
-      setLocalTarget(target);
-
-      if (macroTarget) {
-        const targetChanged =
-          target.proteinPercentage !== macroTarget.proteinPercentage ||
-          target.carbsPercentage !== macroTarget.carbsPercentage ||
-          target.fatsPercentage !== macroTarget.fatsPercentage ||
-          // Check for differences in lockedMacros arrays
-          JSON.stringify(target.lockedMacros ?? []) !==
-            JSON.stringify(macroTarget.lockedMacros ?? []);
-        setHasChanges(targetChanged);
-      } else {
-        setHasChanges(true);
-      }
-
-      // Clear success message when changes are made
-      if (saveSuccess) {
-        setSaveSuccess(false);
+  const form = useForm({
+    defaultValues: {
+      target: macroTarget
+        ? toMacroTargetState(macroTarget)
+        : DEFAULT_MACRO_TARGET,
+    },
+    validators: { onSubmit: validateTarget },
+    onSubmit: async ({ value, formApi }) => {
+      const { target } = value;
+      try {
+        await mutateAsync({
+          proteinPercentage: target.proteinPercentage,
+          carbsPercentage: target.carbsPercentage,
+          fatsPercentage: target.fatsPercentage,
+          lockedMacros:
+            target.lockedMacros.length > 0 ? target.lockedMacros : undefined,
+        });
+        formApi.reset(value);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } catch (error) {
+        handleApiError(error, "save macro target settings");
       }
     },
-    [macroTarget, saveSuccess],
-  );
+  });
+  const hasChanges = !useStore(form.store, (state) => state.isDefaultValue);
+  const submitError = useStore(form.store, (state) => state.errorMap.onSubmit);
 
-  // Save changes to the backend
-  const handleSaveChanges = useCallback(() => {
-    if (localTarget && hasChanges) {
-      // Convert MacroTargetState back to MacroTargetSettings for the API
-      const settingsToSave: MacroTargetSettings = {
-        proteinPercentage: localTarget.proteinPercentage,
-        carbsPercentage: localTarget.carbsPercentage,
-        fatsPercentage: localTarget.fatsPercentage,
-        lockedMacros:
-          localTarget.lockedMacros.length > 0
-            ? localTarget.lockedMacros
-            : undefined,
-      };
-
-      mutateAsync(settingsToSave)
-        .then(() => {
-          setSaveSuccess(true);
-          setHasChanges(false);
-          // Clear success message after 3 seconds
-          setTimeout(() => setSaveSuccess(false), 3000);
-        })
-        .catch((error) => {
-          handleApiError(error, "save macro target settings");
-        });
-    }
-  }, [localTarget, hasChanges, mutateAsync]);
-
-  // Reset to original values
-  const handleReset = useCallback(() => {
-    if (macroTarget) {
-      setLocalTarget(toMacroTargetState(macroTarget));
-    } else {
-      setLocalTarget(DEFAULT_MACRO_TARGET);
-    }
-    setHasChanges(false);
+  const handleReset = () => {
+    form.reset();
+    setResetCount((count) => count + 1);
     setSaveSuccess(false);
-  }, [macroTarget]);
-
-  // Only use displayValues when we actually have a localTarget
-  // This ensures we don't render the form with default values while loading
-  const hasValidValues = localTarget !== undefined;
-
-  // Use local target values for rendering
-  const displayValues = localTarget ?? DEFAULT_MACRO_TARGET;
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
@@ -128,11 +88,19 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
 
           {/* Show skeleton loader when loading or when we don't have valid values yet */}
           <div className="rounded-card border border-border bg-surface-2 p-5">
-            {hasValidValues ? (
-              <MacroTarget
-                initialValues={displayValues}
-                onTargetChange={handleMacroTargetChange}
-              />
+            {macroTarget ? (
+              <form.Field name="target">
+                {(field) => (
+                  <MacroTarget
+                    key={resetCount}
+                    initialValues={field.state.value}
+                    onTargetChange={(target) => {
+                      field.handleChange(target);
+                      setSaveSuccess(false);
+                    }}
+                  />
+                )}
+              </form.Field>
             ) : (
               <div className="space-y-10">
                 {/* Skeleton for the stacked bar */}
@@ -193,12 +161,17 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     Settings saved successfully
                   </div>
                 )}
-                {!saveSuccess && hasChanges && (
+                {!saveSuccess && submitError && (
+                  <div role="alert" className="text-sm text-error">
+                    {submitError}
+                  </div>
+                )}
+                {!saveSuccess && !submitError && hasChanges && (
                   <div className="text-sm text-warning">
                     You have unsaved changes
                   </div>
                 )}
-                {!saveSuccess && !hasChanges && <div />}
+                {!saveSuccess && !submitError && !hasChanges && <div />}
               </>
             )}
             <div className="flex gap-4">
@@ -216,7 +189,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
               )}
               <Button
                 type="button"
-                onClick={handleSaveChanges}
+                onClick={() => void form.handleSubmit()}
                 isLoading={isPending}
                 loadingText="Saving..."
                 disabled={!hasChanges}

@@ -1,7 +1,9 @@
+import { useForm, useStore } from "@tanstack/react-form";
+
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import TextField from "@/components/form/TextField";
-import { HabitGoalFormValues } from "@/types/habit";
+import { HabitFrequency, HabitGoalFormValues } from "@/types/habit";
 
 import { HABIT_ICONS } from "../../constants/habits";
 
@@ -109,29 +111,24 @@ const COLOR_GRADIENT_CHIP_MAP = {
   },
 } as const;
 
+export const validateTitle = ({ value }: { value: string }) =>
+  value.trim() ? undefined : "Title is required";
+
+// Lets the form prop below be typed by inference instead of useForm's generics.
+export function useHabitForm(
+  defaultValues: HabitGoalFormValues,
+  onSubmit: (values: HabitGoalFormValues) => Promise<void>,
+) {
+  return useForm({ defaultValues, onSubmit: ({ value }) => onSubmit(value) });
+}
+
 interface HabitFormProps {
-  values: HabitGoalFormValues;
-  onChange: (field: keyof HabitGoalFormValues, value: string | number) => void;
-  errors: Partial<Record<keyof HabitGoalFormValues, string>>;
+  form: ReturnType<typeof useHabitForm>;
   currentProgress?: number;
 }
 
-function HabitForm({
-  values,
-  onChange,
-  errors,
-  currentProgress = 0,
-}: HabitFormProps) {
-  const handleChange = (
-    field: keyof HabitGoalFormValues,
-    value: string | number | undefined,
-  ) => {
-    if (field === "target") {
-      onChange(field, Math.max(1, Number(value) || 1));
-    } else {
-      onChange(field, value as string | number);
-    }
-  };
+function HabitForm({ form, currentProgress = 0 }: HabitFormProps) {
+  const values = useStore(form.store, (state) => state.values);
 
   type AccentKey = keyof typeof COLOR_TEXT_RING_MAP;
   const accentKey = values.accentColor as AccentKey;
@@ -141,37 +138,46 @@ function HabitForm({
 
   return (
     <div className="space-y-6">
-      <div>
-        <TextField
-          label="Habit Title"
-          value={values.title}
-          onChange={(value) => handleChange("title", value)}
-          placeholder="Enter a title for your habit"
-          error={errors.title}
-          required
-        />
-      </div>
+      <form.Field name="title" validators={{ onChange: validateTitle }}>
+        {(field) => (
+          <TextField
+            label="Habit Title"
+            value={field.state.value}
+            onChange={field.handleChange}
+            placeholder="Enter a title for your habit"
+            error={field.state.meta.errors[0]}
+            required
+          />
+        )}
+      </form.Field>
 
       <div>
         <div className="grid grid-cols-2 gap-4">
-          <NumberField
-            label="Target"
-            value={values.target}
-            onChange={(value: number | undefined) =>
-              handleChange("target", value)
-            }
-            min={1}
-            max={100}
-            error={errors.target}
-            required
-          />
-          <Dropdown
-            id="habit-frequency"
-            label="Frequency"
-            options={FREQUENCY_OPTIONS}
-            value={values.frequency ?? "daily"}
-            onChange={(value) => handleChange("frequency", value)}
-          />
+          <form.Field name="target">
+            {(field) => (
+              <NumberField
+                label="Target"
+                value={field.state.value}
+                onChange={(value: number | undefined) =>
+                  field.handleChange(Math.max(1, Number(value) || 1))
+                }
+                min={1}
+                max={100}
+                required
+              />
+            )}
+          </form.Field>
+          <form.Field name="frequency">
+            {(field) => (
+              <Dropdown
+                id="habit-frequency"
+                label="Frequency"
+                options={FREQUENCY_OPTIONS}
+                value={field.state.value ?? "daily"}
+                onChange={(value) => field.handleChange(value as HabitFrequency)}
+              />
+            )}
+          </form.Field>
         </div>
         <p className="mt-1 text-xs text-muted">
           {values.frequency === "weekly"
@@ -205,7 +211,7 @@ function HabitForm({
                     ? `${grad.chip} border ${colorRing}`
                     : "bg-surface-2 hover:bg-surface-3"
                 }`}
-                onClick={() => handleChange("iconName", key)}
+                onClick={() => form.setFieldValue("iconName", key)}
                 aria-pressed={isSelected}
                 aria-label={
                   key.charAt(0).toUpperCase() + key.slice(1) + " icon"
@@ -242,7 +248,7 @@ function HabitForm({
                   ? "ring-2 ring-white/60"
                   : "opacity-70 hover:opacity-100"
               }`}
-              onClick={() => handleChange("accentColor", color.value)}
+              onClick={() => form.setFieldValue("accentColor", color.value)}
               aria-pressed={values.accentColor === color.value}
               aria-label={`Select ${color.label} color`}
             />

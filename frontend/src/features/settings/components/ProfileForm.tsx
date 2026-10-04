@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+
+import type { UserDetailsResponse } from "@/api/user";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import HeightField from "@/components/form/HeightField";
@@ -5,7 +9,9 @@ import TextField from "@/components/form/TextField";
 import WeightField from "@/components/form/WeightField";
 import { Button } from "@/components/ui";
 import Panel from "@/components/ui/Panel";
-import { type Gender, type UserSettings } from "@/types/user";
+import { useSaveSettings } from "@/hooks/queries/useSettings";
+import { useStore as useAppStore } from "@/store/store";
+import { type Gender } from "@/types/user";
 import type { UnitSystem } from "@/utils/unitConversion";
 import {
   ACTIVITY_LEVELS,
@@ -13,16 +19,11 @@ import {
   UNIT_SYSTEM_OPTIONS,
 } from "@/utils/userConstants";
 
+import { validateSettingsComplete } from "../utils/validation";
+
 interface ProfileFormProps {
-  settings: UserSettings;
-  updateSetting: <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K],
-  ) => void;
-  formErrors: Record<string, string>;
-  onSubmit: (event: React.FormEvent) => Promise<void>;
-  isSaving: boolean;
-  hasChanges: boolean;
+  settings: UserDetailsResponse;
+  onHasChangesChange: (hasChanges: boolean) => void;
 }
 
 function getActivityLevelOptions() {
@@ -32,131 +33,196 @@ function getActivityLevelOptions() {
   }));
 }
 
+// Zero or negative reads as an empty field.
+const positiveOrUndefined = (value: number | undefined) =>
+  value && value > 0 ? value : undefined;
+
 export default function ProfileForm({
   settings,
-  updateSetting,
-  formErrors,
-  onSubmit,
-  isSaving,
-  hasChanges,
+  onHasChangesChange,
 }: ProfileFormProps) {
-  // Convert string activity level to number if needed
-  const activityLevelValue = settings.activityLevel;
-  const unitSystem = settings.unitSystem ?? "metric";
+  const { showNotification } = useAppStore();
+  const saveSettingsMutation = useSaveSettings();
 
-  // Ensure weight is a valid positive number
-  const handleWeightChange = (value: number | undefined) => {
-    // Don't allow undefined, negative or zero weights
-    const validWeight = value && value > 0 ? value : undefined;
-    updateSetting("weight", validWeight);
-  };
+  const form = useForm({
+    defaultValues: {
+      firstName: settings.firstName,
+      lastName: settings.lastName,
+      email: settings.email,
+      dateOfBirth: settings.dateOfBirth,
+      gender: settings.gender as Gender | undefined,
+      unitSystem: settings.unitSystem as UnitSystem | undefined,
+      height: settings.height,
+      weight: settings.weight,
+      activityLevel: settings.activityLevel,
+    },
+    validators: {
+      onChange: ({ value }) => {
+        const errors = validateSettingsComplete({
+          ...value,
+          id: settings.id,
+          gender: value.gender === "" ? undefined : value.gender,
+        });
 
-  // Ensure height is a valid positive number
-  const handleHeightChange = (value: number | undefined) => {
-    // Don't allow undefined, negative or zero heights
-    const validHeight = value && value > 0 ? value : undefined;
-    updateSetting("height", validHeight);
-  };
+        return Object.keys(errors).length > 0 ? { fields: errors } : undefined;
+      },
+    },
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await saveSettingsMutation.mutateAsync({
+          ...value,
+          gender: value.gender === "" ? undefined : value.gender,
+        });
+        formApi.reset(value);
+        showNotification("Settings saved", "success");
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        showNotification(`Failed to save settings: ${errorMessage}`, "error");
+      }
+    },
+  });
+  const unitSystem =
+    useStore(form.store, (state) => state.values.unitSystem) ?? "metric";
+  const hasChanges = !useStore(form.store, (state) => state.isDefaultValue);
+  const isValid = useStore(form.store, (state) => state.isValid);
+
+  useEffect(() => {
+    onHasChangesChange(hasChanges);
+  }, [hasChanges, onHasChangesChange]);
 
   return (
     <Panel padding="none">
-      <form onSubmit={onSubmit}>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void form.handleSubmit();
+        }}
+      >
         <div className="space-y-4 p-4 sm:space-y-5 sm:p-6">
         <div className="grid grid-cols-1 gap-3.5 sm:gap-4 md:grid-cols-2">
-          <TextField
-            label="First Name"
-            value={settings.firstName}
-            onChange={(value) => {
-              updateSetting("firstName", value);
-            }}
-            error={formErrors.firstName}
-            required
-          />
+          <form.Field name="firstName">
+            {(field) => (
+              <TextField
+                label="First Name"
+                value={field.state.value}
+                onChange={field.handleChange}
+                error={field.state.meta.errors[0]}
+                required
+              />
+            )}
+          </form.Field>
 
-          <TextField
-            label="Last Name"
-            value={settings.lastName}
-            onChange={(value) => {
-              updateSetting("lastName", value);
-            }}
-            error={formErrors.lastName}
-            required
-          />
+          <form.Field name="lastName">
+            {(field) => (
+              <TextField
+                label="Last Name"
+                value={field.state.value}
+                onChange={field.handleChange}
+                error={field.state.meta.errors[0]}
+                required
+              />
+            )}
+          </form.Field>
 
-          <TextField
-            label="Email"
-            value={settings.email}
-            type="email"
-            onChange={(value) => {
-              updateSetting("email", value);
-            }}
-            error={formErrors.email}
-            required
-          />
+          <form.Field name="email">
+            {(field) => (
+              <TextField
+                label="Email"
+                value={field.state.value}
+                type="email"
+                onChange={field.handleChange}
+                error={field.state.meta.errors[0]}
+                required
+              />
+            )}
+          </form.Field>
 
-          <DateField
-            label="Date of Birth"
-            value={settings.dateOfBirth ?? ""}
-            onChange={(value) => {
-              updateSetting("dateOfBirth", value);
-            }}
-            error={formErrors.dateOfBirth}
-            required
-          />
+          <form.Field name="dateOfBirth">
+            {(field) => (
+              <DateField
+                label="Date of Birth"
+                value={field.state.value ?? ""}
+                onChange={field.handleChange}
+                error={field.state.meta.errors[0]}
+                required
+              />
+            )}
+          </form.Field>
 
-          <Dropdown
-            label="Gender"
-            value={settings.gender ?? ""}
-            onChange={(value) => {
-              updateSetting("gender", value as Gender);
-            }}
-            options={GENDER_OPTIONS}
-            error={formErrors.gender}
-            required
-          />
+          <form.Field name="gender">
+            {(field) => (
+              <Dropdown
+                label="Gender"
+                value={field.state.value ?? ""}
+                onChange={(value) => field.handleChange(value as Gender)}
+                options={GENDER_OPTIONS}
+                error={field.state.meta.errors[0]}
+                required
+              />
+            )}
+          </form.Field>
 
-          <Dropdown
-            label="Units"
-            value={unitSystem}
-            onChange={(value) => {
-              updateSetting("unitSystem", value as UnitSystem);
-            }}
-            options={UNIT_SYSTEM_OPTIONS}
-          />
+          <form.Field name="unitSystem">
+            {(field) => (
+              <Dropdown
+                label="Units"
+                value={unitSystem}
+                onChange={(value) => field.handleChange(value as UnitSystem)}
+                options={UNIT_SYSTEM_OPTIONS}
+              />
+            )}
+          </form.Field>
 
-          <HeightField
-            label="Height"
-            value={settings.height ?? undefined}
-            onChange={handleHeightChange}
-            error={formErrors.height}
-            unitSystem={unitSystem}
-            min={100}
-            max={250}
-            required
-          />
+          <form.Field name="height">
+            {(field) => (
+              <HeightField
+                label="Height"
+                value={field.state.value}
+                onChange={(value) =>
+                  field.handleChange(positiveOrUndefined(value))
+                }
+                error={field.state.meta.errors[0]}
+                unitSystem={unitSystem}
+                min={100}
+                max={250}
+                required
+              />
+            )}
+          </form.Field>
 
-          <WeightField
-            label="Weight"
-            value={settings.weight ?? undefined}
-            onChange={handleWeightChange}
-            error={formErrors.weight}
-            unitSystem={unitSystem}
-            minKg={30}
-            maxKg={300}
-            required
-          />
+          <form.Field name="weight">
+            {(field) => (
+              <WeightField
+                label="Weight"
+                value={field.state.value}
+                onChange={(value) =>
+                  field.handleChange(positiveOrUndefined(value))
+                }
+                error={field.state.meta.errors[0]}
+                unitSystem={unitSystem}
+                minKg={30}
+                maxKg={300}
+                required
+              />
+            )}
+          </form.Field>
 
-          <Dropdown
-            label="Activity Level"
-            value={activityLevelValue ?? ""} // Use the converted numeric value
-            onChange={(value) => {
-              updateSetting("activityLevel", value ? Number(value) : undefined);
-            }} // Ensure we store as number or undefined
-            options={getActivityLevelOptions()}
-            error={formErrors.activityLevel}
-            placeholder="Select activity level"
-            required
-          />
+          <form.Field name="activityLevel">
+            {(field) => (
+              <Dropdown
+                label="Activity Level"
+                value={field.state.value ?? ""}
+                onChange={(value) =>
+                  field.handleChange(value ? Number(value) : undefined)
+                }
+                options={getActivityLevelOptions()}
+                error={field.state.meta.errors[0]}
+                placeholder="Select activity level"
+                required
+              />
+            )}
+          </form.Field>
         </div>
 
         </div>
@@ -170,8 +236,8 @@ export default function ProfileForm({
           </span>
           <Button
             type="submit"
-            isLoading={isSaving}
-            disabled={!hasChanges || Object.keys(formErrors).length > 0}
+            isLoading={saveSettingsMutation.isPending}
+            disabled={!hasChanges || !isValid}
             text="Save changes"
             buttonSize="md"
             variant="primary"
