@@ -77,6 +77,15 @@ bun run typecheck
 bun run lint
 ```
 
+End-to-end tests start their own frontend and backend (Clerk mode, in-memory database) and need Clerk test keys:
+
+```bash
+cp frontend/.env.test.example frontend/.env.test   # then fill it in
+bun run --cwd frontend test:e2e
+```
+
+If ports 5173 or 3000 are taken, set `E2E_FRONTEND_PORT` and `E2E_BACKEND_PORT`.
+
 ## 1-Click App Store Manifests & Homelab Templates
 
 MacroTrackr supports 1-click deployments across popular self-hosted homelab platforms:

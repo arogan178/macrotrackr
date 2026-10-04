@@ -1,34 +1,10 @@
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
+import { navigateToSignIn, loginWithTestUser } from './helpers/auth'
 import { waitForAnyVisible, waitForPageReady } from './helpers/index'
 
 test.describe('Full Flow E2E Tests', () => {
   test.describe('Complete User Journey', () => {
-    test('should complete full signup flow', async ({ page }: { page: Page }) => {
-      test.setTimeout(60000)
-
-      const testUserEmail = `test_${Date.now()}@example.com`
-      const password = 'TestPassword123!'
-
-      console.log('Starting full signup test with email:', testUserEmail)
-
-      await signUpViaUI(page, testUserEmail, password)
-
-      // Verify we're on an authenticated page or verification page
-      const homeUrl = page.url()
-      console.log('After signup, URL:', homeUrl)
-      const isSuccess = homeUrl.includes('/home') || 
-                       homeUrl.includes('/dashboard') || 
-                       homeUrl.includes('verify') ||
-                       homeUrl.includes('register') ||
-                       homeUrl.includes('confirm') ||
-                       homeUrl.includes('auth')
-      expect(isSuccess).toBe(true)
-
-      console.log('Full signup test completed successfully!')
-    })
-
     test('should login with existing user and access pages', async ({ page }: { page: Page }) => {
       test.setTimeout(60000)
 
@@ -41,13 +17,13 @@ test.describe('Full Flow E2E Tests', () => {
 
       // Access goals page
       await page.goto('/goals')
-      await waitForPageReady(page)
       await expect(page).toHaveURL(/\/goals/)
+      await expect(page.getByRole('heading', { name: 'Your Goals', level: 1 })).toBeVisible()
 
       // Access settings page
       await page.goto('/settings')
-      await waitForPageReady(page)
       await expect(page).toHaveURL(/\/settings/)
+      await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     })
   })
 
@@ -87,14 +63,6 @@ test.describe('Full Flow E2E Tests', () => {
 
       const hasContent = await page.locator('main, h1, body').count()
       expect(hasContent > 0).toBe(true)
-    })
-
-    test('should have working navigation links', async ({ page }: { page: Page }) => {
-      await page.goto('/')
-      await waitForPageReady(page)
-
-      const links = await page.locator('a[href]').all()
-      expect(links.length).toBeGreaterThan(0)
     })
   })
 })

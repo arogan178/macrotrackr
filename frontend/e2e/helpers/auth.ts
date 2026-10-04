@@ -12,14 +12,12 @@ export interface TestUser {
  */
 async function revealEmailForm(page: Page): Promise<void> {
   const emailField = page.locator('input[name="email"]').first()
-  if (await emailField.isVisible().catch(() => false)) {
-    return
-  }
+  const continueWithEmail = page.getByRole('button', { name: 'Continue with email' })
 
-  const continueWithEmail = page
-    .locator('button:has-text("Continue with email")')
-    .first()
-  if (await continueWithEmail.isVisible().catch(() => false)) {
+  // Clerk renders the form after page load, so checking either one straight
+  // away can see neither and skip the click.
+  await emailField.or(continueWithEmail).first().waitFor()
+  if (await continueWithEmail.isVisible()) {
     await continueWithEmail.click()
   }
 }
@@ -66,9 +64,8 @@ export async function signInWithUI(page: Page, email: string, password: string):
   const submitButton = page.locator('button:has-text("Sign In")').first()
   await submitButton.click()
 
-  // Wait for redirect to authenticated page
+  // Signed-in pages hold a realtime stream open, so networkidle never fires.
   await page.waitForURL(/\/home|\/dashboard/, { timeout: 10000 })
-  await waitForPageReady(page)
 }
 
 /**
@@ -108,8 +105,6 @@ export async function signUpViaUI(page: Page, email: string, password: string): 
   await submitButton.click()
 
   await completeEmailVerification(page)
-
-  await waitForPageReady(page)
 }
 
 /**

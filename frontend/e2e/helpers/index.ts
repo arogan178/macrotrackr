@@ -1,7 +1,10 @@
 import type { Page } from '@playwright/test'
 
-export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
-export const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+// Overridable because other dev servers often hold the defaults.
+export const FRONTEND_PORT = process.env.E2E_FRONTEND_PORT || '5173'
+export const BACKEND_PORT = process.env.E2E_BACKEND_PORT || '3000'
+export const FRONTEND_URL = `http://localhost:${FRONTEND_PORT}`
+export const BACKEND_URL = `http://localhost:${BACKEND_PORT}`
 
 export const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'your_email+clerk_test@example.com'
 export const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!'
