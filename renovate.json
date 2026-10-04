@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:weekly"],
+  "enabledManagers": ["bun", "github-actions", "dockerfile"],
+  "osvVulnerabilityAlerts": true,
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    {
+      "description": "One weekly PR for all minor and patch updates. Majors stay separate.",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "minor and patch updates"
+    },
+    {
+      "description": "Handled manually: Vite 8, Vitest 5, ESLint 10, Recharts 3, lucide-react 1, motion 14, Zod 4, Stripe 23, svix 2, Resend 6, Pino 10, react-syntax-highlighter 16, TanStack Table 9. Remove entries as each lands.",
+      "matchPackageNames": [
+        "vite",
+        "vitest",
+        "@vitest/*",
+        "eslint",
+        "@eslint/js",
+        "recharts",
+        "lucide-react",
+        "motion",
+        "zod",
+        "stripe",
+        "svix",
+        "resend",
+        "pino",
+        "react-syntax-highlighter",
+        "@tanstack/react-table"
+      ],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}

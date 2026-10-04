@@ -35,3 +35,15 @@ Before adding a package:
 - Use routine dependency updates in small batches.
 - Validate both workspaces when upgrading shared tooling.
 - Treat dependency additions as architecture decisions, not just implementation details.
+
+## 6) Automated updates
+
+Renovate (`renovate.json`) updates both workspaces and `bun.lock`, GitHub Actions, and the Dockerfile base images.
+
+- Minor and patch updates arrive as one grouped PR each week (Mondays before 4am UTC).
+- A separate weekly lock file maintenance PR regenerates `bun.lock` within the existing ranges. Most advisories are in transitive packages, and GitHub and OSV alerts only cover direct dependencies here.
+- Each major update gets its own PR.
+- Security fixes for direct dependencies open immediately, outside the weekly schedule.
+- `bunfig.toml` pins the hoisted linker. A regenerated `bun.lock` would otherwise switch the workspace to the isolated linker.
+- Majors being migrated by hand are ignored in `renovate.json`. Remove a package from that rule once its migration lands.
+- Run `npx --package renovate -- renovate-config-validator --strict` after editing the config.
