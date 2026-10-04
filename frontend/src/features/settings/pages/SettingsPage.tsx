@@ -27,11 +27,10 @@ import {
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
 import DeleteAccountForm from "@/features/settings/components/DeleteAccountForm";
-import { useBeforeUnload, useMutationErrorHandler } from "@/hooks";
+import { useBeforeUnload } from "@/hooks";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
-import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
+import { useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import { useStore } from "@/store/store";
 
 type TabType = "profile" | "data" | "billing" | "accounts" | "security";
 
@@ -57,34 +56,11 @@ export default function SettingsPage() {
     isLoading: isSettingsLoading,
     error: settingsQueryError,
   } = useSettings();
-  const saveSettingsMutation = useSaveSettings();
   const logoutMutation = useLogout();
 
   const handleLogout = useCallback(() => {
     logoutMutation.mutate();
   }, [logoutMutation]);
-
-  const {
-    settings,
-    formErrors,
-    hasSettingsChanges,
-    validateSettingsForm,
-    updateSetting,
-    resetSettings,
-
-    initializeSettings,
-    showNotification,
-  } = useStore();
-
-  // Get loading state from mutation
-  const isSaving = saveSettingsMutation.isPending;
-
-  // Use new loading state hooks
-  const { handleMutationError, handleMutationSuccess } =
-    useMutationErrorHandler({
-      logError: false,
-      showSuccess: false,
-    });
 
   // Centralize subscription status hydration
   usePageDataSync();
@@ -101,6 +77,7 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
     TabType | undefined
   >();
@@ -122,31 +99,6 @@ export default function SettingsPage() {
     }
   }, [activeTab]);
 
-  // Initialize settings from query data on component mount
-  useEffect(() => {
-    if (settingsData) {
-      // Transform the API response to match the expected settings format
-      const transformedSettings = {
-        id: settingsData.id,
-        email: settingsData.email,
-        firstName: settingsData.firstName,
-        lastName: settingsData.lastName,
-        createdAt: settingsData.createdAt,
-        dateOfBirth: settingsData.dateOfBirth,
-        height: settingsData.height,
-        weight: settingsData.weight,
-        gender: settingsData.gender as "male" | "female" | undefined,
-        activityLevel: settingsData.activityLevel,
-        unitSystem: settingsData.unitSystem,
-        subscription: settingsData.subscription,
-      };
-
-      initializeSettings({
-        settings: transformedSettings,
-      });
-    }
-  }, [settingsData, initializeSettings]);
-
   // Warn user before leaving page with unsaved changes
   // Browsers show their own wording here; a custom message is ignored.
   useBeforeUnload(hasSettingsChanges);
@@ -165,61 +117,18 @@ export default function SettingsPage() {
 
   const confirmTabChange = useCallback(() => {
     if (pendingTabChange) {
-      // Reset settings to original values when discarding changes
-      resetSettings();
+      // Leaving the tab unmounts the form, which drops its edits.
+      setHasSettingsChanges(false);
       setActiveTab(pendingTabChange);
       setPendingTabChange(undefined);
     }
     setShowConfirmModal(false);
-  }, [pendingTabChange, resetSettings]);
+  }, [pendingTabChange]);
 
   const cancelTabChange = useCallback(() => {
     setPendingTabChange(undefined);
     setShowConfirmModal(false);
   }, []);
-
-  const handleSubmit = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
-      if (!validateSettingsForm() || !settings) return;
-
-      // Prepare payload for TanStack Query mutation
-      const payload = {
-        firstName: settings.firstName,
-        lastName: settings.lastName,
-        email: settings.email,
-        dateOfBirth: settings.dateOfBirth,
-        height: settings.height,
-        weight: settings.weight,
-        gender: settings.gender === "" ? undefined : settings.gender,
-        activityLevel: settings.activityLevel,
-        unitSystem: settings.unitSystem,
-      };
-
-      try {
-        await saveSettingsMutation.mutateAsync(payload);
-        // Update the store to reflect successful save
-        const updatedSettings = structuredClone(settings);
-        initializeSettings({ settings: updatedSettings });
-        showNotification("Settings saved", "success");
-        handleMutationSuccess("Settings saved");
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        showNotification(`Failed to save settings: ${errorMessage}`, "error");
-        handleMutationError(error, "saving settings");
-      }
-    },
-    [
-      validateSettingsForm,
-      settings,
-      saveSettingsMutation,
-      initializeSettings,
-      showNotification,
-      handleMutationSuccess,
-      handleMutationError,
-    ],
-  );
 
   return (
     <DashboardPageContainer>
@@ -300,17 +209,13 @@ export default function SettingsPage() {
               Failed to load settings. Please try again.
             </p>
           </div>
-        ) : settings ? (
+        ) : settingsData ? (
           <AnimatePresence mode="wait">
             {activeTab === "profile" && (
               <PageTransition key="profile">
                 <ProfileForm
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  formErrors={formErrors}
-                  onSubmit={handleSubmit}
-                  isSaving={isSaving}
-                  hasChanges={hasSettingsChanges}
+                  settings={settingsData}
+                  onHasChangesChange={setHasSettingsChanges}
                 />
               </PageTransition>
             )}
