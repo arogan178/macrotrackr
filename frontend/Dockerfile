@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Mirror the workspace layout so the root bun.lock applies as-is.
 COPY package.json bun.lock bunfig.toml ./
+COPY patches ./patches
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 RUN bun install --frozen-lockfile --filter macrotrackr-frontend
