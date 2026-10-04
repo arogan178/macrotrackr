@@ -1,5 +1,6 @@
 import { StateCreator } from "zustand";
 
+import type { NotificationType } from "@/components/notifications/NotificationTypes";
 import { validateSettingsComplete as validateSettings } from "@/features/settings/utils/validation";
 import { UserSettings } from "@/types/user";
 
@@ -8,7 +9,7 @@ export interface UserUISlice {
   // Notification function for UI feedback (required, matches NotificationSlice signature)
   showNotification: (
     message: string,
-    type?: string,
+    type?: NotificationType,
     options?: {
       duration?: number;
     },
