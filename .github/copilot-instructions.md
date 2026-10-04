@@ -38,7 +38,7 @@ macrotrackr/
 | File                                                                | Purpose                        |
 | ------------------------------------------------------------------- | ------------------------------ |
 | [`backend/src/index.ts`](../backend/src/index.ts)                   | Server setup, middleware chain |
-| [`backend/src/db/schema.ts`](../backend/src/db/schema.ts)           | Database models                |
+| [`backend/src/db/migrations/`](../backend/src/db/migrations/)       | Database schema migrations     |
 | [`frontend/src/main.tsx`](../frontend/src/main.tsx)                 | App bootstrap with providers   |
 | [`frontend/src/lib/queryKeys.ts`](../frontend/src/lib/queryKeys.ts) | Cache key factory              |
 

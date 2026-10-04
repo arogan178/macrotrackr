@@ -425,6 +425,23 @@ describe("auth routes", () => {
       expect(response.status).toBe(401);
     });
 
+    it("rejects an account with no local password", async () => {
+      safeQueryMock.mockReturnValue({
+        id: 5,
+        email: "clerk@example.com",
+        password: null,
+      });
+
+      const app = createAuthTestApp(fakeDb);
+      const response = await postJson(app, "/api/auth/login", {
+        email: "clerk@example.com",
+        password: "any-password",
+      });
+
+      expect(response.status).toBe(401);
+      expect(createSessionMock).not.toHaveBeenCalled();
+    });
+
     it("returns 404 outside local auth mode", async () => {
       authMode = "clerk";
       process.env.APP_MODE = "managed";
@@ -622,6 +639,22 @@ describe("auth routes", () => {
       expect(response.status).toBe(401);
     });
 
+    it("rejects an account with no local password", async () => {
+      safeQueryMock.mockReturnValue({ password: null });
+
+      const app = createAuthTestApp(fakeDb, {
+        authenticatedUser: localAuthenticatedUser,
+      });
+
+      const response = await postJson(app, "/api/auth/change-password", {
+        currentPassword: "any-password",
+        newPassword: "new-password-123",
+      });
+
+      expect(response.status).toBe(401);
+      expect(safeExecuteMock).not.toHaveBeenCalled();
+    });
+
     it("returns 404 for non-local provider", async () => {
       const app = createAuthTestApp(fakeDb, {
         authenticatedUser: clerkAuthenticatedUser,
@@ -743,7 +776,7 @@ describe("auth routes", () => {
         1,
         fakeDb,
         expect.stringContaining("INSERT INTO users"),
-        ["new-user@example.com", "New", "User", "clerk_new_user", "clerk-auth"],
+        ["new-user@example.com", "New", "User", "clerk_new_user"],
       );
       expect(safeExecuteMock).toHaveBeenNthCalledWith(
         2,

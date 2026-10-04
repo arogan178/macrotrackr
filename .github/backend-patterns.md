@@ -169,7 +169,11 @@ db.transaction(() => {
 
 ### Database Schema
 
-Defined in [`backend/src/db/schema.ts`](../backend/src/db/schema.ts):
+Built by numbered migrations in [`backend/src/db/migrations/`](../backend/src/db/migrations/). On startup, `initializeSchema` in [`backend/src/db/schema.ts`](../backend/src/db/schema.ts) runs each migration above `PRAGMA user_version` in its own transaction and sets `user_version` to its number.
+
+To change the schema, add `NNNN_<name>.ts` exporting one function that takes the `Database`, and append it to the list in `migrations/index.ts`. Never edit, reorder or remove a migration that has shipped. Rebuild a table (create, copy, drop, rename) when SQLite cannot `ALTER` it; the runner turns foreign keys off around migrations so the drop does not cascade.
+
+Main tables:
 
 - `users` - User profiles and settings
 - `macro_entries` - Food log entries
@@ -182,7 +186,7 @@ Defined in [`backend/src/db/schema.ts`](../backend/src/db/schema.ts):
 | File                                                                              | Purpose                        |
 | --------------------------------------------------------------------------------- | ------------------------------ |
 | [`backend/src/index.ts`](../backend/src/index.ts)                                 | Server setup, middleware chain |
-| [`backend/src/db/schema.ts`](../backend/src/db/schema.ts)                         | Database models                |
+| [`backend/src/db/migrations/`](../backend/src/db/migrations/)                     | Database schema migrations     |
 | [`backend/src/lib/errors.ts`](../backend/src/lib/errors.ts)                       | Custom error classes           |
 | [`backend/src/lib/logger.ts`](../backend/src/lib/logger.ts)                       | Structured logging             |
 | [`backend/src/lib/database.ts`](../backend/src/lib/database.ts)                   | Database utilities             |

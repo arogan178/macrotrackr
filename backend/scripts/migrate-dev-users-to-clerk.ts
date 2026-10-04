@@ -203,7 +203,7 @@ export async function main() {
     "UPDATE users SET clerk_id = ? WHERE id = ?"
   );
   const insertUser = db.prepare(
-    "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO users (email, first_name, last_name, clerk_id) VALUES (?, ?, ?, ?)"
   );
   const insertUserDetails = db.prepare(
     `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
@@ -421,8 +421,7 @@ export async function main() {
           defaults.email,
           defaults.firstName,
           defaults.lastName,
-          clerkUser.id,
-          "clerk-auth"
+          clerkUser.id
         );
         const userId = Number(result.lastInsertRowid);
         insertUserDetails.run(userId);

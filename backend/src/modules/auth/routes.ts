@@ -183,10 +183,6 @@ function buildResetTokenExpiry(): string {
   return new Date(Date.now() + 60 * 60 * 1000).toISOString();
 }
 
-function userHasLocalCredential(user: Pick<UserRow, "password">): boolean {
-  return user.password !== "clerk-auth";
-}
-
 function getHeaderValue(headers: unknown, key: string): string | null {
   if (!headers || typeof headers !== "object") {
     return null;
@@ -334,7 +330,7 @@ export const authRoutes = (app: Elysia) =>
             [email],
           );
 
-          if (!user || !userHasLocalCredential(user)) {
+          if (!user?.password) {
             // Mitigate timing attack by always executing a hash comparison
             await verifyPassword(
               body.password,
@@ -653,7 +649,7 @@ export const authRoutes = (app: Elysia) =>
             "SELECT password FROM users WHERE id = ? LIMIT 1",
             [userId],
           );
-          if (!currentUser || !userHasLocalCredential(currentUser)) {
+          if (!currentUser?.password) {
             throw new AuthenticationError("Current password is incorrect.");
           }
 
@@ -817,8 +813,8 @@ export const authRoutes = (app: Elysia) =>
           const userData = withTransaction(db, () => {
             const userResult = safeExecute(
               db,
-              "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
-              [email, firstName, lastName, clerkUserId, "clerk-auth"],
+              "INSERT INTO users (email, first_name, last_name, clerk_id) VALUES (?, ?, ?, ?)",
+              [email, firstName, lastName, clerkUserId],
             );
             const userId = Number(userResult.lastInsertRowid);
 
