@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useForm, useStore as useFormStore } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -25,56 +26,51 @@ export function LocalSignInForm({
   const queryClient = useQueryClient();
   const { showNotification } = useStore();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [enableBiometrics, setEnableBiometrics] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const normalizedEmail = email.trim().toLowerCase();
-      await authApi.login({
-        email: normalizedEmail,
-        password,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.auth.session(),
-      });
-      // Save credentials for Biometric sign-in on future app launches,
-      // only when the user explicitly opted in
-      if (enableBiometrics) {
-        await saveBiometricCredentials(normalizedEmail, password);
-      }
-      showNotification("Signed in successfully!", "success");
-
-      const destination = normalizeAuthRedirect(redirectTo);
-      if (destination === "/home") {
-        navigate({
-          to: "/home",
-          search: { limit: 20, offset: 0 },
-          replace: true,
+  const form = useForm({
+    defaultValues: { email: "", password: "", enableBiometrics: false },
+    onSubmit: async ({ value: { email, password, enableBiometrics } }) => {
+      try {
+        const normalizedEmail = email.trim().toLowerCase();
+        await authApi.login({
+          email: normalizedEmail,
+          password,
         });
-      } else {
-        navigate({
-          to: destination as any,
-          replace: true,
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.auth.session(),
         });
+        // Save credentials for Biometric sign-in on future app launches,
+        // only when the user explicitly opted in
+        if (enableBiometrics) {
+          await saveBiometricCredentials(normalizedEmail, password);
+        }
+        showNotification("Signed in successfully!", "success");
+
+        const destination = normalizeAuthRedirect(redirectTo);
+        if (destination === "/home") {
+          navigate({
+            to: "/home",
+            search: { limit: 20, offset: 0 },
+            replace: true,
+          });
+        } else {
+          navigate({
+            to: destination as any,
+            replace: true,
+          });
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Invalid email or password.";
+        showNotification(message, "error");
       }
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Invalid email or password.";
-      showNotification(message, "error");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+  });
+  const isSubmitting = useFormStore(form.store, (state) => state.isSubmitting);
 
   async function handleForgotPassword() {
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = form.getFieldValue("email").trim().toLowerCase();
     if (!normalizedEmail) {
       showNotification(
         "Enter your email first to request a reset link.",
@@ -106,33 +102,51 @@ export function LocalSignInForm({
     <div className="w-full">
       <BiometricSignInButton redirectTo={redirectTo} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <TextField
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          type="email"
-          required
-          placeholder="your@email.com"
-          name="email"
-          autoComplete="username"
-        />
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void form.handleSubmit();
+        }}
+        className="space-y-4"
+      >
+        <form.Field name="email">
+          {(field) => (
+            <TextField
+              label="Email"
+              value={field.state.value}
+              onChange={field.handleChange}
+              type="email"
+              required
+              placeholder="your@email.com"
+              name="email"
+              autoComplete="username"
+            />
+          )}
+        </form.Field>
 
-        <TextField
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          type="password"
-          required
-          placeholder="••••••••"
-          name="password"
-          autoComplete="current-password"
-        />
+        <form.Field name="password">
+          {(field) => (
+            <TextField
+              label="Password"
+              value={field.state.value}
+              onChange={field.handleChange}
+              type="password"
+              required
+              placeholder="••••••••"
+              name="password"
+              autoComplete="current-password"
+            />
+          )}
+        </form.Field>
 
-        <BiometricOptInCheckbox
-          checked={enableBiometrics}
-          onChange={setEnableBiometrics}
-        />
+        <form.Field name="enableBiometrics">
+          {(field) => (
+            <BiometricOptInCheckbox
+              checked={field.state.value}
+              onChange={field.handleChange}
+            />
+          )}
+        </form.Field>
 
         <div className="flex justify-end">
           <button
@@ -148,7 +162,7 @@ export function LocalSignInForm({
         <Button
           type="submit"
           fullWidth
-          isLoading={isLoading}
+          isLoading={isSubmitting}
           loadingText="Signing in..."
         >
           Sign In
