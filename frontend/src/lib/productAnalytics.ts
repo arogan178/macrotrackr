@@ -3,15 +3,15 @@ import {
   createElement,
   type ReactNode,
   useContext,
-  useMemo,
 } from "react";
-import { usePostHog } from "@posthog/react";
 import {
   type AppMode,
   PRODUCT_ANALYTICS_SCHEMA_VERSION,
   type ProductEvent,
   serializeProductProperties,
 } from "@shared/product-analytics";
+
+import { withPostHog } from "./posthogClient";
 
 interface BrowserProductAnalyticsOptions {
   appMode: AppMode;
@@ -54,25 +54,21 @@ const ProductAnalyticsContext = createContext<ProductAnalyticsClient>(
   disabledProductAnalytics,
 );
 
+const managedProductAnalytics = createBrowserProductAnalytics({
+  appMode: "managed",
+  capture: (event, properties) =>
+    withPostHog((posthog) => posthog.capture(event, properties)),
+  enabled: true,
+});
+
 export function ProductAnalyticsProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const posthog = usePostHog();
-  const analytics = useMemo(
-    () =>
-      createBrowserProductAnalytics({
-        appMode: "managed",
-        capture: (event, properties) => posthog.capture(event, properties),
-        enabled: true,
-      }),
-    [posthog],
-  );
-
   return createElement(
     ProductAnalyticsContext.Provider,
-    { value: analytics },
+    { value: managedProductAnalytics },
     children,
   );
 }

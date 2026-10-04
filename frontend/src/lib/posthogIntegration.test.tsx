@@ -11,7 +11,9 @@ const posthog = {
 const userState: { data: { id: string; subscription: { status: string }; createdAt: string; analyticsTrafficType: string; switchingSource?: string } | undefined } =
   { data: undefined };
 
-vi.mock("@posthog/react", () => ({ usePostHog: () => posthog }));
+vi.mock("./posthogClient", () => ({
+  withPostHog: (callback: (client: typeof posthog) => void) => callback(posthog),
+}));
 vi.mock("@/hooks/auth/useAuthQueries", () => ({ useUser: () => userState }));
 
 const { default: PostHogUserSync } = await import("./posthogIntegration");

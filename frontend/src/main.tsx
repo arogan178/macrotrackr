@@ -1,15 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
-import { PostHogProvider } from "@posthog/react";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import posthog from "posthog-js";
 
 import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 
 import { initializeAuthTokenProvider } from "./api/core";
 import { shouldMountClerk } from "./config/clerkRuntime";
 import { isClerkAuthMode, runtimeConfig } from "./config/runtime";
+import { loadPostHog } from "./lib/posthogClient";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { ProductAnalyticsProvider } from "./lib/productAnalytics";
 import {
@@ -40,7 +39,7 @@ const shouldEnablePostHog =
 const hasRequiredClerkConfig = !isClerkAuthMode || Boolean(clerkPublishableKey);
 
 if (shouldEnablePostHog && posthogConfig) {
-  posthog.init(posthogConfig.apiKey, {
+  void loadPostHog(posthogConfig.apiKey, {
     api_host: posthogConfig.host,
     capture_exceptions: true,
     debug: import.meta.env.MODE === "development",
@@ -116,11 +115,9 @@ const ClerkAppShell = React.lazy(() =>
 );
 
 const appTree = shouldEnablePostHog ? (
-  <PostHogProvider client={posthog}>
-    <ProductAnalyticsProvider>
-      <AppContent includePostHogSync />
-    </ProductAnalyticsProvider>
-  </PostHogProvider>
+  <ProductAnalyticsProvider>
+    <AppContent includePostHogSync />
+  </ProductAnalyticsProvider>
 ) : (
   <AppContent includePostHogSync={false} />
 );
