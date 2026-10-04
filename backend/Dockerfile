@@ -1,13 +1,18 @@
-FROM docker.io/oven/bun:1.2.13-alpine
+FROM docker.io/oven/bun:1.3.14-alpine
 
 WORKDIR /app
 
-COPY backend/package.json ./package.json
-COPY backend/tsconfig.json ./tsconfig.json
-COPY backend/src ./src
-COPY shared /shared
+# Mirror the workspace layout so the root bun.lock applies as-is.
+COPY package.json bun.lock bunfig.toml ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+RUN bun install --frozen-lockfile --production --filter macrotrackr-backend
 
-RUN bun install
+COPY backend/tsconfig.json ./backend/tsconfig.json
+COPY backend/src ./backend/src
+COPY shared ./shared
+
+WORKDIR /app/backend
 
 ENV NODE_ENV=production
 ENV PORT=3000

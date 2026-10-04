@@ -1,20 +1,26 @@
-FROM docker.io/oven/bun:1.2.13-alpine AS build
+FROM docker.io/oven/bun:1.3.14-alpine AS build
 
 WORKDIR /app
 
-COPY bun.lock ./bun.lock
-COPY frontend/package.json ./package.json
-COPY frontend/tsconfig.json ./tsconfig.json
-COPY frontend/tsconfig.app.json ./tsconfig.app.json
-COPY frontend/tsconfig.node.json ./tsconfig.node.json
-COPY frontend/tsconfig.base.json ./tsconfig.base.json
-COPY frontend/vite.config.ts ./vite.config.ts
-COPY frontend/index.html ./index.html
-COPY frontend/public ./public
-COPY frontend/src ./src
-COPY frontend/scripts ./scripts
-COPY frontend/nginx.conf ./nginx.conf
-COPY shared /shared
+# Mirror the workspace layout so the root bun.lock applies as-is.
+COPY package.json bun.lock bunfig.toml ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+RUN bun install --frozen-lockfile --filter macrotrackr-frontend
+
+COPY frontend/tsconfig.json ./frontend/tsconfig.json
+COPY frontend/tsconfig.app.json ./frontend/tsconfig.app.json
+COPY frontend/tsconfig.node.json ./frontend/tsconfig.node.json
+COPY frontend/tsconfig.base.json ./frontend/tsconfig.base.json
+COPY frontend/vite.config.ts ./frontend/vite.config.ts
+COPY frontend/index.html ./frontend/index.html
+COPY frontend/public ./frontend/public
+COPY frontend/src ./frontend/src
+COPY frontend/scripts ./frontend/scripts
+COPY frontend/nginx.conf ./frontend/nginx.conf
+COPY shared ./shared
+
+WORKDIR /app/frontend
 
 ARG VITE_API_URL=
 ARG VITE_APP_URL=http://localhost:5173
@@ -40,12 +46,11 @@ ENV VITE_PUBLIC_POSTHOG_KEY=$VITE_PUBLIC_POSTHOG_KEY
 ENV VITE_PUBLIC_POSTHOG_HOST=$VITE_PUBLIC_POSTHOG_HOST
 ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 
-RUN bun install
 RUN bun run build
 
 FROM docker.io/library/nginx:1.27-alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/frontend/dist /usr/share/nginx/html
+COPY --from=build /app/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
