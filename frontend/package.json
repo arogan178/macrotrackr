@@ -67,7 +67,7 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0",
     "workbox-routing": "^7.4.1",
-    "zustand": "^5.0.12"
+    "zustand": "5.0.12"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.2",
