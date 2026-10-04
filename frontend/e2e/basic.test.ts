@@ -17,8 +17,8 @@ test.describe('E2E Basic Tests', () => {
   test.describe('Navigation', () => {
     test('should have working navigation links', async ({ page }: { page: Page }) => {
       await page.goto('/')
-      const links = await page.locator('a[href]').all()
-      expect(links.length).toBeGreaterThan(0)
+      await page.locator('a[href*="login"]').first().click()
+      await expect(page).toHaveURL(/\/login/)
     })
   })
 
@@ -51,10 +51,7 @@ test.describe('E2E Basic Tests', () => {
   test.describe('Accessibility', () => {
     test('should have semantic HTML structure', async ({ page }: { page: Page }) => {
       await page.goto('/')
-      const header = await page.locator('header').isVisible().catch(() => false)
-      const main = await page.locator('main').isVisible().catch(() => false)
-      const footer = await page.locator('footer').isVisible().catch(() => false)
-      expect(header || main || footer).toBe(true)
+      await expect(page.locator('header, main, footer').first()).toBeVisible()
     })
 
     test('should have a proper document title', async ({ page }: { page: Page }) => {

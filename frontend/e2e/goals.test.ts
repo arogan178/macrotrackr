@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { loginWithTestUser } from './helpers/auth'
-import { waitForPageReady } from './helpers/index'
 
 test.describe('Goals E2E Tests', () => {
   test.describe('Authenticated Goals Page', () => {
@@ -17,27 +16,23 @@ test.describe('Goals E2E Tests', () => {
 
     test('should navigate to goals page when authenticated', async ({ page }: { page: Page }) => {
       await page.goto('/goals')
-      await waitForPageReady(page)
 
       await expect(page).toHaveURL(/goals/)
+      await expect(page.getByRole('heading', { name: 'Your Goals', level: 1 })).toBeVisible()
     })
 
     test('should display page content', async ({ page }: { page: Page }) => {
       await page.goto('/goals')
-      await waitForPageReady(page)
 
-      // Check that the page has loaded (has body content)
-      const hasContent = await page.locator('body').count()
-      expect(hasContent).toBeGreaterThan(0)
+      await expect(page.getByRole('heading', { name: 'Habit Goals' })).toBeVisible()
     })
 
     test('should have interactive elements', async ({ page }: { page: Page }) => {
       await page.goto('/goals')
-      await waitForPageReady(page)
 
-      // Check for buttons or inputs
-      const hasElements = await page.locator('button, input, a').count()
-      expect(hasElements).toBeGreaterThan(0)
+      // The suite's user starts with no goals, so the setup actions show.
+      await expect(page.getByRole('button', { name: 'Set Weight Goal' })).toBeEnabled()
+      await expect(page.getByRole('button', { name: 'Add First Habit' })).toBeEnabled()
     })
   })
 })
