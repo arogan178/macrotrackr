@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 if (typeof globalThis.matchMedia !== "function") {
   const createMediaQueryList = (
