@@ -1,3 +1,4 @@
+import { fixupPluginRules } from "@eslint/compat";
 import pluginJs from "@eslint/js";
 import stylisticPlugin from "@stylistic/eslint-plugin";
 import eslintPluginImport from "eslint-plugin-import";
@@ -20,13 +21,13 @@ export default [
   {
     files: ["src/components/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}", "src/AppRouter.tsx", "src/features/**/components/**/*.{js,jsx,ts,tsx}", "src/features/**/pages/**/*.{js,jsx,ts,tsx}"],
     rules: {
-      "unicorn/filename-case": ["error", { case: "pascalCase", multipleFileExtensions: false }],
+      "unicorn/filename-case": ["error", { case: "pascalCase", multipleFileExtensions: false, checkDirectories: false }],
     },
   },
   {
     files: ["src/utils/**/*.{js,ts,tsx}", "src/types/**/*.{js,ts,tsx}", "src/hooks/**/*.{js,ts,tsx}", "src/loaders/**/*.{js,ts,tsx}", "src/constants/**/*.{js,ts,tsx}", "src/lib/**/*.{js,ts,tsx}", "src/theme/**/*.{js,ts,tsx}", "src/features/**/hooks/**/*.{js,ts,tsx}", "src/features/**/types/**/*.{js,ts,tsx}", "src/features/**/utils/**/*.{js,ts,tsx}", "src/features/**/constants/**/*.{js,ts,tsx}", "src/api/**/*.{js,ts,tsx}"],
     rules: {
-      "unicorn/filename-case": ["error", { case: "camelCase", multipleFileExtensions: false }],
+      "unicorn/filename-case": ["error", { case: "camelCase", multipleFileExtensions: false, checkDirectories: false }],
     },
   },
   {
@@ -52,13 +53,14 @@ export default [
     plugins: {
       "@stylistic": stylisticPlugin,
       "@typescript-eslint": tseslint.plugin,
-      react: pluginReact,
+      // eslint-plugin-react and eslint-plugin-import still call context methods ESLint 10 removed.
+      react: fixupPluginRules(pluginReact),
       "react-hooks": pluginReactHooks,
       "react-refresh": pluginReactRefresh,
       "jsx-a11y": pluginJsxA11y,
       unicorn: eslintPluginUnicorn,
       "simple-import-sort": simpleImportSort,
-      import: eslintPluginImport,
+      import: fixupPluginRules(eslintPluginImport),
     },
     rules: {
       ...pluginJs.configs.recommended.rules,
@@ -66,6 +68,11 @@ export default [
       ...tseslint.configs.stylisticTypeChecked.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
+      // React Compiler findings in existing code; promote to errors once the compiler is enabled.
+      "react-hooks/immutability": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
       ...pluginJsxA11y.configs.recommended.rules,
       "react-refresh/only-export-components": "off",
       "@stylistic/padding-line-between-statements": ["warn", { blankLine: "always", prev: "*", next: "return" }],
@@ -87,10 +94,9 @@ export default [
       "import/no-self-import": "error",
       "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
       "import/no-mutable-exports": "error",
-      "unicorn/better-regex": "warn",
       "unicorn/no-null": "off",
       "unicorn/no-useless-undefined": "off",
-      "unicorn/prevent-abbreviations": ["warn", {
+      "unicorn/name-replacements": ["warn", {
         allowList: {
           Props: true, Ref: true, params: true, args: true, fn: true,
           acc: true, val: true, prev: true, curr: true, idx: true,

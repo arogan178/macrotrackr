@@ -171,7 +171,7 @@ function AddEntry({
     validators: { onMount: validateEntry, onChange: validateEntry },
     onSubmit: async ({ value }) => {
       const { protein, carbs, fats, quantity, unit, mealName } = value;
-      let finalIngredients = baseIngredients;
+      let finalIngredients: typeof baseIngredients;
       const factor = getFactor(quantity, unit) ?? 1;
 
       if (baseIngredients && baseIngredients.length > 0) {
