@@ -3,6 +3,7 @@
   "extends": ["config:recommended", "schedule:weekly"],
   "enabledManagers": ["bun", "github-actions", "dockerfile"],
   "osvVulnerabilityAlerts": true,
+  "lockFileMaintenance": { "enabled": true },
   "packageRules": [
     {
       "description": "One weekly PR for all minor and patch updates. Majors stay separate.",

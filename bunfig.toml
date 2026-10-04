@@ -1,0 +1,3 @@
+[install]
+# A regenerated bun.lock would default this workspace to the isolated linker.
+linker = "hoisted"
