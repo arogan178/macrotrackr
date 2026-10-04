@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
 import { PostHogProvider } from "@posthog/react";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import posthog from "posthog-js";
 
@@ -86,13 +85,25 @@ function RuntimeConfigError() {
   );
 }
 
+// Lazy so the devtools never delay the app's first render in development.
+const AppDevtools =
+  import.meta.env.MODE === "development"
+    ? React.lazy(() =>
+        import("./AppDevtools").then((module) => ({
+          default: module.AppDevtools,
+        })),
+      )
+    : null;
+
 function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
   return (
     <>
       {includePostHogSync && <PostHogUserSync />}
       <AppRouter />
-      {import.meta.env.MODE === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
+      {AppDevtools && (
+        <React.Suspense fallback={null}>
+          <AppDevtools />
+        </React.Suspense>
       )}
     </>
   );
