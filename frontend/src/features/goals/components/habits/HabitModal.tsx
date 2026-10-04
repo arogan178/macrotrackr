@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useStore as useFormStore } from "@tanstack/react-form";
 
 import Modal from "@/components/ui/Modal";
 import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 
-import HabitForm from "./HabitForm";
+import HabitForm, { useHabitForm, validateTitle } from "./HabitForm";
 
 // Default values for a new habit
 const DEFAULT_HABIT_VALUES: HabitGoalFormValues = {
@@ -32,14 +33,6 @@ function HabitModal({
   mode,
 }: HabitModalProps) {
   const { showNotification } = useStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // State lifted from HabitForm
-  const [formValues, setFormValues] =
-    useState<HabitGoalFormValues>(DEFAULT_HABIT_VALUES);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof HabitGoalFormValues, string>>
-  >({});
-  const [isFormValid, setIsFormValid] = useState(false);
 
   // Use new mutation error handling
   const { handleMutationError } =
@@ -50,77 +43,38 @@ function HabitModal({
 
   const isEditMode = mode === "edit";
 
-  // Validation function
-  const validateForm = useCallback((values: HabitGoalFormValues) => {
-    const newErrors: Partial<Record<keyof HabitGoalFormValues, string>> = {};
-    if (!values.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-    if (values.target <= 0) {
-      newErrors.target = "Target must be greater than 0";
-    }
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  }, []);
-
-  // Initialize/Reset form state when modal opens or habit/mode changes
-  useEffect(() => {
-    if (isOpen) {
-      let initialValues = DEFAULT_HABIT_VALUES;
-      if (isEditMode && habit) {
-        initialValues = {
-          title: habit.title,
-          iconName: habit.iconName,
-          target: habit.target,
-          accentColor: habit.accentColor ?? "indigo",
-          frequency: habit.frequency ?? "daily",
-        };
-      }
-      setFormValues(initialValues);
-      setIsFormValid(validateForm(initialValues)); // Validate initial values
-      setErrors({}); // Clear previous errors
-      setIsSubmitting(false); // Reset submitting state
-    } else {
-      // Optionally reset when closing, though key prop might handle this
-      // setFormValues(DEFAULT_HABIT_VALUES);
-      // setErrors({});
-      // setIsFormValid(false);
-    }
-  }, [isOpen, habit, mode, isEditMode, validateForm]);
-
-  // Handler passed down to HabitForm
-  const handleFormChange = (
-    field: keyof HabitGoalFormValues,
-    value: string | number,
-  ) => {
-    setFormValues((previousValues) => {
-      const newValues = { ...previousValues, [field]: value };
-      setIsFormValid(validateForm(newValues)); // Re-validate on change
-
-      return newValues;
-    });
-  };
-
-  const handleSave = async () => {
-    if (!isFormValid || isSubmitting) return;
+  const form = useHabitForm(DEFAULT_HABIT_VALUES, async (values) => {
     if (isEditMode && !habit) return; // Should not happen if logic is correct
-
-    setIsSubmitting(true);
     try {
-      await onSubmit(formValues, isEditMode ? habit?.id : undefined);
-      // onSubmit handles closing the modal, success/error notifications are handled by the mutation
-      // Note: We don't reset isSubmitting on success because the modal will close
-      // and the component will unmount/reset when it reopens
+      await onSubmit(values, isEditMode ? habit?.id : undefined);
     } catch (error) {
       handleMutationError(
         error,
         `${isEditMode ? "updating" : "creating"} habit`,
       );
-      // Reset submitting state on error so user can try again
-      setIsSubmitting(false);
     }
-  };
+  });
+  const formValues = useFormStore(form.store, (state) => state.values);
+  const isSubmitting = useFormStore(form.store, (state) => state.isSubmitting);
+  // Not onMount validation: that runs once, and this form is reused for every opening.
+  const isFormValid = !validateTitle({ value: formValues.title });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // keepDefaultValues: otherwise the next render puts the add-mode defaults back.
+    form.reset(
+      isEditMode && habit
+        ? {
+            title: habit.title,
+            iconName: habit.iconName,
+            target: habit.target,
+            accentColor: habit.accentColor ?? "indigo",
+            frequency: habit.frequency ?? "daily",
+          }
+        : DEFAULT_HABIT_VALUES,
+      { keepDefaultValues: true },
+    );
+  }, [isOpen, habit, isEditMode, form]);
 
   // Determine the title and save button label based on the mode
   const modalTitle = isEditMode ? "Edit Habit" : "Add New Habit";
@@ -137,15 +91,12 @@ function HabitModal({
       title={modalTitle}
       size="md"
       variant="form"
-      onSave={handleSave}
+      onSave={() => void form.handleSubmit()}
       saveDisabled={!isFormValid || isSubmitting}
       saveLabel={saveLabel}
     >
-      {/* Pass state and handlers down to the controlled HabitForm */}
       <HabitForm
-        values={formValues}
-        onChange={handleFormChange}
-        errors={errors}
+        form={form}
         // Switching frequency restarts progress, so the preview does too
         currentProgress={
           isEditMode &&

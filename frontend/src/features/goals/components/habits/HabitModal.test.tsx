@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach,describe, expect, it, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { HabitGoal } from "@/types/habit";
 
@@ -64,7 +65,8 @@ describe("HabitModal", () => {
     vi.clearAllMocks();
   });
 
-  it("renders add mode defaults with disabled save until valid", () => {
+  it("renders add mode defaults with disabled save until a title is typed", async () => {
+    const user = userEvent.setup();
     render(
       <HabitModal
         isOpen
@@ -77,10 +79,55 @@ describe("HabitModal", () => {
     expect(screen.getByText("Add New Habit")).toBeInTheDocument();
     expect(screen.getByLabelText("Habit Title")).toHaveValue("");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
-    expect(screen.getByRole("button", { name: "Save Habit" })).toBeDisabled();
+    expect(screen.getByLabelText("Frequency")).toHaveValue("daily");
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+    const save = screen.getByRole("button", { name: "Save Habit" });
+    expect(save).toBeDisabled();
+
+    await user.type(screen.getByLabelText("Habit Title"), "   ");
+    expect(screen.getByText("Title is required")).toBeInTheDocument();
+    expect(save).toBeDisabled();
+
+    await user.type(screen.getByLabelText("Habit Title"), "Walk");
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+    expect(save).toBeEnabled();
+
+    await user.clear(screen.getByLabelText("Habit Title"));
+    expect(screen.getByText("Title is required")).toBeInTheDocument();
+    expect(save).toBeDisabled();
   });
 
-  it("renders edit mode values and uses edit save label", () => {
+  it("prefills edit mode, including a weekly frequency, and keeps it across renders", () => {
+    const habit: HabitGoal = { ...baseHabit, frequency: "weekly" };
+    const properties = {
+      isOpen: true,
+      onClose: vi.fn(),
+      onSubmit: vi.fn().mockResolvedValue(undefined),
+      habit,
+      mode: "edit" as const,
+    };
+    const { rerender } = render(<HabitModal {...properties} />);
+    rerender(<HabitModal {...properties} />);
+
+    expect(screen.getByText("Edit Habit")).toBeInTheDocument();
+    expect(screen.getByLabelText("Habit Title")).toHaveValue("Read");
+    expect(screen.getByLabelText("Target")).toHaveValue(10);
+    expect(screen.getByLabelText("Frequency")).toHaveValue("weekly");
+    expect(
+      screen.getByRole("button", { name: "Book icon" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Select Purple color" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
+    expect(document.querySelector('input[name="current"]')).toHaveAttribute(
+      "value",
+      "3",
+    );
+  });
+
+  it("restarts the preview's progress when the frequency changes", async () => {
+    const user = userEvent.setup();
     render(
       <HabitModal
         isOpen
@@ -90,46 +137,45 @@ describe("HabitModal", () => {
         mode="edit"
       />,
     );
+    const current = () => document.querySelector('input[name="current"]');
 
-    expect(screen.getByText("Edit Habit")).toBeInTheDocument();
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("Read");
-    expect(screen.getByLabelText("Target")).toHaveValue(10);
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
-
-    const currentHidden = document.querySelector('input[name="current"]');
-    expect(currentHidden).toHaveAttribute("value", "3");
+    expect(current()).toHaveAttribute("value", "3");
+    await user.selectOptions(screen.getByLabelText("Frequency"), "weekly");
+    expect(current()).toHaveAttribute("value", "0");
+    await user.selectOptions(screen.getByLabelText("Frequency"), "daily");
+    expect(current()).toHaveAttribute("value", "3");
   });
 
-  it("submits add mode form with updated values", async () => {
+  it("submits add mode form with the chosen values", async () => {
+    const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
     render(
       <HabitModal isOpen onClose={vi.fn()} onSubmit={onSubmit} mode="add" />,
     );
 
-    fireEvent.change(screen.getByLabelText("Habit Title"), {
-      target: { value: "Walk" },
-    });
-    fireEvent.change(screen.getByLabelText("Target"), {
-      target: { value: "12" },
-    });
+    await user.type(screen.getByLabelText("Habit Title"), "Walk");
+    await user.type(screen.getByLabelText("Target"), "{Backspace}2");
+    await user.selectOptions(screen.getByLabelText("Frequency"), "weekly");
+    await user.click(screen.getByRole("button", { name: "Calendar icon" }));
+    await user.click(screen.getByRole("button", { name: "Select Red color" }));
+    await user.click(screen.getByRole("button", { name: "Save Habit" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Save Habit" }));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledTimes(1);
-    });
-
+    expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
+      {
         title: "Walk",
+        iconName: "calendar",
         target: 12,
-      }),
+        accentColor: "red",
+        frequency: "weekly",
+      },
       undefined,
     );
   });
 
   it("submits edit mode with habit id", async () => {
+    const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
     render(
@@ -142,38 +188,85 @@ describe("HabitModal", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledTimes(1);
-    });
+    await user.type(screen.getByLabelText("Habit Title"), " more");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
     expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Read",
+      {
+        title: "Read more",
+        iconName: "book",
         target: 10,
-      }),
+        accentColor: "purple",
+        frequency: "daily",
+      },
       "habit-1",
     );
   });
 
+  it("shows Saving... while the save is in flight", async () => {
+    const user = userEvent.setup();
+    let resolveSave: () => void = () => {};
+    const onSubmit = vi.fn(
+      () => new Promise<void>((resolve) => (resolveSave = resolve)),
+    );
+
+    render(
+      <HabitModal
+        isOpen
+        onClose={vi.fn()}
+        onSubmit={onSubmit}
+        habit={baseHabit}
+        mode="edit"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
+
+    await act(async () => resolveSave());
+  });
+
   it("shows error notification and resets submitting state on submit failure", async () => {
+    const user = userEvent.setup();
     const onSubmit = vi.fn().mockRejectedValue(new Error("Unable to save"));
 
     render(
       <HabitModal isOpen onClose={vi.fn()} onSubmit={onSubmit} mode="add" />,
     );
 
-    fireEvent.change(screen.getByLabelText("Habit Title"), {
-      target: { value: "Meditate" },
-    });
+    await user.type(screen.getByLabelText("Habit Title"), "Meditate");
+    await user.click(screen.getByRole("button", { name: "Save Habit" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Save Habit" }));
-
-    await waitFor(() => {
-      expect(showNotification).toHaveBeenCalledWith("Unable to save", "error");
-    });
-
+    expect(showNotification).toHaveBeenCalledWith("Unable to save", "error");
     expect(screen.getByRole("button", { name: "Save Habit" })).toBeEnabled();
+    expect(screen.getByLabelText("Habit Title")).toHaveValue("Meditate");
+  });
+
+  it("starts afresh each time it opens", async () => {
+    const user = userEvent.setup();
+    const properties = {
+      onClose: vi.fn(),
+      onSubmit: vi.fn().mockResolvedValue(undefined),
+    };
+    const { rerender } = render(
+      <HabitModal {...properties} isOpen habit={baseHabit} mode="edit" />,
+    );
+
+    await user.clear(screen.getByLabelText("Habit Title"));
+    expect(screen.getByText("Title is required")).toBeInTheDocument();
+
+    rerender(<HabitModal {...properties} isOpen={false} mode="add" />);
+    rerender(<HabitModal {...properties} isOpen mode="add" />);
+
+    expect(screen.getByLabelText("Habit Title")).toHaveValue("");
+    expect(screen.getByLabelText("Target")).toHaveValue(10);
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save Habit" })).toBeDisabled();
+
+    rerender(<HabitModal {...properties} isOpen={false} mode="add" />);
+    rerender(<HabitModal {...properties} isOpen habit={baseHabit} mode="edit" />);
+
+    expect(screen.getByLabelText("Habit Title")).toHaveValue("Read");
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
   });
 });
