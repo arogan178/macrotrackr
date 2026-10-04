@@ -38,8 +38,8 @@ function calculateAverageMacros(
 ) {
   if (data.length === 0 && !averagesFromProps) return;
 
-  let avgGrams = { protein: 0, carbs: 0, fats: 0 };
-  let avgConsumedCalories = 0;
+  let avgGrams: { protein: number; carbs: number; fats: number };
+  let avgConsumedCalories: number;
 
   if (averagesFromProps) {
     avgGrams = {

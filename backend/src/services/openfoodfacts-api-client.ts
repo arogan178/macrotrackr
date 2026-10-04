@@ -692,7 +692,6 @@ export class OpenFoodFactsApiClient {
         errorMessage = "No results found";
         break;
       case 429:
-        errorMessage = "Rate limit exceeded. Please try again later.";
         throw new OpenFoodFactsRateLimitError();
       case 500:
       case 502:

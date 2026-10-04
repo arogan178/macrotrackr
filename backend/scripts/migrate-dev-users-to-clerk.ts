@@ -322,7 +322,8 @@ export async function main() {
           throw new Error(
             `Clerk createUser failed (status=${retryMeta.status ?? "?"}, code=${retryMeta.code ?? "?"}): ${
               retryMeta.messages.join(" | ") || String(retryError)
-            }`
+            }`,
+            { cause: retryError }
           );
         }
       }
@@ -330,7 +331,8 @@ export async function main() {
       throw new Error(
         `Clerk createUser failed (status=${meta.status ?? "?"}, code=${meta.code ?? "?"}): ${
           meta.messages.join(" | ") || String(error)
-        }`
+        }`,
+        { cause: error }
       );
     }
   }

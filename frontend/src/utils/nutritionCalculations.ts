@@ -301,10 +301,9 @@ export function generateWeightGoalCalculations(
         : "maintain";
 
   if (weightGoal !== "maintain") {
-    let difference = calorieTarget - tdee;
+    const difference = calorieTarget - tdee;
     if (Math.abs(difference) < 50) {
       calorieTarget = difference >= 0 ? tdee + 50 : tdee - 50;
-      difference = calorieTarget - tdee;
     }
   }
 

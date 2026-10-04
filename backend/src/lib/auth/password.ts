@@ -17,7 +17,7 @@ export async function hashPassword(plaintextPassword: string): Promise<string> {
       },
       "high"
     );
-    throw new Error("Could not hash password."); // Throw a generic error
+    throw new Error("Could not hash password.", { cause: error }); // Throw a generic error
   }
 }
 
