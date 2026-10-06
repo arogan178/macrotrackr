@@ -9,18 +9,20 @@ import cssnano from "cssnano";
 import checker from "vite-plugin-checker";
 import viteCompression from "vite-plugin-compression";
 import { VitePWA } from "vite-plugin-pwa";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// Vendor chunks, split by library for better caching.
+// Vendor chunks, split by library for better caching. Rolldown resolves
+// re-exports straight to the core packages, so those are named too. A group
+// also takes the dependencies nobody claimed first, so recharts stays last or
+// it pulls React and clsx into vendor-charts and onto the first load.
 const vendorChunks = {
   "vendor-react": ["react", "react-dom", "scheduler"],
   "vendor-router": ["@tanstack/react-router"],
-  "vendor-query": ["@tanstack/react-query"],
-  "vendor-charts": ["recharts"],
-  "vendor-motion": ["motion"],
+  "vendor-query": ["@tanstack/react-query", "@tanstack/query-core"],
+  "vendor-motion": ["motion", "framer-motion", "motion-dom", "motion-utils"],
   "vendor-ui": ["lucide-react", "clsx", "tailwind-merge"],
+  "vendor-charts": ["recharts"],
 };
 
 export default defineConfig(({ command, isSsrBuild }) => {
@@ -148,7 +150,6 @@ export default defineConfig(({ command, isSsrBuild }) => {
             }),
           ]
         : []),
-      tsconfigPaths(),
       // Bundle analyzer - generates stats.html in dist folder
       ...(!isSsrBuild
         ? [
@@ -162,6 +163,7 @@ export default defineConfig(({ command, isSsrBuild }) => {
         : []),
     ],
     resolve: {
+      tsconfigPaths: true,
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
@@ -171,12 +173,9 @@ export default defineConfig(({ command, isSsrBuild }) => {
     ssr: { noExternal: true },
     build: {
       target: "esnext",
-      // Use esbuild for minification: much faster and far less memory-hungry than terser.
-      // This reduces V8 heap pressure during production builds on small machines.
-      minify: "esbuild",
       // Disable production sourcemaps to lower memory usage during build.
       sourcemap: false,
-      rollupOptions: isSsrBuild ? {} : {
+      rolldownOptions: isSsrBuild ? {} : {
         output: {
           // Add hash to filenames for cache busting
           entryFileNames: `assets/[name].[hash].js`,
@@ -184,10 +183,17 @@ export default defineConfig(({ command, isSsrBuild }) => {
           assetFileNames: `assets/[name].[hash].[ext]`,
           // Claim every file by path. Naming only package entries let other
           // vendor chunks sweep up React, which put recharts on the first load.
-          manualChunks(id) {
-            return Object.entries(vendorChunks).find(([, packages]) =>
-              packages.some((name) => id.includes(`/node_modules/${name}/`)),
-            )?.[0];
+          codeSplitting: {
+            groups: [
+              ...Object.entries(vendorChunks).map(([name, packages]) => ({
+                name,
+                test: (id: string) =>
+                  packages.some((pkg) => id.includes(`/node_modules/${pkg}/`)),
+              })),
+              // Without this, code shared by the entry and lazy routes lands in
+              // dozens of small chunks that index.html preloads one by one.
+              { name: "app", tags: ["$initial"] },
+            ],
           },
         },
       },
