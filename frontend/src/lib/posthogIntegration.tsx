@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 import { withPostHog } from "./posthogClient";
 
@@ -8,15 +9,40 @@ import { withPostHog } from "./posthogClient";
  * PostHogUserSync
  * - Calls posthog.identify(...) as soon as we have a logged-in user
  * - Sets person properties from the user profile
- * - Calls posthog.reset(true) when the user logs out to avoid mixing sessions
+ * - Calls posthog.reset(true) once there is no session, so the next person on
+ *   this device is not analysed as the last one
  * - Starts and stops session replay, which `main.tsx` leaves off at init so a
  *   marketing visitor never pays for the recorder
  */
 export default function PostHogUserSync(): undefined {
+  const { isLoaded, isSignedIn } = useAppAuthState();
   const { data: user } = useUser({ enabled: true });
   const lastDistinctIdReference = useRef<string | undefined>(undefined);
+  const isSignedOut = isLoaded && !isSignedIn;
 
   useEffect(() => {
+    // Not `user`: logout clears the query cache without re-rendering this
+    // component, so the last profile it saw outlives the session.
+    if (isSignedOut) {
+      lastDistinctIdReference.current = undefined;
+      withPostHog((posthog) => {
+        // PostHog's persisted state rather than the ref, so a reload after
+        // signing out still unlinks the device.
+        if (!posthog._isIdentified()) return;
+        try {
+          // Stop before reset, so the recorder does not keep running against a
+          // device id that no longer maps to anyone.
+          posthog.stopSessionRecording();
+          // reset(true) also resets the device id so future events are treated as new device
+          posthog.reset(true);
+        } catch (error) {
+          console.warn("PostHog reset failed:", error);
+        }
+      });
+
+      return;
+    }
+
     // If we have a user, identify them and set person properties
     if (user) {
       const distinctId = String(user.id);
@@ -49,26 +75,8 @@ export default function PostHogUserSync(): undefined {
           console.warn("PostHog session recording failed to start:", error);
         }
       });
-
-      return;
     }
-
-    // If user is undefined (logged out), reset PostHog to unlink device from user
-    if (lastDistinctIdReference.current) {
-      lastDistinctIdReference.current = undefined;
-      withPostHog((posthog) => {
-        try {
-          // Stop before reset, so the recorder does not keep running against a
-          // device id that no longer maps to anyone.
-          posthog.stopSessionRecording();
-          // reset(true) also resets the device id so future events are treated as new device
-          posthog.reset(true);
-        } catch (error) {
-          console.warn("PostHog reset failed:", error);
-        }
-      });
-    }
-  }, [user]);
+  }, [isSignedOut, user]);
 
   return undefined;
 }
