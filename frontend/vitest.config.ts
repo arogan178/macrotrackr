@@ -3,12 +3,11 @@ import path from 'node:path'
 
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 const { version } = createRequire(import.meta.url)('./package.json')
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react()],
   // Explicit, so the alias does not depend on test files being members of
   // tsconfig.app.json. Excluding them there (which is correct: they need vitest
   // globals the app build must not have) previously broke every `@/` import at
