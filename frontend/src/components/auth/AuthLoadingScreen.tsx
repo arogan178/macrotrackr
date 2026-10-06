@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useIsRestoring } from "@tanstack/react-query";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StateCard from "@/components/ui/StateCard";
@@ -23,6 +24,7 @@ const AUTH_RESOLVE_TIMEOUT_MS = 10_000;
 
 export function AuthLoadingScreen() {
   const isOffline = useIsOffline();
+  const isRestoring = useIsRestoring();
   const [hasTimedOut, setHasTimedOut] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,8 @@ export function AuthLoadingScreen() {
   }, []);
 
   // Offline is knowable immediately; no reason to spin for ten seconds first.
-  const hasGivenUp = isOffline || hasTimedOut;
+  // The saved session may still let an offline launch in, so wait for it.
+  const hasGivenUp = !isRestoring && (isOffline || hasTimedOut);
 
   // Clerk's loader does not retry once it has failed, so the provider stays
   // stuck for the life of the document and only a fresh one recovers. Waiting
