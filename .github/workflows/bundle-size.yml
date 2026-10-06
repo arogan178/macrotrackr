@@ -2,7 +2,7 @@ name: Bundle Size Check
 
 on:
   pull_request:
-    branches: [ develop, main ]
+    branches: [ master ]
     paths:
     - 'frontend/**'
 
@@ -19,8 +19,19 @@ jobs:
       working-directory: frontend
       run: bun install
 
+    # Production build args, so the numbers match what ships. The Clerk and
+    # PostHog keys are inert placeholders: the build only inlines them.
     - name: Build with analysis
       working-directory: frontend
+      env:
+        VITE_AUTH_MODE: clerk
+        VITE_BILLING_MODE: managed
+        VITE_ANALYTICS_MODE: posthog
+        VITE_ENABLE_POSTHOG: "true"
+        VITE_SUPPORT_EMAIL: support@macrotrackr.com
+        VITE_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+        VITE_PUBLIC_POSTHOG_KEY: phc_bundle_size_placeholder
+        VITE_PUBLIC_POSTHOG_HOST: https://us.i.posthog.com
       run: bun run build
 
     - name: Check bundle size
