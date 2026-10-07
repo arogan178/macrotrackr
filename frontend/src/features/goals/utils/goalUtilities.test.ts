@@ -12,6 +12,57 @@ describe("goalUtilities", () => {
       expect(normalizeWeightGoals(null, 150)).toBeUndefined();
     });
 
+    it("returns undefined when the API reports a null targetWeight", () => {
+      expect(
+        normalizeWeightGoals(
+          {
+            startingWeight: 180,
+            currentWeight: 180,
+            targetWeight: null,
+            weightGoal: null,
+            startDate: null,
+            targetDate: null,
+            calorieTarget: null,
+            calculatedWeeks: null,
+            weeklyChange: null,
+            dailyChange: null,
+          },
+          undefined,
+        ),
+      ).toBeUndefined();
+    });
+
+    it("fills defaults for null fields on an API weight goal", () => {
+      expect(
+        normalizeWeightGoals(
+          {
+            startingWeight: 180,
+            currentWeight: null,
+            targetWeight: 160,
+            weightGoal: null,
+            startDate: null,
+            targetDate: null,
+            calorieTarget: null,
+            calculatedWeeks: null,
+            weeklyChange: null,
+            dailyChange: null,
+          },
+          undefined,
+        ),
+      ).toEqual({
+        startingWeight: 180,
+        currentWeight: 180,
+        targetWeight: 160,
+        weightGoal: "maintain",
+        startDate: "",
+        targetDate: "",
+        calorieTarget: 0,
+        calculatedWeeks: 0,
+        weeklyChange: 0,
+        dailyChange: 0,
+      });
+    });
+
     it("returns undefined when only targetWeight is provided", () => {
       const goals = normalizeWeightGoals({ targetWeight: 150 }, 160);
       expect(goals?.targetWeight).toBe(150);
@@ -59,7 +110,7 @@ describe("goalUtilities", () => {
         },
         175,
       );
-      expect(goals?.startingWeight).toBeUndefined();
+      expect(goals?.startingWeight).toBe(160);
     });
   });
 });

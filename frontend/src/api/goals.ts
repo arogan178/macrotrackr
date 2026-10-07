@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, unwrap } from "@/api/core";
 import type { WeightGoalFormValues } from "@/features/goals/types";
 import {
   calculateCalorieTarget,
@@ -7,16 +7,16 @@ import {
 } from "@/utils/nutritionCalculations";
 
 interface SetWeightGoalPayload {
-  startingWeight: number;
-  currentWeight: number | undefined;
-  targetWeight: number | undefined;
-  weightGoal: "lose" | "maintain" | "gain" | undefined;
-  startDate: string | undefined;
-  targetDate: string | undefined;
-  calorieTarget: number | undefined;
-  calculatedWeeks: number | undefined;
-  weeklyChange: number | undefined;
-  dailyChange: number | undefined;
+  startingWeight: number | null;
+  currentWeight: number | null;
+  targetWeight: number | null;
+  weightGoal: "lose" | "maintain" | "gain" | null;
+  startDate: string | null;
+  targetDate: string | null;
+  calorieTarget: number | null;
+  calculatedWeeks: number | null;
+  weeklyChange: number | null;
+  dailyChange: number | null;
 }
 
 interface WeightGoalUpsertPayload {
@@ -40,7 +40,9 @@ export const goalsApi = {
    * @throws {ApiError}
    */
   getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
-    const result = await apiClient.get<SetWeightGoalPayload | null>("/api/goals/weight");
+    const result: SetWeightGoalPayload | null = await unwrap(
+      api.api.goals.weight.get(),
+    );
 
     return result ?? undefined;
   },
@@ -55,7 +57,11 @@ export const goalsApi = {
     const startingWeight = goals.startingWeight ?? 0;
     const targetWeight = goals.targetWeight ?? startingWeight;
     const payload = {
-      ...goals,
+      startingWeight,
+      targetWeight: goals.targetWeight ?? null,
+      weightGoal: goals.weightGoal ?? null,
+      startDate: goals.startDate ?? null,
+      targetDate: goals.targetDate ?? null,
       calorieTarget:
         goals.calorieTarget ??
         calculateCalorieTarget(tdee, startingWeight, targetWeight),
@@ -65,10 +71,10 @@ export const goalsApi = {
       calculatedWeeks:
         goals.calculatedWeeks ??
         calculateWeeksToGoal(startingWeight, targetWeight),
-      dailyChange: goals.dailyChange ?? undefined,
+      dailyChange: goals.dailyChange ?? null,
     };
 
-    return apiClient.post<unknown>("/api/goals/weight", payload);
+    return unwrap(api.api.goals.weight.post(payload));
   },
 
   /**
@@ -90,28 +96,28 @@ export const goalsApi = {
       calculatedWeeks:
         goals.calculatedWeeks ??
         calculateWeeksToGoal(startingWeight, targetWeight),
-      dailyChange: goals.dailyChange ?? undefined,
-      targetWeight: goals.targetWeight,
-      weightGoal: goals.weightGoal,
-      startDate: goals.startDate,
-      targetDate: goals.targetDate,
+      dailyChange: goals.dailyChange ?? null,
+      targetWeight: goals.targetWeight ?? null,
+      weightGoal: goals.weightGoal ?? null,
+      startDate: goals.startDate ?? null,
+      targetDate: goals.targetDate ?? null,
     };
 
-    return apiClient.put<unknown>("/api/goals/weight", payload);
+    return unwrap(api.api.goals.weight.put(payload));
   },
 
   /**
    * @throws {ApiError}
    */
   deleteWeightGoals: async () => {
-    return apiClient.del<unknown>("/api/goals/weight");
+    return unwrap(api.api.goals.weight.delete());
   },
 
   /**
    * @throws {ApiError}
    */
   getWeightLog: async (): Promise<WeightLogEntry[]> => {
-    return apiClient.get<WeightLogEntry[]>("/api/goals/weight-log");
+    return unwrap(api.api.goals["weight-log"].get());
   },
 
   /**
@@ -120,7 +126,9 @@ export const goalsApi = {
   addWeightLogEntry: async (
     payload: AddWeightLogPayload,
   ): Promise<WeightLogEntry> => {
-    const fullEntry = await apiClient.post<WeightLogEntry>("/api/goals/weight-log", payload);
+    const fullEntry = await unwrap(
+      api.api.goals["weight-log"].post(payload),
+    );
 
     return {
       id: fullEntry.id,
@@ -137,10 +145,9 @@ export const goalsApi = {
     timestamp,
     weight,
   }: WeightLogEntry): Promise<WeightLogEntry> => {
-    return apiClient.put<WeightLogEntry>(`/api/goals/weight-log/${id}`, {
-      timestamp,
-      weight,
-    });
+    return unwrap(
+      api.api.goals["weight-log"]({ id }).put({ timestamp, weight }),
+    );
   },
 
   /**
@@ -151,6 +158,6 @@ export const goalsApi = {
   ): Promise<{ success: boolean; id: string }> => {
     const id = typeof idOrParameters === "object" && idOrParameters !== null ? idOrParameters.id : idOrParameters;
 
-    return apiClient.del<{ success: boolean; id: string }>(`/api/goals/weight-log/${id}`);
+    return unwrap(api.api.goals["weight-log"]({ id }).delete());
   },
 };

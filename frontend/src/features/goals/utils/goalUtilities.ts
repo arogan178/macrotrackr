@@ -4,34 +4,41 @@ import { todayISO } from "@/utils/dateUtilities";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 import type { WeightGoalsResponse } from "../types";
 
+// The API returns null for unset fields
+type NullableWeightGoals = { [K in keyof WeightGoals]: WeightGoals[K] | null };
+
 // Type guard to check if goals is already WeightGoals
-const isWeightGoals = (goals: unknown): goals is WeightGoals => {
+const isWeightGoals = (
+  goals: unknown,
+): goals is NullableWeightGoals | WeightGoals => {
   return goals !== null && typeof goals === "object" && "currentWeight" in goals;
 };
 
 // Normalize WeightGoalsResponse or WeightGoals to WeightGoals
 export function normalizeWeightGoals(
-  goals: WeightGoalsResponse | WeightGoals | undefined,
+  goals: NullableWeightGoals | WeightGoalsResponse | WeightGoals | undefined,
   userWeight: number | undefined,
 ): WeightGoals | undefined {
   if (!goals) return undefined;
 
+  if (goals.targetWeight == null) return undefined;
+
   if (isWeightGoals(goals)) {
+    const startingWeight = goals.startingWeight ?? goals.targetWeight;
+
     return {
-      startingWeight: goals.startingWeight,
-      currentWeight: goals.currentWeight,
+      startingWeight,
+      currentWeight: goals.currentWeight ?? startingWeight,
       targetWeight: goals.targetWeight,
-      weightGoal: goals.weightGoal,
-      startDate: goals.startDate,
-      targetDate: goals.targetDate,
-      calorieTarget: goals.calorieTarget,
-      calculatedWeeks: goals.calculatedWeeks,
-      weeklyChange: goals.weeklyChange,
-      dailyChange: goals.dailyChange,
+      weightGoal: goals.weightGoal ?? "maintain",
+      startDate: goals.startDate ?? "",
+      targetDate: goals.targetDate ?? "",
+      calorieTarget: goals.calorieTarget ?? 0,
+      calculatedWeeks: goals.calculatedWeeks ?? 0,
+      weeklyChange: goals.weeklyChange ?? 0,
+      dailyChange: goals.dailyChange ?? 0,
     };
   }
-
-  if (goals.targetWeight === undefined) return undefined;
 
   const starting = goals.startingWeight;
   const target = goals.targetWeight;

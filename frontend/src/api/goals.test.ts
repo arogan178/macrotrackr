@@ -8,7 +8,7 @@ import {
   calculateWeeksToGoal,
 } from "../utils/nutritionCalculations";
 
-import { apiClient } from "./core";
+import { apiClient, ApiError } from "./core";
 import { goalsApi } from "./goals";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
@@ -44,8 +44,8 @@ describe("goalsApi", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/goals/weight",
       expect.objectContaining({
+        method: "GET",
         credentials: "include",
-        headers: {},
       }),
     );
   });
@@ -70,11 +70,15 @@ describe("goalsApi", () => {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({
-          ...goals,
+          startingWeight: 90,
+          targetWeight: 80,
+          weightGoal: "lose",
+          startDate: "2026-04-01",
+          targetDate: "2026-06-01",
           calorieTarget: calculateCalorieTarget(tdee, 90, 80),
           weeklyChange: calculateWeeklyChange(90, 80),
           calculatedWeeks: calculateWeeksToGoal(90, 80),
-          dailyChange: undefined,
+          dailyChange: null,
         }),
       }),
     );
@@ -101,7 +105,7 @@ describe("goalsApi", () => {
           calorieTarget: calculateCalorieTarget(2200, 80, 84),
           weeklyChange: calculateWeeklyChange(80, 84),
           calculatedWeeks: calculateWeeksToGoal(80, 84),
-          dailyChange: undefined,
+          dailyChange: null,
           targetWeight: 84,
           weightGoal: "gain",
           startDate: "2026-04-10",
@@ -109,6 +113,30 @@ describe("goalsApi", () => {
         }),
       }),
     );
+  });
+
+  it("sends null for unset update fields so the backend accepts the body", async () => {
+    fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true }));
+
+    await goalsApi.updateWeightGoal({
+      goals: { startingWeight: 80, targetWeight: 84 },
+      tdee: 2200,
+    });
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(JSON.parse(init?.body as string)).toMatchObject({
+      weightGoal: null,
+      startDate: null,
+      targetDate: null,
+    });
+  });
+
+  it("surfaces a 401 as ApiError", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse({ code: "UNAUTHORIZED", message: "nope" }, { status: 401 }),
+    );
+
+    await expect(goalsApi.getWeightLog()).rejects.toBeInstanceOf(ApiError);
   });
 
   it("deletes weight log entry when passed primitive string id or object parameter", async () => {
