@@ -433,7 +433,8 @@ export default function HomePage() {
                 <AddEntryLoadingSkeleton />
               ) : (
                 <AddEntryForm
-                  key={date}
+                  // Today's key must survive midnight, or a half-typed entry is lost.
+                  key={isToday ? "today" : date}
                   onSubmit={handleAddEntry}
                   isSaving={isSaving}
                   defaultDate={isToday ? undefined : date}

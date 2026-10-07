@@ -122,7 +122,8 @@ vi.mock("@/features/macroTracking/components/AddEntryForm", () => ({
   default: (properties: FormProps) => {
     captured.form = properties;
 
-    return null;
+    // Uncontrolled, so a remount loses what was typed.
+    return <input aria-label="Meal name" />;
   },
 }));
 vi.mock("@/features/macroTracking/components/EntryHistoryPanel", () => ({
@@ -285,6 +286,31 @@ describe("HomePage selected day", () => {
     expect(captured.dailyTotals).toHaveBeenCalledWith("2026-09-20");
     expect(captured.summary!.date).toBe("2026-09-20");
     expect(captured.form!.defaultDate).toBe("2026-09-20");
+  });
+
+  it("keeps a half-typed entry when today rolls over at midnight", () => {
+    captured.homeDate = {
+      date: "2026-09-25",
+      today: "2026-09-25",
+      oldestDate: undefined,
+      isToday: true,
+    };
+    const { rerender } = render(<HomePage />);
+    fireEvent.change(screen.getByLabelText("Meal name"), {
+      target: { value: "Late toast" },
+    });
+
+    captured.homeDate = {
+      date: "2026-09-26",
+      today: "2026-09-26",
+      oldestDate: undefined,
+      isToday: true,
+    };
+    rerender(<HomePage />);
+
+    expect(captured.dailyTotals).toHaveBeenLastCalledWith("2026-09-26");
+    expect(screen.getByLabelText("Meal name")).toHaveValue("Late toast");
+    expect(captured.form!.defaultDate).toBeUndefined();
   });
 
   it("puts the day in the URL, and drops it for today", () => {
