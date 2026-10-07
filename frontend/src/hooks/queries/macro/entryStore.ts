@@ -305,7 +305,16 @@ export async function clearSignedOutAccount(): Promise<void> {
   closeEntryStore();
   localStorage.removeItem(DEVICE_ACCOUNT_KEY);
   if (userId !== undefined) {
-    await new IndexedDBAdapter(outboxName(userId), "transactions").clear();
+    try {
+      await new IndexedDBAdapter(outboxName(userId), "transactions").clear();
+    } catch (error) {
+      // IndexedDB can be missing or blocked (some private modes); sign-out must still finish.
+      console.error("Could not clear the on-device outbox", error);
+    }
   }
-  await queryCachePersister.removeClient();
+  try {
+    await queryCachePersister.removeClient();
+  } catch (error) {
+    console.error("Could not clear the on-device query cache", error);
+  }
 }
