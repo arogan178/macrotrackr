@@ -10,11 +10,6 @@ import { queryKeys } from "@/lib/queryKeys";
 import { clearBiometricCredentials } from "@/services/biometrics";
 import { removeToken } from "@/utils/tokenStorage";
 
-interface ResetPasswordData {
-  token: string;
-  newPassword: string;
-}
-
 interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
@@ -70,21 +65,6 @@ export function useLogout() {
       navigate({ to: "/" });
     },
     onError: logLogoutError,
-  });
-}
-
-export function useResetPassword() {
-  const navigate = useNavigate();
-  const logResetPasswordError = createMutationErrorLogger("Password reset failed");
-
-  return useMutation({
-    mutationFn: async (data: ResetPasswordData): Promise<void> => {
-      await authApi.resetPassword(data);
-    },
-    onSuccess: () => {
-      navigate({ to: "/login", search: { returnTo: undefined } });
-    },
-    onError: logResetPasswordError,
   });
 }
 

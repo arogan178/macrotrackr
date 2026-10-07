@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm, useStore as useFormStore } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,8 +24,6 @@ export function LocalSignInForm({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showNotification } = useStore();
-
-  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const form = useForm({
     defaultValues: { email: "", password: "", enableBiometrics: false },
@@ -68,35 +65,6 @@ export function LocalSignInForm({
     },
   });
   const isSubmitting = useFormStore(form.store, (state) => state.isSubmitting);
-
-  async function handleForgotPassword() {
-    const normalizedEmail = form.getFieldValue("email").trim().toLowerCase();
-    if (!normalizedEmail) {
-      showNotification(
-        "Enter your email first to request a reset link.",
-        "info",
-      );
-
-      return;
-    }
-
-    setIsSendingReset(true);
-    try {
-      await authApi.forgotPassword({ email: normalizedEmail });
-      showNotification(
-        "If this email exists, a password reset link has been sent.",
-        "success",
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Could not request a password reset.";
-      showNotification(message, "error");
-    } finally {
-      setIsSendingReset(false);
-    }
-  }
 
   return (
     <div className="w-full">
@@ -151,11 +119,15 @@ export function LocalSignInForm({
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={handleForgotPassword}
-            disabled={isSendingReset}
-            className="inline-flex min-h-11 items-center rounded-control px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-60"
+            onClick={() =>
+              navigate({
+                to: "/reset-password",
+                search: { returnTo: redirectTo },
+              })
+            }
+            className="inline-flex min-h-11 items-center rounded-control px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
-            {isSendingReset ? "Sending..." : "Forgot password?"}
+            Forgot password?
           </button>
         </div>
 

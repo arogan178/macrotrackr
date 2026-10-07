@@ -45,10 +45,6 @@ export function useClerkLogout() {
   return requireRegistered().queries.useLogout();
 }
 
-export function useClerkResetPassword() {
-  return requireRegistered().queries.useResetPassword();
-}
-
 export function useClerkChangePassword() {
   return requireRegistered().queries.useChangePassword();
 }

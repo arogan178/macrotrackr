@@ -7,8 +7,8 @@ describe("auth schemas", () => {
       expect(AuthSchemas).toBeDefined();
     });
 
-    it("should have resetPassword schema", () => {
-      expect(AuthSchemas.resetPassword).toBeDefined();
+    it("should have changePassword schema", () => {
+      expect(AuthSchemas.changePassword).toBeDefined();
     });
   });
 });

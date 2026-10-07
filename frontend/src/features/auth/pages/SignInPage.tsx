@@ -31,10 +31,7 @@ export default function SignInPage() {
               navigate({ to: "/register", search: returnToSearch })
             }
             onForgotPassword={() =>
-              navigate({
-                to: "/reset-password",
-                search: { ...returnToSearch, token: undefined },
-              })
+              navigate({ to: "/reset-password", search: returnToSearch })
             }
             redirectTo={returnTo}
           />

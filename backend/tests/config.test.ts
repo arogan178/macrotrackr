@@ -17,9 +17,7 @@ const requiredEnv: Record<string, string> = {
   AUTH_MODE: "clerk",
   BILLING_MODE: "managed",
   ANALYTICS_MODE: "disabled",
-  EMAIL_MODE: "disabled",
   APP_URL: "http://localhost:5173",
-  PUBLIC_APP_NAME: "MacroTrackr",
   SUPPORT_EMAIL: "support@local.invalid",
   ENABLE_METRICS: "false",
   STRIPE_SECRET_KEY: "sk_test_123",
@@ -43,7 +41,6 @@ const managedKeys = [
   "ANALYTICS_MODE",
   "EMAIL_MODE",
   "APP_URL",
-  "PUBLIC_APP_NAME",
   "SUPPORT_EMAIL",
   "ENABLE_METRICS",
   "STRIPE_SECRET_KEY",
@@ -122,9 +119,7 @@ describe("config", () => {
     expect(config.AUTH_MODE).toBe("clerk");
     expect(config.BILLING_MODE).toBe("managed");
     expect(config.ANALYTICS_MODE).toBe("disabled");
-    expect(config.EMAIL_MODE).toBe("disabled");
     expect(config.APP_URL).toBe("http://localhost:5173");
-    expect(config.PUBLIC_APP_NAME).toBe("MacroTrackr");
     expect(config.SUPPORT_EMAIL).toBe("support@local.invalid");
     expect(config.ENABLE_METRICS).toBe(false);
     expect(config.CORS_ORIGIN).toBe("http://localhost:5173");
@@ -175,7 +170,6 @@ describe("config", () => {
         APP_URL: "not-a-url",
         SUPPORT_EMAIL: "not-an-email",
         POSTHOG_HOST: "not-a-url",
-        SMTP_FROM: "not-an-email",
         PORT: "abc",
         BILLING_MODE: "bogus",
       }),
@@ -189,7 +183,6 @@ describe("config", () => {
         APP_URL: ["APP_URL must be a valid URL"],
         SUPPORT_EMAIL: ["SUPPORT_EMAIL must be a valid email"],
         POSTHOG_HOST: ["POSTHOG_HOST must be a valid URL"],
-        SMTP_FROM: ["SMTP_FROM must be a valid email"],
       },
     );
   });
@@ -235,28 +228,24 @@ describe("config", () => {
     );
   });
 
-  it("allows self-hosted local mode without Clerk/Stripe/Resend secrets", async () => {
+  it("allows self-hosted local mode without Clerk/Stripe secrets", async () => {
     const { config } = await loadConfigModule({
       APP_MODE: "self-hosted",
       AUTH_MODE: "local",
       BILLING_MODE: "disabled",
-      EMAIL_MODE: "disabled",
       CLERK_PUBLISHABLE_KEY: undefined,
       CLERK_SECRET_KEY: undefined,
       STRIPE_SECRET_KEY: undefined,
       STRIPE_WEBHOOK_SECRET: undefined,
       STRIPE_PRICE_ID_MONTHLY: undefined,
       STRIPE_PRICE_ID_YEARLY: undefined,
-      RESEND_API_KEY: undefined,
     });
 
     expect(config.APP_MODE).toBe("self-hosted");
     expect(config.AUTH_MODE).toBe("local");
     expect(config.BILLING_MODE).toBe("disabled");
-    expect(config.EMAIL_MODE).toBe("disabled");
     expect(config.CLERK_PUBLISHABLE_KEY).toBeUndefined();
     expect(config.STRIPE_SECRET_KEY).toBeUndefined();
-    expect(config.RESEND_API_KEY).toBeUndefined();
   });
 
   it("requires Clerk keys when AUTH_MODE=clerk", async () => {
@@ -278,52 +267,17 @@ describe("config", () => {
     );
   });
 
-  it("requires Resend key when EMAIL_MODE=resend", async () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+  it("ignores retired email settings left in an existing .env", async () => {
+    const { config } = await loadConfigModule({
+      EMAIL_MODE: "resend",
+      RESEND_API_KEY: "re_live_key",
+      SMTP_PORT: "not-a-port",
+      SMTP_FROM: "not-an-email",
+    });
 
-    await expect(
-      loadConfigModule({
-        EMAIL_MODE: "resend",
-        RESEND_API_KEY: undefined,
-      }),
-    ).rejects.toThrow("Invalid environment variables");
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Invalid environment variables:",
-      expect.objectContaining({
-        RESEND_API_KEY: expect.any(Array),
-      }),
-    );
-  });
-
-  it("requires SMTP values when EMAIL_MODE=smtp", async () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    await expect(
-      loadConfigModule({
-        EMAIL_MODE: "smtp",
-        SMTP_HOST: undefined,
-        SMTP_PORT: undefined,
-        SMTP_USER: undefined,
-        SMTP_PASS: undefined,
-        SMTP_FROM: undefined,
-      }),
-    ).rejects.toThrow("Invalid environment variables");
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Invalid environment variables:",
-      expect.objectContaining({
-        SMTP_HOST: expect.any(Array),
-        SMTP_PORT: expect.any(Array),
-        SMTP_USER: expect.any(Array),
-        SMTP_PASS: expect.any(Array),
-        SMTP_FROM: expect.any(Array),
-      }),
-    );
+    expect(config.AUTH_MODE).toBe("clerk");
+    expect(Object.keys(config)).not.toContain("EMAIL_MODE");
+    expect(Object.keys(config)).not.toContain("RESEND_API_KEY");
   });
 
   it("requires PostHog settings when ANALYTICS_MODE=posthog", async () => {

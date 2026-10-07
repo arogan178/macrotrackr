@@ -15,7 +15,7 @@ const { navigate, showNotification } = vi.hoisted(() => ({
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
 vi.mock("@/store/store", () => ({ useStore: () => ({ showNotification }) }));
 vi.mock("@/api/auth", () => ({
-  authApi: { login: vi.fn(), forgotPassword: vi.fn() },
+  authApi: { login: vi.fn() },
 }));
 // Native so the biometric opt-in renders; no stored credentials, so the
 // biometric sign-in button stays hidden.
@@ -116,28 +116,16 @@ describe("LocalSignInForm", () => {
     expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
   });
 
-  it("asks for an email before sending a reset link, then sends it", async () => {
+  it("sends Forgot password to the reset help page without calling the API", async () => {
     const user = userEvent.setup();
-    vi.mocked(authApi.forgotPassword).mockResolvedValue({} as never);
     renderForm();
-    const forgot = screen.getByRole("button", { name: "Forgot password?" });
 
-    await user.click(forgot);
-    expect(showNotification).toHaveBeenCalledWith(
-      "Enter your email first to request a reset link.",
-      "info",
-    );
-    expect(authApi.forgotPassword).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Forgot password?" }));
 
-    await user.type(screen.getByLabelText("Email"), "Sam@Example.com");
-    await user.click(forgot);
-
-    expect(authApi.forgotPassword).toHaveBeenCalledWith({
-      email: "sam@example.com",
+    expect(navigate).toHaveBeenCalledWith({
+      to: "/reset-password",
+      search: { returnTo: undefined },
     });
-    expect(showNotification).toHaveBeenLastCalledWith(
-      "If this email exists, a password reset link has been sent.",
-      "success",
-    );
+    expect(authApi.login).not.toHaveBeenCalled();
   });
 });

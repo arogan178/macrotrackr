@@ -7,8 +7,6 @@ import { logger } from "../lib/observability/logger";
 const LOCAL_AUTH_EXEMPT_PATHS = new Set([
   "/api/auth/register",
   "/api/auth/login",
-  "/api/auth/forgot-password",
-  "/api/auth/reset-password",
   "/api/auth/session",
   "/api/auth/clerk-sync",
   "/api/docs",

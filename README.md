@@ -30,13 +30,14 @@ Expected behavior:
 - Session transport via `mt_session` secure cookie + DB-backed sessions
 - Billing routes unmounted (`404` by absence)
 - Billing UI hidden
+- No email. A forgotten password is reset on the server with `bun run reset-password <email>` (see [docs/self-hosting.md](docs/self-hosting.md#resetting-a-forgotten-password))
 
 ## Environment Contracts
 
 Backend canonical variables:
 
-- `ANALYTICS_MODE`, `EMAIL_MODE`
-- `APP_URL`, `PUBLIC_APP_NAME`, `SUPPORT_EMAIL`
+- `ANALYTICS_MODE`
+- `APP_URL`, `SUPPORT_EMAIL`
 - `ENABLE_METRICS`
 
 Frontend optional branding/public link variables:
@@ -50,7 +51,6 @@ Frontend optional branding/public link variables:
 Provider env vars are only required when corresponding modes are enabled:
 
 - PostHog keys only when `ANALYTICS_MODE=posthog`
-- Resend/SMTP keys only when `EMAIL_MODE=resend|smtp`
 
 Reference templates:
 

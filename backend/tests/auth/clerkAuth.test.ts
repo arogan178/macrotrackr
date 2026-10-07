@@ -25,7 +25,6 @@ describe("isExemptPath", () => {
     expect(isExemptPath("/")).toBe(true);
     expect(isExemptPath("/health")).toBe(true);
     expect(isExemptPath("/health/ready")).toBe(true);
-    expect(isExemptPath("/api/auth/reset-password")).toBe(true);
     expect(isExemptPath("/api/billing/webhook")).toBe(true);
   });
 
@@ -45,8 +44,8 @@ describe("isExemptPath", () => {
   });
 
   it("is path-sensitive", () => {
-    expect(isExemptPath("/api/auth/reset-password?token=abc")).toBe(false);
-    expect(isExemptPath("/API/AUTH/RESET-PASSWORD")).toBe(false);
+    expect(isExemptPath("/api/billing/webhook?token=abc")).toBe(false);
+    expect(isExemptPath("/API/BILLING/WEBHOOK")).toBe(false);
     expect(isExemptPath("api/docs")).toBe(false);
     expect(isExemptPath("")).toBe(false);
   });

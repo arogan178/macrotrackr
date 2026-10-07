@@ -154,8 +154,6 @@ export const rateLimit = (limitConfig: RateLimitConfig) => {
 const SENSITIVE_AUTH_PATHS = new Set([
   "/api/auth/login",
   "/api/auth/register",
-  "/api/auth/forgot-password",
-  "/api/auth/reset-password",
   "/api/auth/change-password",
 ]);
 

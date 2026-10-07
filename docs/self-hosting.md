@@ -108,21 +108,30 @@ docker compose up -d
 | `AUTH_MODE` | `local` | Use `local` for built-in database auth |
 | `BILLING_MODE` | `disabled` | Set to `disabled` for self-hosted instances |
 | `ANALYTICS_MODE`| `disabled` | Set to `disabled` for zero telemetry |
-| `EMAIL_MODE` | `disabled` | Set to `disabled`, `smtp`, or `resend` |
 | `ENABLE_METRICS`| `false` | Enable Prometheus `/metrics` endpoint |
 | `METRICS_API_KEY` | *(optional)* | Shared secret for securing `/metrics` endpoint |
 
-### SMTP Configuration (Optional)
+MacroTrackr does not send email. Earlier versions documented `EMAIL_MODE`, `RESEND_API_KEY` and `SMTP_*`; they are no longer read, so you can delete them from your `.env`.
 
-If `EMAIL_MODE=smtp` is enabled:
+---
 
-| Variable | Description |
-| :--- | :--- |
-| `SMTP_HOST` | SMTP server hostname |
-| `SMTP_PORT` | SMTP server port (e.g., `587` or `465`) |
-| `SMTP_USER` | SMTP authentication username |
-| `SMTP_PASS` | SMTP authentication password |
-| `SMTP_FROM` | Sender email address (`noreply@yourdomain.com`) |
+## Resetting a Forgotten Password
+
+Anyone with shell access to the server can reset a user's password. With the root `docker-compose.yml`:
+
+```bash
+docker compose exec backend bun run reset-password user@example.com
+```
+
+On other platforms, run it in the backend container. The CasaOS, Cosmos and TrueNAS templates name it `macrotrackr-backend`; `docker ps` lists the name elsewhere.
+
+```bash
+docker exec macrotrackr-backend bun run reset-password user@example.com
+```
+
+The command prints a temporary password and signs the user out of every device. Pass the password on privately. The user signs in with it and sets a new one in **Settings**. The email match ignores case. An unknown email exits with an error and changes nothing.
+
+The command only works with `AUTH_MODE=local`. With `AUTH_MODE=clerk`, Clerk holds the passwords.
 
 ---
 

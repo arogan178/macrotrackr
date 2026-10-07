@@ -19,16 +19,6 @@ export const AuthSchemas = {
     password: PasswordSchema,
   }),
 
-  forgotPassword: t.Object({
-    email: EmailSchema,
-  }),
-
-  // Schema for resetting a password with a token
-  resetPassword: t.Object({
-    token: t.String(),
-    newPassword: PasswordSchema,
-  }),
-
   changePassword: t.Object({
     currentPassword: PasswordSchema,
     newPassword: PasswordSchema,
