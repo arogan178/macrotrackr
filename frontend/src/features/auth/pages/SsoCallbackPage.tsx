@@ -271,6 +271,7 @@ function ClerkSsoCallbackPage() {
         navigate({
           to: "/profile-setup",
           search: { redirectTo: safeRedirectTo },
+          replace: true,
         });
       } catch (error_) {
         logger.error("SSO callback routing error:", error_);
