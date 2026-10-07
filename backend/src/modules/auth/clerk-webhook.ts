@@ -34,11 +34,12 @@ function verifyWebhookSignature(request: Request, payload: string): ClerkWebhook
   }
 
   const webhook = new SvixWebhook(secret);
-  return webhook.verify(payload, {
+  webhook.verify(payload, {
     "svix-id": svixId,
     "svix-timestamp": svixTimestamp,
     "svix-signature": svixSignature,
-  }) as ClerkWebhookEvent;
+  });
+  return JSON.parse(payload) as ClerkWebhookEvent;
 }
 
 function getPrimaryEmail(event: ClerkWebhookEvent): string | undefined {
