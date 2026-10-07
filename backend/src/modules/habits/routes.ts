@@ -67,7 +67,7 @@ function toHabitResponse(habit: HabitRow, date: string) {
     frequency: habit.frequency,
     isComplete: isCurrentPeriod && Boolean(habit.is_complete),
     createdAt: habit.created_at,
-    completedAt: isCurrentPeriod ? habit.completed_at : null,
+    completedAt: (isCurrentPeriod ? habit.completed_at : null) ?? undefined,
   };
 }
 
@@ -204,7 +204,7 @@ export const habitRoutes = new Elysia({ prefix: "/api/habits" })
             frequency,
             isComplete,
             createdAt,
-            completedAt,
+            completedAt: completedAt ?? undefined,
           };
         },
         {
@@ -325,7 +325,7 @@ export const habitRoutes = new Elysia({ prefix: "/api/habits" })
             frequency,
             isComplete,
             createdAt,
-            completedAt: completedAt ?? null,
+            completedAt: completedAt ?? undefined,
           };
         },
         {

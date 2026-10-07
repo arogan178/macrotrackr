@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, unwrap } from "@/api/core";
 import { isLocalAuthMode } from "@/config/runtime";
 import type { Ingredient, MealType } from "@/types/macro";
 
@@ -9,7 +9,6 @@ export interface SavedMeal {
   protein: number;
   carbs: number;
   fats: number;
-  calories: number;
   ingredients: Ingredient[];
   createdAt: string;
   updatedAt?: string;
@@ -33,28 +32,29 @@ export interface CreateSavedMealPayload {
 
 export type UpdateSavedMealPayload = Partial<CreateSavedMealPayload>;
 
+// The backend types ingredients as unknown[]; it stores what the client sent.
+const toSavedMeal = (meal: Omit<SavedMeal, "ingredients"> & { ingredients: unknown[] }) =>
+  ({ ...meal, ingredients: meal.ingredients as Ingredient[] }) satisfies SavedMeal;
+
 export const savedMealsApi = {
   /**
    * @throws {ApiError}
    */
   getAll: async (): Promise<SavedMealsResponse> => {
-    const response = await apiClient.get<SavedMealsResponse>("/api/saved-meals");
+    const { meals, ...rest } = await unwrap(api.api["saved-meals"].get());
 
-    if (isLocalAuthMode) {
-      return {
-        ...response,
-        isPro: true,
-      };
-    }
-
-    return response;
+    return {
+      ...rest,
+      meals: meals.map(toSavedMeal),
+      isPro: isLocalAuthMode || rest.isPro,
+    };
   },
 
   /**
    * @throws {ApiError}
    */
   create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
-    return apiClient.post<SavedMeal>("/api/saved-meals", payload);
+    return toSavedMeal(await unwrap(api.api["saved-meals"].post(payload)));
   },
 
   /**
@@ -64,13 +64,13 @@ export const savedMealsApi = {
     id: number,
     payload: UpdateSavedMealPayload,
   ): Promise<SavedMeal> => {
-    return apiClient.put<SavedMeal>(`/api/saved-meals/${id}`, payload);
+    return toSavedMeal(await unwrap(api.api["saved-meals"]({ id }).put(payload)));
   },
 
   /**
    * @throws {ApiError}
    */
   delete: async (id: number): Promise<{ success: boolean; id: number }> => {
-    return apiClient.del<{ success: boolean; id: number }>(`/api/saved-meals/${id}`);
+    return unwrap(api.api["saved-meals"]({ id }).delete());
   },
 };

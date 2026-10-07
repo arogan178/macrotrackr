@@ -46,8 +46,8 @@ interface SavedMealResponse {
   protein: number;
   carbs: number;
   fats: number;
-  mealType: string;
-  ingredients?: unknown[];
+  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  ingredients: unknown[];
   createdAt: string;
   updatedAt: string;
 }
@@ -80,10 +80,15 @@ const SavedMealSchemas = {
     protein: t.Number(),
     carbs: t.Number(),
     fats: t.Number(),
-    mealType: t.String(),
+    mealType: t.Union([
+      t.Literal("breakfast"),
+      t.Literal("lunch"),
+      t.Literal("dinner"),
+      t.Literal("snack"),
+    ]),
     createdAt: t.String(),
     updatedAt: t.String(),
-    ingredients: t.Optional(t.Array(t.Unknown())),
+    ingredients: t.Array(t.Unknown()),
   }),
 
   createSavedMealBody: t.Object({

@@ -24,7 +24,6 @@ const StringRequired = t.String({ minLength: 1 });
 const PositiveNumber = t.Number({ minimum: 0 });
 const DateString = t.String({ format: "date-time" });
 const DateStringOrNull = t.Nullable(t.String({ format: "date-time" }));
-const BooleanOrNull = t.Nullable(t.Boolean());
 // The user's local day. A strict pattern because progress matches on the exact string.
 const LocalDate = t.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" });
 
@@ -42,7 +41,7 @@ export const HabitSchemas = {
     frequency: Frequency,
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
-    completedAt: t.Optional(DateStringOrNull),
+    completedAt: t.Optional(DateString),
   }),
 
   getHabitsQuery: t.Object({
@@ -72,7 +71,7 @@ export const HabitSchemas = {
       frequency: Frequency,
       isComplete: t.Optional(t.Boolean()),
       createdAt: DateString,
-      completedAt: t.Optional(DateStringOrNull),
+      completedAt: t.Optional(DateString),
     })
   ),
 
@@ -101,9 +100,9 @@ export const HabitSchemas = {
     progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
     frequency: Frequency,
-    isComplete: t.Optional(BooleanOrNull),
+    isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,
-    completedAt: t.Optional(DateStringOrNull),
+    completedAt: t.Optional(DateString),
   }),
 
   // Schema for PUT /api/habits/:id request body
@@ -131,7 +130,7 @@ export const HabitSchemas = {
     frequency: Frequency,
     isComplete: t.Boolean(),
     createdAt: DateString,
-    completedAt: t.Optional(DateStringOrNull),
+    completedAt: t.Optional(DateString),
   }),
 
   // Schema for response after deleting a habit

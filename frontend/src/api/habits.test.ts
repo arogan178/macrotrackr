@@ -37,10 +37,7 @@ describe("habitsApi", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/habits?date=2026-09-25",
-      expect.objectContaining({
-        credentials: "include",
-        headers: {},
-      }),
+      expect.objectContaining({ method: "GET", credentials: "include" }),
     );
   });
 
