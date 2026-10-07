@@ -39,6 +39,7 @@ describe("billingApi", () => {
           currentPeriodEnd: "2026-05-01T00:00:00.000Z",
           provider: "stripe" as const,
           providerSubscriptionId: "sub_stripe",
+          cancelAtPeriodEnd: false,
         },
         stripeDetails: null,
       }),
@@ -51,10 +52,7 @@ describe("billingApi", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/billing/details",
-      expect.objectContaining({
-        credentials: "include",
-        headers: {},
-      }),
+      expect.objectContaining({ method: "GET", credentials: "include" }),
     );
   });
 
@@ -73,7 +71,6 @@ describe("billingApi", () => {
       expect.objectContaining({
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
       }),
     );
   });

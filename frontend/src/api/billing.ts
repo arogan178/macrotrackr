@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, unwrap } from "@/api/core";
 
 export interface BillingSubscriptionDetails {
   id: string;
@@ -61,16 +61,14 @@ export const billingApi = {
    * @throws {ApiError}
    */
   getCapabilities: async (): Promise<BillingCapabilitiesResponse> => {
-    return apiClient.get<BillingCapabilitiesResponse>(
-      "/api/billing/capabilities",
-    );
+    return unwrap(api.api.billing.capabilities.get());
   },
 
   /**
    * @throws {ApiError}
    */
   getBillingDetails: async (): Promise<BillingDetailsResponse> => {
-    return apiClient.get<BillingDetailsResponse>("/api/billing/details");
+    return unwrap(api.api.billing.details.get());
   },
 
   /**
@@ -80,9 +78,7 @@ export const billingApi = {
    * @throws {ApiError}
    */
   getPlayAccountToken: async (): Promise<{ accountToken: string }> => {
-    return apiClient.get<{ accountToken: string }>(
-      "/api/billing/play/account-token",
-    );
+    return unwrap(api.api.billing.play["account-token"].get());
   },
 
   /**
@@ -95,16 +91,14 @@ export const billingApi = {
   verifyPlayPurchase: async (
     purchaseToken: string,
   ): Promise<PlayVerifyResponse> => {
-    return apiClient.post<PlayVerifyResponse>("/api/billing/play/verify", {
-      purchaseToken,
-    });
+    return unwrap(api.api.billing.play.verify.post({ purchaseToken }));
   },
 
   /**
    * @throws {ApiError}
    */
   cancelSubscription: async (): Promise<BillingCancelResponse> => {
-    return apiClient.post<BillingCancelResponse>("/api/billing/cancel");
+    return unwrap(api.api.billing.cancel.post());
   },
 
   /**
@@ -115,17 +109,15 @@ export const billingApi = {
     cancelUrl,
     plan = "monthly",
   }: CheckoutSessionPayload): Promise<BillingCheckoutSessionResponse> => {
-    return apiClient.post<BillingCheckoutSessionResponse>("/api/billing/checkout", {
-      successUrl,
-      cancelUrl,
-      plan,
-    });
+    return unwrap(
+      api.api.billing.checkout.post({ successUrl, cancelUrl, plan }),
+    );
   },
 
   /**
    * @throws {ApiError}
    */
   createPortalSession: async ({ returnUrl }: { returnUrl: string }): Promise<BillingPortalSessionResponse> => {
-    return apiClient.post<BillingPortalSessionResponse>("/api/billing/portal", { returnUrl });
+    return unwrap(api.api.billing.portal.post({ returnUrl }));
   },
 };
