@@ -75,9 +75,7 @@ function normalizeSubscriptionStatus(
   return "free";
 }
 
-export const userRoutes = (app: Elysia) =>
-  app.group("/api/user", (group) =>
-    group
+export const userRoutes = new Elysia({ prefix: "/api/user" })
       // GET /me - Get current user details
       .get(
         "/me",
@@ -582,5 +580,4 @@ export const userRoutes = (app: Elysia) =>
             tags: ["User"],
           },
         },
-      ),
-  );
+      );

@@ -179,9 +179,7 @@ function resolveBillingUser(context: BillingRouteContext) {
   };
 }
 
-export const billingRoutes = (app: Elysia) =>
-  app.group("/api/billing", (group) =>
-    group
+export const billingRoutes = new Elysia({ prefix: "/api/billing" })
       // Get detailed billing/subscription info
       .get(
         "/details",
@@ -662,5 +660,4 @@ export const billingRoutes = (app: Elysia) =>
             tags: ["Billing"],
           },
         },
-      ),
-  );
+      );

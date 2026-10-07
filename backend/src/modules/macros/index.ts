@@ -2,7 +2,7 @@
  * Macros module public API.
  */
 
-export { registerMacroEntryRoutes } from "./entry-routes";
+export { macroEntryRoutes } from "./entry-routes";
 export { macroRoutes } from "./routes";
 export {
   normalizeMacroEntryRow,
@@ -12,6 +12,6 @@ export {
   type MacroHistorySummaryItem,
   type MacrosRouteContext,
 } from "./service";
-export { registerMacroSearchRoutes } from "./search-routes";
+export { macroSearchRoutes } from "./search-routes";
 export { MacroSchemas, type MacroTargetPercentages } from "./schemas";
-export { registerMacroTargetRoutes } from "./target-routes";
+export { macroTargetRoutes } from "./target-routes";

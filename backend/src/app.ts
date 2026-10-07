@@ -107,11 +107,7 @@ function recordRequestTiming(context: unknown): void {
   recordRequest(request.method, path, statusCode, duration);
 }
 
-function configureSwaggerDocs(app: Elysia): void {
-  if (config.NODE_ENV === "production") {
-    return;
-  }
-
+function swaggerDocs(app: Elysia) {
   app.use(
     swagger({
       path: "/api/docs",
@@ -126,7 +122,7 @@ function configureSwaggerDocs(app: Elysia): void {
   );
 
   // Alias for Swagger UI bug: serve /api/api/docs/json as /api/docs/json
-  app.get("/api/api/docs/json", ({ set }) => {
+  return app.get("/api/api/docs/json", ({ set }) => {
     set.status = 302;
     set.headers = {};
     set.headers["Location"] = "/api/docs/json";
@@ -247,82 +243,11 @@ function handleGlobalError({ code, error, set, path }: ErrorHandlerContext) {
   return buildUnexpectedErrorPayload(errorCode, error, statusCode);
 }
 
-function registerCoreRoutes(app: Elysia, db: Database): void {
+export function createApp(db: Database) {
   const withClerk = isClerkAuthMode();
   const withManagedBilling = isManagedBillingMode();
 
-  const core = app
-    // Context decorators (add early for webhook access)
-    .decorate("db", db);
-
-  if (withManagedBilling) {
-    // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
-    core.use(webhookHandler);
-  }
-
-  if (isPlayBillingEnabled()) {
-    // Play notifications have their own switch: an Android release does not
-    // require Stripe to be configured, and mounting this under the Stripe
-    // flag would silently drop every renewal and cancellation.
-    core.use(playWebhookHandler);
-  }
-
-  if (withClerk) {
-    // Clerk webhook handler (NO AUTH) - handles user sync from Clerk
-    core.use(clerkWebhookHandler);
-  }
-
-  core
-
-    // Health check routes (public, no auth) - BEFORE auth middleware
-    .use(healthRoutes)
-
-    // Metrics endpoint (public, no auth) - Prometheus-compatible - BEFORE auth
-    .use(metricsRoutes)
-
-    // Apply middleware after webhook routes to avoid body consumption conflicts
-    .onRequest(({ set }) => {
-      set.headers["Cache-Control"] =
-        "no-store, no-cache, must-revalidate, proxy-revalidate";
-      set.headers["Pragma"] = "no-cache";
-      set.headers["Expires"] = "0";
-    })
-    .use(correlationMiddleware)
-    .use(enhancedApiLogging)
-
-    // Apply rate limiting (strict bucket for credential endpoints first)
-    .use(rateLimiters.auth)
-    .use(rateLimiters.api);
-
-  if (withClerk) {
-    // Apply Clerk auth middleware globally (it has path exemptions built-in)
-    // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
-    core.use(clerkAuthMiddleware);
-  } else {
-    // In local mode, use DB-backed sessions for protected routes.
-    core.use(localAuthMiddleware);
-  }
-
-  core
-    // Public auth routes
-    .use(authRoutes)
-
-    // All other routes
-    .use(userRoutes)
-    .use(macroRoutes)
-    .use(goalRoutes)
-    .use(habitRoutes)
-    .use(reportingRoutes)
-    .use(savedMealRoutes)
-    .use(syncRoutes);
-
-  if (withManagedBilling) {
-    core.use(billingRoutes);
-  }
-}
-
-export function createApp(db: Database) {
-  const app = new Elysia()
+  return new Elysia()
     // Baseline security response headers
     .use(securityHeadersMiddleware)
 
@@ -387,14 +312,70 @@ export function createApp(db: Database) {
         allowedHeaders: ["Content-Type", "Authorization"],
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
       })
+    )
+
+    .use(config.NODE_ENV === "production" ? undefined : swaggerDocs)
+
+    // Context decorators (add early for webhook access)
+    .decorate("db", db)
+
+    // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
+    .use(withManagedBilling ? webhookHandler : undefined)
+
+    // Play notifications have their own switch: an Android release does not
+    // require Stripe to be configured, and mounting this under the Stripe
+    // flag would silently drop every renewal and cancellation.
+    .use(isPlayBillingEnabled() ? playWebhookHandler : undefined)
+
+    // Clerk webhook handler (NO AUTH) - handles user sync from Clerk
+    .use(withClerk ? clerkWebhookHandler : undefined)
+
+    // Health check routes (public, no auth) - BEFORE auth middleware
+    .use(healthRoutes)
+
+    // Metrics endpoint (public, no auth) - Prometheus-compatible - BEFORE auth
+    .use(metricsRoutes)
+
+    // Apply middleware after webhook routes to avoid body consumption conflicts
+    .onRequest(({ set }) => {
+      set.headers["Cache-Control"] =
+        "no-store, no-cache, must-revalidate, proxy-revalidate";
+      set.headers["Pragma"] = "no-cache";
+      set.headers["Expires"] = "0";
+    })
+    .use(correlationMiddleware)
+    .use(enhancedApiLogging)
+
+    // Apply rate limiting (strict bucket for credential endpoints first)
+    .use(rateLimiters.auth)
+    .use(rateLimiters.api)
+
+    // Clerk mode: Clerk auth middleware globally (it has path exemptions built-in).
+    // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
+    // Local mode: DB-backed sessions for protected routes.
+    .use(withClerk ? clerkAuthMiddleware : localAuthMiddleware)
+
+    // Public auth routes
+    .use(authRoutes)
+
+    // All other routes
+    .use(userRoutes)
+    .use(macroRoutes)
+    .use(goalRoutes)
+    .use(habitRoutes)
+    .use(reportingRoutes)
+    .use(savedMealRoutes)
+    .use(syncRoutes)
+
+    // The type argument lists billing routes in App in every mode. With billing
+    // disabled they 404, and clients already gate them on their BILLING_MODE.
+    .use<typeof billingRoutes>(
+      withManagedBilling ? billingRoutes : new Elysia()
+    )
+
+    .onError(({ code, error, set, path }) =>
+      handleGlobalError({ code, error, set, path })
     );
-
-  configureSwaggerDocs(app);
-  registerCoreRoutes(app, db);
-
-  app.onError(({ code, error, set, path }) =>
-    handleGlobalError({ code, error, set, path })
-  );
-
-  return app;
 }
+
+export type App = ReturnType<typeof createApp>;

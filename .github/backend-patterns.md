@@ -4,25 +4,22 @@ Patterns and conventions for the Elysia.js backend.
 
 ## Route Module Pattern
 
-Routes are defined in `backend/src/modules/*/routes.ts` using Elysia groups:
+Routes are defined in `backend/src/modules/*/routes.ts` as Elysia plugin instances with their routes chained, so route types reach the app's `App` type:
 
 ```typescript
 // Route module pattern
-export const macroRoutes = (app: Elysia) =>
-  app.group("/api/macros", (group) =>
-    group
-      .decorate("db", db)
-      .get("/search", searchHandler, { query: SearchSchema })
-      .post("/entry", createHandler, { body: CreateSchema })
-      .put("/entry/:id", updateHandler, { body: UpdateSchema })
-      .delete("/entry/:id", deleteHandler),
-  );
+export const macroRoutes = new Elysia({ prefix: "/api/macros" })
+  .get("/search", searchHandler, { query: SearchSchema })
+  .post("/entry", createHandler, { body: CreateSchema })
+  .put("/entry/:id", updateHandler, { body: UpdateSchema })
+  .delete("/entry/:id", deleteHandler);
 ```
 
 ### Route Organization
 
 - Each feature module has its own `routes.ts` file
-- Routes are mounted in [`backend/src/index.ts`](../backend/src/index.ts)
+- Routes are mounted in one chain in [`backend/src/app.ts`](../backend/src/app.ts), which exports `type App`. Mount a mode-dependent plugin with `.use(enabled ? plugin : undefined)`; never mutate the app outside the chain, or its routes drop out of `App`
+- [`backend/tests/app-types.test-d.ts`](../backend/tests/app-types.test-d.ts) fails the typecheck if response types stop reaching `App`
 - Schemas are co-located in `schemas.ts` within the same module
 
 ## Error Handling

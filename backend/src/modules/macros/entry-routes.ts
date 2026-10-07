@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { Elysia, t } from "elysia";
 import {
   safeExecute,
   safeQuery,
@@ -33,13 +33,6 @@ import {
   normalizeMacroEntryRow,
   type MacrosRouteContext,
 } from "./service";
-
-type MacroRouteGroup = {
-  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
-  post: (path: string, ...args: unknown[]) => MacroRouteGroup;
-  delete: (path: string, ...args: unknown[]) => MacroRouteGroup;
-  put: (path: string, ...args: unknown[]) => MacroRouteGroup;
-};
 
 interface TrackingProgress {
   distinctDays: number;
@@ -78,11 +71,11 @@ function setClauseFor(updates: Record<string, unknown>) {
   };
 }
 
-export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
-  group
+export const macroEntryRoutes = new Elysia()
     .get(
       "/totals",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, query } = context;
         const internalUserId = context.authenticatedUser.userId;
         let { startDate, endDate } = query;
@@ -137,7 +130,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .get(
       "/history",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, query } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -277,7 +271,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .post(
       "/",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -406,7 +401,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .post(
       "/import",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -608,7 +604,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .delete(
       "/:id",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, params } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -646,7 +643,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .put(
       "/:id",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, params, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -707,7 +705,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .put(
       "/by-client-id/:clientId",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, params, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
@@ -762,7 +761,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
     )
     .delete(
       "/by-client-id/:clientId",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, params } = context;
         const internalUserId = context.authenticatedUser.userId;
         const clientId = params?.clientId as string;

@@ -1,3 +1,4 @@
+import { Elysia } from "elysia";
 import { BadRequestError } from "../../lib/http/errors";
 import {
   buildFoodSearchCacheKey,
@@ -7,15 +8,11 @@ import type { FoodProductResult } from "../../services/openfoodfacts-api-client"
 import { MacroSchemas } from "./schemas";
 import type { MacrosRouteContext } from "./service";
 
-type MacroRouteGroup = {
-  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
-};
-
-export const registerMacroSearchRoutes = (group: MacroRouteGroup) =>
-  group
+export const macroSearchRoutes = new Elysia()
     .get(
       "/search",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { query, openFoodFactsApiClient, cacheService: cache } = context;
 
         const rawSearchQuery = query.q;
@@ -60,7 +57,8 @@ export const registerMacroSearchRoutes = (group: MacroRouteGroup) =>
     )
     .get(
       "/barcode/:barcode",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { params, openFoodFactsApiClient, cacheService: cache } = context;
 
         const rawBarcode = params?.barcode;

@@ -26,7 +26,7 @@ export function createServerApp(options: AppBootstrapOptions = {}) {
   return new Elysia().use(createApp(db));
 }
 
-let appInstance: Elysia | null = null;
+let appInstance: ReturnType<typeof createServerApp> | null = null;
 
 export function getApp(options: AppBootstrapOptions = {}) {
   appInstance ??= createServerApp(options);

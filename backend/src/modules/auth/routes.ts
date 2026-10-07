@@ -182,9 +182,7 @@ function assertLocalRouteAccess(context: {
   return auth;
 }
 
-export const authRoutes = (app: Elysia) =>
-  app.group("/api/auth", (group) =>
-    group
+export const authRoutes = new Elysia({ prefix: "/api/auth" })
       .post(
         "/register",
         async (context) => {
@@ -698,8 +696,7 @@ export const authRoutes = (app: Elysia) =>
             tags: ["Auth"],
           },
         },
-      ),
-  );
+      );
 
 export function isSessionFresh(lastUsedAt: string): boolean {
   const last = new Date(lastUsedAt).getTime();

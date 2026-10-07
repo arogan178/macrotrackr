@@ -189,8 +189,7 @@ function handleUserDeleted(database: Database, event: ClerkWebhookEvent) {
  * Clerk webhook handler
  * Receives and processes webhook events from Clerk
  */
-export const clerkWebhookHandler = (app: Elysia) =>
-  app.post(
+export const clerkWebhookHandler = new Elysia().post(
     "/api/webhooks/clerk",
     async (context) => {
       const { request, db, body } = context as {

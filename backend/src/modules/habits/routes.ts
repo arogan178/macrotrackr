@@ -71,9 +71,7 @@ function toHabitResponse(habit: HabitRow, date: string) {
   };
 }
 
-export const habitRoutes = (app: Elysia) =>
-  app.group("/api/habits", (group) =>
-    group
+export const habitRoutes = new Elysia({ prefix: "/api/habits" })
       // --- Get All Habits ---
       .get(
         "/",
@@ -466,5 +464,4 @@ export const habitRoutes = (app: Elysia) =>
             tags: ["Habits"],
           },
         }
-      )
-  );
+      );
