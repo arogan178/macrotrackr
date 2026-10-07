@@ -8,7 +8,7 @@ import {
   Line,
   ResponsiveContainer,
   Tooltip,
-  TooltipProps,
+  type TooltipContentProps,
   XAxis,
   XAxisProps,
   YAxis,
@@ -82,7 +82,7 @@ interface LineChartComponentProps {
   emptyState?: React.ReactNode;
   tooltipContent?:
     | React.ReactElement
-    | React.FC<TooltipProps<ValueType, NameType>>;
+    | React.FC<TooltipContentProps<ValueType, NameType>>;
   chartElements?: React.ReactNode; // For <defs>, <Area>, <ReferenceLine> etc.
   xAxisProps?: Partial<XAxisProps>;
   yAxisProps?: Partial<YAxisProps>;
@@ -119,6 +119,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   showNoDataMessage = false, // Default to false, controlled by parent
 }) => {
   const hasData = data && data.length > 0;
+  // Recharts 3 shows dots before an entrance animation reaches them; 2 waited.
+  const [isDrawing, setIsDrawing] = React.useState(true);
   // Assign the component or element directly; default to richer ChartTooltip
   const TooltipContent = tooltipContent ?? ChartTooltip;
 
@@ -288,6 +290,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             {showLegend && (
               <Legend
                 iconSize={10}
+                itemSorter={null}
                 wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
                 formatter={(value) => (
                   <span className="text-foreground">{value}</span>
@@ -309,6 +312,12 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   : dataLength > 30
                     ? { r: 5 }
                     : (line.activeDot ?? { r: 6 });
+              const dot =
+                isDrawing && line.isAnimationActive
+                  ? false
+                  : (line.dot ?? (
+                      <CustomDot dataKey={line.dataKey} dataLength={dataLength} />
+                    ));
 
               return line.isArea ? (
                 <Area
@@ -321,17 +330,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   fillOpacity={0.15}
                   strokeWidth={adaptiveStrokeWidth}
                   activeDot={adaptiveActiveDot}
-                  dot={
-                    line.dot ?? (
-                      <CustomDot
-                        dataKey={line.dataKey}
-                        dataLength={dataLength}
-                      />
-                    )
-                  }
+                  dot={dot}
                   connectNulls={line.connectNulls ?? false}
                   isAnimationActive={line.isAnimationActive ?? false}
                   animationDuration={line.animationDuration ?? 900}
+                  onAnimationEnd={() => setIsDrawing(false)}
                 />
               ) : (
                 <Line
@@ -342,17 +345,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   stroke={line.color ?? "var(--color-muted)"}
                   strokeWidth={adaptiveStrokeWidth}
                   activeDot={adaptiveActiveDot}
-                  dot={
-                    line.dot ?? (
-                      <CustomDot
-                        dataKey={line.dataKey}
-                        dataLength={dataLength}
-                      />
-                    )
-                  }
+                  dot={dot}
                   connectNulls={line.connectNulls ?? false}
                   isAnimationActive={line.isAnimationActive ?? false}
                   animationDuration={line.animationDuration ?? 900}
+                  onAnimationEnd={() => setIsDrawing(false)}
                 />
               );
             })}

@@ -204,6 +204,7 @@ function MealTimeBreakdown({
             verticalAlign="bottom"
             height={36}
             iconType="circle"
+            itemSorter={null}
             formatter={(value) => (
               <span className="ml-1 text-sm font-medium text-foreground">
                 {value}

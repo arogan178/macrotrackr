@@ -111,7 +111,11 @@ export default function TrendDisplay({
       {data && data.length > 0 && dataKey && trend.direction !== "insufficient" ? (
         <div className="h-9 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
+              accessibilityLayer={false}
+            >
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={strokeColor} stopOpacity={0.35} />
@@ -124,6 +128,7 @@ export default function TrendDisplay({
                 stroke={strokeColor}
                 strokeWidth={1.5}
                 fill={`url(#${gradientId})`}
+                activeDot={false}
                 isAnimationActive
               />
             </AreaChart>

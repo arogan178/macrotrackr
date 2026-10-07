@@ -3,6 +3,7 @@ import {
   BarChart,
   CartesianGrid,
   LabelList,
+  type LabelProps,
   Legend,
   ResponsiveContainer,
   Tooltip,
@@ -29,15 +30,7 @@ interface MacroDensityBreakdownProps {
 
 // --- Subcomponents ---
 
-interface PercentageLabelProps {
-  x?: string | number;
-  y?: string | number;
-  width?: string | number;
-  height?: string | number;
-  value?: string | number;
-}
-
-const PercentageLabel = (properties: PercentageLabelProps) => {
+const PercentageLabel = (properties: LabelProps) => {
   // Convert to number if possible, else default to 0
   const toNumber = (value_: string | number | undefined) =>
     typeof value_ === "number" ? value_ : value_ ? Number(value_) : 0;
@@ -158,15 +151,10 @@ const MacroDensityBreakdown = ({
               height={14}
               iconSize={10}
               iconType="circle"
+              itemSorter={null}
               verticalAlign="bottom"
               align="center"
               wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
-              payload={["protein", "carbs", "fats"].map((macro) => ({
-                id: macro,
-                value: macro.charAt(0).toUpperCase() + macro.slice(1),
-                type: "circle",
-                color: MACRO_COLORS[macro].base,
-              }))}
               formatter={(value) => (
                 <span className="ml-1 text-foreground capitalize">{value}</span>
               )}
