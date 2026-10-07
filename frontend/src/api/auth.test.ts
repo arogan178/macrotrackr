@@ -28,34 +28,6 @@ describe("authApi", () => {
     apiClient.setGetToken(async () => null);
   });
 
-  it("submits reset-password payload and returns the API response", async () => {
-    fetchMock.mockResolvedValueOnce(
-      createJsonResponse({ success: true, message: "Password reset" }),
-    );
-
-    await expect(
-      authApi.resetPassword({
-        token: "token-123",
-        newPassword: "new-password",
-      }),
-    ).resolves.toEqual({
-      success: true,
-      message: "Password reset",
-    });
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3000/api/auth/reset-password",
-      expect.objectContaining({
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token: "token-123", newPassword: "new-password" }),
-      }),
-    );
-  });
-
   it("uses an explicit bearer token for sync requests when provided", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse({

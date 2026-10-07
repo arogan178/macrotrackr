@@ -7,8 +7,8 @@ import { queryKeys } from "@/lib/queryKeys";
 /**
  * Used when ClerkProvider was deliberately not mounted, which only happens on
  * public routes with no session cookie. The mutations below all live behind
- * /settings or /reset-password, which mount Clerk, so they are unreachable
- * here and say so rather than failing quietly.
+ * /settings, which mounts Clerk, so they are unreachable here and say so
+ * rather than failing quietly.
  */
 const unreachable =
   <TVariables,>(name: string) =>
@@ -28,14 +28,6 @@ export function useUser(_options?: { enabled?: boolean }) {
 
 export function useLogout() {
   return useMutation({ mutationFn: unreachable<void>("useLogout") });
-}
-
-export function useResetPassword() {
-  return useMutation({
-    mutationFn: unreachable<{ token: string; newPassword: string }>(
-      "useResetPassword",
-    ),
-  });
 }
 
 export function useChangePassword() {

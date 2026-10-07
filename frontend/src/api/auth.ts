@@ -24,11 +24,6 @@ export interface AuthSyncResponse {
   message?: string;
 }
 
-export interface ResetPasswordPayload {
-  token: string;
-  newPassword: string;
-}
-
 export interface RegisterPayload {
   email: string;
   password: string;
@@ -39,10 +34,6 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
-}
-
-export interface ForgotPasswordPayload {
-  email: string;
 }
 
 export interface ChangePasswordPayload {
@@ -117,25 +108,6 @@ export const authApi = {
 
   getSession: async (): Promise<LocalSessionResponse> => {
     return apiClient.get<LocalSessionResponse>("/api/auth/session");
-  },
-
-  forgotPassword: async ({ email }: ForgotPasswordPayload) => {
-    return apiClient.post<{ success: boolean; message?: string }>(
-      "/api/auth/forgot-password",
-      { email },
-      { headers: { includeAuth: false } },
-    );
-  },
-
-  /**
-   * @throws {ApiError}
-   */
-  resetPassword: async ({ token, newPassword }: ResetPasswordPayload) => {
-    return apiClient.post<{ success: boolean; message?: string }>(
-      "/api/auth/reset-password",
-      { token, newPassword },
-      { headers: { includeAuth: false } },
-    );
   },
 
   changePassword: async ({ currentPassword, newPassword }: ChangePasswordPayload) => {
