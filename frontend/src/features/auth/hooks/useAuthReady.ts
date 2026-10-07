@@ -66,7 +66,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
       hasInitializedRef.current = true;
 
       if (!isSignedIn) {
-        navigate({ to: "/login", search: { returnTo: undefined } });
+        navigate({ to: "/login", search: { returnTo: undefined }, replace: true });
 
         return;
       }
@@ -149,7 +149,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
         // there is nothing to read back — it goes to setup either way.
         if (isNewUser) {
           queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
-          navigate({ to: "/profile-setup", search: { redirectTo } });
+          navigate({ to: "/profile-setup", search: { redirectTo }, replace: true });
 
           return;
         }
@@ -176,16 +176,16 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
 
       const isProfileComplete = resolveProfileCompletion(userDetails);
       if (isProfileComplete === false) {
-        navigate({ to: "/profile-setup", search: { redirectTo } });
+        navigate({ to: "/profile-setup", search: { redirectTo }, replace: true });
 
         return;
       }
 
       const normalizedRedirectTo = normalizeAuthRedirect(redirectTo);
       if (normalizedRedirectTo === "/home") {
-        navigate({ to: "/home", search: { limit: 20, offset: 0 } });
+        navigate({ to: "/home", search: { limit: 20, offset: 0 }, replace: true });
       } else {
-        navigate({ to: normalizedRedirectTo as any });
+        navigate({ to: normalizedRedirectTo as any, replace: true });
 
         return;
       }

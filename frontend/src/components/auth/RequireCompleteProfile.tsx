@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "@tanstack/react-router";
+import { Navigate, useMatch } from "@tanstack/react-router";
 
 import { AuthLoadingScreen } from "@/components/auth/AuthLoadingScreen";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -31,10 +31,20 @@ interface RequireCompleteProfileProps {
 export function RequireCompleteProfile({
   children,
 }: RequireCompleteProfileProps) {
-  const location = useLocation();
+  // The guarded route, not the router location: once the redirect starts, that
+  // is already /profile-setup, and redirecting from it nests redirectTo forever.
+  const redirectTo = useMatch({
+    strict: false,
+    select: buildRedirectFromLocation,
+  });
   const { isLoaded: isAuthLoaded, isSignedIn } = useAppAuthState();
   const shouldCheckProfileCompletion = isClerkAuthMode;
-  const { data: user, isLoading: isUserLoading } = useUser({
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    isFetching: isUserFetching,
+    isFetchedAfterMount: isUserFetchedAfterMount,
+  } = useUser({
     enabled: shouldCheckProfileCompletion && isAuthLoaded && isSignedIn,
   });
 
@@ -65,13 +75,17 @@ export function RequireCompleteProfile({
   // (usually token sync race). Route through auth-ready to establish session
   // and sync backend user before trying protected pages again.
   if (user === null) {
-    const redirectTo = buildRedirectFromLocation(location);
-
-    return <Navigate to="/auth-ready" search={{ redirectTo }} />;
+    return <Navigate to="/auth-ready" search={{ redirectTo }} replace />;
   }
 
+  const isProfileComplete = resolveProfileCompletion(user);
+  // A persisted copy can predate setup finished on another device, so a
+  // refetch in flight decides. Offline there is none and the copy stands.
+  const isAwaitingFreshProfile =
+    isProfileComplete === false && isUserFetching && !isUserFetchedAfterMount;
+
   // If query has not produced data yet (undefined), avoid crashing/looping.
-  if (!user) {
+  if (!user || isAwaitingFreshProfile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
         <LoadingSpinner size="lg" />
@@ -80,12 +94,11 @@ export function RequireCompleteProfile({
   }
 
   // Only redirect when we can explicitly determine the profile is incomplete.
-  const isProfileComplete = resolveProfileCompletion(user);
   if (isProfileComplete === false) {
     return (
       <Navigate
         to="/profile-setup"
-        search={{ redirectTo: buildRedirectFromLocation(location) }}
+        search={{ redirectTo }}
       />
     );
   }

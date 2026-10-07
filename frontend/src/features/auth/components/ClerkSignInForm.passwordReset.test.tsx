@@ -185,6 +185,7 @@ describe("ClerkSignInForm password reset", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/auth-ready",
       search: { redirectTo: "/home" },
+      replace: true,
     });
   });
 

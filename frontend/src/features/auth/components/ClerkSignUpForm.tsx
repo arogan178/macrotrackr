@@ -167,6 +167,7 @@ export function ClerkSignUpForm({
       navigate({
         to: "/auth-ready",
         search: { redirectTo: afterSignUpRedirect },
+        replace: true,
       });
     },
     [afterSignUpRedirect, navigate, setActive],
@@ -271,6 +272,7 @@ export function ClerkSignUpForm({
             navigate({
               to: "/auth-ready",
               search: { redirectTo: normalizedRedirect },
+              replace: true,
             });
 
             return;
@@ -370,6 +372,7 @@ export function ClerkSignUpForm({
         navigate({
           to: "/auth-ready",
           search: { redirectTo: normalizedRedirect },
+          replace: true,
         });
 
         return;
@@ -475,6 +478,7 @@ export function ClerkSignUpForm({
               navigate({
                 to: "/auth-ready",
                 search: { redirectTo: normalizedRedirect },
+                replace: true,
               });
 
               return;

@@ -179,6 +179,7 @@ function ClerkSsoCallbackPage() {
           navigate({
             to: "/auth-ready",
             search: { redirectTo: safeRedirectTo },
+            replace: true,
           });
 
           return;
@@ -252,6 +253,7 @@ function ClerkSsoCallbackPage() {
           navigate({
             to: "/auth-ready",
             search: { redirectTo: safeRedirectTo },
+            replace: true,
           });
 
           return;

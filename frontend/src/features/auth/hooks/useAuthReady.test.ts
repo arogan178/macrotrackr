@@ -66,6 +66,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/home",
       search: { limit: 20, offset: 0 },
+      replace: true,
     });
   });
 
@@ -83,6 +84,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/profile-setup",
       search: { redirectTo: "/home" },
+      replace: true,
     });
   });
 
@@ -98,6 +100,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/home",
       search: { limit: 20, offset: 0 },
+      replace: true,
     });
   });
 
@@ -114,6 +117,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/home",
       search: { limit: 20, offset: 0 },
+      replace: true,
     });
   });
 
@@ -131,6 +135,7 @@ describe("useAuthReady", () => {
       to: "/login",
       search: { returnTo: "/settings?tab=accounts" },
       replace: true,
+      replace: true,
     });
   });
 
@@ -143,6 +148,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/profile-setup",
       search: { redirectTo: "/home" },
+      replace: true,
     });
   });
 
@@ -155,6 +161,7 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/profile-setup",
       search: { redirectTo: "/profile-setup" },
+      replace: true,
       replace: true,
     });
   });

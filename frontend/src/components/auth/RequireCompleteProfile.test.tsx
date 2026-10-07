@@ -6,7 +6,7 @@ import { RequireCompleteProfile } from "./RequireCompleteProfile";
 
 vi.mock("@tanstack/react-router", () => ({
   Navigate: ({ to }: { to: string }) => <div data-testid="navigate">{to}</div>,
-  useLocation: () => ({ pathname: "/home", search: {} }),
+  useMatch: () => "/home",
 }));
 
 vi.mock("@/config/runtime", () => ({

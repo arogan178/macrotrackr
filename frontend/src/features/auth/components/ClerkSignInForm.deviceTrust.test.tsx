@@ -203,6 +203,7 @@ describe("ClerkSignInForm device trust", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/auth-ready",
       search: { redirectTo: "/home" },
+      replace: true,
     });
   });
 
