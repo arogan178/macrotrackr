@@ -32,7 +32,7 @@
     /* Types */
     "types": ["vite/client"]
   },
-  "include": ["src", "../shared/**/*.ts"],
+  "include": ["src", "../shared/**/*.ts", "../backend/src/**/*.ts"],
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
