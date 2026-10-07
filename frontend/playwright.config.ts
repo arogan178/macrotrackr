@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 import dotenv from 'dotenv'
-import { BACKEND_PORT, BACKEND_URL, FRONTEND_PORT, FRONTEND_URL } from './e2e/helpers'
+import { BACKEND_PORT, BACKEND_URL, FRONTEND_PORT, FRONTEND_URL, PREVIEW_PORT, PREVIEW_URL } from './e2e/helpers'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -49,6 +49,13 @@ export default defineConfig({
       env: { VITE_AUTH_MODE: 'clerk', VITE_API_URL: BACKEND_URL },
     },
     {
+      command: `bunx vite build --outDir dist/e2e && bunx vite preview --outDir dist/e2e --port ${PREVIEW_PORT} --strictPort`,
+      url: PREVIEW_URL,
+      reuseExistingServer: false,
+      timeout: 180 * 1000,
+      env: { VITE_AUTH_MODE: 'clerk', VITE_API_URL: BACKEND_URL },
+    },
+    {
       // --no-env-file keeps backend/.env.development (live keys, dev
       // database) out of the run. Stripe is never called by these tests.
       command: 'bun --no-env-file src/index.ts',
@@ -63,7 +70,7 @@ export default defineConfig({
         PORT: BACKEND_PORT,
         DATABASE_PATH: ':memory:',
         APP_URL: FRONTEND_URL,
-        CORS_ORIGIN: FRONTEND_URL,
+        CORS_ORIGIN: `${FRONTEND_URL},${PREVIEW_URL}`,
         STRIPE_SECRET_KEY: 'sk_test_e2e',
         STRIPE_WEBHOOK_SECRET: 'whsec_e2e',
         STRIPE_PRICE_ID_MONTHLY: 'price_e2e_monthly',

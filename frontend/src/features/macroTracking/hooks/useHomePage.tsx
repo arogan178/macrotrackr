@@ -3,7 +3,11 @@ import { FREE_TIER_LIMITS } from "@shared/entitlements";
 import { useSearch } from "@tanstack/react-router";
 import { parseISO } from "date-fns";
 
-import { useMacroHistoryInfinite } from "@/hooks/queries/useMacroQueries";
+import { recentEntriesStart } from "@/hooks/queries/macro/entryStore";
+import {
+  useMacroHistoryInfinite,
+  useRecentMacroEntries,
+} from "@/hooks/queries/useMacroQueries";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import type { MacroEntry } from "@/types/macro";
 import {
@@ -98,33 +102,29 @@ export function useHomeDate() {
   return { date, today, oldestDate, isToday: date === today };
 }
 
+/** Recent days come from the device; older ones page in from the server. */
 export function useHistoryPagination(pageSize: number) {
+  const { entries: recent, isLoading: isHistoryLoading } = useRecentMacroEntries();
   const {
-    data: macroHistoryData,
-    isLoading: isHistoryLoading,
+    data: olderHistoryData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useMacroHistoryInfinite(pageSize);
+  } = useMacroHistoryInfinite(pageSize, {
+    endDate: addDaysISO(recentEntriesStart(), -1),
+  });
 
   const history = useMemo(() => {
-    const pages = macroHistoryData?.pages;
-    if (!Array.isArray(pages)) {
-      return [];
-    }
-
-    return pages
+    const pages = olderHistoryData?.pages ?? [];
+    const older = pages
       .flatMap((page) => (Array.isArray(page.entries) ? page.entries : []))
       .filter((entry) => isMacroEntry(entry));
-  }, [macroHistoryData]);
 
-  // Get limits from the first page (all pages have same limits data)
-  const limits = useMemo(() => {
-    return macroHistoryData?.pages?.[0]?.limits;
-  }, [macroHistoryData]);
+    return [...recent, ...older];
+  }, [recent, olderHistoryData]);
 
-  const historyHasMore = hasNextPage;
-  const isLoadingMore = isFetchingNextPage;
+  // The older pages carry the free plan's hidden-entry count.
+  const limits = olderHistoryData?.pages[0]?.limits;
 
   const loadMoreHistory = useCallback(async () => {
     if (hasNextPage) {
@@ -134,9 +134,9 @@ export function useHistoryPagination(pageSize: number) {
 
   return {
     history,
-    historyHasMore,
+    historyHasMore: hasNextPage,
     isHistoryLoading,
-    isLoadingMore,
+    isLoadingMore: isFetchingNextPage,
     loadMoreHistory,
     limits,
   };

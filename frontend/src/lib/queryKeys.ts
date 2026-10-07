@@ -39,6 +39,7 @@ export const queryKeys = {
     historyRange: (startDate?: string, endDate?: string) =>
       ["macros", "history-range", startDate, endDate] as const,
     dailyTotals: (date: string) => ["macros", "daily-totals", date] as const,
+    recentEntries: (userId: number) => ["macros", "recent-entries", userId] as const,
     targets: () => ["macros", "targets"] as const,
   },
 

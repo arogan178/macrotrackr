@@ -126,47 +126,31 @@ describe("macrosApi", () => {
     ).rejects.toThrow("Invalid payload: macroTarget object is required.");
   });
 
-  it("deletes a macro entry when passed primitive id or object parameter", async () => {
-    fetchMock.mockImplementation(() =>
-      Promise.resolve(createJsonResponse({ success: true, id: 123 })),
-    );
-
-    await macrosApi.deleteEntry(123);
-    expect(fetchMock).toHaveBeenLastCalledWith(
-      "http://localhost:3000/api/macros/123",
-      expect.objectContaining({ method: "DELETE" }),
-    );
-
-    await macrosApi.deleteEntry({ id: 456 });
-    expect(fetchMock).toHaveBeenLastCalledWith(
-      "http://localhost:3000/api/macros/456",
-      expect.objectContaining({ method: "DELETE" }),
-    );
-  });
-
-  it("updates a macro entry when passed positional arguments or object parameter", async () => {
+  it("writes an entry by the id the device gave it", async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve(createJsonResponse({ success: true })),
     );
+    const entry = {
+      clientId: "6f1c2b9e-4d3a-4f8e-9b7c-1a2b3c4d5e6f",
+      clientUpdatedAt: 1000,
+      protein: 30,
+      carbs: 40,
+      fats: 10,
+      mealType: "lunch" as const,
+      mealName: "Rice bowl",
+      entryDate: "2026-10-01",
+      entryTime: "12:30",
+    };
+    const body = JSON.stringify({ ...entry, ingredients: undefined });
 
-    const updatePayload = { protein: 30, carbs: 40 };
+    await macrosApi.addEntry(entry);
+    await macrosApi.replaceEntry(entry);
+    await macrosApi.deleteEntry(entry.clientId);
 
-    await macrosApi.updateEntry(123, updatePayload);
-    expect(fetchMock).toHaveBeenLastCalledWith(
-      "http://localhost:3000/api/macros/123",
-      expect.objectContaining({
-        method: "PUT",
-        body: JSON.stringify(updatePayload),
-      }),
-    );
-
-    await macrosApi.updateEntry({ id: 456, data: updatePayload });
-    expect(fetchMock).toHaveBeenLastCalledWith(
-      "http://localhost:3000/api/macros/456",
-      expect.objectContaining({
-        method: "PUT",
-        body: JSON.stringify(updatePayload),
-      }),
-    );
+    expect(fetchMock.mock.calls.map(([url, init]) => [url, init.method, init.body])).toEqual([
+      ["http://localhost:3000/api/macros", "POST", body],
+      ["http://localhost:3000/api/macros/by-client-id/6f1c2b9e-4d3a-4f8e-9b7c-1a2b3c4d5e6f", "PUT", body],
+      ["http://localhost:3000/api/macros/by-client-id/6f1c2b9e-4d3a-4f8e-9b7c-1a2b3c4d5e6f", "DELETE", undefined],
+    ]);
   });
 });

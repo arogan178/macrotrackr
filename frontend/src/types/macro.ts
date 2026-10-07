@@ -65,8 +65,11 @@ export interface Ingredient {
 }
 
 export interface MacroEntry {
+  /** The server row; 0 until an entry logged on this device has synced. */
   id: number;
-  clientId?: string;
+  /** Made by the device that logged the entry, so it can be edited before it syncs. */
+  clientId: string;
+  clientUpdatedAt?: number | null;
   createdAt: string;
   protein: number;
   carbs: number;

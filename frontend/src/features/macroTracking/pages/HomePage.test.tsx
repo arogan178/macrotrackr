@@ -11,12 +11,11 @@ const mutations = vi.hoisted(() => ({
   add: vi.fn(),
   delete: vi.fn(),
   createSavedMeal: vi.fn(),
-  deleteState: { isPending: false, variables: undefined as number | undefined },
 }));
 
 interface PanelProps {
-  deleteEntry: (id: number, options?: { undoable?: boolean }) => Promise<void>;
-  isDeleting: (id: number) => boolean;
+  deleteEntry: (clientId: string, options?: { undoable?: boolean }) => Promise<void>;
+  isDeleting: (clientId: string) => boolean;
   onSaveMeal: (entry: MacroEntry) => Promise<void>;
   onExportCsv: () => Promise<void>;
   onLogAgain: (entry: MacroEntry) => Promise<void>;
@@ -51,11 +50,10 @@ vi.mock("@/api/macros", () => ({
 }));
 
 vi.mock("@/hooks/queries/useMacroQueries", () => ({
-  useAddMacroEntry: () => ({ mutateAsync: mutations.add, isPending: false }),
-  useUpdateMacroEntry: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  useDeleteMacroEntry: () => ({
-    mutateAsync: mutations.delete,
-    ...mutations.deleteState,
+  useEntryStore: () => ({
+    log: mutations.add,
+    remove: mutations.delete,
+    replace: vi.fn(),
   }),
   useMacroDailyTotals: (date: string) => {
     captured.dailyTotals(date);
@@ -137,6 +135,7 @@ vi.mock("@/features/macroTracking/components/EntryHistoryPanel", () => ({
 
 const entry: MacroEntry = {
   id: 7,
+  clientId: "entry-7",
   createdAt: "2026-09-20T08:00:00Z",
   mealName: "Oatmeal",
   protein: 10,
@@ -158,7 +157,6 @@ function errorMessages() {
 describe("HomePage error notifications", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mutations.deleteState = { isPending: false, variables: undefined };
     useStore.setState({ notifications: [] });
     captured.history = [entry];
     render(<HomePage />);
@@ -168,7 +166,7 @@ describe("HomePage error notifications", () => {
   it("shows an error when deleting an entry fails", async () => {
     mutations.delete.mockRejectedValue(new Error("Delete failed on server"));
 
-    await act(() => captured.panel!.deleteEntry(entry.id));
+    await act(() => captured.panel!.deleteEntry(entry.clientId));
 
     expect(errorMessages()).toEqual(["Delete failed on server"]);
   });
@@ -207,19 +205,22 @@ describe("HomePage error notifications", () => {
     expect(errorMessages()).toEqual(["Add failed on server"]);
   });
 
-  it("marks only the entry being deleted as deleting", () => {
-    mutations.deleteState = { isPending: true, variables: 7 };
-    render(<HomePage />);
+  it("marks only the entry being deleted as deleting", async () => {
+    mutations.delete.mockReturnValue(new Promise(() => {}));
 
-    expect(captured.panel!.isDeleting(7)).toBe(true);
-    expect(captured.panel!.isDeleting(8)).toBe(false);
+    await act(async () => {
+      void captured.panel!.deleteEntry(entry.clientId);
+    });
+
+    expect(captured.panel!.isDeleting("entry-7")).toBe(true);
+    expect(captured.panel!.isDeleting("entry-8")).toBe(false);
   });
 
   it("offers to undo a deleted entry and re-adds it from the snapshot", async () => {
-    mutations.delete.mockResolvedValue({ success: true, id: entry.id });
-    mutations.add.mockResolvedValue({ ...entry, id: 8 });
+    mutations.delete.mockResolvedValue(undefined);
+    mutations.add.mockResolvedValue(undefined);
 
-    await act(() => captured.panel!.deleteEntry(entry.id));
+    await act(() => captured.panel!.deleteEntry(entry.clientId));
 
     const [notification] = useStore.getState().notifications;
     expect(notification).toMatchObject({
@@ -244,9 +245,9 @@ describe("HomePage error notifications", () => {
   });
 
   it("does not offer undo when a whole day is deleted", async () => {
-    mutations.delete.mockResolvedValue({ success: true, id: entry.id });
+    mutations.delete.mockResolvedValue(undefined);
 
-    await act(() => captured.panel!.deleteEntry(entry.id, { undoable: false }));
+    await act(() => captured.panel!.deleteEntry(entry.clientId, { undoable: false }));
 
     expect(useStore.getState().notifications).toEqual([]);
   });

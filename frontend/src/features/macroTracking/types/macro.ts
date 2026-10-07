@@ -13,15 +13,3 @@ export interface MacroEntryInput {
   ingredients?: Ingredient[];
   saveAsMeal?: boolean;
 }
-
-export interface EditingEntry {
-  id: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-  mealType: MealType;
-  mealName: string;
-  entryDate?: string; // optional
-  entryTime?: string; // optional
-  ingredients?: Ingredient[];
-}

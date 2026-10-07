@@ -13,7 +13,9 @@ export interface FoodSearchResult {
   rawQuantity?: string;
 }
 
-export interface MacroEntryCreatePayload {
+export interface MacroEntryWrite {
+  clientId: string;
+  clientUpdatedAt: number;
   protein: number;
   carbs: number;
   fats: number;
@@ -24,11 +26,19 @@ export interface MacroEntryCreatePayload {
   ingredients?: Ingredient[];
 }
 
-export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
-
-export interface MacroEntryDeleteResponse {
-  success: boolean;
-  id: number;
+function toWritePayload(entry: MacroEntryWrite) {
+  return {
+    clientId: entry.clientId,
+    clientUpdatedAt: entry.clientUpdatedAt,
+    protein: entry.protein,
+    carbs: entry.carbs,
+    fats: entry.fats,
+    mealType: entry.mealType,
+    mealName: entry.mealName ?? "",
+    entryDate: entry.entryDate,
+    entryTime: entry.entryTime,
+    ingredients: entry.ingredients,
+  };
 }
 
 export interface MacroHistoryOptions {
@@ -166,63 +176,32 @@ export const macrosApi = {
   },
 
   /**
+   * Repeats of the same clientId return the stored entry.
    * @throws {ApiError}
    */
-  addEntry: async (entry: MacroEntryCreatePayload) => {
-    const payload = {
-      protein: entry.protein,
-      carbs: entry.carbs,
-      fats: entry.fats,
-      mealType: entry.mealType,
-      mealName: entry.mealName ?? "",
-      entryDate: entry.entryDate,
-      entryTime: entry.entryTime,
-      ingredients: entry.ingredients,
-    };
-    
-    return apiClient.post<unknown>("/api/macros", payload);
+  addEntry: async (entry: MacroEntryWrite): Promise<MacroEntry> => {
+    return apiClient.post<MacroEntry>("/api/macros", toWritePayload(entry));
   },
 
   /**
+   * Ignored by the server when a newer edit of the entry has already landed.
    * @throws {ApiError}
    */
-  updateEntry: async (
-    idOrParameters: number | { id: number; data: MacroEntryUpdatePayload },
-    dataPayload?: MacroEntryUpdatePayload,
-  ) => {
-    let id: number;
-    let entry: MacroEntryUpdatePayload;
-
-    if (typeof idOrParameters === "object" && idOrParameters !== null) {
-      id = idOrParameters.id;
-      entry = idOrParameters.data;
-    } else {
-      id = idOrParameters;
-      entry = dataPayload ?? {};
-    }
-
-    const payload: MacroEntryUpdatePayload = {};
-    if (entry.protein !== undefined) payload.protein = entry.protein;
-    if (entry.carbs !== undefined) payload.carbs = entry.carbs;
-    if (entry.fats !== undefined) payload.fats = entry.fats;
-    if (entry.mealType !== undefined) payload.mealType = entry.mealType;
-    if (entry.mealName !== undefined) payload.mealName = entry.mealName;
-    if (entry.entryDate !== undefined) payload.entryDate = entry.entryDate;
-    if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
-    if (entry.ingredients !== undefined) payload.ingredients = entry.ingredients;
-    
-    return apiClient.put<unknown>(`/api/macros/${id}`, payload);
+  replaceEntry: async (entry: MacroEntryWrite): Promise<MacroEntry> => {
+    return apiClient.put<MacroEntry>(
+      `/api/macros/by-client-id/${entry.clientId}`,
+      toWritePayload(entry),
+    );
   },
 
   /**
+   * Succeeds when the entry is already gone.
    * @throws {ApiError}
    */
-  deleteEntry: async (
-    idOrParameters: number | { id: number },
-  ): Promise<MacroEntryDeleteResponse> => {
-    const id = typeof idOrParameters === "object" && idOrParameters !== null ? idOrParameters.id : idOrParameters;
-
-    return apiClient.del<MacroEntryDeleteResponse>(`/api/macros/${id}`);
+  deleteEntry: async (clientId: string) => {
+    return apiClient.del<{ success: boolean; clientId: string }>(
+      `/api/macros/by-client-id/${clientId}`,
+    );
   },
 
   /**

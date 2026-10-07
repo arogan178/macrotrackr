@@ -61,6 +61,10 @@ export function useLogout() {
     },
     onSuccess: () => {
       queryClient.clear();
+      // Loaded on demand so the offline store stays off the first page load.
+      void import("@/hooks/queries/macro/entryStore").then(({ clearSignedOutAccount }) =>
+        clearSignedOutAccount(),
+      );
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       queryClient.removeQueries({ queryKey: queryKeys.auth.session() });
       navigate({ to: "/" });
