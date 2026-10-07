@@ -54,6 +54,9 @@ const managedKeys = [
   "CLERK_PUBLISHABLE_KEY",
   "CLERK_SECRET_KEY",
   "CLERK_WEBHOOK_SECRET",
+  "POSTHOG_KEY",
+  "POSTHOG_HOST",
+  "SMTP_FROM",
   "METRICS_API_KEY",
 ];
 
@@ -159,6 +162,76 @@ describe("config", () => {
       expect.objectContaining({
         APP_MODE: expect.any(Array),
       }),
+    );
+  });
+
+  it("reports exact messages naming each invalid variable", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    await expect(
+      loadConfigModule({
+        APP_URL: "not-a-url",
+        SUPPORT_EMAIL: "not-an-email",
+        POSTHOG_HOST: "not-a-url",
+        SMTP_FROM: "not-an-email",
+        PORT: "abc",
+        BILLING_MODE: "bogus",
+      }),
+    ).rejects.toThrow("Invalid environment variables");
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Invalid environment variables:",
+      {
+        PORT: ["Invalid input: expected number, received NaN"],
+        BILLING_MODE: ['Invalid option: expected one of "managed"|"disabled"'],
+        APP_URL: ["APP_URL must be a valid URL"],
+        SUPPORT_EMAIL: ["SUPPORT_EMAIL must be a valid email"],
+        POSTHOG_HOST: ["POSTHOG_HOST must be a valid URL"],
+        SMTP_FROM: ["SMTP_FROM must be a valid email"],
+      },
+    );
+  });
+
+  it("reports exact messages for missing provider keys", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    await expect(
+      loadConfigModule({
+        CLERK_PUBLISHABLE_KEY: undefined,
+        STRIPE_SECRET_KEY: undefined,
+      }),
+    ).rejects.toThrow("Invalid environment variables");
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Invalid environment variables:",
+      {
+        CLERK_PUBLISHABLE_KEY: ["CLERK_PUBLISHABLE_KEY is required"],
+        STRIPE_SECRET_KEY: ["STRIPE_SECRET_KEY is required"],
+      },
+    );
+  });
+
+  it("reports the exact message for an invalid mode combination", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    await expect(
+      loadConfigModule({ APP_MODE: "self-hosted", AUTH_MODE: "clerk" }),
+    ).rejects.toThrow("Invalid environment variables");
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Invalid environment variables:",
+      {
+        APP_MODE: [
+          "APP_MODE=self-hosted requires AUTH_MODE=local",
+          "APP_MODE=self-hosted requires BILLING_MODE=disabled",
+        ],
+      },
     );
   });
 
