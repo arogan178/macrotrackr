@@ -24,7 +24,7 @@ function NumberField({
   name,
 }: NumberFieldProps) {
   const autoId = useId();
-  const inputId = id ?? name ?? (label ? `number-field-${label}` : `number-field-${autoId}`);
+  const inputId = id ?? name ?? `number-field-${autoId}`;
   // Labels contain spaces, which would split an aria-describedby reference.
   const errorId = `${autoId}-error`;
   const describedBy =

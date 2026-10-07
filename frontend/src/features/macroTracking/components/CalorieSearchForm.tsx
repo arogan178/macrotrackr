@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { FoodSearchResult } from "@/api/macros";
@@ -69,6 +69,7 @@ const CalorieSearch = memo(function CalorieSearch({
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<SavedMeal | null>(null);
+  const searchInputId = useId();
   const wrapperReference = useRef<HTMLDivElement>(null);
   const inputReference = useRef<HTMLInputElement>(null);
   const isAutoFocusing = useRef(false);
@@ -353,7 +354,7 @@ const CalorieSearch = memo(function CalorieSearch({
   return (
     <div className="relative flex flex-col gap-3" ref={wrapperReference}>
       <div className="space-y-2">
-        <label htmlFor="calorie-search-input" className={formStyles.label}>
+        <label htmlFor={searchInputId} className={formStyles.label}>
           Search for food
         </label>
         <div className="flex items-center gap-2 sm:gap-3">
@@ -363,7 +364,7 @@ const CalorieSearch = memo(function CalorieSearch({
             </div>
             <input
               ref={inputReference}
-              id="calorie-search-input"
+              id={searchInputId}
               type="text"
               value={query}
               onChange={handleQueryChange}
