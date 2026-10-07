@@ -31,7 +31,6 @@ type ClerkContextObject = {
 
 // Define paths exempt from authentication checks.
 const AUTH_EXEMPT_PATHS = new Set([
-  "/api/auth/reset-password",
   // Note: /api/auth/clerk-sync is NOT exempt - it needs auth to know which user to sync
   "/api/webhooks/clerk",
   "/api/billing/webhook",

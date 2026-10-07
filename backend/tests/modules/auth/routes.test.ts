@@ -12,7 +12,6 @@ const deleteAllUserSessionsMock = vi.fn();
 const deleteSessionMock = vi.fn();
 const deleteAllSessionsExceptMock = vi.fn();
 const createSessionMock = vi.fn();
-const sendPasswordResetEmailMock = vi.fn(async () => undefined);
 const readSessionTokenFromRequestMock = vi.fn(() => null);
 let authMode: "local" | "clerk" = "local";
 
@@ -39,13 +38,6 @@ vi.mock("../../../src/lib/auth/session", () => ({
   deleteSession: (...arguments_: unknown[]) => deleteSessionMock(...arguments_),
   readSessionTokenFromRequest: (...arguments_: unknown[]) =>
     readSessionTokenFromRequestMock(...arguments_),
-}));
-
-vi.mock("../../../src/services/email-service", () => ({
-  emailService: {
-    sendPasswordResetEmail: (...arguments_: unknown[]) =>
-      sendPasswordResetEmailMock(...arguments_),
-  },
 }));
 
 import { resetConfigCache } from "../../../src/config";
@@ -201,7 +193,6 @@ describe("auth routes", () => {
     deleteAllSessionsExceptMock.mockReset();
     deleteAllUserSessionsMock.mockReset();
     deleteSessionMock.mockReset();
-    sendPasswordResetEmailMock.mockReset();
     readSessionTokenFromRequestMock.mockReset();
 
     safeQueryMock.mockReturnValue(null);
@@ -212,97 +203,7 @@ describe("auth routes", () => {
     hashPasswordMock.mockResolvedValue("hashed-password");
     verifyPasswordMock.mockResolvedValue(true);
     createSessionMock.mockReturnValue({ token: "new-session-id.secret", sessionId: "new-session-id" });
-    sendPasswordResetEmailMock.mockResolvedValue(undefined);
     readSessionTokenFromRequestMock.mockReturnValue(null);
-  });
-
-  describe("POST /api/auth/reset-password", () => {
-    it("resets password with a valid token", async () => {
-      safeQueryMock.mockReturnValue({
-        id: "reset-token-row-id",
-        user_id: 42,
-        expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        used_at: null,
-      });
-
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/reset-password", {
-        token: "valid-reset-token",
-        newPassword: "new-password-123",
-      });
-
-      expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toEqual({
-        success: true,
-        message: "Password has been reset successfully.",
-      });
-
-      expect(hashPasswordMock).toHaveBeenCalledWith("new-password-123");
-      expect(safeExecuteMock).toHaveBeenCalledWith(
-        fakeDb,
-        expect.stringContaining("UPDATE users SET password = ?"),
-        ["hashed-password", 42],
-      );
-      expect(safeExecuteMock).toHaveBeenCalledWith(
-        fakeDb,
-        expect.stringContaining("UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP"),
-        ["reset-token-row-id"],
-      );
-      expect(deleteAllUserSessionsMock).toHaveBeenCalledWith(fakeDb, 42);
-    });
-
-    it("returns 401 for unknown reset token", async () => {
-      safeQueryMock.mockReturnValue(null);
-
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/reset-password", {
-        token: "unknown-token",
-        newPassword: "new-password-123",
-      });
-
-      expect(response.status).toBe(401);
-      await expect(response.json()).resolves.toMatchObject({
-        success: false,
-        code: "AUTHENTICATION_ERROR",
-        message: "Invalid or expired password reset token.",
-      });
-    });
-
-    it("returns 401 for expired reset token", async () => {
-      safeQueryMock.mockReturnValue({
-        id: "expired-token-row-id",
-        user_id: 11,
-        expires_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        used_at: null,
-      });
-
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/reset-password", {
-        token: "expired-token",
-        newPassword: "new-password-123",
-      });
-
-      expect(response.status).toBe(401);
-      await expect(response.json()).resolves.toMatchObject({
-        success: false,
-        code: "AUTHENTICATION_ERROR",
-        message: "Invalid or expired password reset token.",
-      });
-    });
-
-    it("returns 400 for schema-invalid payload", async () => {
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/reset-password", {
-        token: "token",
-        newPassword: "short",
-      });
-
-      expect(response.status).toBe(400);
-      await expect(response.json()).resolves.toMatchObject({
-        success: false,
-        code: "VALIDATION_ERROR",
-      });
-    });
   });
 
   describe("POST /api/auth/register", () => {
@@ -547,54 +448,6 @@ describe("auth routes", () => {
         authenticated: false,
         user: null,
       });
-    });
-  });
-
-  describe("POST /api/auth/forgot-password", () => {
-    it("creates reset token and sends email for known user", async () => {
-      safeQueryMock.mockReturnValue({
-        id: 9,
-        email: "local@example.com",
-      });
-
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/forgot-password", {
-        email: "local@example.com",
-      });
-
-      expect(response.status).toBe(200);
-      expect(sendPasswordResetEmailMock).toHaveBeenCalledTimes(1);
-      expect(safeExecuteMock).toHaveBeenCalledWith(
-        fakeDb,
-        expect.stringContaining("INSERT INTO password_reset_tokens"),
-        expect.arrayContaining([9]),
-      );
-    });
-
-    it("returns generic success for unknown user without sending email", async () => {
-      safeQueryMock.mockReturnValue(null);
-
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/forgot-password", {
-        email: "unknown@example.com",
-      });
-
-      expect(response.status).toBe(200);
-      expect(sendPasswordResetEmailMock).not.toHaveBeenCalled();
-    });
-
-    it("returns 404 outside local auth mode", async () => {
-      authMode = "clerk";
-      process.env.APP_MODE = "managed";
-      process.env.AUTH_MODE = "clerk";
-      process.env.BILLING_MODE = "managed";
-      resetConfigCache();
-      const app = createAuthTestApp(fakeDb);
-      const response = await postJson(app, "/api/auth/forgot-password", {
-        email: "local@example.com",
-      });
-
-      expect(response.status).toBe(404);
     });
   });
 

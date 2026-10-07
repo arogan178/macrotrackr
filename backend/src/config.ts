@@ -30,14 +30,9 @@ const BaseEnvSchema = z.object({
   AUTH_MODE: z.enum(["clerk", "local"]).default("local"),
   BILLING_MODE: z.enum(["managed", "disabled"]).default("disabled"),
   ANALYTICS_MODE: z.enum(["posthog", "disabled"]).default("disabled"),
-  EMAIL_MODE: z.enum(["resend", "smtp", "disabled"]).default("disabled"),
   APP_URL: z
     .url("APP_URL must be a valid URL")
     .default("http://localhost:5173"),
-  PUBLIC_APP_NAME: z
-    .string()
-    .min(1, "PUBLIC_APP_NAME is required")
-    .default("MacroTrackr"),
   SUPPORT_EMAIL: z
     .email("SUPPORT_EMAIL must be a valid email")
     .default("support@local.invalid"),
@@ -74,7 +69,6 @@ const BaseEnvSchema = z.object({
   GOOGLE_PLAY_PRODUCT_ID_MONTHLY: z.string().optional(),
   GOOGLE_PLAY_PRODUCT_ID_YEARLY: z.string().optional(),
 
-  RESEND_API_KEY: z.string().optional(),
   CLERK_PUBLISHABLE_KEY: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
   CLERK_WEBHOOK_SECRET: z.string().optional(),
@@ -90,12 +84,6 @@ const BaseEnvSchema = z.object({
         .map((email) => email.trim().toLowerCase())
         .filter(Boolean),
     ),
-
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.coerce.number().int().positive().optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.email("SMTP_FROM must be a valid email").optional(),
 
   METRICS_API_KEY: z.string().min(1).optional(),
 });
@@ -218,18 +206,6 @@ function validateProviderRequirements(
   if (config.ANALYTICS_MODE === "posthog") {
     requireValue("POSTHOG_KEY", config.POSTHOG_KEY, errors);
     requireValue("POSTHOG_HOST", config.POSTHOG_HOST, errors);
-  }
-
-  if (config.EMAIL_MODE === "resend") {
-    requireValue("RESEND_API_KEY", config.RESEND_API_KEY, errors);
-  }
-
-  if (config.EMAIL_MODE === "smtp") {
-    requireValue("SMTP_HOST", config.SMTP_HOST, errors);
-    requireValue("SMTP_PORT", config.SMTP_PORT, errors);
-    requireValue("SMTP_USER", config.SMTP_USER, errors);
-    requireValue("SMTP_PASS", config.SMTP_PASS, errors);
-    requireValue("SMTP_FROM", config.SMTP_FROM, errors);
   }
 
   return errors;

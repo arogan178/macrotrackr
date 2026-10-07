@@ -98,7 +98,6 @@ app.get("/api/protected", async (c) => {
 const AUTH_EXEMPT_PATHS = [
   "/health",
   "/health/ready",
-  "/api/auth/reset-password",
   "/api/webhooks/clerk",
   // ...
 ];

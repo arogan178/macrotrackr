@@ -1,6 +1,5 @@
 import type { Database } from "bun:sqlite";
 import { Elysia } from "elysia";
-import { randomBytes, createHash } from "node:crypto";
 import {
   type UserRow,
   safeExecute,
@@ -28,8 +27,6 @@ import {
   readSessionTokenFromRequest,
 } from "../../lib/auth/session";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
-import { emailService } from "../../services/email-service";
-import { generateId } from "../../utils/id-generator";
 import { getConfig } from "../../config";
 import { captureProductEvent } from "../../lib/analytics/product-analytics";
 import { AuthSchemas } from "./schemas";
@@ -125,14 +122,6 @@ type LoginRequestBody = {
   password: string;
 };
 
-type ForgotPasswordRequestBody = {
-  email: string;
-};
-
-type ResetPasswordRequestBody = {
-  token: string;
-  newPassword: string;
-};
 
 type ChangePasswordRequestBody = {
   currentPassword: string;
@@ -162,25 +151,6 @@ function getClientIp(request: Request): string | null {
     return forwarded.split(",")[0]?.trim() ?? null;
   }
   return request.headers.get("x-real-ip");
-}
-
-function hashResetToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
-}
-
-function createPasswordResetTokenPair(): {
-  rawToken: string;
-  tokenHash: string;
-} {
-  const rawToken = randomBytes(32).toString("base64url");
-  return {
-    rawToken,
-    tokenHash: hashResetToken(rawToken),
-  };
-}
-
-function buildResetTokenExpiry(): string {
-  return new Date(Date.now() + 60 * 60 * 1000).toISOString();
 }
 
 function getHeaderValue(headers: unknown, key: string): string | null {
@@ -485,140 +455,6 @@ export const authRoutes = (app: Elysia) =>
           response: AuthSchemas.sessionResponse,
           detail: {
             summary: "Get local session status",
-            tags: ["Auth"],
-          },
-        },
-      )
-      .post(
-        "/forgot-password",
-        async (context) => {
-          const { db, body } =
-            context as unknown as AuthRouteContext<ForgotPasswordRequestBody> & {
-              body: ForgotPasswordRequestBody;
-            };
-
-          const authHeader = getHeaderValue(context.headers, "authorization");
-          if (authHeader) {
-            context.set.status = 404;
-            throw new NotFoundError("Not found");
-          }
-
-          if (getConfig().AUTH_MODE !== "local") {
-            context.set.status = 404;
-            throw new NotFoundError("Not found");
-          }
-
-          const email = body.email.trim().toLowerCase();
-          const user = safeQuery<{ id: number; email: string }>(
-            db,
-            "SELECT id, email FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
-            [email],
-          );
-
-          if (!user) {
-            return {
-              success: true,
-              message: "If this email exists, a reset link has been sent.",
-            };
-          }
-
-          const { rawToken, tokenHash } = createPasswordResetTokenPair();
-          const expiresAt = buildResetTokenExpiry();
-
-          safeExecute(
-            db,
-            "UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP WHERE user_id = ? AND used_at IS NULL",
-            [user.id],
-          );
-
-          safeExecute(
-            db,
-            `INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
-             VALUES (?, ?, ?, ?)`,
-            [generateId(), user.id, tokenHash, expiresAt],
-          );
-
-          await emailService.sendPasswordResetEmail(user.email, rawToken);
-
-          return {
-            success: true,
-            message: "If this email exists, a reset link has been sent.",
-          };
-        },
-        {
-          body: AuthSchemas.forgotPassword,
-          response: AuthSchemas.successResponse,
-          detail: {
-            summary: "Request password reset",
-            tags: ["Auth"],
-          },
-        },
-      )
-      .post(
-        "/reset-password",
-        async (context) => {
-          const { db, body } =
-            context as unknown as AuthRouteContext<ResetPasswordRequestBody> & {
-              body: ResetPasswordRequestBody;
-            };
-
-          const tokenHash = hashResetToken(body.token);
-
-          const tokenRecord = safeQuery<{
-            id: string;
-            user_id: number;
-            expires_at: string;
-            used_at: string | null;
-          }>(
-            db,
-            `SELECT id, user_id, expires_at, used_at
-             FROM password_reset_tokens
-             WHERE token_hash = ?
-             LIMIT 1`,
-            [tokenHash],
-          );
-
-          if (!tokenRecord || tokenRecord.used_at) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token.",
-            );
-          }
-
-          const expiresAt = new Date(tokenRecord.expires_at);
-          if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token.",
-            );
-          }
-
-          const newPasswordHash = await hashPassword(body.newPassword);
-
-          withTransaction(db, () => {
-            safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
-              newPasswordHash,
-              tokenRecord.user_id,
-            ]);
-            safeExecute(
-              db,
-              "UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
-              [tokenRecord.id],
-            );
-            deleteAllUserSessions(db, tokenRecord.user_id);
-          });
-
-          publishUserSyncEvent(tokenRecord.user_id, "session_revoked");
-
-          return {
-            success: true,
-            message: "Password has been reset successfully.",
-          };
-        },
-        {
-          body: AuthSchemas.resetPassword,
-          response: AuthSchemas.successResponse,
-          detail: {
-            summary: "Reset password with token",
-            description: "Resets a password using a valid password reset token",
             tags: ["Auth"],
           },
         },
