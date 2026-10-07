@@ -30,7 +30,7 @@ export function RequireUnauth({ children }: { children: React.ReactNode }) {
 
   if (isSignedIn) {
     if (isClerkAuthMode) {
-      return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} />;
+      return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} replace />;
     }
 
     return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
