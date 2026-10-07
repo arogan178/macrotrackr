@@ -10,6 +10,8 @@ import {
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
+import { PendingSyncMarker } from "./PendingSyncMarker";
+
 interface EntryCardProps {
   entry: MacroEntry;
   onEdit: (entry: MacroEntry) => void;
@@ -101,10 +103,14 @@ export const EntryCard = memo(
           />
         </div>
 
-        {(entry.foodName ?? entry.mealName) && (
-          <p className="mb-2 truncate text-sm text-muted">
-            {entry.foodName ?? entry.mealName}
-          </p>
+        {/* Not in the header: on a phone it pushes the action buttons out of the card. */}
+        {(Boolean(entry.foodName ?? entry.mealName) || entry.$hasPendingWrites) && (
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <p className="min-w-0 truncate text-sm text-muted">
+              {entry.foodName ?? entry.mealName}
+            </p>
+            <PendingSyncMarker entry={entry} />
+          </div>
         )}
 
         {/* One line of values instead of four bordered boxes: a row was ~200px

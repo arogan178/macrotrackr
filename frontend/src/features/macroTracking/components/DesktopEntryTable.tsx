@@ -22,6 +22,7 @@ import type {
   GroupedEntry,
 } from "./EntryHistoryShared";
 import { IngredientsList } from "./IngredientsList";
+import { PendingSyncMarker } from "./PendingSyncMarker";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
@@ -183,6 +184,7 @@ const DesktopEntryTable = memo(
                     {entry.foodName ?? entry.mealName}
                   </span>
                 )}
+                <PendingSyncMarker entry={entry} />
               </div>
             );
           },
