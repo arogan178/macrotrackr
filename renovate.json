@@ -11,11 +11,10 @@
       "groupName": "minor and patch updates"
     },
     {
-      "description": "Handled manually: motion 14, Stripe 23, svix 2, Resend 6, Pino 10, react-syntax-highlighter 16, TanStack Table 9. Remove entries as each lands.",
+      "description": "Handled manually: motion 14, Stripe 23, Resend 6, Pino 10, react-syntax-highlighter 16, TanStack Table 9. Remove entries as each lands.",
       "matchPackageNames": [
         "motion",
         "stripe",
-        "svix",
         "resend",
         "pino",
         "react-syntax-highlighter",
