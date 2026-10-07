@@ -47,8 +47,8 @@ export const AuthSchemas = {
         t.Object({
           id: t.Number(),
           email: t.String(),
-          firstName: t.Optional(t.Nullable(t.String())),
-          lastName: t.Optional(t.Nullable(t.String())),
+          firstName: t.String(),
+          lastName: t.String(),
         }),
       ),
     ),

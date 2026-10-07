@@ -309,6 +309,30 @@ describe("auth routes", () => {
       );
     });
 
+    it("returns empty strings for an account with no stored name", async () => {
+      safeQueryMock.mockReturnValue({
+        id: 5,
+        email: "local@example.com",
+        first_name: null,
+        last_name: null,
+        password: "stored-hash",
+      });
+
+      const app = createAuthTestApp(fakeDb);
+      const response = await postJson(app, "/api/auth/login", {
+        email: "local@example.com",
+        password: "secure-password",
+      });
+
+      expect(response.status).toBe(200);
+      expect((await response.json()).user).toEqual({
+        id: 5,
+        email: "local@example.com",
+        firstName: "",
+        lastName: "",
+      });
+    });
+
     it("returns 401 for invalid credentials", async () => {
       safeQueryMock.mockReturnValue({
         id: 5,
