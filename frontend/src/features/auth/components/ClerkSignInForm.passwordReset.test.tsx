@@ -10,6 +10,7 @@ const {
   signInCreate,
   prepareSecondFactor,
   attemptSecondFactor,
+  attemptFirstFactor,
   setActive,
   navigate,
   showNotification,
@@ -18,6 +19,7 @@ const {
   signInCreate: vi.fn(),
   prepareSecondFactor: vi.fn(),
   attemptSecondFactor: vi.fn(),
+  attemptFirstFactor: vi.fn(),
   setActive: vi.fn(),
   navigate: vi.fn(),
   showNotification: vi.fn(),
@@ -77,6 +79,7 @@ vi.mock("@clerk/react/legacy", () => ({
       create: signInCreate,
       prepareSecondFactor,
       attemptSecondFactor,
+      attemptFirstFactor,
     },
   }),
   useSignUp: () => ({ isLoaded: true, signUp: {} }),
@@ -123,82 +126,61 @@ vi.mock("@/features/auth/utils/linkIntent", () => ({
   getAuthLinkIntent: () => null,
 }));
 
-async function signInWithPassword(user: ReturnType<typeof userEvent.setup>) {
+async function requestResetCode(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: /continue with email/i }));
   await user.type(screen.getByLabelText(/email/i), "user@example.com");
-  await user.type(screen.getByLabelText(/password/i), "correct-horse");
-  await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+  await user.click(screen.getByRole("button", { name: /forgot password/i }));
+
+  expect(screen.getByLabelText(/email/i)).toHaveValue("user@example.com");
+  await user.click(screen.getByRole("button", { name: /send reset code/i }));
+
+  await screen.findByLabelText(/reset code/i);
+}
+
+async function submitReset(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText(/reset code/i), "424242");
+  await user.type(screen.getByLabelText(/new password/i), "a-new-long-password");
+  await user.click(screen.getByRole("button", { name: /^reset password$/i }));
 }
 
 function renderForm() {
-  render(
-    <ClerkSignInForm
-      onSwitchToSignUp={vi.fn()}
-      redirectTo="/home"
-    />,
-  );
+  render(<ClerkSignInForm onSwitchToSignUp={vi.fn()} redirectTo="/home" />);
 }
 
-describe("ClerkSignInForm device trust", () => {
+describe("ClerkSignInForm password reset", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    signInCreate.mockResolvedValue({ status: "needs_first_factor" });
     prepareSecondFactor.mockResolvedValue({});
   });
 
-  it("challenges for an email code when Clerk reports needs_client_trust", async () => {
+  it("sends a reset code, sets the new password and signs in", async () => {
     const user = userEvent.setup();
-    signInCreate.mockResolvedValue({
-      status: "needs_client_trust",
-      supportedSecondFactors: [
-        {
-          strategy: "email_code",
-          emailAddressId: "idn_1",
-          safeIdentifier: "u****@example.com",
-        },
-      ],
-    });
-
-    renderForm();
-    await signInWithPassword(user);
-
-    await waitFor(() => {
-      expect(prepareSecondFactor).toHaveBeenCalledWith({
-        strategy: "email_code",
-        emailAddressId: "idn_1",
-      });
-    });
-
-    expect(await screen.findByText("Verify this device")).toBeInTheDocument();
-    expect(screen.getByText(/u\*{4}@example\.com/)).toBeInTheDocument();
-  });
-
-  it("completes the sign-in once the code verifies", async () => {
-    const user = userEvent.setup();
-    signInCreate.mockResolvedValue({
-      status: "needs_client_trust",
-      supportedSecondFactors: [{ strategy: "email_code" }],
-    });
-    attemptSecondFactor.mockResolvedValue({
+    attemptFirstFactor.mockResolvedValue({
       status: "complete",
-      createdSessionId: "sess_abc",
+      createdSessionId: "sess_reset",
     });
 
     renderForm();
-    await signInWithPassword(user);
+    await requestResetCode(user);
 
-    await screen.findByText("Verify this device");
-    await user.type(screen.getByLabelText(/verification code/i), "123456");
-    await user.click(screen.getByRole("button", { name: "Verify" }));
-
-    await waitFor(() => {
-      expect(attemptSecondFactor).toHaveBeenCalledWith({
-        strategy: "email_code",
-        code: "123456",
-      });
+    expect(signInCreate).toHaveBeenCalledWith({
+      strategy: "reset_password_email_code",
+      identifier: "user@example.com",
     });
+    expect(
+      screen.getByRole("button", { name: /resend code in 30s/i }),
+    ).toBeDisabled();
 
+    await submitReset(user);
+
+    expect(attemptFirstFactor).toHaveBeenCalledWith({
+      strategy: "reset_password_email_code",
+      code: "424242",
+      password: "a-new-long-password",
+    });
     await waitFor(() => {
-      expect(setActive).toHaveBeenCalledWith({ session: "sess_abc" });
+      expect(setActive).toHaveBeenCalledWith({ session: "sess_reset" });
     });
     expect(navigate).toHaveBeenCalledWith({
       to: "/auth-ready",
@@ -206,62 +188,49 @@ describe("ClerkSignInForm device trust", () => {
     });
   });
 
-  it("keeps the user on the challenge and explains a rejected code", async () => {
+  it.each([
+    ["form_code_incorrect", "Incorrect code"],
+    [
+      "form_password_pwned",
+      "Password has been found in an online data breach. For account safety, please use a different password.",
+    ],
+  ])("shows Clerk's message for %s and stays on the form", async (code, longMessage) => {
     const user = userEvent.setup();
-    signInCreate.mockResolvedValue({
-      status: "needs_client_trust",
-      supportedSecondFactors: [{ strategy: "email_code" }],
-    });
-    attemptSecondFactor.mockRejectedValue({
-      errors: [{ code: "verification_expired", message: "expired" }],
+    attemptFirstFactor.mockRejectedValue({
+      errors: [{ code, message: "short", longMessage }],
     });
 
     renderForm();
-    await signInWithPassword(user);
+    await requestResetCode(user);
+    await submitReset(user);
 
-    await screen.findByText("Verify this device");
-    await user.type(screen.getByLabelText(/verification code/i), "000000");
-    await user.click(screen.getByRole("button", { name: "Verify" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "That code has expired. Request a new one.",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(longMessage);
+    expect(screen.getByLabelText(/reset code/i)).toBeInTheDocument();
     expect(setActive).not.toHaveBeenCalled();
   });
 
-  it("uses the same challenge for MFA, preferring the authenticator app", async () => {
+  it("hands over to the second-factor challenge when 2FA is on", async () => {
     const user = userEvent.setup();
-    signInCreate.mockResolvedValue({
+    attemptFirstFactor.mockResolvedValue({
       status: "needs_second_factor",
-      supportedSecondFactors: [
-        { strategy: "email_code" },
-        { strategy: "totp" },
-      ],
+      supportedSecondFactors: [{ strategy: "totp" }],
     });
-
-    renderForm();
-    await signInWithPassword(user);
-
-    expect(
-      await screen.findByText("Two-factor authentication"),
-    ).toBeInTheDocument();
-    // TOTP needs no delivery, so nothing should have been sent.
-    expect(prepareSecondFactor).not.toHaveBeenCalled();
-  });
-
-  it("still completes normally when no second factor is required", async () => {
-    const user = userEvent.setup();
-    signInCreate.mockResolvedValue({
+    attemptSecondFactor.mockResolvedValue({
       status: "complete",
-      createdSessionId: "sess_direct",
+      createdSessionId: "sess_2fa",
     });
 
     renderForm();
-    await signInWithPassword(user);
+    await requestResetCode(user);
+    await submitReset(user);
+
+    await screen.findByText("Two-factor authentication");
+    await user.type(screen.getByLabelText(/code/i), "123456");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
 
     await waitFor(() => {
-      expect(setActive).toHaveBeenCalledWith({ session: "sess_direct" });
+      expect(setActive).toHaveBeenCalledWith({ session: "sess_2fa" });
     });
-    expect(prepareSecondFactor).not.toHaveBeenCalled();
   });
 });
+

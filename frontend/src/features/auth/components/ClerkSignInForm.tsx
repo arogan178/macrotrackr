@@ -9,6 +9,7 @@ import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
+import { ClerkPasswordReset } from "@/features/auth/components/ClerkPasswordReset";
 import { LegalConsentNotice } from "@/features/auth/components/LegalConsentNotice";
 import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
 import {
@@ -41,7 +42,6 @@ import { useStore } from "@/store/store";
 
 interface ClerkSignInFormProps {
   onSwitchToSignUp: () => void;
-  onForgotPassword: () => void;
   redirectTo?: string;
 }
 
@@ -102,7 +102,6 @@ function resolveSecondFactorErrorMessage(
 
 export function ClerkSignInForm({
   onSwitchToSignUp,
-  onForgotPassword,
   redirectTo,
 }: ClerkSignInFormProps) {
   const navigate = useNavigate();
@@ -117,6 +116,7 @@ export function ClerkSignInForm({
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [isEmailMode, setIsEmailMode] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(false);
   const [showLinkIntentBanner] = useState(() => getAuthLinkIntent() !== null);
 
   // Second-factor challenge state, used for both MFA and Device Trust.
@@ -168,6 +168,20 @@ export function ClerkSignInForm({
       to: "/auth-ready",
       search: { redirectTo: normalizedRedirect },
     });
+  };
+
+  const startPasswordReset = () => {
+    setPassword("");
+    setIsResetMode(true);
+  };
+
+  // Cancelling the challenge should land on email sign-in, not a spent reset code.
+  const beginResetSecondFactor = async (
+    supportedSecondFactors: unknown[] | null,
+  ) => {
+    setIsResetMode(false);
+    setIsEmailMode(true);
+    await beginSecondFactor(supportedSecondFactors, false);
   };
 
   const resetSecondFactor = () => {
@@ -486,10 +500,10 @@ export function ClerkSignInForm({
 
           if (supportedStrategies?.includes("reset_password_email_code")) {
             showNotification(
-              "Your password needs to be reset. Please check your email for reset instructions.",
+              "Your password needs to be reset. Send yourself a reset code to continue.",
               "info",
             );
-            onForgotPassword();
+            startPasswordReset();
           } else if (supportedStrategies?.includes("email_code")) {
             showNotification(
               "Please check your email for the verification code.",
@@ -505,13 +519,11 @@ export function ClerkSignInForm({
           break;
         }
         case "needs_new_password": {
-          // Password was changed or expired
           showNotification(
-            "Your password has been changed. Please check your email or reset your password.",
+            "Your password needs to be reset. Send yourself a reset code to continue.",
             "info",
           );
-          // Redirect to forgot password page
-          onForgotPassword();
+          startPasswordReset();
 
           break;
         }
@@ -639,6 +651,16 @@ export function ClerkSignInForm({
             isResending={isResendingSecondFactor}
             error={secondFactorError}
           />
+        ) : isResetMode ? (
+          <ClerkPasswordReset
+            email={email}
+            onEmailChange={setEmail}
+            password={password}
+            onPasswordChange={setPassword}
+            onComplete={completeSignIn}
+            onNeedsSecondFactor={beginResetSecondFactor}
+            onCancel={() => setIsResetMode(false)}
+          />
         ) : isEmailMode ? (
           <motion.div
             key="email-sign-in"
@@ -701,7 +723,7 @@ export function ClerkSignInForm({
                     <div className="flex justify-end">
                       <button
                         type="button"
-                        onClick={onForgotPassword}
+                        onClick={startPasswordReset}
                         className="inline-flex min-h-11 items-center rounded-control px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
                       >
                         Forgot password?
