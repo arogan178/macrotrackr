@@ -1,5 +1,29 @@
 [
   {
+    "version": "3.5.0",
+    "date": "2026-10-07",
+    "title": "Offline Logging, Password Reset, and a Much Lighter First Load",
+    "type": "release",
+    "summary": "Version 3.5 lets you log food with no signal and sends it when the connection returns. Hosted accounts can finally reset a forgotten password, and the first load needs about half the JavaScript it did. Self-hosting gets safer database upgrades and a simpler way to reset passwords. Along the way there are many smaller logging, habit and unit improvements, and a round of fixes to goals, profile saves and sign-out.",
+    "highlights": [
+      "Log food with no signal: entries made offline are kept on your device and sent once, in order, when the connection returns. The app now opens offline as the last account you signed in with",
+      "Reset a forgotten password on the hosted app with a code sent to your email. This never worked before",
+      "Faster first load: a page needs about half the JavaScript before it can start, down from 469 KB compressed to about 214 KB",
+      "Analytics now loads after the app starts, and is not in self-hosted builds at all",
+      "Self-hosting: database changes run as numbered migrations on startup, so upgrades are predictable",
+      "Self-hosting: password reset is now a server command, bun run reset-password <email>, and the unused email settings are gone. Docker images build on Bun 1.3 from the locked dependency versions",
+      "Logging is quicker: undo a deleted entry, log an entry again, copy a past day to today, edit an entry's meal, date and time, and filter recents and saved meals as you type",
+      "Edit a saved meal from the search dropdown, including the amount of each ingredient, and recents now rank by how often you log a food",
+      "Browse other days from home, edit a logged weight, and read or enter weight in lb and height in ft and in",
+      "Habits can count per week instead of per day, and daily habits reset each day with undo and reset on the card",
+      "Export your meals, weight log and habits from the Data tab, and get a full export when you delete your account",
+      "Share a calculator result as a link",
+      "Fixes: weight goals without a daily change can be saved, a failed profile save no longer wipes your edits, macro target Reset moves the sliders back, and the weight chart shows its target line",
+      "Fixes: deleting a self-hosted account signs you out, and analytics resets on sign-out so the next person on a shared device is not tracked as you. Cancelled Pro also lasts until the paid period ends",
+      "Security: the dependency refresh cleared both critical advisories and all high ones in shipped code, and dependencies now update automatically each week"
+    ]
+  },
+  {
     "version": "3.1.0",
     "date": "2026-08-24",
     "title": "Barcode Scanning, One-Click Imports, and a Faster Way In",
