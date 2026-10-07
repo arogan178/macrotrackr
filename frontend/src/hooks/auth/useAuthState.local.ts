@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useIsRestoring, useQuery } from "@tanstack/react-query";
 
 import { authApi } from "@/api/auth";
 import { queryConfigs } from "@/lib/queryClient";
@@ -10,6 +10,7 @@ export interface AppAuthState {
 }
 
 export function useAppAuthState(): AppAuthState {
+  const isRestoring = useIsRestoring();
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.auth.session(),
     queryFn: authApi.getSession,
@@ -18,7 +19,8 @@ export function useAppAuthState(): AppAuthState {
   });
 
   return {
-    isLoaded: !isLoading,
+    // Until the saved session is read back, "no session" is not an answer yet.
+    isLoaded: !isLoading && !isRestoring,
     isSignedIn: Boolean(data?.authenticated),
   };
 }

@@ -29,6 +29,7 @@ import {
 import DeleteAccountForm from "@/features/settings/components/DeleteAccountForm";
 import { useBeforeUnload } from "@/hooks";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
+import { countUnsentEntries } from "@/hooks/queries/macro/entryStore";
 import { useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 
@@ -57,8 +58,16 @@ export default function SettingsPage() {
     error: settingsQueryError,
   } = useSettings();
   const logoutMutation = useLogout();
+  const [unsentEntryCount, setUnsentEntryCount] = useState(0);
 
-  const handleLogout = useCallback(() => {
+  // Signing out clears this device, so entries that never synced would go with it.
+  const handleLogout = useCallback(async () => {
+    const unsent = await countUnsentEntries();
+    if (unsent > 0) {
+      setUnsentEntryCount(unsent);
+
+      return;
+    }
     logoutMutation.mutate();
   }, [logoutMutation]);
 
@@ -275,6 +284,21 @@ export default function SettingsPage() {
           confirmLabel="Discard Changes"
           cancelLabel="Keep Editing"
           onConfirm={confirmTabChange}
+          isDanger
+        />
+
+        <Modal
+          isOpen={unsentEntryCount > 0}
+          onClose={() => setUnsentEntryCount(0)}
+          title="Entries not synced yet"
+          variant="confirmation"
+          message={`${unsentEntryCount} ${unsentEntryCount === 1 ? "entry hasn't" : "entries haven't"} reached the server yet. Signing out now deletes ${unsentEntryCount === 1 ? "it" : "them"} from this device. Reconnect first to keep ${unsentEntryCount === 1 ? "it" : "them"}.`}
+          confirmLabel="Sign out anyway"
+          cancelLabel="Stay signed in"
+          onConfirm={() => {
+            setUnsentEntryCount(0);
+            logoutMutation.mutate();
+          }}
           isDanger
         />
       </FeaturePage>

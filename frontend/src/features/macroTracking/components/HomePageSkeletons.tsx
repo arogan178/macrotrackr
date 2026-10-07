@@ -24,6 +24,32 @@ export const AddEntryLoadingSkeleton = () => (
   </Panel>
 );
 
+/** The Log sheet's form while its chunk loads. Phone-sized it is the form's
+ *  height, so the sheet does not jump; sm overrides would cost UI budget. */
+export const LogSheetFormSkeleton = () => (
+  <div aria-hidden="true">
+    {["w-28", "w-24", "w-20", "w-20"].map((labelWidth, index) => (
+      <div key={labelWidth + index} className="mb-3.5">
+        <Skeleton className={`mb-2 h-4 ${labelWidth}`} />
+        <Skeleton className={index === 0 ? "h-11 w-full" : "h-10 w-full"} />
+      </div>
+    ))}
+    <Skeleton className="mb-4 h-4 w-32" />
+    <div className="mb-4 grid grid-cols-3 gap-3">
+      {[0, 1, 2].map((index) => (
+        <div key={index}>
+          <Skeleton className="mb-2 h-4 w-12" />
+          <Skeleton className="h-10" />
+        </div>
+      ))}
+    </div>
+    <div className="flex items-center justify-between border-t border-border pt-4">
+      <Skeleton className="h-4 w-28" />
+      <Skeleton className="h-11 w-28" rounded="full" />
+    </div>
+  </div>
+);
+
 export const DailySummaryLoadingSkeleton = () => (
   <Panel className="flex flex-col">
     <div className="mb-6 flex items-center justify-between">

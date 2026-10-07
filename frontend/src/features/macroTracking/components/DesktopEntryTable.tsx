@@ -64,11 +64,11 @@ const DesktopEntryTable = memo(
     } = controller;
 
     const tableContainerReference = useRef<HTMLDivElement>(null);
-    const [expandedEntries, setExpandedEntries] = useState<Set<number>>(
+    const [expandedEntries, setExpandedEntries] = useState<Set<string>>(
       new Set(),
     );
 
-    const toggleEntryExpand = (id: number, event: React.MouseEvent) => {
+    const toggleEntryExpand = (id: string, event: React.MouseEvent) => {
       event.stopPropagation();
       setExpandedEntries((previous) => {
         const newSet = new Set(previous);
@@ -134,10 +134,10 @@ const DesktopEntryTable = memo(
                     <input
                       type="checkbox"
                       className="mr-2 h-4 w-4 rounded-control border-border text-primary focus:ring-primary/50"
-                      checked={isEntrySelected(entry.id)}
+                      checked={isEntrySelected(entry.clientId)}
                       onChange={(event_) => {
                         event_.stopPropagation();
-                        onToggleEntrySelection?.(entry.id);
+                        onToggleEntrySelection?.(entry.clientId);
                       }}
                     />
                   )}
@@ -145,13 +145,13 @@ const DesktopEntryTable = memo(
                     <button
                       type="button"
                       className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
-                      onClick={(event_) => toggleEntryExpand(entry.id, event_)}
+                      onClick={(event_) => toggleEntryExpand(entry.clientId, event_)}
                       aria-label="Toggle ingredients"
                     >
                       <motion.div
                         initial={false}
                         animate={{
-                          rotate: expandedEntries.has(entry.id) ? -180 : 0,
+                          rotate: expandedEntries.has(entry.clientId) ? -180 : 0,
                         }}
                         transition={{ duration: 0.2 }}
                       >
@@ -288,13 +288,13 @@ const DesktopEntryTable = memo(
               return (
                 <IconButtonGroup
                   onEdit={() => onEdit(entry)}
-                  onDelete={() => deleteEntry(entry.id)}
-                  isDeleting={isDeleting(entry.id)}
+                  onDelete={() => deleteEntry(entry.clientId)}
+                  isDeleting={isDeleting(entry.clientId)}
                   onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
                   onUnsaveMeal={
                     onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
                   }
-                  isMealSaved={isMealSaved(entry.id)}
+                  isMealSaved={isMealSaved(entry.clientId)}
                   onLogAgain={onLogAgain ? () => onLogAgain(entry) : undefined}
                   buttonSize="sm"
                 />
@@ -448,7 +448,7 @@ const DesktopEntryTable = memo(
           <AnimatePresence initial={false}>
             {!isGroup &&
               (data.entries[0].ingredients?.length ?? 0) > 1 &&
-              expandedEntries.has(data.entries[0].id) && (
+              expandedEntries.has(data.entries[0].clientId) && (
                 <IngredientsList
                   ingredients={data.entries[0].ingredients ?? []}
                   calculateCalories={calculateCalories}

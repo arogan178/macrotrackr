@@ -1,41 +1,4 @@
-import { type InfiniteData, type QueryClient } from "@tanstack/react-query";
-
 import type { MacroEntry, PaginatedMacroHistory } from "@/types/macro";
-
-export type MacroHistoryInfiniteData = InfiniteData<PaginatedMacroHistory, number>;
-export type MacroHistorySnapshot = Array<
-  readonly [ReadonlyArray<unknown>, MacroHistoryInfiniteData | undefined]
->;
-export type OptimisticMacroEntry = MacroEntry & { optimistic?: boolean };
-
-export function getMacroHistorySnapshots(queryClient: QueryClient) {
-  return queryClient.getQueriesData<MacroHistoryInfiniteData>({
-    queryKey: ["macros", "history-infinite"],
-  });
-}
-
-export function restoreMacroHistorySnapshots(
-  queryClient: QueryClient,
-  snapshots: MacroHistorySnapshot,
-) {
-  for (const [queryKey, data] of snapshots) {
-    if (data === undefined) {
-      queryClient.removeQueries({ queryKey, exact: true });
-      continue;
-    }
-    queryClient.setQueryData(queryKey, data);
-  }
-}
-
-export function updateMacroHistoryCaches(
-  queryClient: QueryClient,
-  updater: (oldData: MacroHistoryInfiniteData | undefined) => MacroHistoryInfiniteData | undefined,
-) {
-  queryClient.setQueriesData<MacroHistoryInfiniteData>(
-    { queryKey: ["macros", "history-infinite"] },
-    updater,
-  );
-}
 
 export function normalizePaginatedHistory(
   response: unknown,

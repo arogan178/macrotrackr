@@ -5,6 +5,9 @@ export const FRONTEND_PORT = process.env.E2E_FRONTEND_PORT || '5173'
 export const BACKEND_PORT = process.env.E2E_BACKEND_PORT || '3000'
 export const FRONTEND_URL = `http://localhost:${FRONTEND_PORT}`
 export const BACKEND_URL = `http://localhost:${BACKEND_PORT}`
+// A production build, for the service worker that opens the app offline.
+export const PREVIEW_PORT = process.env.E2E_PREVIEW_PORT || String(Number(FRONTEND_PORT) + 1)
+export const PREVIEW_URL = `http://localhost:${PREVIEW_PORT}`
 
 export const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'your_email+clerk_test@example.com'
 export const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!'

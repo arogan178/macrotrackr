@@ -17,8 +17,8 @@ const OfflineBar: React.FC = () => {
       className="fixed inset-x-0 z-80 border-b border-border bg-surface-2 px-4 py-2 text-center text-xs text-muted"
       style={{ top: "var(--sat)" }}
     >
-      Offline — showing the last data loaded. New entries will need a
-      connection.
+      Offline. Entries you log are kept on this device and sync when you
+      reconnect.
     </div>
   );
 };

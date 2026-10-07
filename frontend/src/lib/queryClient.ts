@@ -2,6 +2,8 @@ import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persi
 import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
 import type { PersistedClient } from "@tanstack/react-query-persist-client";
 
+import { createIndexedDatabaseStorage as createIndexedDatabaseStorage } from "./indexedDatabaseStorage";
+
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
@@ -84,8 +86,10 @@ export const queryConfigs = {
   },
 } as const;
 
-export const localStoragePersister = createAsyncStoragePersister({
-  storage: globalThis.localStorage,
+// Health data stays out of localStorage (Play's data policy). Offline logging
+// still needs it on the device, so the cache lives in IndexedDB.
+export const queryCachePersister = createAsyncStoragePersister({
+  storage: createIndexedDatabaseStorage("macrotrackr-query-cache"),
   key: "macrotrackr-query-cache",
   serialize: (data: PersistedClient) => JSON.stringify(data),
   deserialize: (data: string): PersistedClient => {
@@ -97,22 +101,22 @@ export const localStoragePersister = createAsyncStoragePersister({
   },
 });
 
-// Health data (macro logs, goals, habits) is sensitive under Play's data
-// policy — keep it out of plaintext localStorage entirely.
-export const doNotPersistKeys = [
-  ["auth"],
-  ["settings", "user"],
-  ["settings", "billing"],
-  ["habits"],
-  ["goals"],
-  ["macros"],
-  ["saved-meals"],
+/** Long enough to open the app signed in after a week without signal. */
+export const QUERY_CACHE_MAX_AGE = 30 * 24 * 60 * MINUTE;
+
+// Only what opening the app and logging food offline need. Everything else
+// is fetched again, so less health data sits on the device.
+export const persistedQueryPrefixes = [
+  ["auth", "user"],
+  ["auth", "session"],
+  ["macros", "recent-entries"],
+  ["macros", "targets"],
+  ["saved-meals", "list"],
+  ["goals", "weight"],
 ] as const;
 
 export function shouldPersistQuery(queryKey: readonly unknown[]): boolean {
-  return !doNotPersistKeys.some(
-    (prefix) =>
-      queryKey[0] === prefix[0] &&
-      (prefix.length < 2 || queryKey[1] === prefix[1]),
+  return persistedQueryPrefixes.some(
+    ([first, second]) => queryKey[0] === first && queryKey[1] === second,
   );
 }

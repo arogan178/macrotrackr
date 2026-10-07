@@ -26,16 +26,16 @@ export interface EntryHistoryController {
   handleCopyDate: (date: string, event: MouseEvent) => void;
 
   onEdit: (entry: MacroEntry) => void;
-  deleteEntry: (id: number) => void;
+  deleteEntry: (id: string) => void;
 
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
   onLogAgain?: (entry: MacroEntry) => void;
 
-  isMealSaved: (entryId: number) => boolean;
+  isMealSaved: (entryId: string) => boolean;
 
-  isDeleting: (id: number) => boolean;
+  isDeleting: (id: string) => boolean;
   isSelectionMode: boolean;
-  isEntrySelected: (id: number) => boolean;
-  onToggleEntrySelection?: (id: number) => void;
+  isEntrySelected: (id: string) => boolean;
+  onToggleEntrySelection?: (id: string) => void;
 }

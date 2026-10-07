@@ -18,6 +18,7 @@ import {
   buildWeightLogCsv,
 } from "@/features/settings/utils/dataExport";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
+import { clearSignedOutAccount } from "@/hooks/queries/macro/entryStore";
 import { todayISO } from "@/utils/dateUtilities";
 
 /** Typed exactly, or the button stays disabled. */
@@ -72,6 +73,8 @@ const DeleteAccountForm: React.FC = () => {
       setError(null);
       try {
         await userApi.deleteAccount();
+        // Cleared here too: signing out of an account that no longer exists can fail.
+        await clearSignedOutAccount();
         // The account is gone, so the session is meaningless. Clear it rather
         // than leaving the app holding a token for a user that no longer exists.
         logout.mutate();

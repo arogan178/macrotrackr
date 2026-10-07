@@ -316,6 +316,7 @@ describe("EntryHistoryHelpers & Panel", () => {
           history={[
             {
               id: 41,
+              clientId: "entry-41",
               mealName: "Toast",
               mealType: "breakfast",
               protein: 5,
@@ -337,7 +338,7 @@ describe("EntryHistoryHelpers & Panel", () => {
     fireEvent.click(screen.getAllByLabelText("Delete all entries for Today")[0]);
     fireEvent.click(await screen.findByRole("button", { name: "Delete All" }));
 
-    expect(deleteEntry).toHaveBeenCalledWith(41, { undoable: false });
+    expect(deleteEntry).toHaveBeenCalledWith("entry-41", { undoable: false });
   });
 });
 

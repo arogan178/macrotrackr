@@ -1,16 +1,13 @@
 import { lazy, Suspense } from "react";
-import { useLocation } from "@tanstack/react-router";
 
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Modal from "@/components/ui/Modal";
 import { useLogSheet } from "@/lib/logSheet";
 
-import { useAddEntry } from "../hooks/useAddEntry";
-import { useHomeDate } from "../hooks/useHomePage";
+import { LogSheetFormSkeleton } from "./HomePageSkeletons";
 
-/** The form is the heaviest thing on Home; the layout should not pay for it
- *  until someone actually asks to log something. */
-const AddEntryForm = lazy(() => import("./AddEntryForm"));
+/** The form and the offline entry store are the heaviest things on Home; the
+ *  layout should not pay for them until someone actually asks to log something. */
+const LogSheetForm = lazy(() => import("./LogSheetForm"));
 
 /**
  * Logging, available from wherever the user already is.
@@ -23,17 +20,9 @@ const AddEntryForm = lazy(() => import("./AddEntryForm"));
 export default function LogSheet() {
   const [isOpen, setOpen] = useLogSheet();
 
-  // The mutations live in the inner component so that mounting this in the
-  // layout costs nothing on the pages where nobody opens it.
   if (!isOpen) return null;
 
-  return <LogSheetContent onClose={() => setOpen(false)} />;
-}
-
-function LogSheetContent({ onClose }: { onClose: () => void }) {
-  const { addEntry, isSaving } = useAddEntry();
-  const isOnHome = useLocation({ select: (location) => location.pathname === "/home" });
-  const { date, isToday } = useHomeDate();
+  const onClose = () => setOpen(false);
 
   return (
     <Modal
@@ -44,22 +33,8 @@ function LogSheetContent({ onClose }: { onClose: () => void }) {
       variant="form"
       hideDefaultButtons
     >
-      <Suspense
-        fallback={
-          <div className="flex justify-center py-10">
-            <LoadingSpinner />
-          </div>
-        }
-      >
-        <AddEntryForm
-          onSubmit={async (entry) => {
-            await addEntry(entry);
-            onClose();
-          }}
-          isSaving={isSaving}
-          inSheet
-          defaultDate={isOnHome && !isToday ? date : undefined}
-        />
+      <Suspense fallback={<LogSheetFormSkeleton />}>
+        <LogSheetForm onClose={onClose} />
       </Suspense>
     </Modal>
   );

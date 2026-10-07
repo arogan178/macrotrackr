@@ -18,6 +18,7 @@ import { isClerkAuthMode } from "@/config/runtime";
 import { usePageMetadata } from "@/hooks";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
+import { offlineSessionNavigated } from "@/lib/offlineSession";
 
 import { LoadingFallback } from "./-authGuards";
 
@@ -60,6 +61,10 @@ function RootComponent() {
   const location = useLocation();
   const { isLoaded, isSignedIn } = useAppAuthState();
   useRealtimeSync(isLoaded && isSignedIn);
+
+  useEffect(() => {
+    offlineSessionNavigated();
+  }, [location.pathname]);
 
   // This document started on a public route with no session, so no
   // ClerkProvider was mounted. The auth screens call Clerk hooks directly and

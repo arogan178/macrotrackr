@@ -36,9 +36,9 @@ import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
-  deleteEntry: (id: number, options?: { undoable?: boolean }) => void;
+  deleteEntry: (id: string, options?: { undoable?: boolean }) => void;
   onEdit: (entry: MacroEntry) => void;
-  isDeleting: (id: number) => boolean;
+  isDeleting: (id: string) => boolean;
   isEditing: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -46,7 +46,7 @@ interface EntryHistoryProps {
   limits?: HistoryLimits;
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
-  savedMealIds?: Set<number>;
+  savedMealIds?: Set<string>;
   onGroupMeals?: (
     name: string,
     mealType: string,
@@ -85,7 +85,7 @@ const EntryHistoryComponent = function EntryHistory({
   const [dateToCopy, setDateToCopy] = useState<string | undefined>();
 
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedEntryIds, setSelectedEntryIds] = useState<Set<number>>(
+  const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(
     new Set(),
   );
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -99,7 +99,7 @@ const EntryHistoryComponent = function EntryHistory({
     }
   }, [isSelectionMode]);
 
-  const toggleEntrySelection = useCallback((id: number) => {
+  const toggleEntrySelection = useCallback((id: string) => {
     setSelectedEntryIds((previous) => {
       const newSet = new Set(previous);
       if (newSet.has(id)) {
@@ -121,7 +121,7 @@ const EntryHistoryComponent = function EntryHistory({
     if (!onGroupMeals || !groupMealName || selectedEntryIds.size < 2) return;
 
     const selectedEntries = history.filter((entry) =>
-      selectedEntryIds.has(entry.id),
+      selectedEntryIds.has(entry.clientId),
     );
     try {
       await onGroupMeals(groupMealName, groupMealType, selectedEntries);
@@ -282,12 +282,12 @@ const EntryHistoryComponent = function EntryHistory({
   );
 
   const isMealSaved = useCallback(
-    (entryId: number) => savedMealIds?.has(entryId) ?? false,
+    (entryId: string) => savedMealIds?.has(entryId) ?? false,
     [savedMealIds],
   );
 
   const isEntrySelected = useCallback(
-    (entryId: number) => selectedEntryIds.has(entryId),
+    (entryId: string) => selectedEntryIds.has(entryId),
     [selectedEntryIds],
   );
 
@@ -338,7 +338,7 @@ const EntryHistoryComponent = function EntryHistory({
     const group = totalEntries.find((g) => g.date === dateToDelete);
     if (group?.entries) {
       for (const entry of group.entries) {
-        deleteEntry(entry.id, { undoable: false });
+        deleteEntry(entry.clientId, { undoable: false });
       }
     }
     setIsDeleteModalOpen(false);

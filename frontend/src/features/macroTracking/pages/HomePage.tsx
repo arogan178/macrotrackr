@@ -24,16 +24,14 @@ import {
   useHomeHeader,
   useNutritionProfile,
 } from "@/features/macroTracking/hooks/useHomePage";
-import type { EditingEntry } from "@/features/macroTracking/types/macro";
 import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
-  useDeleteMacroEntry,
+  useEntryStore,
   useMacroDailyTotals,
   useMacroTargetQuery,
-  useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
 import {
   useCreateSavedMeal,
@@ -80,8 +78,9 @@ export default function HomePage() {
 
   const { addEntry: handleAddEntry, saveAsMeal: handleSaveMeal, isSaving } =
     useAddEntry();
-  const updateMacroEntryMutation = useUpdateMacroEntry();
-  const deleteMacroEntryMutation = useDeleteMacroEntry();
+  const entryStore = useEntryStore();
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [deletingClientId, setDeletingClientId] = React.useState<string>();
   const createSavedMealMutation = useCreateSavedMeal();
   const deleteSavedMealMutation = useDeleteSavedMeal();
   const { data: savedMealsData } = useSavedMeals();
@@ -89,7 +88,7 @@ export default function HomePage() {
   const [isExportingHistory, setIsExportingHistory] = React.useState(false);
 
   const savedEntryIds = useMemo(() => {
-    const ids = new Set<number>();
+    const ids = new Set<string>();
     for (const entry of history) {
       const entryName = entry.foodName ?? entry.mealName;
       const isSaved = savedMeals.some(
@@ -101,7 +100,7 @@ export default function HomePage() {
           sm.mealType === entry.mealType,
       );
       if (isSaved) {
-        ids.add(entry.id);
+        ids.add(entry.clientId);
       }
     }
 
@@ -234,35 +233,32 @@ export default function HomePage() {
   );
 
   const handleEditEntry = useCallback(
-    async (entry: EditingEntry | undefined) => {
-      if (!entry) return;
-      await updateMacroEntryMutation.mutateAsync({
-        id: entry.id,
-        entry: {
-          protein: entry.protein,
-          carbs: entry.carbs,
-          fats: entry.fats,
-          mealType: entry.mealType,
-          mealName: entry.mealName,
-          entryDate: entry.entryDate ?? "",
-          entryTime: entry.entryTime ?? "",
-          ingredients: entry.ingredients,
-        },
-      });
+    async (entry: MacroEntry | undefined) => {
+      if (!entry || !entryStore) return;
+      setIsEditing(true);
+      try {
+        await entryStore.replace(entry);
+      } finally {
+        setIsEditing(false);
+      }
       setEditingEntry(undefined);
     },
-    [updateMacroEntryMutation, setEditingEntry],
+    [entryStore, setEditingEntry],
   );
 
   const handleDeleteEntry = useCallback(
-    async (id: number, options?: { undoable?: boolean }) => {
-      const deleted = history.find((entry) => entry.id === id);
+    async (clientId: string, options?: { undoable?: boolean }) => {
+      const deleted = history.find((entry) => entry.clientId === clientId);
+      setDeletingClientId(clientId);
       try {
-        await deleteMacroEntryMutation.mutateAsync(id);
+        if (!entryStore) throw new Error("Your account is still loading.");
+        await entryStore.remove(clientId);
       } catch (error) {
         handleMutationError(error, "deleting entry");
 
         return;
+      } finally {
+        setDeletingClientId(undefined);
       }
       if (!deleted || options?.undoable === false) return;
 
@@ -287,7 +283,7 @@ export default function HomePage() {
     },
     [
       history,
-      deleteMacroEntryMutation,
+      entryStore,
       handleMutationError,
       showNotification,
       handleAddEntry,
@@ -375,11 +371,10 @@ export default function HomePage() {
   }, [setEditingEntry]);
 
   const isLoading = isHistoryLoading;
-  const isEditing = updateMacroEntryMutation.isPending;
-  const deletingId = deleteMacroEntryMutation.isPending
-    ? deleteMacroEntryMutation.variables
-    : undefined;
-  const isDeleting = useCallback((id: number) => id === deletingId, [deletingId]);
+  const isDeleting = useCallback(
+    (clientId: string) => clientId === deletingClientId,
+    [deletingClientId],
+  );
 
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget ?? nutritionProfile?.tdee;

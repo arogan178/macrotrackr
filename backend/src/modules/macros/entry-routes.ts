@@ -47,6 +47,37 @@ interface TrackingProgress {
   hasEntryForDate?: number;
 }
 
+const ENTRY_COLUMNS =
+  "id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, client_id, client_updated_at, created_at";
+
+function entryUpdatesFromBody(body: Record<string, unknown>) {
+  const updates: Record<string, unknown> = {};
+  if (body.protein !== undefined) updates.protein = body.protein;
+  if (body.carbs !== undefined) updates.carbs = body.carbs;
+  if (body.fats !== undefined) updates.fats = body.fats;
+  if (body.mealType !== undefined) updates.meal_type = body.mealType;
+  if (body.mealName !== undefined) updates.meal_name = body.mealName;
+  if (body.entryDate !== undefined) updates.entry_date = body.entryDate;
+  if (body.entryTime !== undefined) updates.entry_time = body.entryTime;
+  if (body.ingredients !== undefined) {
+    updates.ingredients = JSON.stringify(body.ingredients);
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new BadRequestError("No valid fields provided for update.");
+  }
+  return updates;
+}
+
+function setClauseFor(updates: Record<string, unknown>) {
+  return {
+    setClause: Object.keys(updates)
+      .map((field) => `${field} = ?`)
+      .join(", "),
+    values: Object.values(updates) as Array<string | number | null>,
+  };
+}
+
 export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
   group
     .get(
@@ -172,7 +203,7 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         );
         const totalAvailable = totalAvailableResult?.count ?? 0;
 
-        const historyQuery = `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at
+        const historyQuery = `SELECT ${ENTRY_COLUMNS}
            FROM macro_entries
            WHERE ${visibleWhere.where}
            ORDER BY entry_date DESC, entry_time DESC, created_at DESC
@@ -267,6 +298,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           entryDate,
           entryTime,
           ingredients,
+          clientId,
+          clientUpdatedAt,
         } = body as {
           protein: number;
           carbs: number;
@@ -276,15 +309,17 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           entryDate: string;
           entryTime: string;
           ingredients?: unknown[];
+          clientId?: string;
+          clientUpdatedAt?: number;
         };
+        const entryClientId = clientId ?? crypto.randomUUID();
 
         const ingredientsJson = ingredients
           ? JSON.stringify(ingredients)
           : null;
 
-        const { result, trackedThirdDay, wasFirstMeal } = withTransaction(
-          db,
-          () => {
+        const { result, created, trackedThirdDay, wasFirstMeal } =
+          withTransaction(db, () => {
             const progress = safeQuery<TrackingProgress>(
               db,
               `SELECT COUNT(*) AS entryCount,
@@ -297,9 +332,10 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
 
             const inserted = safeQuery<MacroEntryRow>(
               db,
-              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-               RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
+              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, client_id, client_updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(user_id, client_id) DO NOTHING
+               RETURNING ${ENTRY_COLUMNS}`,
               [
                 internalUserId,
                 protein,
@@ -310,22 +346,34 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
                 entryDate,
                 entryTime,
                 ingredientsJson,
+                entryClientId,
+                clientUpdatedAt ?? null,
               ],
             );
 
             return {
-              result: inserted,
+              result:
+                inserted ??
+                safeQuery<MacroEntryRow>(
+                  db,
+                  `SELECT ${ENTRY_COLUMNS} FROM macro_entries WHERE user_id = ? AND client_id = ?`,
+                  [internalUserId, entryClientId],
+                ),
+              created: inserted !== undefined,
               trackedThirdDay:
                 progress.distinctDays === 2 && progress.hasEntryForDate !== 1,
               wasFirstMeal: progress.entryCount === 0,
             };
-          },
-        );
+          });
 
         if (!result) {
           throw new DatabaseError(
             "Failed to create macro entry or retrieve confirmation.",
           );
+        }
+
+        if (!created) {
+          return normalizeMacroEntryRow(result);
         }
 
         publishUserSyncEvent(internalUserId, "macros");
@@ -429,8 +477,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
 
           if (entries.length > 0) {
             const insertMacroStmt = db.prepare(
-              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, client_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             );
 
             for (const entry of entries) {
@@ -450,6 +498,7 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
                 date,
                 time,
                 ingredientsJson,
+                crypto.randomUUID(),
               );
             }
           }
@@ -610,37 +659,18 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           throw new NotFoundError("Macro entry ID is required");
         }
 
-        const updates: Record<string, unknown> = {};
-        if (body.protein !== undefined) updates.protein = body.protein;
-        if (body.carbs !== undefined) updates.carbs = body.carbs;
-        if (body.fats !== undefined) updates.fats = body.fats;
-        if (body.mealType !== undefined) updates.meal_type = body.mealType;
-        if (body.mealName !== undefined) updates.meal_name = body.mealName;
-        if (body.entryDate !== undefined) updates.entry_date = body.entryDate;
-        if (body.entryTime !== undefined) updates.entry_time = body.entryTime;
-        if (body.ingredients !== undefined) {
-          updates.ingredients = JSON.stringify(body.ingredients);
-        }
-
-        const fieldsToUpdate = Object.keys(updates);
-        if (fieldsToUpdate.length === 0) {
-          throw new BadRequestError("No valid fields provided for update.");
-        }
-
-        const setClause = fieldsToUpdate
-          .map((field) => `${field} = ?`)
-          .join(", ");
-        const updateValues = Object.values(updates) as Array<
-          string | number | null
-        >;
-        const queryParams = [...updateValues, Number(entryId), internalUserId];
+        // Stamped so a stale offline edit queued earlier cannot overwrite this one.
+        const { setClause, values } = setClauseFor({
+          ...entryUpdatesFromBody(body),
+          client_updated_at: Date.now(),
+        });
 
         const result = safeQuery<MacroEntryRow>(
           db,
           `UPDATE macro_entries SET ${setClause}
            WHERE id = ? AND user_id = ?
-           RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
-          queryParams,
+           RETURNING ${ENTRY_COLUMNS}`,
+          [...values, Number(entryId), internalUserId],
         );
 
         if (!result) {
@@ -671,6 +701,92 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
         response: MacroSchemas.macroEntryResponse,
         detail: {
           summary: "Update a specific macro entry",
+          tags: ["Macros"],
+        },
+      },
+    )
+    .put(
+      "/by-client-id/:clientId",
+      async (context: MacrosRouteContext) => {
+        const { db, params, body } = context;
+        const internalUserId = context.authenticatedUser.userId;
+
+        if (!body) {
+          throw new BadRequestError("Request body is required");
+        }
+
+        const clientId = params?.clientId as string;
+        const clientUpdatedAt = body.clientUpdatedAt as number;
+        const { setClause, values } = setClauseFor({
+          ...entryUpdatesFromBody(body),
+          client_updated_at: clientUpdatedAt,
+        });
+
+        const updated = safeQuery<MacroEntryRow>(
+          db,
+          `UPDATE macro_entries SET ${setClause}
+           WHERE user_id = ? AND client_id = ?
+             AND (client_updated_at IS NULL OR client_updated_at < ?)
+           RETURNING ${ENTRY_COLUMNS}`,
+          [...values, internalUserId, clientId, clientUpdatedAt],
+        );
+
+        if (updated) {
+          publishUserSyncEvent(internalUserId, "macros");
+          return normalizeMacroEntryRow(updated);
+        }
+
+        // A replayed or out-of-order edit is ignored and the current row returned.
+        const existing = safeQuery<MacroEntryRow>(
+          db,
+          `SELECT ${ENTRY_COLUMNS} FROM macro_entries WHERE user_id = ? AND client_id = ?`,
+          [internalUserId, clientId],
+        );
+        if (!existing) {
+          throw new NotFoundError(
+            `Macro entry with client ID ${clientId} not found or access denied.`,
+          );
+        }
+        return normalizeMacroEntryRow(existing);
+      },
+      {
+        params: MacroSchemas.macroClientIdParam,
+        body: MacroSchemas.macroEntryClientUpdate,
+        response: MacroSchemas.macroEntryResponse,
+        detail: {
+          summary:
+            "Apply a device edit to a macro entry unless a newer one already landed",
+          tags: ["Macros"],
+        },
+      },
+    )
+    .delete(
+      "/by-client-id/:clientId",
+      async (context: MacrosRouteContext) => {
+        const { db, params } = context;
+        const internalUserId = context.authenticatedUser.userId;
+        const clientId = params?.clientId as string;
+
+        const result = safeExecute(
+          db,
+          "DELETE FROM macro_entries WHERE user_id = ? AND client_id = ?",
+          [internalUserId, clientId],
+        );
+
+        if (result.changes > 0) {
+          publishUserSyncEvent(internalUserId, "macros");
+        }
+
+        return { success: true, clientId };
+      },
+      {
+        params: MacroSchemas.macroClientIdParam,
+        response: {
+          200: MacroSchemas.deleteMacroEntryByClientIdResponse,
+        },
+        detail: {
+          summary:
+            "Delete a macro entry by its device id, succeeding if it is already gone",
           tags: ["Macros"],
         },
       },

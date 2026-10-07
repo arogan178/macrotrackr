@@ -12,7 +12,8 @@ import { loadPostHog } from "./lib/posthogClient";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { ProductAnalyticsProvider } from "./lib/productAnalytics";
 import {
-  localStoragePersister,
+  QUERY_CACHE_MAX_AGE,
+  queryCachePersister,
   queryClient,
   shouldPersistQuery,
 } from "./lib/queryClient";
@@ -59,6 +60,9 @@ if (shouldEnablePostHog && posthogConfig) {
 
 // Explicitly initialize auth token provider state before any API call path can run.
 initializeAuthTokenProvider();
+
+// The query cache moved to IndexedDB; drop the copy the old build left behind.
+globalThis.localStorage?.removeItem("macrotrackr-query-cache");
 
 function RuntimeConfigError() {
   return (
@@ -128,7 +132,8 @@ const rootElement = (
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={{
-          persister: localStoragePersister,
+          persister: queryCachePersister,
+          maxAge: QUERY_CACHE_MAX_AGE,
           dehydrateOptions: {
             shouldDehydrateQuery: (query) => shouldPersistQuery(query.queryKey),
           },

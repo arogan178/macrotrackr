@@ -147,16 +147,16 @@ const MobileEntryCards = memo(
           entry={entry}
           onEdit={onEdit}
           deleteEntry={deleteEntry}
-          isDeleting={isDeleting(entry.id)}
+          isDeleting={isDeleting(entry.clientId)}
           formatTimeFromEntry={formatTimeFromEntry}
           capitalizeFirstLetter={capitalizeFirstLetter}
           calculateCalories={calculateCalories}
           onSaveMeal={onSaveMeal}
           onUnsaveMeal={onUnsaveMeal}
           onLogAgain={onLogAgain}
-          isMealSaved={isMealSaved(entry.id)}
+          isMealSaved={isMealSaved(entry.clientId)}
           isSelectionMode={isSelectionMode}
-          isSelected={isEntrySelected(entry.id)}
+          isSelected={isEntrySelected(entry.clientId)}
           onToggleSelection={onToggleEntrySelection}
         />
       );
@@ -167,7 +167,7 @@ const MobileEntryCards = memo(
 
       return (
         <motion.div
-          key={entry.clientId ?? entry.id}
+          key={entry.clientId}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{

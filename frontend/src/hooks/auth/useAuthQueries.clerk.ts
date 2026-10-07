@@ -74,6 +74,10 @@ export function useLogout() {
     onSuccess: () => {
       // Clear all cached data
       queryClient.clear();
+      // Loaded on demand so the offline store stays off the first page load.
+      void import("@/hooks/queries/macro/entryStore").then(({ clearSignedOutAccount }) =>
+        clearSignedOutAccount(),
+      );
 
       // Also specifically invalidate auth queries to ensure they're cleared
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });

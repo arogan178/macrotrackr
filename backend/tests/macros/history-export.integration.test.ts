@@ -42,12 +42,12 @@ describe("GET /api/macros/history for a free user", () => {
              (2, 'Other', 'User', 'other@example.com', 'hash', 'other_clerk');
     `);
     const insert = db.prepare(
-      `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time)
-       VALUES (?, 10, 10, 10, 'lunch', ?, ?, '12:00:00')`,
+      `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, client_id)
+       VALUES (?, 10, 10, 10, 'lunch', ?, ?, '12:00:00', ?)`,
     );
-    insert.run(1, "recent", daysAgo(1));
-    insert.run(1, "old", daysAgo(60));
-    insert.run(2, "someone else's", daysAgo(60));
+    insert.run(1, "recent", daysAgo(1), crypto.randomUUID());
+    insert.run(1, "old", daysAgo(60), crypto.randomUUID());
+    insert.run(2, "someone else's", daysAgo(60), crypto.randomUUID());
 
     app = new Elysia()
       .decorate("db", db)

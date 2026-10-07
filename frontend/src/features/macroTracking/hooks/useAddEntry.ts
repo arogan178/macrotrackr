@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { useMutationErrorHandler } from "@/hooks";
-import { useAddMacroEntry } from "@/hooks/queries/useMacroQueries";
+import { useEntryStore } from "@/hooks/queries/useMacroQueries";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
@@ -17,7 +17,8 @@ import type { MacroEntryInput } from "../types/macro";
  * Both callers need this logic and neither should own it.
  */
 export function useAddEntry() {
-  const addMacroEntryMutation = useAddMacroEntry();
+  const entryStore = useEntryStore();
+  const [isSaving, setIsSaving] = useState(false);
   const createSavedMealMutation = useCreateSavedMeal();
   const showNotification = useStore((state) => state.showNotification);
   const { handleMutationError } = useMutationErrorHandler({
@@ -64,19 +65,22 @@ export function useAddEntry() {
     [createSavedMealMutation, handleMutationError],
   );
 
+  // Logging only queues the entry on the device, so it resolves without a network.
   const addEntry = useCallback(
     async (entry: MacroEntryInput) => {
-      let newEntry: MacroEntry;
+      setIsSaving(true);
       try {
-        newEntry = await addMacroEntryMutation.mutateAsync(entry);
+        if (!entryStore) throw new Error("Your account is still loading.");
+        await entryStore.log(entry);
       } catch (error) {
         handleMutationError(error, "adding entry");
         // Rethrow so the form keeps its values for a retry.
         throw error;
+      } finally {
+        setIsSaving(false);
       }
       if (entry.saveAsMeal) {
         await saveAsMeal({
-          id: (newEntry as MacroEntry | undefined)?.id ?? 0,
           protein: entry.protein,
           carbs: entry.carbs,
           fats: entry.fats,
@@ -86,12 +90,8 @@ export function useAddEntry() {
         } as MacroEntry);
       }
     },
-    [addMacroEntryMutation, saveAsMeal, handleMutationError],
+    [entryStore, saveAsMeal, handleMutationError],
   );
 
-  return {
-    addEntry,
-    saveAsMeal,
-    isSaving: addMacroEntryMutation.isPending,
-  };
+  return { addEntry, saveAsMeal, isSaving };
 }

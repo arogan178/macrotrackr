@@ -14,8 +14,7 @@ export {
 } from "@/api/habits";
 export {
   type FoodSearchResult,
-  type MacroEntryCreatePayload,
-  type MacroEntryUpdatePayload,
+  type MacroEntryWrite,
   macrosApi,
 } from "@/api/macros";
 export {

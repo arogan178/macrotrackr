@@ -16,6 +16,8 @@ import type { MacroEntry } from "@/types/macro";
 import DeleteAccountForm from "./DeleteAccountForm";
 
 const logout = vi.hoisted(() => vi.fn());
+const clearSignedOutAccount = vi.hoisted(() => vi.fn());
+vi.mock("@/hooks/queries/macro/entryStore", () => ({ clearSignedOutAccount }));
 vi.mock("@/hooks/auth/useAuthQueries", () => ({
   useLogout: () => ({ mutate: logout, isPending: false }),
 }));
@@ -97,7 +99,7 @@ describe("DeleteAccountForm", () => {
     expect(button).toBeEnabled();
   });
 
-  it("deletes the account and signs out", async () => {
+  it("deletes the account, clears it from the device and signs out", async () => {
     const user = userEvent.setup();
     vi.mocked(userApi.deleteAccount).mockResolvedValue({ success: true, message: "" });
     render(<DeleteAccountForm />);
@@ -112,6 +114,7 @@ describe("DeleteAccountForm", () => {
     await user.click(button);
 
     expect(userApi.deleteAccount).toHaveBeenCalledTimes(1);
+    expect(clearSignedOutAccount).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledTimes(1);
     expect(button).toBeDisabled();
     expect(button).toHaveTextContent("Deleting…");

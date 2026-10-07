@@ -13,7 +13,7 @@ import type { MacroEntry } from "@/types/macro";
 interface EntryCardProps {
   entry: MacroEntry;
   onEdit: (entry: MacroEntry) => void;
-  deleteEntry: (id: number) => void;
+  deleteEntry: (id: string) => void;
   isDeleting: boolean;
   formatTimeFromEntry: (entry: MacroEntry) => string;
   capitalizeFirstLetter: (string: string) => string;
@@ -24,7 +24,7 @@ interface EntryCardProps {
   isMealSaved?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
-  onToggleSelection?: (id: number) => void;
+  onToggleSelection?: (id: string) => void;
 }
 
 export const EntryCard = memo(
@@ -64,7 +64,7 @@ export const EntryCard = memo(
                 checked={isSelected}
                 onChange={(event_) => {
                   event_.stopPropagation();
-                  onToggleSelection?.(entry.id);
+                  onToggleSelection?.(entry.clientId);
                 }}
               />
             )}
@@ -93,7 +93,7 @@ export const EntryCard = memo(
           </div>
           <IconButtonGroup
             onEdit={() => onEdit(entry)}
-            onDelete={() => deleteEntry(entry.id)}
+            onDelete={() => deleteEntry(entry.clientId)}
             isDeleting={isDeleting}
             onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
             onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}

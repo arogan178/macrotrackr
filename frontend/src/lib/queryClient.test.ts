@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { hasStatus, queryClient, queryConfigs } from "./queryClient";
+import { hasStatus, queryClient, queryConfigs, shouldPersistQuery } from "./queryClient";
+import { queryKeys } from "./queryKeys";
 
 describe("queryClient", () => {
   describe("hasStatus", () => {
@@ -51,5 +52,25 @@ describe("queryClient", () => {
       expect(queryConfigs.macros.staleTime).toBe(10 * 1000);
       expect(queryConfigs.macros.refetchOnWindowFocus).toBe(true);
     });
+  });
+
+  it("keeps only what an offline start and offline logging need on the device", () => {
+    const keys = [
+      queryKeys.auth.user(),
+      queryKeys.auth.session(),
+      queryKeys.macros.recentEntries(1),
+      queryKeys.macros.targets(),
+      queryKeys.savedMeals.list(),
+      queryKeys.goals.weight(),
+      queryKeys.goals.weightLog(),
+      queryKeys.habits.list(),
+      queryKeys.macros.historyRange("2026-01-01", "2026-02-01"),
+      queryKeys.macros.historyInfinite(20),
+      queryKeys.settings.user(),
+      queryKeys.settings.billing(),
+      ["reporting", "summary"],
+    ];
+
+    expect(keys.filter((key) => shouldPersistQuery(key))).toEqual(keys.slice(0, 6));
   });
 });
