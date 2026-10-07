@@ -123,10 +123,7 @@ const SavedMealSchemas = {
   }),
 };
 
-export const savedMealRoutes = (app: Elysia) =>
-  app.group("/api/saved-meals", (group) =>
-    group
-
+export const savedMealRoutes = new Elysia({ prefix: "/api/saved-meals" })
       // GET / - List all saved meals for the user
       .get(
         "/",
@@ -366,5 +363,4 @@ export const savedMealRoutes = (app: Elysia) =>
             tags: ["Saved Meals"],
           },
         }
-      )
-  );
+      );

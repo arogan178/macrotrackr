@@ -1,3 +1,4 @@
+import { Elysia } from "elysia";
 import {
   safeQuery,
   type MacroTargetRow,
@@ -11,16 +12,11 @@ import {
   type MacrosRouteContext,
 } from "./service";
 
-type MacroRouteGroup = {
-  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
-  put: (path: string, ...args: unknown[]) => MacroRouteGroup;
-};
-
-export const registerMacroTargetRoutes = (group: MacroRouteGroup) =>
-  group
+export const macroTargetRoutes = new Elysia()
     .get(
       "/target",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, request } = context;
         const internalUserId = context.authenticatedUser.userId;
         const correlationId = request.headers.get("x-correlation-id") ?? undefined;
@@ -74,7 +70,8 @@ export const registerMacroTargetRoutes = (group: MacroRouteGroup) =>
     )
     .put(
       "/target",
-      async (context: MacrosRouteContext) => {
+      async (rawContext: unknown) => {
+        const context = rawContext as MacrosRouteContext;
         const { db, body, request } = context;
         const internalUserId = context.authenticatedUser.userId;
 

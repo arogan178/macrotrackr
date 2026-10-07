@@ -66,9 +66,7 @@ function syncProfileWeightToLatestLog(db: Database, userId: number): void {
   );
 }
 
-export const goalRoutes = (app: Elysia) =>
-  app.group("/api/goals", (group) =>
-    group
+export const goalRoutes = new Elysia({ prefix: "/api/goals" })
       // --- Get Weight Goals ---
       .get(
         "/weight",
@@ -668,5 +666,4 @@ export const goalRoutes = (app: Elysia) =>
             tags: ["Goals", "Weight Log"],
           },
         },
-      ),
-  );
+      );

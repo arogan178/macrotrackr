@@ -9,14 +9,12 @@ type SyncRouteContext = {
   };
 };
 
-export const syncRoutes = (app: Elysia) =>
-  app.group("/api/sync", (group) =>
-    group
+export const syncRoutes = new Elysia({ prefix: "/api/sync" })
       // Mint the one-time credential the EventSource connection carries in its
       // query string. This request is a normal authenticated call, so the
       // session token stays in a header or cookie where it belongs.
       .post("/ticket", (context) => {
-        const authUser = (context as unknown as SyncRouteContext)
+        const authUser = (context as SyncRouteContext)
           .authenticatedUser;
         if (!authUser?.userId) {
           context.set.status = 401;
@@ -38,7 +36,7 @@ export const syncRoutes = (app: Elysia) =>
         return { ticket, expiresInMs };
       })
       .get("/events", (context) => {
-        const authUser = (context as unknown as SyncRouteContext)
+        const authUser = (context as SyncRouteContext)
           .authenticatedUser;
         if (!authUser?.userId) {
           context.set.status = 401;
@@ -115,5 +113,4 @@ export const syncRoutes = (app: Elysia) =>
             "X-Accel-Buffering": "no",
           },
         });
-      }),
-  );
+      });
