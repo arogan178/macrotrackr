@@ -1,6 +1,6 @@
 import React from "react";
 import { format, isValid, parseISO } from "date-fns";
-import { Area, ReferenceLine, TooltipProps } from "recharts";
+import { Area, ReferenceLine, type TooltipContentProps } from "recharts";
 import {
   NameType,
   ValueType,
@@ -26,9 +26,11 @@ function WeightCustomTooltip({
   payload,
   label,
   unit,
-}: TooltipProps<ValueType, NameType> & { unit: string }) {
+}: Partial<TooltipContentProps<ValueType, NameType>> & { unit: string }) {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
+    // The gradient Area comes first in the payload; the colour is the line's.
+    const line = payload.find((entry) => entry.type !== "none") ?? payload[0];
     const entryDate =
       data.fullDate && typeof data.fullDate === "string"
         ? parseISO(data.fullDate)
@@ -45,13 +47,13 @@ function WeightCustomTooltip({
         <div className="mt-1 flex items-center gap-2">
           <div
             className={"h-3 w-3 rounded-full"}
-            style={{ backgroundColor: payload[0].color ?? payload[0].stroke }}
+            style={{ backgroundColor: line.color ?? line.stroke }}
           />
           <span className="text-sm text-foreground">
             Weight:{" "}
             <span
               className="font-semibold"
-              style={{ color: payload[0].color ?? payload[0].stroke }}
+              style={{ color: line.color ?? line.stroke }}
             >
               {typeof data.weight === "number"
                 ? `${formatGrouped(data.weight, 1)} ${unit}`
@@ -146,6 +148,7 @@ function WeightGoalProgressChart({
         fill="url(#weightGradient)"
         stroke="none"
         fillOpacity={0.3}
+        tooltipType="none"
       />
       {targetWeight && (
         <ReferenceLine
@@ -202,7 +205,7 @@ function WeightGoalProgressChart({
     label: {
       value: unit,
       angle: -90,
-      position: "insideLeft",
+      position: "insideLeft" as const,
       fill: "var(--color-muted)",
       fontSize: 12,
       dy: 40,
