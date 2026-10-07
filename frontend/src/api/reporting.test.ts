@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { apiClient } from "./core";
+import { apiClient, ApiError } from "./core";
 import { reportingApi } from "./reporting";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
@@ -29,18 +29,17 @@ describe("reportingApi", () => {
   });
 
   it("requests nutrient density summaries with optional query parameters", async () => {
-    fetchMock.mockResolvedValueOnce(
-      createJsonResponse([
-        {
-          period: "2026-04-01",
-          calories: 2200,
-          protein: 150,
-          carbs: 200,
-          fats: 70,
-          count: 4,
-        },
-      ]),
-    );
+    const summary = [
+      {
+        period: "2026-04-01",
+        calories: 2200,
+        protein: 150,
+        carbs: 200,
+        fats: 70,
+        count: 4,
+      },
+    ];
+    fetchMock.mockResolvedValueOnce(createJsonResponse(summary));
 
     await expect(
       reportingApi.getMacroDensitySummary({
@@ -48,14 +47,36 @@ describe("reportingApi", () => {
         endDate: "2026-04-07",
         groupBy: "day",
       }),
-    ).resolves.toHaveLength(1);
+    ).resolves.toEqual(summary);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/reporting/nutrient-density-summary?startDate=2026-04-01&endDate=2026-04-07&groupBy=day",
-      expect.objectContaining({
-        credentials: "include",
-        headers: {},
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
+  });
+
+  it("surfaces a 401 as ApiError so the offline queue stops retrying", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse(
+        { code: "UNAUTHORIZED", message: "Authentication required" },
+        { status: 401, statusText: "Unauthorized" },
+      ),
+    );
+
+    await expect(reportingApi.getMacroDensitySummary()).rejects.toEqual(
+      expect.objectContaining<Partial<ApiError>>({
+        name: "ApiError",
+        status: 401,
+        code: "UNAUTHORIZED",
+        message: "Authentication required",
       }),
     );
+  });
+
+  it("rethrows network failures unchanged", async () => {
+    const networkError = new TypeError("Failed to fetch");
+    fetchMock.mockRejectedValueOnce(networkError);
+
+    await expect(reportingApi.getMacroDensitySummary()).rejects.toBe(networkError);
   });
 });
