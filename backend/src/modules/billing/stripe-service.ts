@@ -23,7 +23,7 @@ function requireStripeWebhookSecret(): string {
 
 function createStripeClient() {
   return new Stripe(requireStripeSecretKey(), {
-    apiVersion: "2025-08-27.basil",
+    apiVersion: "2026-09-30.endive",
     typescript: true,
   });
 }
@@ -110,20 +110,17 @@ export interface CreateCustomerOptions {
 export function toProviderSubscriptionStatus(
   status: Stripe.Subscription.Status
 ): ProviderSubscriptionStatus {
-  if (
-    status === "active" ||
-    status === "canceled" ||
-    status === "past_due" ||
-    status === "unpaid"
-  ) {
-    return status;
+  switch (status) {
+    case "active":
+    case "trialing":
+      return "active";
+    case "canceled":
+      return "canceled";
+    case "past_due":
+      return "past_due";
+    default:
+      return "unpaid";
   }
-
-  if (status === "trialing") {
-    return "active";
-  }
-
-  return "unpaid";
 }
 
 /**
@@ -166,9 +163,8 @@ export class StripeService {
   }> {
     try {
       const stripe = getStripeClient();
-      // Expand default_payment_method and plan.product for full details
       const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-        expand: ["default_payment_method", "plan.product"],
+        expand: ["default_payment_method"],
       });
 
       // Get price string
@@ -243,7 +239,7 @@ export class StripeService {
       const stripe = getStripeClient();
       const sessionParams: Stripe.Checkout.SessionCreateParams = {
         mode: "subscription",
-        payment_method_types: ["card"],
+        allowed_payment_method_types: ["card"],
         allow_promotion_codes: true,
         line_items: [
           {
@@ -364,11 +360,15 @@ export class StripeService {
     try {
       const stripe = getStripeClient();
 
-      const event = (await stripe.webhooks.constructEventAsync(
-        payload,
-        signature,
-        requireStripeWebhookSecret(),
-      )) as StripeWebhookEvent;
+      const secret = requireStripeWebhookSecret();
+      // constructEventAsync rejects thin payloads, so they take the SDK's own parser.
+      const isThin =
+        (JSON.parse(payload) as { object?: unknown }).object === "v2.core.event";
+      const event = (
+        isThin
+          ? await stripe.parseEventNotificationAsync(payload, signature, secret)
+          : await stripe.webhooks.constructEventAsync(payload, signature, secret)
+      ) as StripeWebhookEvent;
       const normalizedEvent = this.normalizeWebhookEvent(event);
       return normalizedEvent;
     } catch (error) {
