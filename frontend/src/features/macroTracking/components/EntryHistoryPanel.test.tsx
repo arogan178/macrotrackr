@@ -60,7 +60,7 @@ describe("EntryHistoryPanel empty state", () => {
   it("focuses the inline meal name input on desktop", () => {
     setViewportIsDesktop(true);
     const input = document.createElement("input");
-    input.id = "meal-name-input";
+    input.dataset.mealNameInput = "";
     input.scrollIntoView = vi.fn();
     document.body.append(input);
 

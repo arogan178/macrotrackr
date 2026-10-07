@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useId, useState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
@@ -268,6 +268,7 @@ function AddEntry({
     values;
 
   const shownDateTime = pickedDateTime ?? currentDateTime();
+  const mealNameInputId = useId();
   const [isDateTimeExpanded, setIsDateTimeExpanded] = useState(false);
   const [isDateTimeRendered, setIsDateTimeRendered] = useState(false);
 
@@ -561,7 +562,7 @@ function AddEntry({
             <div className="sm:col-span-2">
               <div className="space-y-2">
                 <div className="relative flex h-6 items-center justify-between">
-                  <label htmlFor="meal-name-input" className={formStyles.label}>
+                  <label htmlFor={mealNameInputId} className={formStyles.label}>
                     Meal Name
                   </label>
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -608,7 +609,8 @@ function AddEntry({
                   </div>
                 </div>
                 <input
-                  id="meal-name-input"
+                  id={mealNameInputId}
+                  data-meal-name-input
                   type="text"
                   value={mealName}
                   onChange={(event_) =>

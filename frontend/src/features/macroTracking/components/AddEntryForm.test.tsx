@@ -111,6 +111,24 @@ vi.mock("@/features/macroTracking/components/CalorieSearchForm", () => ({
 }));
 
 describe("AddEntryForm", () => {
+  it("names the visible inputs when a hidden copy is also mounted", () => {
+    // Home mounts the inline form and the Log sheet together.
+    render(
+      <>
+        <div hidden>
+          <AddEntryForm onSubmit={async () => {}} isSaving={false} />
+        </div>
+        <AddEntryForm onSubmit={async () => {}} isSaving={false} />
+      </>,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Meal Name" })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: "Meal Type" })).toBeVisible();
+    for (const name of ["Protein", "Carbs", "Fats"]) {
+      expect(screen.getByRole("spinbutton", { name })).toBeVisible();
+    }
+  });
+
   it("renders without crashing", () => {
     const { container } = render(
       <AddEntryForm onSubmit={async () => {}} isSaving={false} />,
