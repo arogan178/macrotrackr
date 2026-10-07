@@ -130,8 +130,8 @@ test.describe('offline food logging', () => {
   }
 
   async function logEntry(page: Page, mealName: string, protein: number) {
-    const form = page.locator('form').filter({ has: page.locator('#meal-name-input') })
-    await form.locator('#meal-name-input').fill(mealName)
+    const form = page.locator('form').filter({ has: page.getByLabel('Meal Name') })
+    await form.getByLabel('Meal Name').fill(mealName)
     await form.getByLabel('Protein').fill(String(protein))
     await form.getByLabel('Carbs').fill('10')
     await form.getByLabel('Fats').fill('5')
@@ -143,7 +143,7 @@ test.describe('offline food logging', () => {
     await page.getByRole('textbox', { name: 'Search for food' }).click()
     await page.getByRole('tab', { name: 'Saved Meals' }).click()
     await page.getByRole('button', { name: new RegExp(mealName) }).first().click()
-    await expect(page.locator('#meal-name-input')).toHaveValue(mealName)
+    await expect(page.getByLabel('Meal Name')).toHaveValue(mealName)
     await page.getByRole('button', { name: 'Add Entry' }).click()
     await expect(page.getByText(mealName).filter({ visible: true }).first()).toBeVisible()
   }
@@ -194,10 +194,10 @@ test.describe('offline food logging', () => {
     await logSavedMeal(page, names[3]!)
 
     // Back online, half-typed input survives: the reload Clerk needs waits for the next screen.
-    await page.locator('#meal-name-input').fill('Half typed')
+    await page.getByLabel('Meal Name').fill('Half typed')
     await context.setOffline(false)
     await page.waitForTimeout(2000)
-    await expect(page.locator('#meal-name-input')).toHaveValue('Half typed')
+    await expect(page.getByLabel('Meal Name')).toHaveValue('Half typed')
     await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Goals' }).click()
     await page.waitForURL(/goals/)
     await expect
