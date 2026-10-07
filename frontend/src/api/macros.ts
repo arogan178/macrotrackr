@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, unwrap } from "@/api/core";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 export interface FoodSearchResult {
@@ -72,6 +72,10 @@ interface MacroTargetSettingsPayload {
   macroTarget: MacroTargetSettingsObject;
 }
 
+// The backend types ingredients as unknown[]; it stores what the client sent.
+const toMacroEntry = (entry: Omit<MacroEntry, "ingredients"> & { ingredients: unknown[] }) =>
+  ({ ...entry, ingredients: entry.ingredients as Ingredient[] }) satisfies MacroEntry;
+
 type MacroTargetGetResponse =
   | {
       macroTarget: MacroTargetSettingsObject;
@@ -113,14 +117,7 @@ export const macrosApi = {
     startDate,
     endDate,
   }: { startDate?: string; endDate?: string } = {}) => {
-    const searchParameters = new URLSearchParams();
-    if (startDate) searchParameters.append("startDate", startDate);
-    if (endDate) searchParameters.append("endDate", endDate);
-    
-    const queryString = searchParameters.toString();
-    const url = `/api/macros/totals${queryString ? `?${queryString}` : ""}`;
-    
-    return apiClient.get<unknown>(url);
+    return unwrap(api.api.macros.totals.get({ query: { startDate, endDate } }));
   },
 
   /**
@@ -128,18 +125,21 @@ export const macrosApi = {
    */
   getHistory: async (
     options: MacroHistoryOptions = {},
-  ) => {
+  ): Promise<MacroHistoryResponse> => {
     const { limit = 20, offset = 0, startDate, endDate, fullExport } = options;
-    const searchParameters = new URLSearchParams();
-    searchParameters.append("limit", limit.toString());
-    searchParameters.append("offset", offset.toString());
-    if (startDate) searchParameters.append("startDate", startDate);
-    if (endDate) searchParameters.append("endDate", endDate);
-    if (fullExport) searchParameters.append("fullExport", "true");
-    
-    const url = `/api/macros/history?${searchParameters.toString()}`;
+    const { entries, ...rest } = await unwrap(
+      api.api.macros.history.get({
+        query: {
+          limit,
+          offset,
+          startDate,
+          endDate,
+          fullExport: fullExport ? "true" : undefined,
+        },
+      }),
+    );
 
-    return apiClient.get<unknown>(url);
+    return { ...rest, entries: entries.map(toMacroEntry) };
   },
 
   /**
@@ -155,9 +155,9 @@ export const macrosApi = {
     let limits: unknown;
 
     while (hasMore) {
-      const response = (await macrosApi.getHistory(
+      const response = await macrosApi.getHistory(
         { limit: pageSize, offset, ...options },
-      )) as MacroHistoryResponse;
+      );
 
       if (Array.isArray(response.entries)) {
         entries.push(...response.entries);
@@ -180,7 +180,7 @@ export const macrosApi = {
    * @throws {ApiError}
    */
   addEntry: async (entry: MacroEntryWrite): Promise<MacroEntry> => {
-    return apiClient.post<MacroEntry>("/api/macros", toWritePayload(entry));
+    return toMacroEntry(await unwrap(api.api.macros.post(toWritePayload(entry))));
   },
 
   /**
@@ -188,9 +188,10 @@ export const macrosApi = {
    * @throws {ApiError}
    */
   replaceEntry: async (entry: MacroEntryWrite): Promise<MacroEntry> => {
-    return apiClient.put<MacroEntry>(
-      `/api/macros/by-client-id/${entry.clientId}`,
-      toWritePayload(entry),
+    return toMacroEntry(
+      await unwrap(
+        api.api.macros["by-client-id"]({ clientId: entry.clientId }).put(toWritePayload(entry)),
+      ),
     );
   },
 
@@ -198,17 +199,15 @@ export const macrosApi = {
    * Succeeds when the entry is already gone.
    * @throws {ApiError}
    */
-  deleteEntry: async (clientId: string) => {
-    return apiClient.del<{ success: boolean; clientId: string }>(
-      `/api/macros/by-client-id/${clientId}`,
-    );
+  deleteEntry: async (clientId: string): Promise<{ success: boolean; clientId: string }> => {
+    return unwrap(api.api.macros["by-client-id"]({ clientId }).delete());
   },
 
   /**
    * @throws {ApiError}
    */
   getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
-    return apiClient.get<MacroTargetGetResponse>("/api/macros/target");
+    return unwrap(api.api.macros.target.get());
   },
 
   /**
@@ -219,7 +218,7 @@ export const macrosApi = {
       throw new Error("Invalid payload: macroTarget object is required.");
     }
 
-    return apiClient.put<unknown>("/api/macros/target", { macroTarget: payload.macroTarget });
+    return unwrap(api.api.macros.target.put({ macroTarget: payload.macroTarget }));
   },
 
   /**
@@ -230,10 +229,8 @@ export const macrosApi = {
     if (normalizedQuery.length < 2) {
       return [];
     }
-    
-    const response = await apiClient.get<unknown>(`/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`);
 
-    return normalizeFoodSearchResults(response);
+    return unwrap(api.api.macros.search.get({ query: { q: normalizedQuery } }));
   },
 
   /**
@@ -245,13 +242,9 @@ export const macrosApi = {
       return null;
     }
 
-    const response = await apiClient.get<unknown>(`/api/macros/barcode/${encodeURIComponent(cleanBarcode)}`);
-
-    if (isFoodSearchResult(response)) {
-      return response;
-    }
-
-    return null;
+    return unwrap(
+      api.api.macros.barcode({ barcode: encodeURIComponent(cleanBarcode) }).get(),
+    );
   },
 
   /**
@@ -284,17 +277,6 @@ export const macrosApi = {
     } | null;
     message: string;
   }> => {
-    return apiClient.post<{
-      success: boolean;
-      importedCount: {
-        macros: number;
-        weightLogs: number;
-      };
-      dateRange: {
-        start: string;
-        end: string;
-      } | null;
-      message: string;
-    }>("/api/macros/import", payload);
+    return unwrap(api.api.macros.import.post(payload));
   },
 };
