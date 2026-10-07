@@ -32,7 +32,6 @@ const BaseEnvSchema = z.object({
   ANALYTICS_MODE: z.enum(["posthog", "disabled"]).default("disabled"),
   EMAIL_MODE: z.enum(["resend", "smtp", "disabled"]).default("disabled"),
   APP_URL: z
-    .string()
     .url("APP_URL must be a valid URL")
     .default("http://localhost:5173"),
   PUBLIC_APP_NAME: z
@@ -40,7 +39,6 @@ const BaseEnvSchema = z.object({
     .min(1, "PUBLIC_APP_NAME is required")
     .default("MacroTrackr"),
   SUPPORT_EMAIL: z
-    .string()
     .email("SUPPORT_EMAIL must be a valid email")
     .default("support@local.invalid"),
   ENABLE_METRICS: z
@@ -82,7 +80,7 @@ const BaseEnvSchema = z.object({
   CLERK_WEBHOOK_SECRET: z.string().optional(),
 
   POSTHOG_KEY: z.string().optional(),
-  POSTHOG_HOST: z.string().url("POSTHOG_HOST must be a valid URL").optional(),
+  POSTHOG_HOST: z.url("POSTHOG_HOST must be a valid URL").optional(),
   ANALYTICS_INTERNAL_EMAILS: z
     .string()
     .default("")
@@ -97,7 +95,7 @@ const BaseEnvSchema = z.object({
   SMTP_PORT: z.coerce.number().int().positive().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().email("SMTP_FROM must be a valid email").optional(),
+  SMTP_FROM: z.email("SMTP_FROM must be a valid email").optional(),
 
   METRICS_API_KEY: z.string().min(1).optional(),
 });
@@ -243,7 +241,7 @@ const EnvSchema = BaseEnvSchema.superRefine((config, ctx) => {
 
   for (const issue of [...profileErrors, ...providerErrors]) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: issue.message,
       path: [issue.path],
     });
@@ -261,7 +259,7 @@ function parseConfigFromEnvironment(): Config {
   if (!parsedEnv.success) {
     console.error(
       "Invalid environment variables:",
-      parsedEnv.error.flatten().fieldErrors,
+      z.flattenError(parsedEnv.error).fieldErrors,
     );
     throw new Error("Invalid environment variables");
   }
