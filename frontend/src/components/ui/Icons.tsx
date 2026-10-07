@@ -15,7 +15,7 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronRight,
-  CircleHelp,
+  CircleQuestionMark,
   Clipboard,
   Coffee,
   Copy,
@@ -61,7 +61,7 @@ import {
   Star,
   Sun,
   Target,
-  Trash2,
+  Trash,
   TrendingDown,
   TrendingUp,
   Unlock,
@@ -133,7 +133,7 @@ export const EyeIcon = createIcon(Eye);
 export const EyeSlashIcon = createIcon(EyeOff);
 export const PlusIcon = createIcon(Plus);
 export const EditIcon = createIcon(Edit);
-export const TrashIcon = createIcon(Trash2);
+export const TrashIcon = createIcon(Trash);
 export const SearchIcon = createIcon(Search);
 export const LoadingSpinnerIcon = createIcon(Loader);
 export const HomeIcon = createIcon(Home);
@@ -181,7 +181,7 @@ export const WheatIcon = createIcon(Wheat);
 export const XCircleIcon = createIcon(XCircle);
 export const PieChartIcon = createIcon(PieChart);
 export const MoveLeftIcon = createIcon(MoveLeft);
-export const CircleHelpIcon = createIcon(CircleHelp);
+export const CircleHelpIcon = createIcon(CircleQuestionMark);
 export const SparklesIcon = createIcon(Sparkles);
 export const CopyIcon = createIcon(Copy);
 export const RepeatIcon = createIcon(Repeat);
