@@ -135,7 +135,6 @@ describe("useAuthReady", () => {
       to: "/login",
       search: { returnTo: "/settings?tab=accounts" },
       replace: true,
-      replace: true,
     });
   });
 
@@ -161,7 +160,6 @@ describe("useAuthReady", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/profile-setup",
       search: { redirectTo: "/profile-setup" },
-      replace: true,
       replace: true,
     });
   });
