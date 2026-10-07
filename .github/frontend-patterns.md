@@ -645,12 +645,12 @@ const userQueries = useQueries({
 
 ### Typed API Clients (Eden Treaty)
 
-The `frontend/src/api/*.ts` clients are moving from hand-written `apiClient.get/post` calls to Eden Treaty, typed from the backend's exported `App`. [`reporting.ts`](../frontend/src/api/reporting.ts) is the worked example.
+The `frontend/src/api/*.ts` clients use Eden Treaty, typed from the backend's exported `App`. [`reporting.ts`](../frontend/src/api/reporting.ts) is the worked example.
 
-- **Client:** `api` in [`core.ts`](../frontend/src/api/core.ts) is the only treaty instance. It keeps the old wrapper's base URL (`VITE_API_URL`), auth headers, `credentials: "include"` and `cache: "no-store"`. Do not create another.
+- **Client:** `api` in [`core.ts`](../frontend/src/api/core.ts) is the only treaty instance. It handles the base URL (`VITE_API_URL`), auth headers, `credentials: "include"` and `cache: "no-store"`. Do not create another.
 - **Calls:** path segments mirror the route, so `/api/reporting/nutrient-density-summary` is `api.api.reporting["nutrient-density-summary"].get({ query })`. Pass bodies as the first argument to `post`/`put`, and `:id` params as a call: `api.api.macros({ id }).delete()`.
-- **Errors:** wrap every call in `unwrap(...)`. It returns `data` or throws `ApiError` with the same `status`, `code` and `details` as before, and rethrows network failures unchanged. The offline queue and React Query retries rely on that, so callers and hooks do not change.
-- **Types:** keep the exported interfaces callers import and annotate the method's return type with them. The compiler then checks them against the backend, so delete the matching `contracts.test.ts` checks for the file you migrate.
+- **Errors:** wrap every call in `unwrap(...)`. It returns `data` or throws `ApiError` with `status`, `code` and `details` from the response body, and rethrows network failures unchanged. The offline queue and React Query retries rely on that.
+- **Types:** keep the exported interfaces callers import and annotate the method's return type with them. The compiler then checks them against the backend.
 - **Tests:** client tests keep stubbing global `fetch` (Eden calls it per request) and assert URL, `method` and `credentials` with `expect.objectContaining`. Eden lowercases header names and sends `content-type: application/json` even on GETs. Hook and component tests keep `vi.mock`-ing the `xxxApi` module.
 
 ```typescript

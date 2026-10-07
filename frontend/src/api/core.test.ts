@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { apiClient,ApiError } from "./core";
+import { api, apiClient, ApiError, unwrap } from "./core";
 
 describe("api/core", () => {
   describe("ApiError", () => {
@@ -88,6 +88,42 @@ describe("api/core", () => {
       apiClient.setGetToken(async () => null);
       const token = await apiClient.getAuthToken();
       expect(token).toBe("static-token");
+    });
+  });
+
+  describe("unwrap", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("surfaces structured API failures through ApiError", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn<typeof fetch>(async () =>
+          new Response(
+            JSON.stringify({
+              code: "ACCOUNT_NOT_SYNCED",
+              message: "Finish setup first",
+              details: { step: "profile" },
+            }),
+            {
+              status: 409,
+              statusText: "Conflict",
+              headers: { "Content-Type": "application/json" },
+            },
+          ),
+        ),
+      );
+
+      await expect(unwrap(api.api.sync.ticket.post())).rejects.toEqual(
+        expect.objectContaining<ApiError>({
+          name: "ApiError",
+          status: 409,
+          code: "ACCOUNT_NOT_SYNCED",
+          message: "Finish setup first",
+          details: { step: "profile" },
+        }),
+      );
     });
   });
 });

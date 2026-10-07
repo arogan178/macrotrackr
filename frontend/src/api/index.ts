@@ -2,9 +2,7 @@ export { authApi } from "@/api/auth";
 export { billingApi } from "@/api/billing";
 export {
   API_BASE_URL,
-  apiClient,
   ApiError,
-  type GetHeadersOptions,
 } from "@/api/core";
 export { type AddWeightLogPayload, goalsApi, type WeightLogEntry } from "@/api/goals";
 export {
