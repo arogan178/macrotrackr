@@ -56,7 +56,15 @@ export function initializeNativeAppLifecycle(
 
       const pathAndSearch = parseDeepLinkPathAndSearch(data.url);
       if (pathAndSearch) {
-        router.history.push(pathAndSearch);
+        // Auth handoff pages must not stay in history, or Back returns to sign-in.
+        const isAuthHandoff = /^\/(login|auth-ready|sso-callback)\b/.test(
+          pathAndSearch,
+        );
+        if (isAuthHandoff) {
+          router.history.replace(pathAndSearch);
+        } else {
+          router.history.push(pathAndSearch);
+        }
       }
     } catch (err) {
       console.debug("appUrlOpen parse error:", err);
