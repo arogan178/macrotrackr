@@ -1,5 +1,19 @@
 [
   {
+    "slug": "v3-5-0",
+    "title": "MacroTrackr 3.5.0: Offline Logging, Password Reset, and a Much Lighter First Load",
+    "excerpt": "Version 3.5 lets you log food with no signal and sends it when the connection returns. Hosted accounts can finally reset a forgotten password, and the first load is about a quarter lighter. Self-hosting gets safer database upgrades and a simpler way to reset passwords. Along the way there are many smaller logging, habit and unit improvements, and a round of fixes to goals, profile saves and sign-out.",
+    "date": "2026-10-07",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "2 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v3-1-0",
     "title": "MacroTrackr 3.1.0: Barcode Scanning, One-Click Imports, and a Faster Way In",
     "excerpt": "Version 3.1 is mostly about the phone: barcode scanning that works inside an installed app, importers so switching trackers does not mean starting from an empty log, and an Android build with in-app Pro. Plus the launch and sign-in path, which had been dropping people on the marketing page and making them think they had been signed out.",
