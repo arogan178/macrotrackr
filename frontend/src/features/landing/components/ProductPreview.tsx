@@ -1,4 +1,10 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import Panel from "@/components/ui/Panel";
 import { cn } from "@/lib/classnameUtilities";
@@ -187,30 +193,34 @@ const SCENES = [
   { key: "goal", label: "Hit the goal", steps: 1, hold: 4400, render: GoalChart },
 ] as const;
 
+const subscribeToNothing = () => () => {};
+const prefersReducedMotion = () =>
+  typeof globalThis.matchMedia === "function" &&
+  globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 const ProductPreview: React.FC = () => {
-  const reducedMotion =
-    typeof globalThis.matchMedia === "function" &&
-    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reducedMotion = useSyncExternalStore(
+    subscribeToNothing,
+    prefersReducedMotion,
+    // Hydration starts from the prerendered HTML, which cannot know the
+    // visitor's motion preference.
+    () => false,
+  );
 
   const [scene, setScene] = useState(0);
   const [stopped, setStopped] = useState(false);
-  // Starts empty everywhere so hydration matches the prerendered HTML, which
-  // cannot know the visitor's motion preference.
-  const [step, setStep] = useState(0);
+  const [sequenceStep, setSequenceStep] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    if (reducedMotion) setStep(SCENES[0].steps);
-  }, [reducedMotion]);
-
   const active = SCENES[scene];
+  const step = reducedMotion ? active.steps : sequenceStep;
 
   // Picking a scene stops the sequence, on the same rule the rest of this
   // component follows: an explicit choice is not overridden a moment later.
   const goTo = (index: number) => {
     setStopped(true);
     setScene(index);
-    setStep(SCENES[index].steps);
+    setSequenceStep(SCENES[index].steps);
     setVisible(true);
   };
 
@@ -219,7 +229,7 @@ const ProductPreview: React.FC = () => {
 
     // Still filling in: take the next step.
     if (step < active.steps) {
-      const timer = setTimeout(() => setStep((current) => current + 1), STEP_MS);
+      const timer = setTimeout(() => setSequenceStep((current) => current + 1), STEP_MS);
 
       return () => clearTimeout(timer);
     }
@@ -228,7 +238,7 @@ const ProductPreview: React.FC = () => {
     const hold = setTimeout(() => setVisible(false), active.hold);
     const handover = setTimeout(() => {
       setScene((current) => (current + 1) % SCENES.length);
-      setStep(0);
+      setSequenceStep(0);
       setVisible(true);
     }, active.hold + FADE_MS);
 

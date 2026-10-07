@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
 import { useClerk } from "@clerk/react";
 import { useSignIn, useSignUp } from "@clerk/react/legacy";
@@ -117,7 +117,7 @@ export function ClerkSignInForm({
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [isEmailMode, setIsEmailMode] = useState(false);
-  const [showLinkIntentBanner, setShowLinkIntentBanner] = useState(false);
+  const [showLinkIntentBanner] = useState(() => getAuthLinkIntent() !== null);
 
   // Second-factor challenge state, used for both MFA and Device Trust.
   const [secondFactorOptions, setSecondFactorOptions] = useState<
@@ -135,10 +135,6 @@ export function ClerkSignInForm({
 
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
   const normalizedRedirect = normalizeAuthRedirect(redirectTo);
-
-  useEffect(() => {
-    setShowLinkIntentBanner(getAuthLinkIntent() !== null);
-  }, []);
 
   /**
    * Shared completion path. Reached either straight from a password sign-in or

@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
@@ -289,11 +289,11 @@ const ReadingProgress: React.FC = () => {
 
 const BlogArticlePage: React.FC = () => {
   const params = useParams({ strict: false }) as { slug?: string };
-  const lastSlugRef = useRef(params.slug);
-  if (params.slug) {
-    lastSlugRef.current = params.slug;
+  const [lastSlug, setLastSlug] = useState(params.slug);
+  if (params.slug && params.slug !== lastSlug) {
+    setLastSlug(params.slug);
   }
-  const slug = params.slug || lastSlugRef.current || "";
+  const slug = params.slug || lastSlug || "";
   const shouldReduceMotion = useReducedMotion();
   const post = getPostBySlug(slug);
   const [copiedLink, setCopiedLink] = useState(false);

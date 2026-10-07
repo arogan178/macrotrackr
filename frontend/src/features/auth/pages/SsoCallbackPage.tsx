@@ -163,14 +163,7 @@ function ClerkSsoCallbackPage() {
     if (hasProcessedRouting.current) return;
     if (!authLoaded || !userLoaded) return;
 
-    if (!isSignedIn || !user) {
-      if (callbackResolution) {
-        hasProcessedRouting.current = true;
-        setError(callbackResolution.message);
-      }
-
-      return;
-    }
+    if (!isSignedIn || !user) return;
 
     hasProcessedRouting.current = true;
 
@@ -290,7 +283,6 @@ function ClerkSsoCallbackPage() {
     routeUser();
   }, [
     authLoaded,
-    callbackResolution,
     isSignUpFlow,
     isSignedIn,
     navigate,
@@ -346,7 +338,14 @@ function ClerkSsoCallbackPage() {
           }),
       };
 
-  if (error) {
+  // A failed callback only matters once Clerk confirms nobody is signed in.
+  const shownError =
+    error ??
+    (authLoaded && userLoaded && (!isSignedIn || !user)
+      ? callbackResolution?.message
+      : undefined);
+
+  if (shownError) {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
         <div className="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-8 text-center">
@@ -368,7 +367,7 @@ function ClerkSsoCallbackPage() {
           <h1 className="mb-2 text-xl font-bold text-foreground">
             Sign-in Failed
           </h1>
-          <p className="mb-6 text-muted">{error}</p>
+          <p className="mb-6 text-muted">{shownError}</p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <button
               type="button"

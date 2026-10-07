@@ -1,4 +1,11 @@
-import { memo, useEffect, useId, useRef, useState } from "react";
+import {
+  memo,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import ReactDOM from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -66,6 +73,12 @@ const backdropVariants = {
     transition: { duration: 0.2, ease: "easeIn" as const },
   },
 };
+
+// The portal target only exists in the browser; prerendered pages and
+// hydration render nothing here.
+const subscribeToNothing = () => () => {};
+const isClient = () => true;
+const isServer = () => false;
 
 function renderConfirmationFooter(
   properties: ConfirmationModalProps,
@@ -164,18 +177,33 @@ function Modal(properties: ModalProps) {
     children,
     hideClose = false,
   } = properties;
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    subscribeToNothing,
+    isClient,
+    isServer,
+  );
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const openerRef = useRef<Element | null>(null);
+  const [opened, setOpened] = useState<{
+    isOpen: boolean;
+    opener: Element | null;
+  }>({
+    isOpen: false,
+    opener: null,
+  });
 
   // Captured during render: a child's autoFocus has already moved focus by the
   // time effects run.
-  if (!isOpen) {
-    openerRef.current = null;
-  } else if (!openerRef.current && typeof document !== "undefined") {
-    openerRef.current = document.activeElement;
+  if (opened.isOpen !== isOpen) {
+    setOpened({
+      isOpen,
+      opener:
+        isOpen && typeof document !== "undefined"
+          ? document.activeElement
+          : null,
+    });
   }
+  const { opener } = opened;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -220,7 +248,6 @@ function Modal(properties: ModalProps) {
   useEffect(() => {
     if (!isOpen || !isMounted) return;
 
-    const opener = openerRef.current;
     const dialog = dialogRef.current;
     if (dialog && !dialog.contains(document.activeElement)) {
       (dialog.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ?? dialog).focus();
@@ -229,13 +256,7 @@ function Modal(properties: ModalProps) {
     return () => {
       if (opener instanceof HTMLElement) opener.focus();
     };
-  }, [isOpen, isMounted]);
-
-  useEffect(() => {
-    setIsMounted(true);
-
-    return () => setIsMounted(false);
-  }, []);
+  }, [isOpen, isMounted, opener]);
 
   const modalRoot =
     typeof document === "undefined"

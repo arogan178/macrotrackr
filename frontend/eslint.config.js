@@ -68,11 +68,6 @@ export default [
       ...tseslint.configs.stylisticTypeChecked.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
-      // React Compiler findings in existing code; promote to errors once the compiler is enabled.
-      "react-hooks/immutability": "warn",
-      "react-hooks/preserve-manual-memoization": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/set-state-in-effect": "warn",
       ...pluginJsxA11y.configs.recommended.rules,
       "react-refresh/only-export-components": "off",
       "@stylistic/padding-line-between-statements": ["warn", { blankLine: "always", prev: "*", next: "return" }],

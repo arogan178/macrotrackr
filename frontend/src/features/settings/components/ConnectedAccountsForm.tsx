@@ -63,7 +63,7 @@ const ConnectedAccountsForm = () => {
   });
   const [isConnecting, setIsConnecting] = useState<ProviderKey | null>(null);
   const [_isDisconnecting, setIsDisconnecting] = useState(false);
-  const [showLinkIntentHint, setShowLinkIntentHint] = useState(false);
+  const [showLinkIntentHint] = useState(() => getAuthLinkIntent() !== null);
 
   const notifyUnavailableProvider = (providerName: string) => {
     showNotification(
@@ -73,8 +73,6 @@ const ConnectedAccountsForm = () => {
   };
 
   useEffect(() => {
-    const linkIntent = getAuthLinkIntent();
-    setShowLinkIntentHint(linkIntent !== null);
     clearAuthLinkIntent();
   }, []);
 
@@ -160,7 +158,7 @@ const ConnectedAccountsForm = () => {
         return;
       }
 
-      globalThis.location.href = redirectUrl;
+      globalThis.location.assign(redirectUrl);
     } catch (error) {
       logger.error("Error connecting provider:", error);
       const errorMessage =

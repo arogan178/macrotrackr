@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
 import { useClerk } from "@clerk/react";
 import { useSignIn, useSignUp } from "@clerk/react/legacy";
@@ -71,6 +71,12 @@ function resolveVerificationErrorMessage(
   }
 }
 
+// Clerk abandons a stale attempt server-side. Restoring one puts the user
+// on a screen where the code, the resend and the submit all fail.
+function isAbandoned(abandonAt: number | null): boolean {
+  return abandonAt !== null && abandonAt <= Date.now();
+}
+
 interface ClerkSignUpFormProps {
   onSwitchToSignIn: () => void;
   redirectTo?: string;
@@ -105,7 +111,7 @@ export function ClerkSignUpForm({
   const [isResending, setIsResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [consentRequiredOnVerify, setConsentRequiredOnVerify] = useState(false);
-  const hasCheckedPendingSignUp = useRef(false);
+  const [hasCheckedPendingSignUp, setHasCheckedPendingSignUp] = useState(false);
 
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
   const normalizedRedirect = normalizeAuthRedirect(redirectTo);
@@ -123,19 +129,11 @@ export function ClerkSignUpForm({
   // unverified one survives a reload, a tab close, or the app being killed.
   // Without this the user came back to an empty form and no way to reach the
   // code they had already been sent.
-  useEffect(() => {
-    if (!isLoaded || hasCheckedPendingSignUp.current) {
-      return;
-    }
-    hasCheckedPendingSignUp.current = true;
-
-    // Clerk abandons a stale attempt server-side. Restoring one puts the user
-    // on a screen where the code, the resend and the submit all fail.
-    const isAbandoned =
-      signUp.abandonAt !== null && signUp.abandonAt <= Date.now();
+  if (isLoaded && !hasCheckedPendingSignUp) {
+    setHasCheckedPendingSignUp(true);
 
     if (
-      !isAbandoned &&
+      !isAbandoned(signUp.abandonAt) &&
       signUp.status === "missing_requirements" &&
       signUp.unverifiedFields.includes("email_address") &&
       signUp.emailAddress
@@ -148,7 +146,7 @@ export function ClerkSignUpForm({
       // code lands.
       setConsentRequiredOnVerify(isMissingLegalConsent(signUp));
     }
-  }, [isLoaded, signUp]);
+  }
 
   useEffect(() => {
     if (resendCooldown <= 0) {
