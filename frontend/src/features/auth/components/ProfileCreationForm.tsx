@@ -295,7 +295,7 @@ export function ProfileCreationForm() {
         dateOfBirth,
         height: height ?? undefined,
         weight: weight ?? undefined,
-        gender,
+        gender: gender || undefined,
         activityLevel: activityLevel ?? undefined,
         switchingSource: switchingSource || undefined,
         unitSystem,

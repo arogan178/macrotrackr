@@ -29,22 +29,23 @@ describe("userApi", () => {
     apiClient.setGetToken(async () => null);
   });
 
-  it("normalizes snake_case user payloads into the frontend contract", async () => {
+  it("maps nullable profile fields onto the frontend contract", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse({
         id: 9,
         email: "jordan@example.com",
-        first_name: "Jordan",
-        last_name: "Lee",
-        created_at: "2026-04-01T00:00:00.000Z",
-        date_of_birth: "1992-09-10",
+        firstName: "Jordan",
+        lastName: "Lee",
+        createdAt: "2026-04-01T00:00:00.000Z",
+        dateOfBirth: null,
         height: 182,
-        weight: 77,
-        gender: "male",
-        activity_level: 4,
-        unit_system: "imperial",
+        weight: null,
+        gender: null,
+        activityLevel: null,
+        switchingSource: null,
+        unitSystem: "imperial",
         analyticsTrafficType: "internal",
-        isProfileComplete: true,
+        isProfileComplete: false,
         subscription: {
           status: "pro",
         },
@@ -57,14 +58,15 @@ describe("userApi", () => {
       firstName: "Jordan",
       lastName: "Lee",
       createdAt: "2026-04-01T00:00:00.000Z",
-      dateOfBirth: "1992-09-10",
+      dateOfBirth: "",
       height: 182,
-      weight: 77,
-      gender: "male",
-      activityLevel: 4,
+      weight: undefined,
+      gender: undefined,
+      activityLevel: undefined,
+      switchingSource: undefined,
       unitSystem: "imperial",
       analyticsTrafficType: "internal",
-      isProfileComplete: true,
+      isProfileComplete: false,
       subscription: {
         status: "pro",
       },
@@ -72,18 +74,15 @@ describe("userApi", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/user/me",
-      expect.objectContaining({
-        credentials: "include",
-        headers: {},
-      }),
+      expect.objectContaining({ method: "GET", credentials: "include" }),
     );
   });
 
-  it("throws when the user payload is structurally invalid", async () => {
+  it("throws when the user payload is not JSON", async () => {
     fetchMock.mockResolvedValueOnce(
-      createJsonResponse({
-        id: "bad-id",
-        email: "broken@example.com",
+      new Response("<!doctype html>", {
+        status: 200,
+        headers: { "Content-Type": "text/html" },
       }),
     );
 
@@ -91,6 +90,22 @@ describe("userApi", () => {
       name: "ApiError",
       code: "INVALID_USER_RESPONSE",
       status: 500,
+    });
+  });
+
+  it("surfaces a 401 as ApiError", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse(
+        { code: "UNAUTHORIZED", message: "Authentication required" },
+        { status: 401, statusText: "Unauthorized" },
+      ),
+    );
+
+    await expect(userApi.getUserDetails()).rejects.toMatchObject({
+      name: "ApiError",
+      status: 401,
+      code: "UNAUTHORIZED",
+      message: "Authentication required",
     });
   });
 

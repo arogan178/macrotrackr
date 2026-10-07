@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, apiClient, unwrap } from "@/api/core";
 import { removeToken, setToken } from "@/utils/tokenStorage";
 
 export interface AuthSuccessResponse {
@@ -51,15 +51,15 @@ export interface LocalSessionResponse {
   } | null;
 }
 
+// Replaces the default headers: the backend 404s login and register when any
+// Authorization header is present.
+const withoutAuthHeader = { fetch: { headers: {} } };
+
 export const authApi = {
-  register: async (payload: RegisterPayload) => {
+  register: async (payload: RegisterPayload): Promise<AuthSuccessResponse> => {
     removeToken();
     apiClient.setAuthToken(null);
-    const res = await apiClient.post<AuthSuccessResponse>(
-      "/api/auth/register",
-      payload,
-      { headers: { includeAuth: false } },
-    );
+    const res = await unwrap(api.api.auth.register.post(payload, withoutAuthHeader));
     if (res.token) {
       setToken(res.token);
       apiClient.setAuthToken(res.token);
@@ -68,14 +68,10 @@ export const authApi = {
     return res;
   },
 
-  login: async (payload: LoginPayload) => {
+  login: async (payload: LoginPayload): Promise<AuthSuccessResponse> => {
     removeToken();
     apiClient.setAuthToken(null);
-    const res = await apiClient.post<AuthSuccessResponse>(
-      "/api/auth/login",
-      payload,
-      { headers: { includeAuth: false } },
-    );
+    const res = await unwrap(api.api.auth.login.post(payload, withoutAuthHeader));
     if (res.token) {
       setToken(res.token);
       apiClient.setAuthToken(res.token);
@@ -84,52 +80,41 @@ export const authApi = {
     return res;
   },
 
-  logout: async () => {
+  logout: async (): Promise<{ success: boolean; message?: string }> => {
     try {
-      return await apiClient.post<{ success: boolean; message?: string }>(
-        "/api/auth/logout",
-      );
+      return await unwrap(api.api.auth.logout.post());
     } finally {
       removeToken();
       apiClient.setAuthToken(null);
     }
   },
 
-  logoutAll: async () => {
+  logoutAll: async (): Promise<{ success: boolean; message?: string }> => {
     try {
-      return await apiClient.post<{ success: boolean; message?: string }>(
-        "/api/auth/logout-all",
-      );
+      return await unwrap(api.api.auth["logout-all"].post());
     } finally {
       removeToken();
       apiClient.setAuthToken(null);
     }
   },
 
-  getSession: async (): Promise<LocalSessionResponse> => {
-    return apiClient.get<LocalSessionResponse>("/api/auth/session");
-  },
+  getSession: async (): Promise<LocalSessionResponse> =>
+    unwrap(api.api.auth.session.get()),
 
-  changePassword: async ({ currentPassword, newPassword }: ChangePasswordPayload) => {
-    return apiClient.post<{ success: boolean; message?: string }>(
-      "/api/auth/change-password",
-      { currentPassword, newPassword },
-    );
-  },
+  changePassword: async ({
+    currentPassword,
+    newPassword,
+  }: ChangePasswordPayload): Promise<{ success: boolean; message?: string }> =>
+    unwrap(api.api.auth["change-password"].post({ currentPassword, newPassword })),
 
   /**
    * @throws {ApiError}
    */
-  syncUser: async ({ token }: { token?: string } = {}): Promise<AuthSyncResponse> => {
-    if (token) {
-      return apiClient.post<AuthSyncResponse>("/api/auth/clerk-sync", undefined, {
-        customHeaders: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
-    return apiClient.post<AuthSyncResponse>("/api/auth/clerk-sync");
-  },
+  syncUser: async ({ token }: { token?: string } = {}): Promise<AuthSyncResponse> =>
+    unwrap(
+      api.api.auth["clerk-sync"].post(
+        undefined,
+        token ? { headers: { authorization: `Bearer ${token}` } } : undefined,
+      ),
+    ),
 };

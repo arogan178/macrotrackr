@@ -1,11 +1,10 @@
-import {
-  type AnalyticsTrafficType,
-  isSwitchingSource,
-  type SwitchingSource,
+import type {
+  AnalyticsTrafficType,
+  SwitchingSource,
 } from "@shared/product-analytics";
 
 import { authApi } from "@/api/auth";
-import { apiClient, ApiError } from "@/api/core";
+import { api, ApiError, unwrap } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import type { UnitSystem } from "@/utils/unitConversion";
 import { getActivityLevelFromString } from "@/utils/userConstants";
@@ -30,83 +29,6 @@ export interface UserDetailsResponse {
   };
 }
 
-function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const candidate = value as Record<string, unknown>;
-
-  return (
-    typeof candidate.id === "number" &&
-    typeof candidate.email === "string" &&
-    typeof candidate.firstName === "string" &&
-    typeof candidate.lastName === "string"
-  );
-}
-
-function normalizeUserDetailsResponse(
-  value: unknown,
-): UserDetailsResponse | null {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  const candidateRaw = value as Record<string, unknown>;
-
-  const candidate: Record<string, unknown> = {
-    ...candidateRaw,
-    firstName: candidateRaw.firstName ?? candidateRaw.first_name,
-    lastName: candidateRaw.lastName ?? candidateRaw.last_name,
-    createdAt: candidateRaw.createdAt ?? candidateRaw.created_at,
-    dateOfBirth: candidateRaw.dateOfBirth ?? candidateRaw.date_of_birth,
-    activityLevel: candidateRaw.activityLevel ?? candidateRaw.activity_level,
-    switchingSource:
-      candidateRaw.switchingSource ?? candidateRaw.switching_source,
-    unitSystem: candidateRaw.unitSystem ?? candidateRaw.unit_system,
-  };
-
-  if (!isUserDetailsResponse(candidate)) {
-    return null;
-  }
-
-  return {
-    id: candidate.id,
-    email: candidate.email,
-    firstName: candidate.firstName,
-    lastName: candidate.lastName,
-    createdAt:
-      typeof candidate.createdAt === "string"
-        ? candidate.createdAt
-        : new Date().toISOString(),
-    dateOfBirth:
-      typeof candidate.dateOfBirth === "string" ? candidate.dateOfBirth : "",
-    height: typeof candidate.height === "number" ? candidate.height : undefined,
-    weight: typeof candidate.weight === "number" ? candidate.weight : undefined,
-    gender: typeof candidate.gender === "string" ? candidate.gender : undefined,
-    activityLevel:
-      typeof candidate.activityLevel === "number"
-        ? candidate.activityLevel
-        : undefined,
-    switchingSource: isSwitchingSource(candidate.switchingSource)
-      ? candidate.switchingSource
-      : undefined,
-    unitSystem: candidate.unitSystem === "imperial" ? "imperial" : "metric",
-    analyticsTrafficType:
-      candidate.analyticsTrafficType === "internal" ||
-      candidate.analyticsTrafficType === "synthetic"
-        ? candidate.analyticsTrafficType
-        : "customer",
-    isProfileComplete:
-      typeof candidate.isProfileComplete === "boolean"
-        ? candidate.isProfileComplete
-        : false,
-    subscription:
-      typeof candidate.subscription === "object"
-        ? (candidate.subscription as UserDetailsResponse["subscription"])
-        : { status: "free" as const },
-  };
-}
-
 export type UserSettingsPayload = Partial<{
   id: number;
   firstName: string;
@@ -114,7 +36,7 @@ export type UserSettingsPayload = Partial<{
   dateOfBirth: string;
   height: number;
   weight: number;
-  gender: string;
+  gender: "male" | "female";
   activityLevel: string | number;
   switchingSource: SwitchingSource;
   unitSystem: UnitSystem;
@@ -125,18 +47,26 @@ export const userApi = {
    * @throws {ApiError}
    */
   getUserDetails: async (): Promise<UserDetailsResponse> => {
-    const result = await apiClient.get<unknown>("/api/user/me");
-    const normalizedResult = normalizeUserDetailsResponse(result);
-    if (normalizedResult) {
-      return normalizedResult;
+    const user = await unwrap(api.api.user.me.get());
+    // A misrouted API URL can answer 200 with the SPA's HTML instead of JSON.
+    if (typeof user !== "object" || user === null) {
+      throw new ApiError(
+        "Invalid user profile response from server",
+        500,
+        "INVALID_USER_RESPONSE",
+        user,
+      );
     }
 
-    throw new ApiError(
-      "Invalid user profile response from server",
-      500,
-      "INVALID_USER_RESPONSE",
-      result,
-    );
+    return {
+      ...user,
+      dateOfBirth: user.dateOfBirth ?? "",
+      height: user.height ?? undefined,
+      weight: user.weight ?? undefined,
+      gender: user.gender ?? undefined,
+      activityLevel: user.activityLevel ?? undefined,
+      switchingSource: user.switchingSource ?? undefined,
+    };
   },
 
   /**
@@ -156,67 +86,41 @@ export const userApi = {
   updateSettings: async (
     settings: UserSettingsPayload,
   ): Promise<{ success: boolean; message: string }> => {
-    const payloadToSend = { ...settings };
-    if (
-      payloadToSend.activityLevel !== undefined &&
-      typeof payloadToSend.activityLevel === "string"
-    ) {
-      payloadToSend.activityLevel = getActivityLevelFromString(
-        payloadToSend.activityLevel as ActivityLevel,
-      );
-    }
+    const { activityLevel, ...rest } = settings;
 
-    const result = await apiClient.put<{
-      success?: boolean;
-      message?: string;
-      data?: { success?: boolean; message?: string };
-    }>("/api/user/settings", payloadToSend);
-
-    return {
-      success: result.data?.success ?? result.success ?? false,
-      message: result.data?.message ?? result.message ?? "Settings updated.",
-    };
+    return unwrap(
+      api.api.user.settings.put({
+        ...rest,
+        activityLevel:
+          typeof activityLevel === "string"
+            ? getActivityLevelFromString(activityLevel as ActivityLevel)
+            : activityLevel,
+      }),
+    );
   },
 
-  /**
-   * @throws {ApiError}
-   */
   /**
    * Permanently delete the current account and everything owned by it.
    * Irreversible. Rejects with 409 while a subscription is active.
    *
    * @throws {ApiError}
    */
-  deleteAccount: async (): Promise<{ success: boolean; message: string }> => {
-    return apiClient.del<{ success: boolean; message: string }>("/api/user/me");
-  },
+  deleteAccount: async (): Promise<{ success: boolean; message: string }> =>
+    unwrap(api.api.user.me.delete()),
 
+  /**
+   * @throws {ApiError}
+   */
   completeProfile: async (
-    profileData: Partial<
-      Pick<
-        UserSettingsPayload,
-        | "dateOfBirth"
-        | "height"
-        | "weight"
-        | "gender"
-        | "activityLevel"
-        | "switchingSource"
-        | "unitSystem"
-      >
-    >,
-  ): Promise<{ success: boolean; message: string }> => {
-    const result = await apiClient.post<{
-      success?: boolean;
-      message?: string;
-      data?: { success?: boolean; message?: string };
-    }>("/api/user/complete-profile", profileData);
-
-    return {
-      success: result.data?.success ?? result.success ?? false,
-      message:
-        result.data?.message ??
-        result.message ??
-        "Profile updated successfully.",
-    };
-  },
+    profileData: Pick<
+      UserSettingsPayload,
+      | "dateOfBirth"
+      | "height"
+      | "weight"
+      | "gender"
+      | "switchingSource"
+      | "unitSystem"
+    > & { activityLevel?: number },
+  ): Promise<{ success: boolean; message: string }> =>
+    unwrap(api.api.user["complete-profile"].post(profileData)),
 };
