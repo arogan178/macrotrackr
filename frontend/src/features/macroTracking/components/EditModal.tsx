@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import Modal from "@/components/ui/Modal";
 import IngredientsPanel from "@/features/macroTracking/components/edit-modal/IngredientsPanel";
@@ -31,7 +31,6 @@ export default function EditModal({
 }: EditModalProps) {
   const [editedEntry, setEditedEntry] = useState<MacroEntry | null>(null);
   const [originalEntry, setOriginalEntry] = useState<MacroEntry | null>(null);
-  const [formValid, setFormValid] = useState(true);
   const [showIngredients, setShowIngredients] = useState(true);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [baseIngredientsForScaling, setBaseIngredientsForScaling] = useState<
@@ -48,8 +47,10 @@ export default function EditModal({
   const [singleBaseQuantity, setSingleBaseQuantity] = useState<number>(100);
   const [singleBaseUnit, setSingleBaseUnit] = useState<UnitType>("g");
 
-  // Update editedEntry when entry prop changes
-  useEffect(() => {
+  // Reset the form when a different entry is opened
+  const [loadedEntry, setLoadedEntry] = useState<MacroEntry>();
+  if (entry !== loadedEntry) {
+    setLoadedEntry(entry);
     if (entry) {
       const ingredientsWithBase =
         entry.ingredients?.map((ing) => ({
@@ -91,7 +92,7 @@ export default function EditModal({
       setSingleBaseQuantity(firstIng?.baseQuantity ?? initialQty);
       setSingleBaseUnit((firstIng?.baseUnit as UnitType) ?? initialUnit);
     }
-  }, [entry]);
+  }
 
   const hasUnsavedChanges = useMemo(() => {
     if (!originalEntry || !editedEntry) return false;
@@ -121,20 +122,14 @@ export default function EditModal({
     setShowUnsavedWarning(false);
   };
 
-  // Validate form whenever entry changes
-  useEffect(() => {
-    if (editedEntry) {
-      const isValid =
-        editedEntry.mealName.trim() !== "" &&
-        editedEntry.entryDate !== "" &&
-        editedEntry.entryTime !== "" &&
-        editedEntry.protein >= 0 &&
-        editedEntry.carbs >= 0 &&
-        editedEntry.fats >= 0;
-
-      setFormValid(isValid);
-    }
-  }, [editedEntry]);
+  const formValid =
+    !editedEntry ||
+    (editedEntry.mealName.trim() !== "" &&
+      editedEntry.entryDate !== "" &&
+      editedEntry.entryTime !== "" &&
+      editedEntry.protein >= 0 &&
+      editedEntry.carbs >= 0 &&
+      editedEntry.fats >= 0);
 
   const handleInputChange = (field: keyof MacroEntry, value: string) => {
     setEditedEntry((previous) =>

@@ -168,4 +168,16 @@ describe("SSOCallbackPage", () => {
       globalThis.location.href,
     );
   });
+
+  it("shows why the callback failed when nobody is signed in", async () => {
+    handleRedirectCallback.mockRejectedValue(new Error("Provider refused"));
+
+    render(<SSOCallbackPage />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign-in Failed" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Provider refused")).toBeInTheDocument();
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });

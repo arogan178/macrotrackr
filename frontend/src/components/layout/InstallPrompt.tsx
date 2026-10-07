@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import Button from "@/components/ui/Button";
 import { CloseIcon } from "@/components/ui/Icons";
@@ -24,6 +30,9 @@ const isIos = (): boolean =>
   /iphone|ipad|ipod/i.test(navigator.userAgent) &&
   !/crios|fxios/i.test(navigator.userAgent);
 
+const subscribeToNothing = () => () => {};
+const shouldShowIosHint = () => !isStandalone() && isIos();
+
 /**
  * With no APK, installing the PWA is the distribution channel — and nothing
  * told anyone it existed. Chrome hands us the event; iOS has no equivalent, so
@@ -35,7 +44,12 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(
     null,
   );
-  const [showIosHint, setShowIosHint] = useState(false);
+  // Prerendered pages hydrate without the hint, then show it on iOS.
+  const showIosHint = useSyncExternalStore(
+    subscribeToNothing,
+    shouldShowIosHint,
+    () => false,
+  );
   const bannerRef = useRef<HTMLDivElement>(null);
   const [dismissed, setDismissed] = useState(
     () => globalThis.localStorage?.getItem(DISMISSED_KEY) === "1",
@@ -50,7 +64,6 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({
     };
 
     globalThis.addEventListener("beforeinstallprompt", onBeforeInstall);
-    if (isIos()) setShowIosHint(true);
 
     return () =>
       globalThis.removeEventListener("beforeinstallprompt", onBeforeInstall);

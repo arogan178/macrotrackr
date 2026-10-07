@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { format, isValid, parse, parseISO } from "date-fns";
 
 import type { AddWeightLogPayload, WeightLogEntry } from "@/api/goals";
@@ -71,7 +71,18 @@ function LogWeightModal({
     if (formError) setFormError(undefined);
   };
 
-  useEffect(() => {
+  // Reset the fields each time the modal opens or is pointed at another entry.
+  const [shownFor, setShownFor] = useState({
+    isOpen: false,
+    entry,
+    initialWeight,
+  });
+  if (
+    shownFor.isOpen !== isOpen ||
+    shownFor.entry !== entry ||
+    shownFor.initialWeight !== initialWeight
+  ) {
+    setShownFor({ isOpen, entry, initialWeight });
     if (isOpen) {
       const dateTime = entry ? parseISO(entry.timestamp) : new Date();
       setDate(format(dateTime, "yyyy-MM-dd"));
@@ -79,7 +90,7 @@ function LogWeightModal({
       setWeight(entry?.weight ?? initialWeight ?? "");
       setFormError(undefined);
     }
-  }, [isOpen, initialWeight, entry]);
+  }
 
   // Validation logic for Save button
   function validateForm(): boolean {

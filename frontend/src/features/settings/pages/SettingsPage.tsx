@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 
@@ -82,22 +82,19 @@ export default function SettingsPage() {
     TabType | undefined
   >();
 
-  // Update tab when URL changes
-  useEffect(() => {
-    const tabParameter = search.tab;
-    if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
-      const newTab = tabParameter as TabType;
-      if (newTab !== activeTab && !hasSettingsChanges) {
-        setActiveTab(newTab);
-      }
+  // Update tab when URL changes. Only on a change, so a tab picked after
+  // landing on ?tab= is not switched back.
+  const [urlTab, setUrlTab] = useState(search.tab);
+  if (search.tab !== urlTab) {
+    setUrlTab(search.tab);
+    if (
+      search.tab &&
+      VALID_TABS.has(search.tab as TabType) &&
+      !hasSettingsChanges
+    ) {
+      setActiveTab(search.tab as TabType);
     }
-  }, [search.tab, hasSettingsChanges, activeTab]);
-
-  useEffect(() => {
-    if (!VALID_TABS.has(activeTab)) {
-      setActiveTab("profile");
-    }
-  }, [activeTab]);
+  }
 
   // Warn user before leaving page with unsaved changes
   // Browsers show their own wording here; a custom message is ignored.

@@ -271,7 +271,7 @@ function AddEntry({
   const [isDateTimeExpanded, setIsDateTimeExpanded] = useState(false);
   const [isDateTimeRendered, setIsDateTimeRendered] = useState(false);
 
-  const toggleDateTime = useCallback((event: React.MouseEvent) => {
+  const toggleDateTime = (event: React.MouseEvent) => {
     event.preventDefault();
     setIsDateTimeExpanded((open) => {
       if (open) return false;
@@ -280,7 +280,7 @@ function AddEntry({
 
       return true;
     });
-  }, []);
+  };
 
   const isLoggedNow = pickedDateTime === undefined;
 

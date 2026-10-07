@@ -6,24 +6,21 @@ interface SocialProfileData {
   dateOfBirth?: string;
 }
 
-export function useSocialProfileData() {
-  const [socialData, setSocialData] = useState<SocialProfileData | null>(null);
-  const [dateOfBirth, setDateOfBirth] = useState("");
+function readSocialProfileData(): SocialProfileData | null {
+  const storedData = sessionStorage.getItem("socialProfileData");
+  if (!storedData) return null;
 
-  useEffect(() => {
-    const storedData = sessionStorage.getItem("socialProfileData");
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData) as SocialProfileData;
-        setSocialData(parsed);
-        if (parsed.dateOfBirth) {
-          setDateOfBirth(parsed.dateOfBirth);
-        }
-      } catch {
-        // Invalid JSON, ignore
-      }
-    }
-  }, []);
+  try {
+    return JSON.parse(storedData) as SocialProfileData;
+  } catch {
+    // Invalid JSON, ignore
+    return null;
+  }
+}
+
+export function useSocialProfileData() {
+  const [socialData] = useState(readSocialProfileData);
+  const [dateOfBirth, setDateOfBirth] = useState(socialData?.dateOfBirth ?? "");
 
   useEffect(() => {
     return () => {
