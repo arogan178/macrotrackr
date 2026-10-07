@@ -1,8 +1,16 @@
+import { createClerkClient } from '@clerk/backend'
 import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { navigateToSignUp, navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
 import { generateRandomEmail, generateRandomPassword } from './helpers'
+
+// The dev instance caps users at 100, so every sign-up test removes its user.
+async function deleteClerkUserByEmail(email: string): Promise<void> {
+  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
+  const { data } = await clerk.users.getUserList({ emailAddress: [email] })
+  await Promise.all(data.map((user) => clerk.users.deleteUser(user.id)))
+}
 
 test.describe('Authentication E2E Tests', () => {
   test.describe('Sign Up Flow', () => {
@@ -62,16 +70,20 @@ test.describe('Authentication E2E Tests', () => {
       // A fixed password fails HIBP on the dev instance (form_password_pwned).
       const password = generateRandomPassword()
 
-      await signUpViaUI(page, email, password)
+      try {
+        await signUpViaUI(page, email, password)
 
-      // "still on /register" used to count as success here, so this passed
-      // while the account was never created. Landing on profile setup or the
-      // app is the only outcome that means the sign-up actually completed.
-      // /auth-ready is a staging post: it exchanges the Clerk token and syncs
-      // the account before routing on, so give it room.
-      await expect(page).toHaveURL(/\/profile-setup|\/home|\/dashboard/, {
-        timeout: 30000,
-      })
+        // "still on /register" used to count as success here, so this passed
+        // while the account was never created. Landing on profile setup or the
+        // app is the only outcome that means the sign-up actually completed.
+        // /auth-ready is a staging post: it exchanges the Clerk token and syncs
+        // the account before routing on, so give it room.
+        await expect(page).toHaveURL(/\/profile-setup|\/home|\/dashboard/, {
+          timeout: 30000,
+        })
+      } finally {
+        await deleteClerkUserByEmail(email)
+      }
     })
   })
 
