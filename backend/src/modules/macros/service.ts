@@ -42,10 +42,10 @@ export interface MacroEntryResponse {
   carbs: number;
   fats: number;
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
-  mealName?: string;
+  mealName: string;
   entryDate: string;
   entryTime: string;
-  ingredients?: unknown[] | null;
+  ingredients: unknown[];
   clientId: string;
   clientUpdatedAt: number | null;
   createdAt: string;
@@ -90,6 +90,7 @@ export function normalizeMacroEntryRow(
   } else {
     normalized.ingredients ??= [];
   }
+  normalized.mealName ??= "";
 
   return normalized as unknown as MacroEntryResponse;
 }

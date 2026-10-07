@@ -42,4 +42,22 @@ describe("normalizeMacroEntryRow", () => {
     const result = normalizeMacroEntryRow(row);
     expect(result.ingredients).toEqual([{ name: "Tuna", protein: 20, carbs: 0, fats: 5 }]);
   });
+
+  it("returns an empty meal name when the column is null", () => {
+    const row = {
+      id: 651,
+      user_id: 1,
+      protein: 20,
+      carbs: 10,
+      fats: 5,
+      meal_type: "lunch" as const,
+      meal_name: null,
+      entry_date: "2026-07-27",
+      entry_time: "12:30",
+      ingredients: "[]",
+      created_at: "2026-07-27 10:30:00",
+    };
+
+    expect(normalizeMacroEntryRow(row).mealName).toBe("");
+  });
 });

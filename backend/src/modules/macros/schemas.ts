@@ -101,10 +101,10 @@ export const MacroSchemas = {
     carbs: MacroValueSchema,
     fats: MacroValueSchema,
     mealType: MealTypeSchema, // camelCase
-    mealName: t.Optional(t.String()), // camelCase
+    mealName: t.String(),
     entryDate: DateSchema,
     entryTime: TimeSchema,
-    ingredients: t.Optional(t.Nullable(t.Array(t.Unknown()))),
+    ingredients: t.Array(t.Unknown()),
     clientId: t.String(),
     clientUpdatedAt: t.Nullable(t.Number()),
     createdAt: t.String(), // Accept any string format for timestamp
@@ -131,12 +131,9 @@ export const MacroSchemas = {
   }),
 
   // --- Macro Target Schemas (Moved from goals/schemas.ts) ---
-  getMacroTargetResponse: t.Nullable(
-    t.Object({
-      // Contains only the percentages object
-      macroTarget: t.Nullable(MacroTargetPercentagesSchema),
-    })
-  ),
+  getMacroTargetResponse: t.Object({
+    macroTarget: MacroTargetPercentagesSchema,
+  }),
   updateMacroTargetBody: t.Object({
     // Body only contains percentages object
     macroTarget: t.Nullable(MacroTargetPercentagesSchema),

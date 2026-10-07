@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { apiClient } from "./core";
+import { apiClient, ApiError } from "./core";
 import {
   macrosApi,
   normalizeFoodSearchResults,
@@ -152,5 +152,56 @@ describe("macrosApi", () => {
       ["http://localhost:3000/api/macros/by-client-id/6f1c2b9e-4d3a-4f8e-9b7c-1a2b3c4d5e6f", "PUT", body],
       ["http://localhost:3000/api/macros/by-client-id/6f1c2b9e-4d3a-4f8e-9b7c-1a2b3c4d5e6f", "DELETE", undefined],
     ]);
+  });
+
+  it("searches and looks up barcodes with encoded values", async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(createJsonResponse([])));
+
+    await macrosApi.search({ query: " oat milk " });
+    await macrosApi.getByBarcode(" 12/34 ");
+
+    expect(fetchMock.mock.calls.map(([url, init]) => [url, init?.method])).toEqual([
+      ["http://localhost:3000/api/macros/search?q=oat%20milk", "GET"],
+      ["http://localhost:3000/api/macros/barcode/12%2F34", "GET"],
+    ]);
+  });
+
+  it("returns entries with their ingredients", async () => {
+    const ingredients = [{ name: "Rice", protein: 3, carbs: 28, fats: 0 }];
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse({ id: 7, clientId: "a", mealName: "", ingredients }),
+    );
+
+    const saved = await macrosApi.addEntry({
+      clientId: "a",
+      clientUpdatedAt: 1,
+      protein: 3,
+      carbs: 28,
+      fats: 0,
+      mealType: "lunch",
+      entryDate: "2026-10-01",
+      entryTime: "12:00",
+    });
+
+    expect(saved.ingredients).toEqual(ingredients);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3000/api/macros",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+  });
+
+  it("surfaces a 401 as an ApiError and rethrows network failures unchanged", async () => {
+    const networkError = new TypeError("Failed to fetch");
+    fetchMock
+      .mockResolvedValueOnce(
+        createJsonResponse({ message: "Authentication required.", code: "UNAUTHORIZED" }, { status: 401 }),
+      )
+      .mockRejectedValueOnce(networkError);
+
+    const unauthorized = await macrosApi.deleteEntry("a").catch((error: unknown) => error);
+    expect(unauthorized).toBeInstanceOf(ApiError);
+    expect(unauthorized).toMatchObject({ status: 401, code: "UNAUTHORIZED" });
+
+    await expect(macrosApi.deleteEntry("a")).rejects.toBe(networkError);
   });
 });
