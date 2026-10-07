@@ -54,7 +54,7 @@
     "@zxing/library": "^0.23.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "lucide-react": "^0.525.0",
+    "lucide-react": "^1.52.0",
     "motion": "^12.38.0",
     "posthog-js": "^1.369.2",
     "react": "^19.2.5",

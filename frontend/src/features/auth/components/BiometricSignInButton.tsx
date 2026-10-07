@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Fingerprint, ScanFace } from "lucide-react";
+import { FingerprintPattern, ScanFace } from "lucide-react";
 
 import { authApi } from "@/api/auth";
 import Button from "@/components/ui/Button";
@@ -120,7 +120,7 @@ export function BiometricSignInButton({
           {isFaceId ? (
             <ScanFace className="h-5 w-5 text-primary" />
           ) : (
-            <Fingerprint className="h-5 w-5 text-primary" />
+            <FingerprintPattern className="h-5 w-5 text-primary" />
           )}
           <span>{label}</span>
         </span>
