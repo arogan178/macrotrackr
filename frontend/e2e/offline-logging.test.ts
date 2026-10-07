@@ -182,6 +182,7 @@ test.describe('offline food logging', () => {
     await context.clock.fastForward(ELEVEN_MINUTES)
     await logEntry(page, names[2]!, 13)
     await expect(page.getByText('Offline. Entries you log are kept on this device')).toBeVisible()
+    await expect(page.getByText('Waiting to sync').filter({ visible: true })).toHaveCount(3)
 
     // Close the app and open it again with no network at all.
     const offlineNow = await now(context)
@@ -227,6 +228,7 @@ test.describe('offline food logging', () => {
     for (const name of names) {
       await expect(page.getByText(name).filter({ visible: true })).toHaveCount(1)
     }
+    await expect(page.getByText('Waiting to sync')).toHaveCount(0)
     await context.close()
   })
 })

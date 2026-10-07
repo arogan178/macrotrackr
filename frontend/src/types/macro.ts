@@ -80,6 +80,8 @@ export interface MacroEntry {
   entryTime: string;
   foodName?: string;
   ingredients?: Ingredient[];
+  /** Set by the device's entry store while a change to the entry is queued. */
+  readonly $hasPendingWrites?: boolean;
 }
 
 export interface MacroDailyTotals {
