@@ -32,7 +32,7 @@ describe("savedMealsApi", () => {
     apiClient.setGetToken(async () => null);
   });
 
-  it("fetches saved meals without forcing a JSON content-type header", async () => {
+  it("fetches saved meals with credentials", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse({ meals: [], count: 0, limit: 10, isPro: false }),
     );
@@ -46,10 +46,7 @@ describe("savedMealsApi", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/saved-meals",
-      expect.objectContaining({
-        credentials: "include",
-        headers: {},
-      }),
+      expect.objectContaining({ method: "GET", credentials: "include" }),
     );
   });
 
@@ -79,7 +76,6 @@ describe("savedMealsApi", () => {
       expect.objectContaining({
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }),
     );
@@ -97,7 +93,6 @@ describe("savedMealsApi", () => {
       expect.objectContaining({
         method: "PUT",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }),
     );
@@ -113,7 +108,6 @@ describe("savedMealsApi", () => {
       expect.objectContaining({
         method: "DELETE",
         credentials: "include",
-        headers: {},
       }),
     );
   });

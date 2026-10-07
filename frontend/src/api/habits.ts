@@ -1,4 +1,4 @@
-import { apiClient } from "@/api/core";
+import { api, unwrap } from "@/api/core";
 import type { HabitAccentColor, HabitFrequency } from "@/types/habit";
 
 export interface HabitGoalPayload {
@@ -45,14 +45,14 @@ export const habitsApi = {
    * @throws {ApiError}
    */
   getHabits: async (date: string): Promise<HabitGoalPayload[]> => {
-    return apiClient.get<HabitGoalPayload[]>(`/api/habits?date=${date}`);
+    return unwrap(api.api.habits.get({ query: { date } }));
   },
 
   /**
    * @throws {ApiError}
    */
   saveHabit: async (habitGoal: HabitGoalPayload): Promise<HabitGoalPayload> => {
-    return apiClient.post<HabitGoalPayload>("/api/habits", habitGoal);
+    return unwrap(api.api.habits.post(habitGoal));
   },
 
   /**
@@ -73,7 +73,7 @@ export const habitsApi = {
       data = dataPayload!;
     }
 
-    return apiClient.put<HabitGoalPayload>(`/api/habits/${id}`, data);
+    return unwrap(api.api.habits({ id }).put(data));
   },
 
   /**
@@ -84,7 +84,7 @@ export const habitsApi = {
   ): Promise<{ success: boolean; id: string }> => {
     const id = typeof idOrParameters === "object" && idOrParameters !== null ? idOrParameters.id : idOrParameters;
 
-    return apiClient.del<{ success: boolean; id: string }>(`/api/habits/${id}`);
+    return unwrap(api.api.habits({ id }).delete());
   },
 
   /**
@@ -95,9 +95,6 @@ export const habitsApi = {
     action: HabitProgressAction,
     date: string,
   ): Promise<HabitGoalPayload> => {
-    return apiClient.post<HabitGoalPayload>(`/api/habits/${id}/progress`, {
-      action,
-      date,
-    });
+    return unwrap(api.api.habits({ id }).progress.post({ action, date }));
   },
 };

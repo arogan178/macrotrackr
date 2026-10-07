@@ -15,7 +15,7 @@ interface HabitResponse {
   current: number;
   progress: number;
   isComplete: boolean;
-  completedAt: string | null;
+  completedAt?: string;
 }
 
 describe("habit progress", () => {
@@ -100,6 +100,13 @@ describe("habit progress", () => {
     db.close();
   });
 
+  it("omits completedAt instead of returning null for an incomplete habit", async () => {
+    const habit = await readHabit("2026-09-24");
+
+    expect(habit.isComplete).toBe(false);
+    expect("completedAt" in habit).toBe(false);
+  });
+
   it("reads a completed habit as 0 on the next local day", async () => {
     await updateProgress("increment", "2026-09-24");
     const completed = await updateProgress("increment", "2026-09-24");
@@ -111,7 +118,6 @@ describe("habit progress", () => {
       current: 0,
       progress: 0,
       isComplete: false,
-      completedAt: null,
     });
   });
 
@@ -145,7 +151,6 @@ describe("habit progress", () => {
     expect(await updateProgress("decrement", "2026-09-25")).toMatchObject({
       current: 1,
       isComplete: false,
-      completedAt: null,
     });
     await updateProgress("decrement", "2026-09-25");
     expect(await updateProgress("decrement", "2026-09-25")).toMatchObject({ current: 0 });
@@ -197,7 +202,6 @@ describe("habit progress", () => {
       expect(await readHabit("2026-09-28")).toMatchObject({
         current: 0,
         isComplete: false,
-        completedAt: null,
       });
     });
 
