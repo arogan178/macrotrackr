@@ -12,7 +12,6 @@ services:
       - AUTH_MODE=local
       - BILLING_MODE=disabled
       - ANALYTICS_MODE=disabled
-      - EMAIL_MODE=disabled
       - APP_URL=http://localhost:5173
       - CORS_ORIGIN=http://localhost:5173
       - TRUST_PROXY=true
