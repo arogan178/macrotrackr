@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { apiClient, getFullUrl } from "@/api/core";
+import { api, getFullUrl, unwrap } from "@/api/core";
 import { getToken } from "@/utils/tokenStorage";
 
 /**
@@ -12,11 +12,9 @@ import { getToken } from "@/utils/tokenStorage";
  */
 async function requestSyncTicket(): Promise<string | null> {
   try {
-    const response = await apiClient.post<{ ticket?: string }>(
-      "/api/sync/ticket",
-    );
+    const response = await unwrap(api.api.sync.ticket.post());
 
-    return response?.ticket ?? null;
+    return response.ticket ?? null;
   } catch {
     // Fall back to a cookie-authenticated stream rather than dropping sync.
     return null;
