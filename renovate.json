@@ -11,11 +11,10 @@
       "groupName": "minor and patch updates"
     },
     {
-      "description": "Handled manually: motion 14, Resend 6, react-syntax-highlighter 16, TanStack Table 9. Remove entries as each lands.",
+      "description": "Handled manually: motion 14, Resend 6, TanStack Table 9. Remove entries as each lands.",
       "matchPackageNames": [
         "motion",
         "resend",
-        "react-syntax-highlighter",
         "@tanstack/react-table"
       ],
       "matchUpdateTypes": ["major"],
