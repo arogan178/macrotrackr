@@ -452,7 +452,7 @@ const EntryHistoryComponent = function EntryHistory({
                 return;
               }
               const input = document.querySelector<HTMLInputElement>(
-                "#meal-name-input",
+                "[data-meal-name-input]",
               );
               input?.scrollIntoView({ behavior: "smooth", block: "center" });
               input?.focus();

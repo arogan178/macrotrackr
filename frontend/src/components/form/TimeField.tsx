@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 
 import { formStyles } from "@/components/form/FormStyles";
 import type { TimeFieldProps } from "@/components/form/FormTypes";
@@ -28,7 +28,8 @@ function TimeField({
     "cursor-pointer"
   );
 
-  const resolvedId = id ?? name ?? label;
+  const autoId = useId();
+  const resolvedId = id ?? name ?? autoId;
 
   return (
     <div className={formStyles.container}>

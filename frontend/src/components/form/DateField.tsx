@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 
 import { formStyles } from "@/components/form/FormStyles";
 import type { DateFieldProps } from "@/components/form/FormTypes";
@@ -30,7 +30,8 @@ function DateField({
     "cursor-pointer"
   );
 
-  const resolvedId = id ?? name ?? label;
+  const autoId = useId();
+  const resolvedId = id ?? name ?? autoId;
   const resolvedMaxDate = maxDate ?? todayISO();
 
   return (

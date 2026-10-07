@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 
 import { formStyles } from "@/components/form/FormStyles";
 import type { DropdownProps } from "@/components/form/FormTypes";
@@ -26,7 +26,8 @@ function Dropdown({
     disabled ? formStyles.input.disabled : "cursor-pointer"
   );
 
-  const resolvedId = id ?? name ?? label;
+  const autoId = useId();
+  const resolvedId = id ?? name ?? autoId;
   const normalizedValue = value ?? "";
   const normalizedOptions =
     placeholder && !options.some((option) => option.value === "")

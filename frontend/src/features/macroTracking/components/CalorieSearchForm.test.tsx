@@ -157,6 +157,18 @@ describe("CalorieSearchForm", () => {
     expect(container).toBeDefined();
   });
 
+  it("names the visible search input when a hidden copy is also mounted", () => {
+    renderWithQueryClient(
+      <>
+        <div hidden>
+          <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />
+        </div>
+        <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />
+      </>,
+    );
+    expect(screen.getByRole("textbox", { name: "Search for food" })).toBeVisible();
+  });
+
   it("scales calories and macros in dropdown according to portion size", async () => {
     (macrosApi.search as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([
       {
