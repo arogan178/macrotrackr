@@ -35,9 +35,9 @@ type TableRowData = GroupedEntry & {
 
 const columnHelper = createColumnHelper<TableRowData>();
 
-// Wider actions column so a row's four buttons fit beside the six figures.
+// Wider actions column so a row's five buttons fit beside the six figures.
 const columnWidth = (columnId: string) =>
-  columnId === "actions" ? "22%" : "13%";
+  columnId === "actions" ? "28%" : "12%";
 
 const DesktopEntryTable = memo(
   ({ groupedEntries }: DesktopEntryTableProps) => {
@@ -57,6 +57,7 @@ const DesktopEntryTable = memo(
       onSaveMeal,
       onUnsaveMeal,
       onLogAgain,
+      onCopyOrMove,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -288,18 +289,30 @@ const DesktopEntryTable = memo(
               const entry = data.entries[0];
 
               return (
-                <IconButtonGroup
-                  onEdit={() => onEdit(entry)}
-                  onDelete={() => deleteEntry(entry.clientId)}
-                  isDeleting={isDeleting(entry.clientId)}
-                  onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
-                  onUnsaveMeal={
-                    onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
-                  }
-                  isMealSaved={isMealSaved(entry.clientId)}
-                  onLogAgain={onLogAgain ? () => onLogAgain(entry) : undefined}
-                  buttonSize="sm"
-                />
+                <div className="flex items-center justify-center gap-1">
+                  {onCopyOrMove && (
+                    <IconButton
+                      variant="custom"
+                      buttonSize="sm"
+                      className="text-muted hover:text-foreground"
+                      icon={<CopyIcon className="h-4 w-4" />}
+                      onClick={() => onCopyOrMove(entry)}
+                      ariaLabel="Copy or move entry"
+                    />
+                  )}
+                  <IconButtonGroup
+                    onEdit={() => onEdit(entry)}
+                    onDelete={() => deleteEntry(entry.clientId)}
+                    isDeleting={isDeleting(entry.clientId)}
+                    onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
+                    onUnsaveMeal={
+                      onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
+                    }
+                    isMealSaved={isMealSaved(entry.clientId)}
+                    onLogAgain={onLogAgain ? () => onLogAgain(entry) : undefined}
+                    buttonSize="sm"
+                  />
+                </div>
               );
             }
           },
@@ -321,6 +334,7 @@ const DesktopEntryTable = memo(
         onSaveMeal,
         onUnsaveMeal,
         onLogAgain,
+        onCopyOrMove,
         isMealSaved,
         isSelectionMode,
         isEntrySelected,

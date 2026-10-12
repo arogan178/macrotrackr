@@ -8,6 +8,7 @@ import FeaturePage from "@/components/layout/FeaturePage";
 import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
 import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
+import type { EntryDestination } from "@/features/macroTracking/components/CopyMoveEntryModal";
 import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
 import DayNavigator from "@/features/macroTracking/components/DayNavigator";
 import EditModal from "@/features/macroTracking/components/EditModal";
@@ -354,6 +355,55 @@ export default function HomePage() {
     [handleAddEntry, today, showNotification],
   );
 
+  const describeDay = useCallback(
+    (day: string) => (day === today ? "today" : getDisplayDate(parseISO(day))),
+    [today],
+  );
+
+  // The same create path as a new entry, so it queues offline with its own clientId.
+  const handleCopyEntry = useCallback(
+    async (entry: MacroEntry, destination: EntryDestination) => {
+      try {
+        await handleAddEntry({
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: destination.mealType,
+          mealName: entry.mealName,
+          entryDate: destination.entryDate,
+          entryTime: entry.entryTime,
+          ingredients: entry.ingredients,
+        });
+      } catch {
+        // addEntry has already shown the error.
+        return;
+      }
+      showNotification(
+        `Copied to ${describeDay(destination.entryDate)}`,
+        "success",
+      );
+    },
+    [handleAddEntry, describeDay, showNotification],
+  );
+
+  const handleMoveEntry = useCallback(
+    async (entry: MacroEntry, destination: EntryDestination) => {
+      try {
+        if (!entryStore) throw new Error("Your account is still loading.");
+        await entryStore.replace({ ...entry, ...destination });
+      } catch (error) {
+        handleMutationError(error, "moving entry");
+
+        return;
+      }
+      showNotification(
+        `Moved to ${describeDay(destination.entryDate)}`,
+        "success",
+      );
+    },
+    [entryStore, describeDay, handleMutationError, showNotification],
+  );
+
   const handleExportHistory = useCallback(async () => {
     setIsExportingHistory(true);
     try {
@@ -465,6 +515,9 @@ export default function HomePage() {
                   isExportingCsv={isExportingHistory}
                   onLogAgain={handleLogAgain}
                   onCopyDayToToday={handleCopyDayToToday}
+                  onCopyEntry={handleCopyEntry}
+                  onMoveEntry={handleMoveEntry}
+                  oldestDate={oldestDate}
                 />
               )}
           </Panel>

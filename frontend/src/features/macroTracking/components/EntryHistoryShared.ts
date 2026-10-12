@@ -31,6 +31,7 @@ export interface EntryHistoryController {
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
   onLogAgain?: (entry: MacroEntry) => void;
+  onCopyOrMove?: (entry: MacroEntry) => void;
 
   isMealSaved: (entryId: string) => boolean;
 

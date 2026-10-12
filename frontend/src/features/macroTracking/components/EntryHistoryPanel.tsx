@@ -23,6 +23,7 @@ import { todayISO } from "@/utils/dateUtilities";
 
 import { MEAL_TYPE_OPTIONS } from "../constants";
 
+import CopyMoveEntryModal, { type EntryDestination } from "./CopyMoveEntryModal";
 import DesktopEntryTable from "./DesktopEntryTable";
 import { EntryHistoryContext } from "./EntryHistoryContext";
 import {
@@ -56,6 +57,10 @@ interface EntryHistoryProps {
   isExportingCsv?: boolean;
   onLogAgain?: (entry: MacroEntry) => void;
   onCopyDayToToday?: (entries: MacroEntry[]) => void;
+  onCopyEntry?: (entry: MacroEntry, destination: EntryDestination) => void;
+  onMoveEntry?: (entry: MacroEntry, destination: EntryDestination) => void;
+  /** The free plan's oldest visible day, so copy and move cannot reach past it. */
+  oldestDate?: string;
 }
 
 const EntryHistoryComponent = function EntryHistory({
@@ -75,6 +80,9 @@ const EntryHistoryComponent = function EntryHistory({
   isExportingCsv = false,
   onLogAgain,
   onCopyDayToToday,
+  onCopyEntry,
+  onMoveEntry,
+  oldestDate,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const initializedDatesReference = useRef<Set<string>>(new Set());
@@ -83,6 +91,7 @@ const EntryHistoryComponent = function EntryHistory({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
   const [dateToCopy, setDateToCopy] = useState<string | undefined>();
+  const [entryToCopyOrMove, setEntryToCopyOrMove] = useState<MacroEntry>();
 
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(
@@ -307,6 +316,8 @@ const EntryHistoryComponent = function EntryHistory({
       onSaveMeal,
       onUnsaveMeal,
       onLogAgain,
+      onCopyOrMove:
+        onCopyEntry && onMoveEntry ? setEntryToCopyOrMove : undefined,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -325,6 +336,8 @@ const EntryHistoryComponent = function EntryHistory({
       onSaveMeal,
       onUnsaveMeal,
       onLogAgain,
+      onCopyEntry,
+      onMoveEntry,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -600,6 +613,17 @@ const EntryHistoryComponent = function EntryHistory({
         cancelLabel="Cancel"
         onConfirm={confirmCopyDate}
       />
+
+      {onCopyEntry && onMoveEntry && (
+        <CopyMoveEntryModal
+          entry={entryToCopyOrMove}
+          today={todayISO()}
+          oldestDate={oldestDate}
+          onCopy={onCopyEntry}
+          onMove={onMoveEntry}
+          onClose={() => setEntryToCopyOrMove(undefined)}
+        />
+      )}
 
       <Modal
         isOpen={isGroupModalOpen}
