@@ -27,6 +27,12 @@ const DateSchema = t.String({
   format: "date",
   error: "Invalid date format. Please use YYYY-MM-DD.",
 });
+// The pattern also catches query strings, which skip the format check.
+const StrictDateSchema = t.String({
+  format: "date",
+  pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+  error: "Invalid date format. Please use YYYY-MM-DD.",
+});
 const TimeSchema = t.String({
   pattern: "^([01]\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?$",
   error: "Invalid time format. Please use HH:MM or HH:MM:SS.",
@@ -128,6 +134,24 @@ export const MacroSchemas = {
   deleteMacroEntryByClientIdResponse: t.Object({
     success: t.Boolean(),
     clientId: t.String(),
+  }),
+
+  partialDaysQuery: t.Object({
+    startDate: StrictDateSchema,
+    endDate: StrictDateSchema,
+  }),
+  partialDaysResponse: t.Object({
+    dates: t.Array(t.String()),
+  }),
+  partialDayParam: t.Object({
+    date: StrictDateSchema,
+  }),
+  partialDayBody: t.Object({
+    partial: t.Boolean(),
+  }),
+  partialDayResponse: t.Object({
+    date: t.String(),
+    partial: t.Boolean(),
   }),
 
   // --- Macro Target Schemas (Moved from goals/schemas.ts) ---

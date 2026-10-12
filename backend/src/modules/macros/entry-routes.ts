@@ -16,10 +16,7 @@ import {
 import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { captureProductEvent } from "../../lib/analytics/product-analytics";
-import {
-  checkProStatus,
-  FREE_TIER_LIMITS,
-} from "../../middleware/clerk-guards";
+import { checkProStatus } from "../../middleware/clerk-guards";
 import { generateId } from "../../utils/id-generator";
 import {
   isImportFormat,
@@ -29,6 +26,7 @@ import {
 } from "@shared/importer";
 import { MacroSchemas } from "./schemas";
 import {
+  freeHistoryCutoffDate,
   type MacroEntryResponse,
   normalizeMacroEntryRow,
   type MacrosRouteContext,
@@ -148,12 +146,7 @@ export const macroEntryRoutes = new Elysia()
         // The delete-account export must hand over every entry, not just the free window.
         const isRestricted =
           query.fullExport !== "true" && !(await checkProStatus(userId));
-        const visibleDays = FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS;
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - visibleDays);
-        const cutoffDateString = cutoffDate
-          .toISOString()
-          .split("T")[0] as string;
+        const cutoffDateString = freeHistoryCutoffDate();
 
         const buildWhereClause = (includeRetentionCutoff: boolean) => {
           const clauses = ["user_id = ?"];

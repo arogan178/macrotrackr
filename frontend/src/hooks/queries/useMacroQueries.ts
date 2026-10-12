@@ -189,7 +189,48 @@ export function useMacroTargetQuery() {
   });
 }
 
+export function usePartialDays(startDate: string, endDate: string) {
+  return useQuery({
+    queryKey: queryKeys.macros.partialDays(startDate, endDate),
+    queryFn: () => macrosApi.getPartialDays(startDate, endDate),
+    ...queryConfigs.macros,
+  });
+}
+
 // --- Mutations ---
+
+const PARTIAL_DAYS_PREFIX = ["macros", "partial-days"] as const;
+
+/**
+ * Offline it pauses and resumes on reconnect, like the weight log. The caller
+ * shows the pending value; the cache only changes once the server accepts it.
+ */
+export function useSetPartialDay() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: [...PARTIAL_DAYS_PREFIX, "set"],
+    mutationFn: ({ date, partial }: { date: string; partial: boolean }) =>
+      macrosApi.setPartialDay(date, partial),
+    onSuccess: (_result, { date, partial }) => {
+      const cached = queryClient.getQueriesData<{ dates: string[] }>({
+        queryKey: PARTIAL_DAYS_PREFIX,
+      });
+      for (const [key, data] of cached) {
+        const [, , startDate, endDate] = key as readonly string[];
+        if (!data || date < startDate || date > endDate) continue;
+        const others = data.dates.filter((day) => day !== date);
+        queryClient.setQueryData(key, {
+          dates: partial ? [...others, date].sort() : others,
+        });
+      }
+      broadcastLocalDataChange("macros");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: PARTIAL_DAYS_PREFIX });
+    },
+  });
+}
 
 export function useUpdateMacroTarget() {
   const queryClient = useQueryClient();

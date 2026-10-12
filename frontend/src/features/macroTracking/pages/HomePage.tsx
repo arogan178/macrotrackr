@@ -18,6 +18,7 @@ import {
   DailySummaryLoadingSkeleton,
   HistoryLoadingSkeleton,
 } from "@/features/macroTracking/components/HomePageSkeletons";
+import PartialDayControls from "@/features/macroTracking/components/PartialDayControls";
 import { useAddEntry } from "@/features/macroTracking/hooks/useAddEntry";
 import {
   useHistoryPagination,
@@ -464,6 +465,13 @@ export default function HomePage() {
                     macroTarget={macroTarget ?? undefined}
                     calorieTarget={effectiveCalorieTarget}
                     date={isToday ? undefined : date}
+                    dayAction={
+                      <PartialDayControls
+                        date={date}
+                        macroTarget={macroTarget ?? undefined}
+                        onEstimate={handleAddEntry}
+                      />
+                    }
                   />
                 )
               )}
