@@ -14,11 +14,13 @@ import MacroTargetForm from "@/features/goals/components/macros/MacroTargetForm"
 import GoalsErrorState from "@/features/goals/components/ui-states/GoalsErrorState";
 import GoalsLoadingSkeleton from "@/features/goals/components/ui-states/GoalsLoadingSkeleton";
 import ExpenditureCard from "@/features/goals/components/weight-goals/ExpenditureCard";
+import TargetSuggestion from "@/features/goals/components/weight-goals/TargetSuggestion";
 import WeightGoalDashboard from "@/features/goals/components/weight-goals/WeightGoalDashboard";
 import WeightGoalModal from "@/features/goals/components/weight-goals/WeightGoalModal";
 import LogWeightModal from "@/features/goals/components/weight-logs/LogWeightModal";
 import WeightProgressTabs from "@/features/goals/components/weight-logs/WeightProgressTabs";
 import { useGoalsController } from "@/features/goals/hooks/page";
+import { useTargetSuggestion } from "@/features/goals/hooks/useTargetSuggestion";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { useExpenditure } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
@@ -51,6 +53,14 @@ export default function GoalsPage() {
     () => normalizeWeightGoals(currentWeightGoals ?? undefined, user?.weight),
     [currentWeightGoals, user?.weight],
   );
+
+  const targetSuggestion = useTargetSuggestion({
+    expenditure: expenditureQuery.data,
+    goals: normalizedWeightGoals,
+    bmr: nutritionProfile?.bmr ?? 0,
+    tdee: nutritionProfile?.tdee ?? 0,
+    userId: user?.id,
+  });
 
   const handleRetry = useCallback(() => {
     queryClient.refetchQueries({ queryKey: queryKeys.goals.all() });
@@ -156,6 +166,17 @@ export default function GoalsPage() {
                         expenditure={expenditureQuery.data}
                         formulaTdee={nutritionProfile?.tdee ?? 0}
                         unitSystem={unitSystem}
+                        footer={
+                          targetSuggestion.suggestion && (
+                            <TargetSuggestion
+                              suggestion={targetSuggestion.suggestion}
+                              isSaving={targetSuggestion.isSaving}
+                              onUse={() => void targetSuggestion.accept()}
+                              onEdit={actions.openWeightGoalModal}
+                              onDismiss={targetSuggestion.dismiss}
+                            />
+                          )
+                        }
                       />
                     )}
                     <WeightProgressTabs unitSystem={unitSystem} />

@@ -26,6 +26,7 @@ import {
 
 import { GOAL_RATE_PERCENT, GOAL_RATE_STEP } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
+import { formatRatePercent } from "../../utils/goalUtilities";
 
 export interface WeightGoalFormHandle {
   save: () => void;
@@ -75,10 +76,6 @@ const getGoalType = (
 
   return "maintain";
 };
-
-// "0.5%", "0.25%": one decimal unless the step needs two.
-const formatRatePercent = (percent: number) =>
-  `${formatGrouped(percent, Number.isInteger(Math.round(percent * 100) / 10) ? 1 : 2)}%`;
 
 const describeGoalRate = (
   percent: number,
