@@ -197,7 +197,6 @@ function UnifiedInsights({
             <MetricCard
               title="Macro Balance"
               tooltipText="Shows how close your current intake of Protein, Carbs, and Fats aligns with your set targets."
-              score={macroBalance.score}
               delay={0.1}
             >
               <div className="flex h-full flex-col justify-center pt-2">
@@ -248,7 +247,6 @@ function UnifiedInsights({
             <MetricCard
               title="Protein Share"
               tooltipText="Share of your average daily calories that came from protein."
-              score={macroDensity.score}
               delay={0.2}
             >
               <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
