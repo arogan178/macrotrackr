@@ -23,7 +23,7 @@
       },
       {
         "title": "Weekly Compliance",
-        "description": "Track rolling weekly averages to focus on consistency over single-day spikes."
+        "description": "Track weekly averages to focus on consistency over single-day spikes."
       }
     ],
     "matrix": [
@@ -94,17 +94,17 @@
     "title": "Open-Source MacroFactor Alternative for Calorie & Macro Tracking",
     "shortTitle": "MacroTrackr vs MacroFactor",
     "badge": "Open-Source & Transparent",
-    "tagline": "Weekly average trend tracking without a mandatory monthly subscription",
-    "subtitle": "Get clear weekly calorie and macro compliance metrics without paying $11.99/month for algorithmic coaching.",
+    "tagline": "Weekly trend tracking with a free tier and open-source code",
+    "subtitle": "Get clear weekly calorie and macro averages for free, instead of paying $71.99 a year or $11.99 a month for adaptive coaching.",
     "metaDescription": "MacroTrackr vs MacroFactor: Compare features, pricing, and philosophy. Learn how MacroTrackr delivers trend tracking and smooth logging with zero monthly lock-in.",
     "keyDifferentiators": [
       {
         "title": "No Mandatory Subscription",
-        "description": "Full macro tracking free self-hosted or $3.99/mo cloud vs $11.99/mo."
+        "description": "Full macro tracking free self-hosted, or $29.99/yr in the cloud vs $71.99/yr."
       },
       {
-        "title": "Transparent Target Control",
-        "description": "Full control of deficits and macros without a black-box algorithm."
+        "title": "Open-Source Target Maths",
+        "description": "Your targets come from formulas in public code you can read and check, and nothing changes them without you."
       },
       {
         "title": "Self-Hosted Privacy",
@@ -119,12 +119,12 @@
       {
         "feature": "Free Tier",
         "macrotrackr": "Full (Self-Hosted)",
-        "competitor": "None"
+        "competitor": "7-day trial only"
       },
       {
         "feature": "Cloud / Premium",
         "macrotrackr": "$3.99/mo or $29.99/yr",
-        "competitor": "$11.99/mo or $71.99/yr"
+        "competitor": "$11.99/mo, $47.99/6 mo or $71.99/yr"
       },
       {
         "feature": "Self-Hostable",
@@ -139,12 +139,12 @@
       {
         "feature": "Barcode Scanner",
         "macrotrackr": "Free",
-        "competitor": "Included ($11.99/mo)"
+        "competitor": "Included"
       },
       {
-        "feature": "User Target Control",
-        "macrotrackr": "Full Control",
-        "competitor": "Algorithm Guided"
+        "feature": "Target Adjustment",
+        "macrotrackr": "Manual, open-source formulas",
+        "competitor": "Coached, collaborative or manual"
       },
       {
         "feature": "Open Source",
@@ -155,11 +155,11 @@
     "faqs": [
       {
         "question": "How does MacroTrackr differ from MacroFactor?",
-        "answer": "MacroFactor is a proprietary, subscription-only app centered on automated expenditure adjustments. MacroTrackr is an open-source, user-empowering tracker giving you full control of your macro targets with weekly average visibility and self-hosting capabilities."
+        "answer": "MacroFactor is a subscription-only app built around adaptive expenditure coaching, with a manual mode for people who set their own targets. MacroTrackr is open source and free to self-host: you set your own targets from formulas you can read, and weekly averages are on every plan."
       },
       {
         "question": "Can I track weekly averages in MacroTrackr?",
-        "answer": "Yes. MacroTrackr calculates weekly rolling averages and visual compliance rings so you can evaluate long-term trends rather than stressing over single-day spikes."
+        "answer": "Yes. MacroTrackr shows weekly averages and a consistency score, so you can judge long-term trends rather than single-day spikes."
       }
     ]
   },

@@ -40,7 +40,7 @@ export const MASTER_COMPARISON_MATRIX: readonly MasterComparisonRow[] = [
     feature: "Free Tier",
     macrotrackr: "Full (Self-Hosted)",
     myfitnesspal: "Limited (Ads)",
-    macrofactor: "None",
+    macrofactor: "7-day trial only",
     cronometer: "Limited (Ads)",
     loseIt: "Limited (Ads)",
   },
