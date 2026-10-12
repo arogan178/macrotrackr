@@ -1,9 +1,12 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
+import { calculateTrendWeights } from "@shared/trendWeight";
 
 import CardContainer from "@/components/form/CardContainer";
 import { StateCard, TargetIcon } from "@/components/ui/";
 import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
+import { getTrendChange } from "@/features/goals/utils/weightLogUtilities";
 import { useFeatureLoading } from "@/hooks";
+import { useWeightLog } from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -42,6 +45,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
 
   // Get log weight modal state from centralized goals UI slice
   const { setLogWeightModalOpen } = useStore();
+
+  const { data: weightLog = [] } = useWeightLog();
+  const trendPoints = useMemo(() => calculateTrendWeights(weightLog), [weightLog]);
 
   // Handler for Log Weight Modal
   function handleOpenLogWeightModal() {
@@ -110,6 +116,8 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
         }
         macroTarget={macroTarget}
         unitSystem={unitSystem}
+        trendWeight={trendPoints.at(-1)?.trend}
+        trendChange={getTrendChange(trendPoints)}
       />
     </div>
   );

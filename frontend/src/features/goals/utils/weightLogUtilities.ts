@@ -1,3 +1,4 @@
+import type { TrendWeightPoint } from "@shared/trendWeight";
 import { formatISO } from "date-fns";
 
 import type { AddWeightLogPayload, WeightLogEntry } from "@/api/goals";
@@ -48,36 +49,17 @@ export function getLastNEntries(
   return sorted.slice(0, count);
 }
 
-// Weight trend analysis utilities
-export function calculateWeightTrend(
-  entries: WeightLogEntry[],
+// Change in trend weight over the last `days` calendar days, or undefined
+// when the trend does not reach back that far yet.
+export function getTrendChange(
+  points: TrendWeightPoint[],
   days = 7,
-): {
-  trend: "up" | "down" | "stable";
-  change: number;
-  averageChange: number;
-} {
-  const recent = getLastNEntries(entries, days);
+): number | undefined {
+  const latest = points.at(-1);
+  const earlier = points.at(-1 - days);
+  if (!latest || !earlier) return undefined;
 
-  if (recent.length < 2) {
-    return { trend: "stable", change: 0, averageChange: 0 };
-  }
-
-  const latest = recent[0].weight;
-  const oldest = recent.at(-1)?.weight ?? latest;
-  const change = latest - oldest;
-  const averageChange = change / (recent.length - 1);
-
-  let trend: "up" | "down" | "stable" = "stable";
-  if (Math.abs(change) > 0.1) {
-    trend = change > 0 ? "up" : "down";
-  }
-
-  return {
-    trend,
-    change: Math.round(change * 10) / 10,
-    averageChange: Math.round(averageChange * 10) / 10,
-  };
+  return latest.trend - earlier.trend;
 }
 
 export function calculateWeightAverage(
