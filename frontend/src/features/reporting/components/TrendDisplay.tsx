@@ -19,8 +19,8 @@ export default function TrendDisplay({
   // was always falling through to a literal that happened to match it. The
   // fallbacks are gone with it: a hex here is a transcription that can drift.
   const colorMap: Record<string, string> = {
-    up: "var(--color-success)",
-    down: "var(--color-error)",
+    up: "var(--color-foreground)",
+    down: "var(--color-foreground)",
     stable: "var(--color-muted)",
   };
   const strokeColor = colorMap[trend.direction] ?? colorMap.stable;
@@ -95,20 +95,20 @@ export default function TrendDisplay({
         {hasStats && trend.delta !== undefined && (
           <span
             className={`text-xs font-medium ${
-              trend.delta > 0
-                ? "text-success"
-                : trend.delta < 0
-                  ? "text-error"
-                  : "text-muted"
+              trend.delta === 0 ? "text-muted" : "text-foreground"
             }`}
           >
-            {trend.delta > 0 ? `+${trend.delta}` : trend.delta} {trend.unit ?? unit}
+            {trend.delta > 0 ? `+${trend.delta}` : trend.delta}{" "}
+            {trend.unit ?? unit}
           </span>
         )}
       </div>
 
       {/* Micro Sparkline */}
-      {data && data.length > 0 && dataKey && trend.direction !== "insufficient" ? (
+      {data &&
+      data.length > 0 &&
+      dataKey &&
+      trend.direction !== "insufficient" ? (
         <div className="h-9 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -118,7 +118,11 @@ export default function TrendDisplay({
             >
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={strokeColor} stopOpacity={0.35} />
+                  <stop
+                    offset="5%"
+                    stopColor={strokeColor}
+                    stopOpacity={0.35}
+                  />
                   <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
                 </linearGradient>
               </defs>
