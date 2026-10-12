@@ -38,6 +38,7 @@ function renderControls() {
       />
     </QueryClientProvider>,
   );
+
   return onEstimate;
 }
 
@@ -55,6 +56,7 @@ describe("PartialDayControls", () => {
     api.setPartialDay.mockImplementation(
       async (date: string, partial: boolean) => {
         api.partialDates = partial ? [date] : [];
+
         return { date, partial };
       },
     );
