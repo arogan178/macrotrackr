@@ -24,7 +24,12 @@ import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { formatDateShort } from "@/utils/dateUtilities";
-import { fromKg, type UnitSystem, weightUnit } from "@/utils/unitConversion";
+import {
+  formatWeight,
+  fromKg,
+  type UnitSystem,
+  weightUnit,
+} from "@/utils/unitConversion";
 
 import MacroNutrient from "../macros/MacroNutrient";
 
@@ -40,6 +45,10 @@ interface WeightGoalStatusProps {
   targetCalories?: number;
   macroTarget?: MacroTargetSettings;
   unitSystem?: UnitSystem;
+  /** Latest trend weight in kg. */
+  trendWeight?: number;
+  /** Trend change over the last 7 days in kg. */
+  trendChange?: number;
 }
 
 const WeightGoalStatus = memo(function WeightGoalStatus({
@@ -54,6 +63,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   targetCalories,
   macroTarget,
   unitSystem = "metric",
+  trendWeight,
+  trendChange,
 }: WeightGoalStatusProps) {
   const unit = weightUnit(unitSystem);
   const goalStartingWeight = weightGoals?.startingWeight ?? startingWeight;
@@ -117,6 +128,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const targetFatsGrams = Math.round(
     (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9,
   );
+
+  let trendChangeText: string | undefined;
+  if (trendChange !== undefined) {
+    trendChangeText =
+      Math.abs(fromKg(trendChange, unitSystem)) < 0.05
+        ? "Steady over 7 days"
+        : `${trendChange < 0 ? "Down" : "Up"} ${formatWeight(Math.abs(trendChange), unitSystem)} in 7 days`;
+  }
 
   const weeklyChange = weightGoals?.weeklyChange ?? 0;
   const calculatedWeeks = weightGoals?.calculatedWeeks ?? 0;
@@ -263,6 +282,19 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               </span>
             </div>
           </>
+        )}
+        {trendWeight !== undefined && (
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2.5 text-xs">
+            <span className="text-muted">
+              Trend weight{" "}
+              <span className="font-semibold text-foreground">
+                {formatWeight(trendWeight, unitSystem)}
+              </span>
+            </span>
+            {trendChangeText && (
+              <span className="text-muted">{trendChangeText}</span>
+            )}
+          </div>
         )}
       </CardContainer>
 

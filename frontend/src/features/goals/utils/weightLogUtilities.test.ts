@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createWeightLogEntry,
   filterWeightLogByDateRange,
+  getTrendChange,
   sortWeightLogByDate,
 } from "./weightLogUtilities";
 
@@ -78,6 +79,24 @@ describe("weightLogUtilities", () => {
     it("handles empty array", () => {
       const filtered = filterWeightLogByDateRange([], "2024-01-01", "2024-01-10");
       expect(filtered).toEqual([]);
+    });
+  });
+
+  describe("getTrendChange", () => {
+    const points = [80, 79.9, 79.7, 79.6, 79.4, 79.3, 79.1, 79].map(
+      (trend, index) => ({
+        date: `2026-03-0${index + 1}`,
+        weight: null,
+        trend,
+      }),
+    );
+
+    it("compares the latest trend with the trend seven days earlier", () => {
+      expect(getTrendChange(points)).toBeCloseTo(-1, 10);
+    });
+
+    it("waits until the trend covers seven days", () => {
+      expect(getTrendChange(points.slice(1))).toBeUndefined();
     });
   });
 });
