@@ -35,7 +35,7 @@ export default function PartialDayControls({
   macroTarget,
   onEstimate,
 }: PartialDayControlsProps) {
-  const [isEstimateOpen, setIsEstimateOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { data } = usePartialDays(date, date);
   const setPartialDay = useSetPartialDay();
   const showNotification = useStore((state) => state.showNotification);
@@ -59,46 +59,49 @@ export default function PartialDayControls({
   };
 
   return (
-    <div className="space-y-1">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <label className="flex min-h-11 items-center gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={isPartial}
-            onChange={(event) => togglePartial(event.target.checked)}
-            className="h-4 w-4 rounded-control border-border accent-primary"
-            aria-describedby="partial-day-hint"
-          />
-          Partly logged
-        </label>
-        <Button
-          variant="secondary"
-          buttonSize="sm"
-          text="Estimate the rest"
-          onClick={() => setIsEstimateOpen(true)}
-        />
-      </div>
-      <p id="partial-day-hint" className="text-xs text-muted">
-        Partly logged days are left out of trend estimates.
-      </p>
-
+    <>
+      <Button
+        variant={isPartial ? "secondary" : "ghost"}
+        buttonSize="sm"
+        // Keeps the 44px touch target without growing the 36px header row.
+        className="-my-1"
+        text={isPartial ? "Partly logged" : "Missed something?"}
+        onClick={() => setIsOpen(true)}
+      />
       <Modal
-        isOpen={isEstimateOpen}
-        onClose={() => setIsEstimateOpen(false)}
-        title="Estimate the rest of the day"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Missed something?"
         variant="form"
         size="sm"
       >
-        {isEstimateOpen && (
-          <EstimateForm
-            date={date}
-            target={macroTarget ?? DEFAULT_MACRO_TARGET}
-            onEstimate={onEstimate}
-            onClose={() => setIsEstimateOpen(false)}
-          />
+        {isOpen && (
+          <div className="space-y-5">
+            <EstimateForm
+              date={date}
+              target={macroTarget ?? DEFAULT_MACRO_TARGET}
+              onEstimate={onEstimate}
+              onClose={() => setIsOpen(false)}
+            />
+            <div className="space-y-1 border-t border-border pt-4">
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={isPartial}
+                  onChange={(event) => togglePartial(event.target.checked)}
+                  className="h-4 w-4 rounded-control border-border accent-primary"
+                  aria-describedby="partial-day-hint"
+                />
+                Partly logged
+              </label>
+              <p id="partial-day-hint" className="text-xs text-muted">
+                Or leave this day out of trend estimates instead.
+              </p>
+            </div>
+          </div>
         )}
       </Modal>
-    </div>
+    </>
   );
 }
 
@@ -162,8 +165,7 @@ function EstimateForm({
           ? `Adds ${formatGrouped(grams.protein)} g protein, ${formatGrouped(grams.carbs)} g carbs, ${formatGrouped(grams.fats)} g fats as a snack named Estimate.`
           : "Split by your macro targets and logged as a snack named Estimate."}
       </p>
-      <div className="flex justify-end gap-3">
-        <Button variant="secondary" text="Cancel" onClick={onClose} />
+      <div className="flex justify-end">
         <Button
           type="submit"
           variant="primary"

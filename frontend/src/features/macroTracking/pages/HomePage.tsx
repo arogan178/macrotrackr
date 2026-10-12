@@ -465,7 +465,7 @@ export default function HomePage() {
                     macroTarget={macroTarget ?? undefined}
                     calorieTarget={effectiveCalorieTarget}
                     date={isToday ? undefined : date}
-                    footer={
+                    dayAction={
                       <PartialDayControls
                         date={date}
                         macroTarget={macroTarget ?? undefined}

@@ -50,7 +50,8 @@ interface DailySummaryProps {
   calorieTarget?: number;
   /** The day shown, when it is not today. */
   date?: string;
-  footer?: ReactNode;
+  /** A control for the day, shown beside the target figure. */
+  dayAction?: ReactNode;
 }
 
 function DailySummaryInner({
@@ -58,7 +59,7 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
   date,
-  footer,
+  dayAction,
 }: DailySummaryProps) {
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
@@ -213,7 +214,7 @@ function DailySummaryInner({
   );
 
   return (
-    <Panel padding="none" className="flex flex-col" footer={footer}>
+    <Panel padding="none" className="flex flex-col">
       {/* One idea — calories, then its macro breakdown — so one panel, split by
           dividers. It used to be six bordered boxes. */}
       <div className="p-4 sm:p-6">
@@ -222,6 +223,7 @@ function DailySummaryInner({
             {date ? getDisplayDate(parseISO(date)) : "Today"}
           </Heading>
           <div className="flex items-center gap-2">
+            {dayAction}
             <span className="text-xs text-muted">
               {completionPercentages.calories}% of target
             </span>

@@ -66,7 +66,7 @@ describe("PartialDayControls", () => {
     const user = userEvent.setup();
     const onEstimate = renderControls();
 
-    await user.click(screen.getByRole("button", { name: "Estimate the rest" }));
+    await user.click(screen.getByRole("button", { name: "Missed something?" }));
     await user.type(screen.getByLabelText(/Calories not logged/), "600");
 
     expect(
@@ -98,7 +98,7 @@ describe("PartialDayControls", () => {
     const user = userEvent.setup();
     renderControls();
 
-    await user.click(screen.getByRole("button", { name: "Estimate the rest" }));
+    await user.click(screen.getByRole("button", { name: "Missed something?" }));
 
     expect(screen.getByRole("button", { name: "Add estimate" })).toBeDisabled();
   });
@@ -106,6 +106,7 @@ describe("PartialDayControls", () => {
   it("marks the day as partly logged and clears it again", async () => {
     const user = userEvent.setup();
     renderControls();
+    await user.click(screen.getByRole("button", { name: "Missed something?" }));
     const toggle = screen.getByRole("checkbox", { name: "Partly logged" });
     await waitFor(() =>
       expect(api.getPartialDays).toHaveBeenCalledWith(
@@ -118,6 +119,9 @@ describe("PartialDayControls", () => {
     await user.click(toggle);
     expect(api.setPartialDay).toHaveBeenCalledWith("2026-10-10", true);
     await waitFor(() => expect(toggle).toBeChecked());
+    expect(
+      screen.getByRole("button", { name: "Partly logged" }),
+    ).toBeInTheDocument();
 
     await user.click(toggle);
     expect(api.setPartialDay).toHaveBeenLastCalledWith("2026-10-10", false);
@@ -128,17 +132,16 @@ describe("PartialDayControls", () => {
     api.partialDates = ["2026-10-10"];
     renderControls();
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole("checkbox", { name: "Partly logged" }),
-      ).toBeChecked(),
-    );
+    expect(
+      await screen.findByRole("button", { name: "Partly logged" }),
+    ).toBeInTheDocument();
   });
 
   it("rolls the toggle back when the server refuses", async () => {
     const user = userEvent.setup();
     api.setPartialDay.mockRejectedValue(new Error("Forbidden"));
     renderControls();
+    await user.click(screen.getByRole("button", { name: "Missed something?" }));
     const toggle = screen.getByRole("checkbox", { name: "Partly logged" });
     await waitFor(() => expect(api.getPartialDays).toHaveBeenCalled());
 
