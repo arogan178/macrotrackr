@@ -4,6 +4,7 @@ import {
 } from "../../lib/data/database";
 import { ValidationError } from "../../lib/http/errors";
 import { transformKeysToCamel } from "../../lib/mappers";
+import { FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
 import type { FoodProductResult } from "../../services/openfoodfacts-api-client";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 
@@ -11,6 +12,15 @@ export interface MacroHistoryQuery {
   startDate?: string;
   endDate?: string;
   groupBy?: "day" | "week" | "month";
+}
+
+/** Earliest YYYY-MM-DD a free account can see. */
+export function freeHistoryCutoffDate(): string {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(
+    cutoffDate.getDate() - FREE_TIER_LIMITS.FREE_VISIBLE_HISTORY_DAYS,
+  );
+  return cutoffDate.toISOString().split("T")[0] as string;
 }
 
 export interface CacheService {

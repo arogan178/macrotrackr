@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, type ReactNode, useMemo, useState } from "react";
 import { parseISO } from "date-fns";
 
 import {
@@ -50,6 +50,7 @@ interface DailySummaryProps {
   calorieTarget?: number;
   /** The day shown, when it is not today. */
   date?: string;
+  footer?: ReactNode;
 }
 
 function DailySummaryInner({
@@ -57,6 +58,7 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
   date,
+  footer,
 }: DailySummaryProps) {
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
@@ -211,7 +213,7 @@ function DailySummaryInner({
   );
 
   return (
-    <Panel padding="none" className="flex flex-col">
+    <Panel padding="none" className="flex flex-col" footer={footer}>
       {/* One idea — calories, then its macro breakdown — so one panel, split by
           dividers. It used to be six bordered boxes. */}
       <div className="p-4 sm:p-6">

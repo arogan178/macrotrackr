@@ -204,6 +204,27 @@ export const macrosApi = {
   },
 
   /**
+   * Days in the range the user marked as partly logged.
+   * @throws {ApiError}
+   */
+  getPartialDays: async (
+    startDate: string,
+    endDate: string,
+  ): Promise<{ dates: string[] }> => {
+    return unwrap(
+      api.api.macros["partial-days"].get({ query: { startDate, endDate } }),
+    );
+  },
+
+  /**
+   * Idempotent: marking a marked day, or clearing a clear one, changes nothing.
+   * @throws {ApiError}
+   */
+  setPartialDay: async (date: string, partial: boolean) => {
+    return unwrap(api.api.macros["partial-days"]({ date }).put({ partial }));
+  },
+
+  /**
    * @throws {ApiError}
    */
   getMacroTarget: async (): Promise<MacroTargetGetResponse> => {

@@ -41,6 +41,8 @@ export const queryKeys = {
     dailyTotals: (date: string) => ["macros", "daily-totals", date] as const,
     recentEntries: (userId: number) => ["macros", "recent-entries", userId] as const,
     targets: () => ["macros", "targets"] as const,
+    partialDays: (startDate: string, endDate: string) =>
+      ["macros", "partial-days", startDate, endDate] as const,
   },
 
   // Settings queries

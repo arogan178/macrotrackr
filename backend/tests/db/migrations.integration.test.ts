@@ -92,6 +92,7 @@ describe("initializeSchema", () => {
       "habits",
       "macro_entries",
       "macro_targets",
+      "partial_days",
       "password_reset_tokens",
       "play_billing_events",
       "saved_meals",
@@ -173,10 +174,16 @@ describe("initializeSchema", () => {
       db.query("SELECT id FROM users WHERE email = 'new@example.com'").get(),
     ).toEqual({ id: 4 });
 
+    db.run(
+      "INSERT INTO partial_days (user_id, entry_date) VALUES (1, '2025-04-01'), (2, '2025-04-02')",
+    );
     db.run("DELETE FROM users WHERE id = 2");
     expect(db.query("SELECT COUNT(*) AS n FROM subscriptions").get()).toEqual({
       n: 0,
     });
+    expect(db.query("SELECT user_id, entry_date FROM partial_days").all()).toEqual([
+      { user_id: 1, entry_date: "2025-04-01" },
+    ]);
     db.close();
   });
 
