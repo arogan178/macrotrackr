@@ -3,7 +3,6 @@ import { memo } from "react";
 import { StarIcon, UserIcon } from "@/components/ui";
 import MetricCard from "@/components/ui/MetricCard";
 import { formatGrouped } from "@/lib/formatNumber";
-import { maintenanceLabel } from "@/utils/userConstants";
 
 interface UserMetricsPanelProps {
   bmr: number;
@@ -56,17 +55,14 @@ function UserMetricsPanel({
   const metrics = [
     {
       label: "BMR",
-      pillLabel: "BMR",
       meaning: "at rest",
       value: bmr,
       icon: UserIcon,
       iconClass: "text-primary",
     },
     {
-      label: "TDEE",
-      // The pill has no subtitle, so it names the user's own number there.
-      pillLabel: tdeeIsOverride ? maintenanceLabel(true) : "TDEE",
-      meaning: tdeeIsOverride ? maintenanceLabel(true) : "with activity",
+      label: tdeeIsOverride ? "Your TDEE" : "TDEE",
+      meaning: tdeeIsOverride ? "set by you" : "with activity",
       value: tdee,
       icon: StarIcon,
       iconClass: "text-primary",
@@ -76,7 +72,7 @@ function UserMetricsPanel({
   return (
     <>
       <div className="flex items-center gap-2 sm:hidden">
-        {metrics.map(({ label, pillLabel, value, icon: Icon, iconClass }) => (
+        {metrics.map(({ label, value, icon: Icon, iconClass }) => (
           <div
             key={label}
             className="flex flex-1 items-center justify-between gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 shadow-xs"
@@ -87,7 +83,7 @@ function UserMetricsPanel({
                 strokeWidth={1.5}
               />
               <span className="text-xs font-medium text-foreground whitespace-nowrap">
-                {pillLabel}
+                {label}
               </span>
             </div>
             <span className="text-xs font-semibold text-foreground whitespace-nowrap">
