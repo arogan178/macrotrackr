@@ -91,6 +91,21 @@ describe("ProfileCreationForm goal step", () => {
     expect(losing).not.toEqual(gaining);
   });
 
+  it("sets the target from the default rate, not a fixed offset", async () => {
+    const user = userEvent.setup();
+    await reachGoalStep(user);
+    const kcal = () =>
+      Number(summaryValue(/daily calorie target/i).replaceAll(/\D/g, ""));
+
+    await user.click(screen.getByRole("radio", { name: /maintain/i }));
+    const maintenance = kcal();
+
+    // 0.5% of 90 kg is 0.45 kg a week, 495 kcal a day
+    await user.click(screen.getByRole("radio", { name: /lose weight/i }));
+    await user.type(screen.getByLabelText(/target weight/i), "80");
+    expect(kcal()).toBe(maintenance - 495);
+  });
+
   it("keeps each direction's target weight to itself", async () => {
     const user = userEvent.setup();
     await reachGoalStep(user);

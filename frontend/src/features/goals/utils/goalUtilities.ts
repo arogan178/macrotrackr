@@ -1,7 +1,5 @@
 import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
-import { todayISO } from "@/utils/dateUtilities";
 
-import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 import type { WeightGoalsResponse } from "../types";
 
 // The API returns null for unset fields
@@ -61,91 +59,6 @@ export function normalizeWeightGoals(
     calculatedWeeks: goals.calculatedWeeks ?? 0,
     weeklyChange: goals.weeklyChange ?? 0,
     dailyChange: goals.dailyChange ?? 0,
-  };
-}
-
-// Define local payload types since they're not exported from types
-interface GoalPayload {
-  targetWeight?: number;
-  startDate?: string;
-  targetDate?: string;
-  weightGoal?: string;
-  calorieTarget?: number;
-  calculatedWeeks?: number;
-  weeklyChange?: number;
-  dailyChange?: number;
-}
-
-// Goal creation and update utilities
-export function calculateGoalDetails(
-  formValues: WeightGoalFormValues,
-  tdee: number,
-  existingStartDate?: string | undefined,
-): GoalPayload & { weightGoal: string } {
-  const {
-    startingWeight, // Needed for calculation but not always sent
-    targetWeight,
-    startDate,
-    targetDate,
-    calorieTarget: customCalorieTarget,
-    weeklyChange: customWeeklyChange,
-    calculatedWeeks: customCalculatedWeeks,
-    weightGoal: customWeightGoal,
-  } = formValues;
-
-  let weightGoal = customWeightGoal ?? "maintain";
-  if (!customWeightGoal && startingWeight && targetWeight) {
-    if (targetWeight < startingWeight) weightGoal = "lose";
-    else if (targetWeight > startingWeight) weightGoal = "gain";
-  }
-
-  const today = new Date();
-  const formattedToday = todayISO(today);
-
-  const calorieTarget =
-    customCalorieTarget ??
-    tdee +
-      (CALORIE_ADJUSTMENT_FACTORS[
-        weightGoal as keyof typeof CALORIE_ADJUSTMENT_FACTORS
-      ] || 0);
-
-  let calculatedWeeks = customCalculatedWeeks ?? 1;
-  let weeklyChange = customWeeklyChange ?? 0;
-  let dailyChange = 0;
-
-  if (
-    (calculatedWeeks <= 1 || weeklyChange === 0) &&
-    startingWeight &&
-    targetWeight &&
-    targetDate
-  ) {
-    const startDateObject = existingStartDate
-      ? new Date(existingStartDate)
-      : startDate
-        ? new Date(startDate)
-        : today;
-    const targetDateObject = new Date(targetDate);
-
-    const timeDiff = targetDateObject.getTime() - startDateObject.getTime();
-    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-    calculatedWeeks = Math.max(1, Math.ceil(daysDiff / 7));
-
-    const totalWeightChange = Math.abs(targetWeight - startingWeight);
-    weeklyChange = totalWeightChange / calculatedWeeks;
-    dailyChange = weeklyChange / 7;
-  } else if (weeklyChange > 0) {
-    dailyChange = weeklyChange / 7;
-  }
-
-  return {
-    targetWeight,
-    startDate: startDate ?? formattedToday,
-    targetDate,
-    weightGoal,
-    calorieTarget,
-    calculatedWeeks,
-    weeklyChange,
-    dailyChange,
   };
 }
 
@@ -224,8 +137,7 @@ export function calculateGoalProgress(goals: WeightGoals): {
       ? Math.abs(current - start)
       : 0;
 
-  const rawProgress =
-    totalChange > 0 ? (currentChange / totalChange) * 100 : 0;
+  const rawProgress = totalChange > 0 ? (currentChange / totalChange) * 100 : 0;
 
   const progress = Math.max(0, Math.min(rawProgress, 100));
   const remainingWeight =
