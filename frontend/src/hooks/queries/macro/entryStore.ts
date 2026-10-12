@@ -13,6 +13,7 @@ import { onlineManager } from "@tanstack/react-query";
 
 import { ApiError } from "@/api/core";
 import { macrosApi } from "@/api/macros";
+import { clearSuggestionDismissals } from "@/features/goals/utils/suggestedTarget";
 import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { queryCachePersister, queryClient, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -304,6 +305,7 @@ export async function clearSignedOutAccount(): Promise<void> {
   const userId = current?.userId ?? deviceAccount();
   closeEntryStore();
   localStorage.removeItem(DEVICE_ACCOUNT_KEY);
+  clearSuggestionDismissals();
   if (userId !== undefined) {
     try {
       await new IndexedDBAdapter(outboxName(userId), "transactions").clear();

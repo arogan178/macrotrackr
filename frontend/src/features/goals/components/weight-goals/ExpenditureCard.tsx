@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ExpenditureResult } from "@shared/expenditure";
 
 import Heading from "@/components/ui/Heading";
@@ -11,6 +12,7 @@ interface ExpenditureCardProps {
   expenditure: ExpenditureResult | undefined;
   formulaTdee: number;
   unitSystem: UnitSystem;
+  footer?: ReactNode;
 }
 
 const roundToTen = (value: number) => Math.round(value / 10) * 10;
@@ -79,6 +81,7 @@ export default function ExpenditureCard({
   expenditure,
   formulaTdee,
   unitSystem,
+  footer,
 }: ExpenditureCardProps) {
   const hasFormula = Number.isFinite(formulaTdee) && formulaTdee > 0;
   const measured = expenditure?.status === "measured" ? expenditure : undefined;
@@ -87,6 +90,7 @@ export default function ExpenditureCard({
     <Panel
       title="Maintenance calories"
       description="What you burn in a day, from your own log and weight trend."
+      footer={footer}
     >
       <div className="grid grid-cols-2 gap-4">
         {measured && (

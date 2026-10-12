@@ -1,3 +1,4 @@
+import { formatGrouped } from "@/lib/formatNumber";
 import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
 
 import type { WeightGoalsResponse } from "../types";
@@ -219,3 +220,7 @@ export function getMotivationalMessage(
     }
   }
 }
+
+// "0.5%", "0.25%": one decimal unless the step needs two.
+export const formatRatePercent = (percent: number) =>
+  `${formatGrouped(percent, Number.isInteger(Math.round(percent * 100) / 10) ? 1 : 2)}%`;
