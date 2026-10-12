@@ -15,7 +15,9 @@ function pad(value: number): string {
 }
 
 // Timestamps are stored as UTC instants; the user's day is the local one.
+// Imported weigh-ins are bare dates, which Date would read as UTC midnight.
 function localDayKey(timestamp: string): string | undefined {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(timestamp)) return timestamp;
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return undefined;
 

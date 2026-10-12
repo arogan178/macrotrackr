@@ -76,6 +76,15 @@ describe("calculateTrendWeights", () => {
     expect(point.date).toBe("2026-03-01");
   });
 
+  it("keeps an imported date-only weigh-in on its own day west of UTC", () => {
+    process.env.TZ = "America/Los_Angeles";
+    const [point] = calculateTrendWeights([
+      { timestamp: "2026-03-02", weight: 80 },
+    ]);
+
+    expect(point.date).toBe("2026-03-02");
+  });
+
   it("keeps one point per day across a daylight saving change", () => {
     process.env.TZ = "America/Los_Angeles";
     // Clocks go forward on 8 March 2026.
