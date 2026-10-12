@@ -35,9 +35,9 @@ type TableRowData = GroupedEntry & {
 
 const columnHelper = createColumnHelper<TableRowData>();
 
-// Wider actions column so a row's five buttons fit beside the six figures.
+// Actions fit five buttons; the meal column keeps names on one line.
 const columnWidth = (columnId: string) =>
-  columnId === "actions" ? "28%" : "12%";
+  columnId === "actions" ? "24%" : columnId === "entries" ? "18%" : "11.6%";
 
 const DesktopEntryTable = memo(
   ({ groupedEntries }: DesktopEntryTableProps) => {
