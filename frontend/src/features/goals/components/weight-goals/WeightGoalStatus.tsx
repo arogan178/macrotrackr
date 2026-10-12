@@ -30,6 +30,7 @@ import {
   type UnitSystem,
   weightUnit,
 } from "@/utils/unitConversion";
+import { maintenanceLabel } from "@/utils/userConstants";
 
 import MacroNutrient from "../macros/MacroNutrient";
 
@@ -37,6 +38,7 @@ interface WeightGoalStatusProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
+  tdeeIsOverride?: boolean;
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | undefined | null;
   onEdit: () => void;
@@ -55,6 +57,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   startingWeight,
   targetWeight,
   tdee,
+  tdeeIsOverride = false,
   macroDailyTotals,
   weightGoals,
   onEdit,
@@ -350,7 +353,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
                 ? "Daily Deficit"
                 : isWeightGain
                   ? "Daily Surplus"
-                  : "Est. TDEE"}
+                  : tdeeIsOverride
+                    ? maintenanceLabel(true)
+                    : "Est. TDEE"}
             </p>
             <p className="text-xs sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
               {isMaintenance ? (

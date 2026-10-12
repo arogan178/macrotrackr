@@ -19,6 +19,7 @@ interface WeightGoalModalProps {
   startingWeight: number;
   targetWeight?: number;
   tdee: number;
+  tdeeIsOverride?: boolean;
   weightGoals: WeightGoals | undefined | null;
   unitSystem?: UnitSystem;
 }
@@ -29,6 +30,7 @@ function WeightGoalModal({
   startingWeight,
   targetWeight,
   tdee,
+  tdeeIsOverride = false,
   weightGoals,
   unitSystem = "metric",
 }: WeightGoalModalProps) {
@@ -103,6 +105,7 @@ function WeightGoalModal({
         startingWeight={initialStartingWeight}
         targetWeight={initialTargetWeight}
         tdee={tdee}
+        tdeeIsOverride={tdeeIsOverride}
         weightGoals={weightGoals}
         isLoading={isLoading}
         onSave={handleSave}

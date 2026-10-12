@@ -123,6 +123,7 @@ export default function HomePage() {
           dateOfBirth: user.dateOfBirth,
           gender: user.gender,
           activityLevel: user.activityLevel,
+          expenditureOverride: user.expenditureOverride,
         }
       : undefined;
 
@@ -480,6 +481,7 @@ export default function HomePage() {
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
+                tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
                 isLoading={isLoading}
               />
             </div>

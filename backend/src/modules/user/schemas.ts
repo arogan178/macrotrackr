@@ -27,6 +27,10 @@ const SwitchingSource = t.Union([
   t.Literal("unknown"),
 ]);
 const UnitSystem = t.Union([t.Literal("metric"), t.Literal("imperial")]);
+// Null clears it back to the formula estimate.
+const OptionalExpenditureOverride = t.Optional(
+  t.Union([t.Integer({ minimum: 800, maximum: 6000 }), t.Null()]),
+);
 
 export const UserSchemas = {
   userDetailsResponse: t.Object({
@@ -42,6 +46,7 @@ export const UserSchemas = {
     activityLevel: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
     switchingSource: t.Nullable(SwitchingSource),
     unitSystem: UnitSystem,
+    expenditureOverride: t.Nullable(t.Integer()),
     analyticsTrafficType: t.Union([
       t.Literal("customer"),
       t.Literal("internal"),
@@ -70,6 +75,7 @@ export const UserSchemas = {
     gender: OptionalGender,
     activityLevel: OptionalActivityLevel,
     unitSystem: t.Optional(UnitSystem),
+    expenditureOverride: OptionalExpenditureOverride,
   }),
 
   // Schema for the simplified profile completion endpoint - USE camelCase

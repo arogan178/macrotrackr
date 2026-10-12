@@ -60,6 +60,7 @@ interface UserDetailsResult {
   activity_level: number | null;
   switching_source: SwitchingSource | null;
   unit_system: UnitSystem | null;
+  expenditure_override: number | null;
 }
 
 function normalizeSubscriptionStatus(
@@ -106,7 +107,7 @@ export const userRoutes = new Elysia({ prefix: "/api/user" })
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                     u.subscription_status,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
-                      ud.switching_source, ud.unit_system
+                      ud.switching_source, ud.unit_system, ud.expenditure_override
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
                WHERE u.id = ?
@@ -131,6 +132,7 @@ export const userRoutes = new Elysia({ prefix: "/api/user" })
               activityLevel: dbResult.activity_level,
               switchingSource: dbResult.switching_source ?? null,
               unitSystem: dbResult.unit_system ?? "metric",
+              expenditureOverride: dbResult.expenditure_override ?? null,
               analyticsTrafficType: resolveAnalyticsTrafficType(
                 dbResult.email,
                 getConfig().ANALYTICS_INTERNAL_EMAILS,
@@ -203,6 +205,7 @@ export const userRoutes = new Elysia({ prefix: "/api/user" })
               gender,
               activityLevel,
               unitSystem,
+              expenditureOverride,
             } = body as {
               firstName?: string;
               lastName?: string;
@@ -213,6 +216,7 @@ export const userRoutes = new Elysia({ prefix: "/api/user" })
               gender?: "male" | "female";
               activityLevel?: number;
               unitSystem?: UnitSystem;
+              expenditureOverride?: number | null;
             };
 
             return await withTransactionAsync(db, async () => {
@@ -294,6 +298,15 @@ export const userRoutes = new Elysia({ prefix: "/api/user" })
                   nullify(unitSystem),
                 ],
               );
+
+              // Not COALESCE like the rest: null is how the user clears it.
+              if (expenditureOverride !== undefined) {
+                safeExecute(
+                  db,
+                  "UPDATE user_details SET expenditure_override = ? WHERE user_id = ?",
+                  [expenditureOverride, internalUserId],
+                );
+              }
 
               // Log weight change if weight is provided and different
               const newWeightProvided = weight != null;

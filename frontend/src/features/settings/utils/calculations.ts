@@ -166,6 +166,7 @@ export const createNutritionProfile = (
     userId: settings.id,
     bmr,
     tdee,
+    tdeeIsOverride: false,
   };
 };
 

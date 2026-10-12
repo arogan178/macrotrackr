@@ -23,6 +23,7 @@ import {
   weightLimits,
   weightUnit,
 } from "@/utils/unitConversion";
+import { maintenanceLabel } from "@/utils/userConstants";
 
 import { GOAL_RATE_PERCENT, GOAL_RATE_STEP } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
@@ -36,6 +37,7 @@ interface WeightGoalFormProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
+  tdeeIsOverride?: boolean;
   weightGoals: WeightGoals | undefined | null;
   isLoading?: boolean;
   onSave: (values: WeightGoalFormValues) => void;
@@ -77,11 +79,15 @@ const getGoalType = (
   return "maintain";
 };
 
+const overrideNote = (tdeeIsOverride: boolean) =>
+  tdeeIsOverride ? ` (${maintenanceLabel(true)})` : "";
+
 const describeGoalRate = (
   percent: number,
   weeklyChangeKg: number,
   dailyCalorieChange: number,
   tdee: number,
+  tdeeIsOverride: boolean,
   unitSystem: UnitSystem,
 ) => {
   const weeklyAmount = Math.abs(weeklyChangeKg);
@@ -92,7 +98,7 @@ const describeGoalRate = (
   );
   const direction = dailyCalorieChange < 0 ? "below" : "above";
 
-  return `${formatRatePercent(percent)} a week is ${weight}, about ${formatGrouped(Math.abs(dailyCalorieChange))} kcal a day ${direction} your ${formatGrouped(tdee)} kcal maintenance.`;
+  return `${formatRatePercent(percent)} a week is ${weight}, about ${formatGrouped(Math.abs(dailyCalorieChange))} kcal a day ${direction} your ${formatGrouped(tdee)} kcal maintenance${overrideNote(tdeeIsOverride)}.`;
 };
 
 const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
@@ -101,6 +107,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       startingWeight,
       targetWeight,
       tdee,
+      tdeeIsOverride = false,
       weightGoals,
       isLoading = false,
       onSave,
@@ -366,6 +373,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                     calculations.weeklyChange,
                     calculations.dailyChange,
                     tdee,
+                    tdeeIsOverride,
                     unitSystem,
                   )}
                 </p>
@@ -387,7 +395,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               {isMaintenance ? (
                 <p className="mt-1 text-xs text-muted">
                   Maintenance goal. Your maintenance is {formatGrouped(tdee)}{" "}
-                  kcal a day.
+                  kcal a day{overrideNote(tdeeIsOverride)}.
                 </p>
               ) : (
                 <>

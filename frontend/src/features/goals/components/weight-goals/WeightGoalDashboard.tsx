@@ -18,6 +18,7 @@ import WeightGoalStatus from "./WeightGoalStatus";
 interface WeightGoalDashboardProps {
   user: UserSettings;
   tdee: number;
+  tdeeIsOverride?: boolean;
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | undefined | null;
   isLoading?: boolean;
@@ -31,6 +32,7 @@ interface WeightGoalDashboardProps {
 const WeightGoalDashboard = memo(function WeightGoalDashboard({
   user,
   tdee,
+  tdeeIsOverride = false,
   macroDailyTotals,
   weightGoals,
   isLoading = false,
@@ -106,6 +108,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
         startingWeight={user.weight ?? 0}
         targetWeight={weightGoals.targetWeight}
         tdee={Number.isFinite(tdee) ? tdee : 0}
+        tdeeIsOverride={tdeeIsOverride}
         macroDailyTotals={macroDailyTotals}
         weightGoals={weightGoals}
         onEdit={onOpenModal}

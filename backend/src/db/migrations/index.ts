@@ -25,6 +25,7 @@ import { indexes } from "./0022_indexes";
 import { usersNullablePassword } from "./0023_users_nullable_password";
 import { macroEntriesClientId } from "./0024_macro_entries_client_id";
 import { partialDays } from "./0025_partial_days";
+import { userDetailsExpenditureOverride } from "./0026_user_details_expenditure_override";
 
 export type Migration = (db: Database) => void;
 
@@ -56,4 +57,5 @@ export const migrations: readonly Migration[] = [
   usersNullablePassword,
   macroEntriesClientId,
   partialDays,
+  userDetailsExpenditureOverride,
 ];

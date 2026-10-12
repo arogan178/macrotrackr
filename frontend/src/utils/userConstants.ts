@@ -13,13 +13,19 @@ export interface NutritionProfileSource {
   dateOfBirth: string | undefined;
   gender: "male" | "female" | undefined;
   activityLevel: number | undefined;
+  expenditureOverride?: number | null;
 }
 
 export interface UserNutritionalProfile {
   userId: number;
   bmr: number;
+  /** The user's own maintenance number when set, otherwise the formula TDEE. */
   tdee: number;
+  tdeeIsOverride: boolean;
 }
+
+export const maintenanceLabel = (tdeeIsOverride: boolean) =>
+  tdeeIsOverride ? "Your number" : "Formula estimate";
 
 // Gender options for forms
 export const GENDER_OPTIONS = [
@@ -146,9 +152,12 @@ export function createNutritionProfile(
     );
   }
 
+  const override = settings.expenditureOverride ?? undefined;
+
   return {
     userId: settings.id,
     bmr,
-    tdee,
+    tdee: override ?? tdee,
+    tdeeIsOverride: override !== undefined,
   };
 }

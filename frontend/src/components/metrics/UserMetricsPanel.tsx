@@ -7,6 +7,7 @@ import { formatGrouped } from "@/lib/formatNumber";
 interface UserMetricsPanelProps {
   bmr: number;
   tdee: number;
+  tdeeIsOverride?: boolean;
   isLoading?: boolean;
 }
 
@@ -46,6 +47,7 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
 function UserMetricsPanel({
   bmr,
   tdee,
+  tdeeIsOverride = false,
   isLoading = false,
 }: UserMetricsPanelProps) {
   if (isLoading) return <LoadingSkeleton />;
@@ -59,8 +61,8 @@ function UserMetricsPanel({
       iconClass: "text-primary",
     },
     {
-      label: "TDEE",
-      meaning: "with activity",
+      label: tdeeIsOverride ? "Your TDEE" : "TDEE",
+      meaning: tdeeIsOverride ? "set by you" : "with activity",
       value: tdee,
       icon: StarIcon,
       iconClass: "text-primary",
@@ -80,7 +82,7 @@ function UserMetricsPanel({
                 className={`h-3.5 w-3.5 shrink-0 ${iconClass}`}
                 strokeWidth={1.5}
               />
-              <span className="text-xs font-medium text-foreground">
+              <span className="text-xs font-medium text-foreground whitespace-nowrap">
                 {label}
               </span>
             </div>
