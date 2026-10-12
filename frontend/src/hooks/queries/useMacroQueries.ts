@@ -228,6 +228,7 @@ export function useSetPartialDay() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: PARTIAL_DAYS_PREFIX });
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.expenditureAll() });
     },
   });
 }

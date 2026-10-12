@@ -13,18 +13,21 @@ import HabitTracker from "@/features/goals/components/habits/HabitTracker";
 import MacroTargetForm from "@/features/goals/components/macros/MacroTargetForm";
 import GoalsErrorState from "@/features/goals/components/ui-states/GoalsErrorState";
 import GoalsLoadingSkeleton from "@/features/goals/components/ui-states/GoalsLoadingSkeleton";
+import ExpenditureCard from "@/features/goals/components/weight-goals/ExpenditureCard";
 import WeightGoalDashboard from "@/features/goals/components/weight-goals/WeightGoalDashboard";
 import WeightGoalModal from "@/features/goals/components/weight-goals/WeightGoalModal";
 import LogWeightModal from "@/features/goals/components/weight-logs/LogWeightModal";
 import WeightProgressTabs from "@/features/goals/components/weight-logs/WeightProgressTabs";
 import { useGoalsController } from "@/features/goals/hooks/page";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
+import { useExpenditure } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 
 export default function GoalsPage() {
   const { ui, data, actions } = useGoalsController();
   const queryClient = useQueryClient();
+  const expenditureQuery = useExpenditure();
 
   usePageDataSync();
 
@@ -145,6 +148,13 @@ export default function GoalsPage() {
                         onDelete={actions.openDeleteConfirmModal}
                         macroTarget={macroTarget ?? undefined}
                         tdee={nutritionProfile?.tdee ?? 0}
+                        unitSystem={unitSystem}
+                      />
+                    )}
+                    {!expenditureQuery.isError && (
+                      <ExpenditureCard
+                        expenditure={expenditureQuery.data}
+                        formulaTdee={nutritionProfile?.tdee ?? 0}
                         unitSystem={unitSystem}
                       />
                     )}

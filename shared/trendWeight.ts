@@ -1,7 +1,8 @@
 export const TREND_SMOOTHING = 0.1;
 
 export interface TrendWeightPoint {
-  /** Calendar day, YYYY-MM-DD, in the runtime's local time zone. */
+  /** Calendar day, YYYY-MM-DD, in the runtime's local time zone unless a
+   *  day key mapper says otherwise. */
   date: string;
   /** Average of that day's weigh-ins, or null when the day was filled in. */
   weight: number | null;
@@ -14,14 +15,31 @@ function pad(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-// Timestamps are stored as UTC instants; the user's day is the local one.
+/** Maps a stored timestamp (a UTC instant) to the user's calendar day. */
+export type DayKeyMapper = (timestamp: string) => string | undefined;
+
 // Imported weigh-ins are bare dates, which Date would read as UTC midnight.
-function localDayKey(timestamp: string): string | undefined {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(timestamp)) return timestamp;
+const BARE_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Timestamps are stored as UTC instants; the user's day is the local one.
+const localDayKey: DayKeyMapper = (timestamp) => {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return undefined;
 
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+/**
+ * Day keys for a user whose clock is `offsetMinutes` behind UTC, in the sign
+ * convention of `Date.prototype.getTimezoneOffset` (UTC+2 is -120).
+ */
+export function dayKeyAtOffset(offsetMinutes: number): DayKeyMapper {
+  return (timestamp) => {
+    const ms = new Date(timestamp).getTime();
+    if (Number.isNaN(ms)) return undefined;
+
+    return utcMsToDayKey(ms - offsetMinutes * 60_000);
+  };
 }
 
 // Day keys are stepped in UTC so a DST change never skips or repeats a day.
@@ -41,10 +59,13 @@ function utcMsToDayKey(ms: number): string {
 
 export function calculateTrendWeights(
   logs: ReadonlyArray<{ timestamp: string; weight: number }>,
+  dayKeyOf: DayKeyMapper = localDayKey,
 ): TrendWeightPoint[] {
   const byDay = new Map<string, { sum: number; count: number }>();
   for (const log of logs) {
-    const key = localDayKey(log.timestamp);
+    const key = BARE_DATE.test(log.timestamp)
+      ? log.timestamp
+      : dayKeyOf(log.timestamp);
     if (!key || !Number.isFinite(log.weight)) continue;
     const day = byDay.get(key) ?? { sum: 0, count: 0 };
     day.sum += log.weight;

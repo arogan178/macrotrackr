@@ -2,6 +2,21 @@ import { useQuery } from "@tanstack/react-query";
 
 import { reportingApi } from "@/api/reporting";
 import { queryConfigs } from "@/lib/queryClient";
+import { queryKeys } from "@/lib/queryKeys";
+import { todayISO } from "@/utils/dateUtilities";
+
+/** What the user's own intake and weight trend say they burn. */
+export function useExpenditure() {
+  const now = new Date();
+  const today = todayISO(now);
+  const tzOffsetMinutes = now.getTimezoneOffset();
+
+  return useQuery({
+    queryKey: queryKeys.macros.expenditure(today, tzOffsetMinutes),
+    queryFn: () => reportingApi.getExpenditure(today, tzOffsetMinutes),
+    ...queryConfigs.longLived,
+  });
+}
 
 export const reportingKeys = {
   all: ["reporting"] as const,

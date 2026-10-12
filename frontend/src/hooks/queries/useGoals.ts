@@ -310,6 +310,7 @@ export function useAddWeightLogEntry() {
       // Always refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.expenditureAll() });
       broadcastLocalDataChange("goals");
     },
   });
@@ -360,6 +361,7 @@ export function useUpdateWeightLogEntry() {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.expenditureAll() });
       broadcastLocalDataChange("goals");
     },
   });
@@ -416,6 +418,7 @@ export function useDeleteWeightLogEntry() {
       queryClient.refetchQueries({ queryKey: queryKeys.goals.weightLog() });
       // Also refetch weight goals to update current weight
       queryClient.refetchQueries({ queryKey: queryKeys.goals.weight() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.expenditureAll() });
       broadcastLocalDataChange("goals");
     },
   });

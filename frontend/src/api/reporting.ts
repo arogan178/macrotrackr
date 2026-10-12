@@ -1,3 +1,5 @@
+import type { ExpenditureResult } from "@shared/expenditure";
+
 import { api, unwrap } from "@/api/core";
 
 export interface MacroDensitySummaryParameters {
@@ -23,4 +25,13 @@ export const reportingApi = {
     parameters: MacroDensitySummaryParameters = {},
   ): Promise<MacroDensitySummaryItem[]> =>
     unwrap(api.api.reporting["nutrient-density-summary"].get({ query: parameters })),
+
+  /**
+   * @throws {ApiError}
+   */
+  getExpenditure: (
+    today: string,
+    tzOffsetMinutes: number,
+  ): Promise<ExpenditureResult> =>
+    unwrap(api.api.reporting.expenditure.get({ query: { today, tzOffsetMinutes } })),
 };
