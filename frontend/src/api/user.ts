@@ -22,6 +22,7 @@ export interface UserDetailsResponse {
   activityLevel?: number;
   switchingSource?: SwitchingSource;
   unitSystem: UnitSystem;
+  expenditureOverride: number | null;
   analyticsTrafficType: AnalyticsTrafficType;
   isProfileComplete: boolean;
   subscription: {
@@ -40,6 +41,7 @@ export type UserSettingsPayload = Partial<{
   activityLevel: string | number;
   switchingSource: SwitchingSource;
   unitSystem: UnitSystem;
+  expenditureOverride: number | null;
 }>;
 
 export const userApi = {

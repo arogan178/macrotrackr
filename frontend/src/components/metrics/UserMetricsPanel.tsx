@@ -3,10 +3,12 @@ import { memo } from "react";
 import { StarIcon, UserIcon } from "@/components/ui";
 import MetricCard from "@/components/ui/MetricCard";
 import { formatGrouped } from "@/lib/formatNumber";
+import { maintenanceLabel } from "@/utils/userConstants";
 
 interface UserMetricsPanelProps {
   bmr: number;
   tdee: number;
+  tdeeIsOverride?: boolean;
   isLoading?: boolean;
 }
 
@@ -46,6 +48,7 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
 function UserMetricsPanel({
   bmr,
   tdee,
+  tdeeIsOverride = false,
   isLoading = false,
 }: UserMetricsPanelProps) {
   if (isLoading) return <LoadingSkeleton />;
@@ -53,6 +56,7 @@ function UserMetricsPanel({
   const metrics = [
     {
       label: "BMR",
+      pillLabel: "BMR",
       meaning: "at rest",
       value: bmr,
       icon: UserIcon,
@@ -60,7 +64,9 @@ function UserMetricsPanel({
     },
     {
       label: "TDEE",
-      meaning: "with activity",
+      // The pill has no subtitle, so it names the user's own number there.
+      pillLabel: tdeeIsOverride ? maintenanceLabel(true) : "TDEE",
+      meaning: tdeeIsOverride ? maintenanceLabel(true) : "with activity",
       value: tdee,
       icon: StarIcon,
       iconClass: "text-primary",
@@ -70,7 +76,7 @@ function UserMetricsPanel({
   return (
     <>
       <div className="flex items-center gap-2 sm:hidden">
-        {metrics.map(({ label, value, icon: Icon, iconClass }) => (
+        {metrics.map(({ label, pillLabel, value, icon: Icon, iconClass }) => (
           <div
             key={label}
             className="flex flex-1 items-center justify-between gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 shadow-xs"
@@ -80,8 +86,8 @@ function UserMetricsPanel({
                 className={`h-3.5 w-3.5 shrink-0 ${iconClass}`}
                 strokeWidth={1.5}
               />
-              <span className="text-xs font-medium text-foreground">
-                {label}
+              <span className="text-xs font-medium text-foreground whitespace-nowrap">
+                {pillLabel}
               </span>
             </div>
             <span className="text-xs font-semibold text-foreground whitespace-nowrap">

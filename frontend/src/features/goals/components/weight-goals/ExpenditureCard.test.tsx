@@ -18,7 +18,8 @@ describe("ExpenditureCard", () => {
           spanDays: 20,
           dailyBalance: -350.6,
         }}
-        formulaTdee={2787}
+        tdee={2787}
+        tdeeIsOverride={false}
         unitSystem="metric"
       />,
     );
@@ -54,7 +55,8 @@ describe("ExpenditureCard", () => {
           spanDays: 20,
           dailyBalance: 192.5,
         }}
-        formulaTdee={2600}
+        tdee={2600}
+        tdeeIsOverride={false}
         unitSystem="imperial"
       />,
     );
@@ -76,7 +78,8 @@ describe("ExpenditureCard", () => {
           weighInsInWindow: 1,
           needs: { loggedDays: 6, weighIns: 2 },
         }}
-        formulaTdee={2787}
+        tdee={2787}
+        tdeeIsOverride={false}
         unitSystem="metric"
       />,
     );
@@ -99,7 +102,8 @@ describe("ExpenditureCard", () => {
           weighInsInWindow: 2,
           needs: { loggedDays: 0, weighIns: 1 },
         }}
-        formulaTdee={0}
+        tdee={0}
+        tdeeIsOverride={false}
         unitSystem="metric"
       />,
     );
@@ -121,7 +125,8 @@ describe("ExpenditureCard", () => {
           weighInsInWindow: 4,
           needs: { loggedDays: 0, weighIns: 0 },
         }}
-        formulaTdee={2787}
+        tdee={2787}
+        tdeeIsOverride={false}
         unitSystem="metric"
       />,
     );
@@ -131,5 +136,20 @@ describe("ExpenditureCard", () => {
         "Measured expenditure needs weigh-ins spread over at least 2 of the last 3 weeks.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("labels the user's own maintenance number and shows it unrounded", () => {
+    render(
+      <ExpenditureCard
+        expenditure={undefined}
+        tdee={2555}
+        tdeeIsOverride
+        unitSystem="metric"
+      />,
+    );
+
+    expect(screen.getByText("Your number")).toBeInTheDocument();
+    expect(screen.getByText("2,555")).toBeInTheDocument();
+    expect(screen.queryByText("Formula estimate")).not.toBeInTheDocument();
   });
 });

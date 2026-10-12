@@ -24,6 +24,7 @@ export interface UserSettings {
   activityLevel: number | undefined; // Store the number (1-5) consistent with backend
   gender: Gender | undefined;
   unitSystem?: UnitSystem;
+  expenditureOverride?: number | null;
 }
 
 // Represents calculated nutritional info based on UserSettings

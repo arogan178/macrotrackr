@@ -7,10 +7,12 @@ import Skeleton from "@/components/ui/Skeleton";
 import Value from "@/components/ui/Value";
 import { formatGrouped } from "@/lib/formatNumber";
 import { fromKg, type UnitSystem, weightUnit } from "@/utils/unitConversion";
+import { maintenanceLabel } from "@/utils/userConstants";
 
 interface ExpenditureCardProps {
   expenditure: ExpenditureResult | undefined;
-  formulaTdee: number;
+  tdee: number;
+  tdeeIsOverride: boolean;
   unitSystem: UnitSystem;
   footer?: ReactNode;
 }
@@ -79,11 +81,12 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 export default function ExpenditureCard({
   expenditure,
-  formulaTdee,
+  tdee,
+  tdeeIsOverride,
   unitSystem,
   footer,
 }: ExpenditureCardProps) {
-  const hasFormula = Number.isFinite(formulaTdee) && formulaTdee > 0;
+  const hasTdee = Number.isFinite(tdee) && tdee > 0;
   const measured = expenditure?.status === "measured" ? expenditure : undefined;
 
   return (
@@ -96,8 +99,11 @@ export default function ExpenditureCard({
         {measured && (
           <Stat label="Measured expenditure" value={roundToTen(measured.estimate)} />
         )}
-        {hasFormula && (
-          <Stat label="Formula estimate" value={roundToTen(formulaTdee)} />
+        {hasTdee && (
+          <Stat
+            label={maintenanceLabel(tdeeIsOverride)}
+            value={tdeeIsOverride ? tdee : roundToTen(tdee)}
+          />
         )}
       </div>
 

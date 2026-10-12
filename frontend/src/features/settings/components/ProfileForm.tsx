@@ -5,6 +5,7 @@ import type { UserDetailsResponse } from "@/api/user";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import HeightField from "@/components/form/HeightField";
+import NumberField from "@/components/form/NumberField";
 import TextField from "@/components/form/TextField";
 import WeightField from "@/components/form/WeightField";
 import { Button } from "@/components/ui";
@@ -12,6 +13,10 @@ import Panel from "@/components/ui/Panel";
 import { useSaveSettings } from "@/hooks/queries/useSettings";
 import { useStore as useAppStore } from "@/store/store";
 import { type Gender } from "@/types/user";
+import {
+  EXPENDITURE_OVERRIDE_MAX,
+  EXPENDITURE_OVERRIDE_MIN,
+} from "@/utils/constants";
 import type { UnitSystem } from "@/utils/unitConversion";
 import {
   ACTIVITY_LEVELS,
@@ -55,6 +60,8 @@ export default function ProfileForm({
       height: settings.height,
       weight: settings.weight,
       activityLevel: settings.activityLevel,
+      // Null clears it on the server; undefined would leave it unchanged.
+      expenditureOverride: settings.expenditureOverride,
     },
     validators: {
       onChange: ({ value }) => {
@@ -220,6 +227,24 @@ export default function ProfileForm({
                 error={field.state.meta.errors[0]}
                 placeholder="Select activity level"
                 required
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="expenditureOverride">
+            {(field) => (
+              <NumberField
+                id="expenditure-override"
+                label="Your maintenance calories"
+                value={field.state.value ?? undefined}
+                onChange={(value) => field.handleChange(value ?? null)}
+                error={field.state.meta.errors[0]}
+                helperText="Leave empty to use the formula estimate."
+                min={EXPENDITURE_OVERRIDE_MIN}
+                max={EXPENDITURE_OVERRIDE_MAX}
+                maxDigits={4}
+                unit="kcal"
+                placeholder=""
               />
             )}
           </form.Field>

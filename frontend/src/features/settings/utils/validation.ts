@@ -1,5 +1,7 @@
 import type { MacroTargetSettings } from "@/types/macro";
 import {
+  EXPENDITURE_OVERRIDE_MAX,
+  EXPENDITURE_OVERRIDE_MIN,
   USER_MAXIMUM_HEIGHT,
   USER_MAXIMUM_WEIGHT,
   USER_MINIMUM_AGE,
@@ -51,6 +53,16 @@ export function validateUserSettings(
       settings.weight > USER_MAXIMUM_WEIGHT)
   ) {
     errors.weight = `Please enter a valid weight (${formatWeightRange(USER_MINIMUM_WEIGHT, USER_MAXIMUM_WEIGHT, unitSystem)})`;
+  }
+
+  const override = settings?.expenditureOverride;
+  if (
+    override != null &&
+    (!Number.isInteger(override) ||
+      override < EXPENDITURE_OVERRIDE_MIN ||
+      override > EXPENDITURE_OVERRIDE_MAX)
+  ) {
+    errors.expenditureOverride = "Enter a whole number from 800 to 6,000, or leave it empty";
   }
 
   return errors;

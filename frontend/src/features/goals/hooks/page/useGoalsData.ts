@@ -51,6 +51,7 @@ export function useGoalsData() {
           dateOfBirth: safeUserSettings.dateOfBirth,
           gender: safeUserSettings.gender,
           activityLevel: safeUserSettings.activityLevel,
+          expenditureOverride: user?.expenditureOverride,
         })
       : undefined;
 

@@ -24,6 +24,7 @@ const baseSettings: UserDetailsResponse = {
   activityLevel: 3,
   gender: "male",
   unitSystem: "metric",
+  expenditureOverride: null,
   analyticsTrafficType: "external",
   isProfileComplete: true,
   subscription: { status: "free" },
@@ -39,6 +40,7 @@ const savedPayload = {
   height: 175,
   weight: 70,
   activityLevel: 3,
+  expenditureOverride: null,
 };
 
 const showNotification = vi.fn();
@@ -212,6 +214,44 @@ describe("ProfileForm", () => {
 
     await user.type(screen.getByLabelText("Last Name"), "{Backspace}");
     expect(screen.getByText("All changes saved")).toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it("saves your maintenance calories", async () => {
+    mutateAsync.mockResolvedValue({ success: true, message: "" });
+    const { user } = renderForm();
+
+    expect(
+      screen.getByText("Leave empty to use the formula estimate."),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Your maintenance calories"), "2500");
+    await user.click(saveButton());
+    expect(mutateAsync).toHaveBeenLastCalledWith({
+      ...savedPayload,
+      expenditureOverride: 2500,
+    });
+  });
+
+  it("sends null to clear a saved maintenance number", async () => {
+    mutateAsync.mockResolvedValue({ success: true, message: "" });
+    const { user } = renderForm({ ...baseSettings, expenditureOverride: 2500 });
+    const field = screen.getByLabelText("Your maintenance calories");
+
+    expect(field).toHaveValue(2500);
+    await user.clear(field);
+    await user.click(saveButton());
+    expect(mutateAsync).toHaveBeenLastCalledWith(savedPayload);
+  });
+
+  it("blocks saving a maintenance number outside 800 to 6,000", async () => {
+    const { user } = renderForm();
+
+    await user.type(screen.getByLabelText("Your maintenance calories"), "700");
+
+    expect(
+      screen.getByText("Enter a whole number from 800 to 6,000, or leave it empty"),
+    ).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
   });
 });

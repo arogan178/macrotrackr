@@ -4,6 +4,8 @@ export const USER_MINIMUM_HEIGHT = 120; // cm
 export const USER_MAXIMUM_HEIGHT = 250; // cm
 export const USER_MINIMUM_WEIGHT = 50; // kg
 export const USER_MAXIMUM_WEIGHT = 300; // kg
+export const EXPENDITURE_OVERRIDE_MIN = 800; // kcal a day, matches the API
+export const EXPENDITURE_OVERRIDE_MAX = 6000;
 // Form field constants
 export const TEXT_FIELD_DEFAULT_MIN_LENGTH = 2;
 export const TEXT_FIELD_DEFAULT_MAX_LENGTH = 16;

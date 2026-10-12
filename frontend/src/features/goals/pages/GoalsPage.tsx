@@ -134,6 +134,7 @@ export default function GoalsPage() {
           startingWeight={user?.weight ?? 0}
           targetWeight={safeTargetWeight}
           tdee={nutritionProfile?.tdee ?? 0}
+          tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
           weightGoals={normalizedWeightGoals}
           unitSystem={unitSystem}
         />
@@ -158,13 +159,15 @@ export default function GoalsPage() {
                         onDelete={actions.openDeleteConfirmModal}
                         macroTarget={macroTarget ?? undefined}
                         tdee={nutritionProfile?.tdee ?? 0}
+                        tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
                         unitSystem={unitSystem}
                       />
                     )}
                     {!expenditureQuery.isError && (
                       <ExpenditureCard
                         expenditure={expenditureQuery.data}
-                        formulaTdee={nutritionProfile?.tdee ?? 0}
+                        tdee={nutritionProfile?.tdee ?? 0}
+                        tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
                         unitSystem={unitSystem}
                         footer={
                           targetSuggestion.suggestion && (
