@@ -110,7 +110,7 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-foreground">
                   <motion.div
                     key={`chevron-${data.date}`}
                     initial={false}
