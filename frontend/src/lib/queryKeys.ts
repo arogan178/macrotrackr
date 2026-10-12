@@ -43,6 +43,10 @@ export const queryKeys = {
     targets: () => ["macros", "targets"] as const,
     partialDays: (startDate: string, endDate: string) =>
       ["macros", "partial-days", startDate, endDate] as const,
+    // Under "macros" so entry writes refresh it; weight log writes invalidate it too.
+    expenditureAll: () => ["macros", "expenditure"] as const,
+    expenditure: (today: string, tzOffsetMinutes: number) =>
+      ["macros", "expenditure", today, tzOffsetMinutes] as const,
   },
 
   // Settings queries

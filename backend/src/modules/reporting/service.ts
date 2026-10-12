@@ -2,6 +2,12 @@
 import type { Database } from "bun:sqlite";
 import { safeQueryAll } from "../../lib/data/database";
 import { transformKeysToCamel } from "../../lib/mappers";
+import {
+  estimateExpenditure,
+  expenditureWindow,
+  type ExpenditureResult,
+} from "@shared/expenditure";
+import { calculateTrendWeights, dayKeyAtOffset } from "@shared/trendWeight";
 
 export interface MacroHistorySummaryItem {
   period: string;
@@ -53,4 +59,56 @@ export function getMacroDensitySummary({
     (row) =>
       transformKeysToCamel(row) as unknown as MacroHistorySummaryItem,
   );
+}
+
+// Enough weigh-ins before the window for the trend to settle.
+const TREND_LEAD_IN_DAYS = 60;
+
+export function getExpenditure({
+  db,
+  userId,
+  today,
+  tzOffsetMinutes,
+}: {
+  db: Database;
+  userId: number;
+  today: string;
+  tzOffsetMinutes: number;
+}): ExpenditureResult {
+  const { start, end } = expenditureWindow(today);
+
+  const intakeRows = safeQueryAll<{ entry_date: string; calories: number }>(
+    db,
+    `SELECT entry_date, SUM(protein*4 + carbs*4 + fats*9) AS calories
+     FROM macro_entries
+     WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?
+     GROUP BY entry_date`,
+    [userId, start, end],
+  );
+  const partialRows = safeQueryAll<{ entry_date: string }>(
+    db,
+    `SELECT entry_date FROM partial_days
+     WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?`,
+    [userId, start, end],
+  );
+  // Timestamps are ISO instants or bare dates, so the day prefix compares as text.
+  const leadInStart = new Date(
+    Date.parse(`${start}T00:00:00Z`) - TREND_LEAD_IN_DAYS * 86_400_000,
+  )
+    .toISOString()
+    .slice(0, 10);
+  const weightRows = safeQueryAll<{ timestamp: string; weight: number }>(
+    db,
+    "SELECT timestamp, weight FROM weight_log WHERE user_id = ? AND timestamp >= ?",
+    [userId, leadInStart],
+  );
+
+  return estimateExpenditure({
+    intakeByDate: Object.fromEntries(
+      intakeRows.map((row) => [row.entry_date, row.calories]),
+    ),
+    partialDates: partialRows.map((row) => row.entry_date),
+    trend: calculateTrendWeights(weightRows, dayKeyAtOffset(tzOffsetMinutes)),
+    today,
+  });
 }
