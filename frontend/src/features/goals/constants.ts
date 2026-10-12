@@ -1,18 +1,24 @@
 /**
  * Calorie and macro calculation constants
  */
-export const CALORIE_ADJUSTMENT_FACTORS = {
-  lose: -500,
-  maintain: 0,
-  gain: 300,
+// Goal rate as % of body weight per week, with the band we recommend.
+export const GOAL_RATE_PERCENT = {
+  lose: {
+    min: 0.25,
+    max: 1,
+    default: 0.5,
+    recommendedMin: 0.5,
+    recommendedMax: 1,
+  },
+  gain: {
+    min: 0.1,
+    max: 0.5,
+    default: 0.25,
+    recommendedMin: 0.25,
+    recommendedMax: 0.5,
+  },
 } as const;
-
-// Calorie range slider labels by goal type
-export const CALORIE_RANGE_LABELS = {
-  lose: { min: "Faster", mid: "TDEE", max: "Slower" },
-  maintain: { min: "Less calories", mid: "TDEE", max: "More calories" },
-  gain: { min: "Slower", mid: "TDEE", max: "Faster" },
-} as const;
+export const GOAL_RATE_STEP = 0.05;
 
 // Default macro totals - imported from centralized location
 export { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";

@@ -2,12 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WeightGoalFormValues } from "@/types/goal";
 
-import {
-  calculateCalorieTarget,
-  calculateWeeklyChange,
-  calculateWeeksToGoal,
-} from "../utils/nutritionCalculations";
-
 import { apiClient, ApiError } from "./core";
 import { goalsApi } from "./goals";
 
@@ -75,9 +69,9 @@ describe("goalsApi", () => {
           weightGoal: "lose",
           startDate: "2026-04-01",
           targetDate: "2026-06-01",
-          calorieTarget: calculateCalorieTarget(tdee, 90, 80),
-          weeklyChange: calculateWeeklyChange(90, 80),
-          calculatedWeeks: calculateWeeksToGoal(90, 80),
+          calorieTarget: 2005,
+          weeklyChange: -0.45,
+          calculatedWeeks: 23,
           dailyChange: null,
         }),
       }),
@@ -102,9 +96,9 @@ describe("goalsApi", () => {
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({
-          calorieTarget: calculateCalorieTarget(2200, 80, 84),
-          weeklyChange: calculateWeeklyChange(80, 84),
-          calculatedWeeks: calculateWeeksToGoal(80, 84),
+          calorieTarget: 2420,
+          weeklyChange: 0.2,
+          calculatedWeeks: 20,
           dailyChange: null,
           targetWeight: 84,
           weightGoal: "gain",

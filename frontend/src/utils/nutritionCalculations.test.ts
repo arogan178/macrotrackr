@@ -7,11 +7,15 @@ import {
   calculateCarbsCalories,
   calculateDailyTotals,
   calculateFatsCalories,
+  calculateGoalRate,
   calculateMacroTarget,
   calculateProteinCalories,
   calculateTDEE,
   caloriesFromMacrosRaw,
   caloriesFromMacrosRounded,
+  clampGoalRatePercent,
+  generateWeightGoalCalculations,
+  goalRatePercentFromWeeklyChange,
 } from "./nutritionCalculations";
 
 describe("nutritionCalculations", () => {
@@ -88,7 +92,9 @@ describe("nutritionCalculations", () => {
     it("calculates balanced percentages", () => {
       // Equal calorie contribution from each macro
       const result = calculateCaloriePercentages(100, 100, 44.44);
-      expect(result.proteinPercent + result.carbsPercent + result.fatsPercent).toBeGreaterThan(95);
+      expect(
+        result.proteinPercent + result.carbsPercent + result.fatsPercent,
+      ).toBeGreaterThan(95);
     });
   });
 
@@ -96,8 +102,8 @@ describe("nutritionCalculations", () => {
     it("calculates targets from calories and percentages", () => {
       const result = calculateMacroTarget(2000, 30, 40, 30);
       expect(result.proteinTarget).toBe(150); // 2000 * 0.3 / 4 = 150
-      expect(result.carbsTarget).toBe(200);   // 2000 * 0.4 / 4 = 200
-      expect(result.fatsTarget).toBe(67);     // 2000 * 0.3 / 9 = 66.67 -> 67
+      expect(result.carbsTarget).toBe(200); // 2000 * 0.4 / 4 = 200
+      expect(result.fatsTarget).toBe(67); // 2000 * 0.3 / 9 = 66.67 -> 67
     });
 
     it("returns zeros for zero calories", () => {
@@ -176,6 +182,111 @@ describe("nutritionCalculations", () => {
 
     it("returns 0 for zero BMR", () => {
       expect(calculateTDEE(0, 1.55)).toBe(0);
+    });
+  });
+
+  describe("calculateGoalRate", () => {
+    it("turns 0.5% of 80 kg into 0.4 kg and 440 kcal a day below", () => {
+      expect(calculateGoalRate(80, "lose", 0.5)).toEqual({
+        weeklyChange: -0.4,
+        dailyCalorieChange: -440,
+      });
+    });
+
+    it("turns 0.25% of 80 kg into 0.2 kg and 220 kcal a day above", () => {
+      expect(calculateGoalRate(80, "gain", 0.25)).toEqual({
+        weeklyChange: 0.2,
+        dailyCalorieChange: 220,
+      });
+    });
+
+    it("scales with body weight", () => {
+      expect(calculateGoalRate(60, "lose", 0.5).dailyCalorieChange).toBe(-330);
+      expect(calculateGoalRate(120, "lose", 0.5).dailyCalorieChange).toBe(-660);
+    });
+
+    it("is zero for maintenance", () => {
+      expect(calculateGoalRate(80, "maintain", 0.5)).toEqual({
+        weeklyChange: 0,
+        dailyCalorieChange: 0,
+      });
+    });
+  });
+
+  describe("clampGoalRatePercent", () => {
+    it("keeps the rate inside each direction's range", () => {
+      expect(clampGoalRatePercent("lose", 2)).toBe(1);
+      expect(clampGoalRatePercent("lose", 0.1)).toBe(0.25);
+      expect(clampGoalRatePercent("gain", 1)).toBe(0.5);
+      expect(clampGoalRatePercent("gain", 0)).toBe(0.1);
+    });
+
+    it("snaps to the 0.05% step", () => {
+      expect(clampGoalRatePercent("lose", 0.625)).toBe(0.65);
+      expect(clampGoalRatePercent("gain", 0.14)).toBe(0.15);
+    });
+  });
+
+  describe("goalRatePercentFromWeeklyChange", () => {
+    it("reads 0.4 kg a week at 80 kg back as 0.5%", () => {
+      expect(goalRatePercentFromWeeklyChange("lose", -0.4, 80)).toBe(0.5);
+    });
+
+    it("ignores the sign older goals stored", () => {
+      expect(goalRatePercentFromWeeklyChange("lose", 0.6, 80)).toBe(0.75);
+      expect(goalRatePercentFromWeeklyChange("gain", -0.2, 80)).toBe(0.25);
+    });
+
+    it("clamps a stored rate outside the range", () => {
+      expect(goalRatePercentFromWeeklyChange("lose", 1.5, 80)).toBe(1);
+      expect(goalRatePercentFromWeeklyChange("gain", 0.04, 80)).toBe(0.1);
+    });
+
+    it("falls back to the default when nothing usable is stored", () => {
+      expect(goalRatePercentFromWeeklyChange("lose", 0, 80)).toBe(0.5);
+      expect(goalRatePercentFromWeeklyChange("gain", 0.2, undefined)).toBe(
+        0.25,
+      );
+      expect(goalRatePercentFromWeeklyChange("maintain", 0.2, 80)).toBe(0);
+    });
+  });
+
+  describe("generateWeightGoalCalculations", () => {
+    it("uses the default lose rate: 80 kg to 75 kg at 2,500 kcal", () => {
+      expect(generateWeightGoalCalculations(2500, 80, 75)).toMatchObject({
+        weightGoal: "lose",
+        ratePercent: 0.5,
+        weeklyChange: -0.4,
+        dailyChange: -440,
+        calorieTarget: 2060,
+        calculatedWeeks: 13,
+      });
+    });
+
+    it("uses the default gain rate: 80 kg to 84 kg at 2,500 kcal", () => {
+      expect(generateWeightGoalCalculations(2500, 80, 84)).toMatchObject({
+        weightGoal: "gain",
+        ratePercent: 0.25,
+        weeklyChange: 0.2,
+        dailyChange: 220,
+        calorieTarget: 2720,
+        calculatedWeeks: 20,
+      });
+    });
+
+    it("bases the rate on the current weight when given", () => {
+      expect(generateWeightGoalCalculations(2500, 90, 70, 1, 80)).toMatchObject(
+        { weeklyChange: -0.8, dailyChange: -880 },
+      );
+    });
+
+    it("targets maintenance calories when maintaining", () => {
+      expect(generateWeightGoalCalculations(2500, 80, 80)).toMatchObject({
+        weightGoal: "maintain",
+        calorieTarget: 2500,
+        weeklyChange: 0,
+        dailyChange: 0,
+      });
     });
   });
 });

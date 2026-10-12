@@ -12,15 +12,19 @@ import { RangeSlider } from "@/components/ui";
 import { formatGrouped } from "@/lib/formatNumber";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
-import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
+import {
+  generateWeightGoalCalculations,
+  goalRatePercentFromWeeklyChange,
+} from "@/utils/nutritionCalculations";
 import {
   formatWeight,
+  fromKg,
   type UnitSystem,
   weightLimits,
   weightUnit,
 } from "@/utils/unitConversion";
 
-import { CALORIE_RANGE_LABELS } from "../../constants";
+import { GOAL_RATE_PERCENT, GOAL_RATE_STEP } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
 
 export interface WeightGoalFormHandle {
@@ -40,7 +44,8 @@ interface WeightGoalFormProps {
   unitSystem?: UnitSystem;
 }
 
-type GoalType = keyof typeof CALORIE_RANGE_LABELS;
+type GoalType = "lose" | "maintain" | "gain";
+type GoalDirection = keyof typeof GOAL_RATE_PERCENT;
 
 const MIN_WEIGHT_KG = 30;
 const MAX_WEIGHT_KG = 300;
@@ -52,7 +57,8 @@ const validateWeight =
     const { min, max } = weightLimits(MIN_WEIGHT_KG, MAX_WEIGHT_KG, unitSystem);
     const unit = weightUnit(unitSystem);
     if (value === undefined) return `${label} is required`;
-    if (value < MIN_WEIGHT_KG) return `${label} must be at least ${min} ${unit}`;
+    if (value < MIN_WEIGHT_KG)
+      return `${label} must be at least ${min} ${unit}`;
     if (value > MAX_WEIGHT_KG) return `${label} must be at most ${max} ${unit}`;
 
     return undefined;
@@ -70,34 +76,26 @@ const getGoalType = (
   return "maintain";
 };
 
-// Calculate calorie range based on goal type
-const getCalorieRange = (
+// "0.5%", "0.25%": one decimal unless the step needs two.
+const formatRatePercent = (percent: number) =>
+  `${formatGrouped(percent, Number.isInteger(Math.round(percent * 100) / 10) ? 1 : 2)}%`;
+
+const describeGoalRate = (
+  percent: number,
+  weeklyChangeKg: number,
+  dailyCalorieChange: number,
   tdee: number,
-  goalType: GoalType,
-): { min: number; max: number } => {
-  const ranges = {
-    lose: { min: Math.max(tdee - 1000, 1200), max: tdee },
-    maintain: { min: tdee - 300, max: tdee + 300 },
-    gain: { min: tdee, max: tdee + 1000 },
-  };
+  unitSystem: UnitSystem,
+) => {
+  const weeklyAmount = Math.abs(weeklyChangeKg);
+  const weight = formatWeight(
+    weeklyAmount,
+    unitSystem,
+    fromKg(weeklyAmount, unitSystem) < 0.1 ? 2 : 1,
+  );
+  const direction = dailyCalorieChange < 0 ? "below" : "above";
 
-  return ranges[goalType];
-};
-
-// Get deficit/surplus display info
-const getCalorieAdjustmentInfo = (
-  tdee: number,
-  calorieIntake: number,
-  isWeightLoss: boolean,
-): { label: string; isLargeAdjustment: boolean } => {
-  const diff = Math.abs(tdee - calorieIntake);
-  const displayDiff = Math.max(diff, 50);
-  const label = isWeightLoss
-    ? `Deficit: ${formatGrouped(displayDiff)} kcal`
-    : `Surplus: ${formatGrouped(displayDiff)} kcal`;
-  const isLargeAdjustment = diff > 800;
-
-  return { label, isLargeAdjustment };
+  return `${formatRatePercent(percent)} a week is ${weight}, about ${formatGrouped(Math.abs(dailyCalorieChange))} kcal a day ${direction} your ${formatGrouped(tdee)} kcal maintenance.`;
 };
 
 const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
@@ -116,6 +114,16 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
   ) {
     const todayString = todayISO();
     const isEditing = Boolean(weightGoals);
+    const storedGoal = weightGoals?.weightGoal;
+    // The rate is read back from the stored kg/week against the current weight.
+    const storedRatePercent =
+      weightGoals && storedGoal && storedGoal !== "maintain"
+        ? goalRatePercentFromWeeklyChange(
+            storedGoal,
+            weightGoals.weeklyChange,
+            weightGoals.currentWeight,
+          )
+        : undefined;
 
     const form = useForm({
       defaultValues: {
@@ -125,31 +133,43 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
         targetWeight: (weightGoals?.targetWeight ?? targetWeight) as
           | number
           | undefined,
-        calorieTarget: weightGoals?.calorieTarget,
+        // Kept per direction, so crossing the starting weight starts the
+        // other direction at its own default.
+        rateByGoal: (storedGoal && storedRatePercent !== undefined
+          ? { [storedGoal]: storedRatePercent }
+          : {}) as Partial<Record<GoalDirection, number>>,
       },
-      onSubmit: ({ value }) => {
-        if (!value.targetWeight || !value.calorieTarget) return;
+      onSubmit: () => {
+        if (!formValues.targetWeight || !goalPlan) return;
 
         onSave({
-          ...(isEditing ? {} : { startingWeight: value.startingWeight! }),
-          targetWeight: value.targetWeight,
-          calorieTarget: value.calorieTarget,
+          ...(isEditing ? {} : { startingWeight: formValues.startingWeight! }),
+          targetWeight: formValues.targetWeight,
+          calorieTarget: goalPlan.calorieTarget,
           startDate: weightGoals?.startDate ?? todayString,
-          targetDate: calculatedTargetDate,
-          weeklyChange: weeklyWeightChange,
-          calculatedWeeks,
-          dailyChange: value.calorieTarget - tdee,
-          weightGoal: getGoalType(value.startingWeight, value.targetWeight),
+          targetDate: goalPlan.targetDate,
+          weeklyChange: goalPlan.weeklyChange,
+          calculatedWeeks: goalPlan.calculatedWeeks,
+          dailyChange: goalPlan.dailyChange,
+          weightGoal: goalType,
         });
       },
     });
     const formValues = useStore(form.store, (state) => state.values);
     const isFormValid = useStore(form.store, (state) => state.isValid);
-    const calorieIntake = formValues.calorieTarget;
-    const setCalorieIntake = useCallback(
-      (calories: number) => form.setFieldValue("calorieTarget", calories),
-      [form],
+
+    const goalType = getGoalType(
+      formValues.startingWeight,
+      formValues.targetWeight,
     );
+    const isMaintenance = goalType === "maintain";
+    const ratePercent =
+      goalType === "maintain"
+        ? 0
+        : (formValues.rateByGoal[goalType] ??
+          GOAL_RATE_PERCENT[goalType].default);
+    const rateBaseWeight =
+      weightGoals?.currentWeight ?? formValues.startingWeight;
 
     const calculations = useMemo(() => {
       if (!tdee || !formValues.startingWeight || !formValues.targetWeight)
@@ -159,63 +179,44 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
         tdee,
         formValues.startingWeight,
         formValues.targetWeight,
-        calorieIntake,
+        ratePercent,
+        rateBaseWeight,
       );
     }, [
       tdee,
       formValues.startingWeight,
       formValues.targetWeight,
-      calorieIntake,
+      ratePercent,
+      rateBaseWeight,
     ]);
 
-    // Initialize calorie intake when modal opens or switches between edit/create
-    useEffect(() => {
-      if (isEditing && weightGoals?.calorieTarget !== undefined) {
-        setCalorieIntake(weightGoals.calorieTarget);
-
-        return;
-      }
-
-      if (
-        !isEditing &&
-        tdee &&
-        formValues.startingWeight &&
-        formValues.targetWeight
-      ) {
-        const defaultCalories = generateWeightGoalCalculations(
-          tdee,
-          formValues.startingWeight,
-          formValues.targetWeight,
-          undefined,
-        ).calorieTarget;
-        setCalorieIntake(defaultCalories);
-      }
-    }, [
-      isEditing,
-      weightGoals,
-      tdee,
-      formValues.startingWeight,
-      formValues.targetWeight,
-      setCalorieIntake,
-    ]);
-
-    const {
-      targetDate: calculatedTargetDate,
-      weeklyChange: weeklyWeightChange,
-      calculatedWeeks,
-    } = calculations ?? {};
+    // A saved goal keeps its calorie target, custom or not, until the user
+    // changes its rate or direction.
+    const keepsStoredTarget =
+      isEditing &&
+      weightGoals != undefined &&
+      goalType === storedGoal &&
+      (isMaintenance || ratePercent === storedRatePercent);
+    const goalPlan =
+      calculations && keepsStoredTarget && weightGoals
+        ? {
+            ...calculations,
+            calorieTarget: weightGoals.calorieTarget,
+            weeklyChange: weightGoals.weeklyChange,
+            dailyChange: weightGoals.dailyChange,
+          }
+        : calculations;
 
     const hasChanges =
       isEditing && weightGoals
         ? formValues.startingWeight !== weightGoals.startingWeight ||
           formValues.targetWeight !== weightGoals.targetWeight ||
-          calorieIntake !== weightGoals.calorieTarget
+          !keepsStoredTarget
         : formValues.startingWeight != undefined &&
           formValues.targetWeight != undefined &&
-          calorieIntake != undefined &&
           formValues.startingWeight > 0 &&
           formValues.targetWeight > 0 &&
-          calorieIntake > 0;
+          goalPlan != undefined;
 
     const canSave =
       hasChanges &&
@@ -253,35 +254,20 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       onCanSaveChange?.(canSave);
     }, [canSave, onCanSaveChange]);
 
-    const goalType = getGoalType(
-      formValues.startingWeight,
-      formValues.targetWeight,
-    );
-    const isWeightLoss = goalType === "lose";
-    const isMaintenance = goalType === "maintain";
-
-    const { min: minCalorieIntake, max: maxCalorieIntake } = getCalorieRange(
-      tdee,
-      goalType,
-    );
-
-    // Clamp calorie intake to valid range
-    useEffect(() => {
-      if (calorieIntake == undefined) return;
-      const clamped = Math.min(
-        maxCalorieIntake,
-        Math.max(minCalorieIntake, calorieIntake),
-      );
-      if (clamped !== calorieIntake) {
-        setCalorieIntake(clamped);
-      }
-    }, [calorieIntake, minCalorieIntake, maxCalorieIntake, setCalorieIntake]);
-
-    const calorieLabels = CALORIE_RANGE_LABELS[goalType];
-    const adjustmentInfo =
-      calorieIntake == undefined
-        ? null
-        : getCalorieAdjustmentInfo(tdee, calorieIntake, isWeightLoss);
+    const rateRange = isMaintenance ? undefined : GOAL_RATE_PERCENT[goalType];
+    const setRatePercent = (percent: number) => {
+      if (goalType === "maintain") return;
+      form.setFieldValue("rateByGoal", (previous) => ({
+        ...previous,
+        [goalType]: percent,
+      }));
+    };
+    const showsStoredTarget =
+      keepsStoredTarget &&
+      calculations !== undefined &&
+      weightGoals !== undefined &&
+      weightGoals !== null &&
+      weightGoals.calorieTarget !== calculations.calorieTarget;
 
     return (
       <div className="space-y-5">
@@ -339,104 +325,89 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           </div>
         )}
 
-        {tdee && calorieIntake !== undefined && formValues.targetWeight && (
+        {tdee && goalPlan && calculations && formValues.targetWeight && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="calorie-intake-range"
-                className="block text-sm font-medium text-foreground"
-              >
-                Daily Calorie Intake
-              </label>
-              <span className="text-sm text-muted">
-                {formatGrouped(calorieIntake)} calories/day
-              </span>
-            </div>
-
-            <RangeSlider
-              value={calorieIntake}
-              onChange={setCalorieIntake}
-              min={minCalorieIntake}
-              max={maxCalorieIntake}
-              step={50}
-              showFillTrack
-              trackColorClass="bg-primary"
-              ariaLabelledBy="calorie-intake-range"
-              unit="calories"
-            />
-            <div className="mt-1 flex justify-between text-xs text-muted">
-              <span>{calorieLabels.min}</span>
-              <span>TDEE ({tdee})</span>
-              <span>{calorieLabels.max}</span>
-            </div>
-
-            {!isMaintenance && (
-              <div className="rounded-control bg-surface p-3">
-                <p className="text-sm text-foreground">
-                  <span className="font-medium">
-                    Estimated completion:{" "}
-                    {calculatedTargetDate
-                      ? new Date(calculatedTargetDate).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )
-                      : "Calculating..."}
+            {rateRange && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span
+                    id="goal-rate-label"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Weekly rate
                   </span>
+                  <span className="text-sm text-muted">
+                    {formatRatePercent(ratePercent)} of body weight a week
+                  </span>
+                </div>
+
+                <RangeSlider
+                  value={ratePercent}
+                  onChange={setRatePercent}
+                  min={rateRange.min}
+                  max={rateRange.max}
+                  step={GOAL_RATE_STEP}
+                  band={{
+                    min: rateRange.recommendedMin,
+                    max: rateRange.recommendedMax,
+                  }}
+                  ariaLabelledBy="goal-rate-label"
+                  unit="percent a week"
+                />
+                <div className="mt-1 flex justify-between text-xs text-muted">
+                  <span>{formatRatePercent(rateRange.min)}</span>
+                  <span>
+                    Recommended {formatRatePercent(rateRange.recommendedMin)} to{" "}
+                    {formatRatePercent(rateRange.recommendedMax)}
+                  </span>
+                  <span>{formatRatePercent(rateRange.max)}</span>
+                </div>
+
+                <p className="text-sm text-foreground">
+                  {describeGoalRate(
+                    ratePercent,
+                    calculations.weeklyChange,
+                    calculations.dailyChange,
+                    tdee,
+                    unitSystem,
+                  )}
                 </p>
-                <p className="mt-1 text-xs text-muted">
-                  Expected change:{" "}
-                  {typeof weeklyWeightChange === "number" &&
-                  !Number.isNaN(weeklyWeightChange)
-                    ? `${formatWeight(Math.abs(weeklyWeightChange), unitSystem, 2)} per week`
-                    : `0 ${weightUnit(unitSystem)} per week`}
-                </p>
-                <p className="mt-1 text-xs text-muted">
-                  Estimated duration:{" "}
-                  {calculatedWeeks === undefined
-                    ? "Calculating..."
-                    : `${calculatedWeeks} weeks`}
-                </p>
-                {adjustmentInfo && (
-                  <div className="mt-2 border-t border-border pt-2">
-                    <p className="flex justify-between text-xs text-muted">
-                      <span>{adjustmentInfo.label}</span>
-                      <span
-                        className={
-                          adjustmentInfo.isLargeAdjustment
-                            ? "text-warning"
-                            : "text-success"
-                        }
-                      >
-                        {adjustmentInfo.isLargeAdjustment
-                          ? "Large adjustment"
-                          : "Healthy range"}
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </div>
+              </>
             )}
 
-            {isMaintenance && (
-              <div className="rounded-control bg-surface p-3">
-                <p className="text-sm text-foreground">
-                  <span className="font-medium">Maintenance Goal</span>
-                </p>
+            <div className="rounded-control bg-surface p-3">
+              <p className="text-sm text-foreground">
+                <span className="font-medium">
+                  Daily calorie target: {formatGrouped(goalPlan.calorieTarget)}{" "}
+                  kcal
+                </span>
+              </p>
+              {showsStoredTarget && (
                 <p className="mt-1 text-xs text-muted">
-                  You're aiming to maintain your current weight with{" "}
-                  {calorieIntake < tdee
-                    ? "slightly fewer"
-                    : calorieIntake > tdee
-                      ? "slightly more"
-                      : "the same"}{" "}
-                  calories than your TDEE
+                  Your saved target stays until you change the rate.
                 </p>
-              </div>
-            )}
+              )}
+              {isMaintenance ? (
+                <p className="mt-1 text-xs text-muted">
+                  Maintenance goal. Your maintenance is {formatGrouped(tdee)}{" "}
+                  kcal a day.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-1 text-xs text-muted">
+                    Estimated completion:{" "}
+                    {new Date(goalPlan.targetDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">
+                    Estimated duration: {goalPlan.calculatedWeeks} weeks
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

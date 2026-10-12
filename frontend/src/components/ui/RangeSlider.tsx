@@ -11,6 +11,8 @@ interface RangeSliderProps {
   className?: string;
   trackColorClass?: string; // Tailwind class for filled track color
   showFillTrack?: boolean;
+  // Marks a sub-range of the track, e.g. a recommended band
+  band?: { min: number; max: number };
   // Accessibility props
   ariaLabel?: string;
   ariaLabelledBy?: string;
@@ -27,14 +29,14 @@ export default function RangeSlider({
   className = "",
   trackColorClass = "bg-foreground/10",
   showFillTrack = false,
+  band,
   ariaLabel,
   ariaLabelledBy,
   unit,
 }: RangeSliderProps) {
-  const percentage = Math.min(
-    100,
-    Math.max(0, ((value - min) / (max - min)) * 100),
-  );
+  const toTrackPercent = (point: number) =>
+    Math.min(100, Math.max(0, ((point - min) / (max - min)) * 100));
+  const percentage = toTrackPercent(value);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const parsed = Number.parseFloat(event.target.value);
@@ -46,7 +48,17 @@ export default function RangeSlider({
     <div className={`relative flex h-4 items-center ${className}`}>
       {/* Background Track */}
       <div className="absolute z-0 h-2 w-full rounded-control bg-foreground/10" />
-      
+
+      {band && (
+        <div
+          className="absolute z-0 h-2 rounded-control bg-primary/30"
+          style={{
+            left: `${toTrackPercent(band.min)}%`,
+            width: `${toTrackPercent(band.max) - toTrackPercent(band.min)}%`,
+          }}
+        />
+      )}
+
       {/* Filled Track (optional) */}
       {showFillTrack && (
         <div
@@ -54,7 +66,7 @@ export default function RangeSlider({
           style={{ width: `${percentage}%` }}
         />
       )}
-      
+
       {/* Actual Slider Input */}
       <input
         type="range"

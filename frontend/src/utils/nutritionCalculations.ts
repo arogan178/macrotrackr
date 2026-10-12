@@ -1,6 +1,8 @@
 import {
   CALORIES_PER_KG_FAT,
   DEFAULT_TARGET_WEEKS,
+  GOAL_RATE_PERCENT,
+  GOAL_RATE_STEP,
   MAX_WEEKLY_WEIGHT_LOSS,
   MIN_WEEKLY_WEIGHT_LOSS,
 } from "@/features/goals/constants";
@@ -193,46 +195,6 @@ export function calculateTDEEByActivityLevel(
 /**
  * Goals math
  */
-export interface TimeToGoalCalculation {
-  weeksToGoal: number;
-  dailyCalorieDeficit: number;
-  expectedWeightLossPerWeek: number;
-}
-
-export function calculateTimeToGoal(
-  startingWeight: number,
-  targetWeight: number,
-  dailyCalorieChange: number,
-): TimeToGoalCalculation {
-  const weightDifference = Math.abs(startingWeight - targetWeight);
-  const isWeightLoss = startingWeight > targetWeight;
-
-  if (dailyCalorieChange === 0) {
-    return {
-      weeksToGoal: Infinity,
-      dailyCalorieDeficit: 0,
-      expectedWeightLossPerWeek: 0,
-    };
-  }
-
-  const weeklyCalorieChange = dailyCalorieChange * 7;
-  const expectedWeightChangePerWeek = weeklyCalorieChange / CALORIES_PER_KG_FAT;
-  const weeksToGoal =
-    expectedWeightChangePerWeek === 0
-      ? Infinity
-      : weightDifference / Math.abs(expectedWeightChangePerWeek);
-
-  return {
-    weeksToGoal: Math.ceil(weeksToGoal),
-    dailyCalorieDeficit: isWeightLoss
-      ? dailyCalorieChange
-      : -dailyCalorieChange,
-    expectedWeightLossPerWeek: isWeightLoss
-      ? expectedWeightChangePerWeek
-      : -expectedWeightChangePerWeek,
-  };
-}
-
 export function calculateRecommendedDeficit(
   startingWeight: number,
   targetWeight: number,
@@ -253,61 +215,68 @@ export function calculateRecommendedDeficit(
   return Math.round(isWeightLoss ? dailyChange : -dailyChange);
 }
 
-export function calculateWeeklyChange(
-  startingWeight: number,
-  targetWeight: number,
-): number {
-  const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500);
+type GoalDirection = Exclude<WeightGoal, "maintain">;
 
-  return timeCalc.expectedWeightLossPerWeek;
+export function clampGoalRatePercent(
+  weightGoal: GoalDirection,
+  percent: number,
+): number {
+  const { min, max } = GOAL_RATE_PERCENT[weightGoal];
+  const stepped = Math.round(percent / GOAL_RATE_STEP) * GOAL_RATE_STEP;
+
+  return Number(Math.min(max, Math.max(min, stepped)).toFixed(2));
 }
 
-export function calculateCalorieTarget(
-  tdee: number,
-  startingWeight: number,
-  targetWeight: number,
+// Weekly change in kg (negative when losing) and the daily calorie change that
+// produces it, from a rate in % of body weight per week.
+export function calculateGoalRate(
+  weightKg: number,
+  weightGoal: WeightGoal,
+  percent: number,
+): { weeklyChange: number; dailyCalorieChange: number } {
+  if (weightGoal === "maintain" || !weightKg) {
+    return { weeklyChange: 0, dailyCalorieChange: 0 };
+  }
+  const direction = weightGoal === "lose" ? -1 : 1;
+  const weeklyChange = (direction * weightKg * percent) / 100;
+
+  return {
+    weeklyChange,
+    dailyCalorieChange: Math.round((weeklyChange * CALORIES_PER_KG_FAT) / 7),
+  };
+}
+
+// Stored goals keep kg/week, signed either way by older versions, so the
+// percent is read back from its size against the current weight.
+export function goalRatePercentFromWeeklyChange(
+  weightGoal: WeightGoal,
+  weeklyChangeKg: number | undefined,
+  weightKg: number | undefined,
 ): number {
-  if (startingWeight === targetWeight) {
-    return tdee;
+  if (weightGoal === "maintain") return 0;
+  if (!weeklyChangeKg || !weightKg) {
+    return GOAL_RATE_PERCENT[weightGoal].default;
   }
 
-  return startingWeight > targetWeight ? tdee - 500 : tdee + 300;
-}
-
-export function calculateWeeksToGoal(
-  startingWeight: number,
-  targetWeight: number,
-): number {
-  const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500);
-
-  return timeCalc.weeksToGoal;
+  return clampGoalRatePercent(
+    weightGoal,
+    (Math.abs(weeklyChangeKg) / weightKg) * 100,
+  );
 }
 
 export function generateWeightGoalCalculations(
   tdee: number,
   startingWeight: number,
   targetWeight: number,
-  customCalorieIntake?: number,
+  ratePercent?: number,
+  currentWeight: number = startingWeight,
 ) {
-  let calorieTarget =
-    customCalorieIntake ??
-    calculateCalorieTarget(tdee, startingWeight, targetWeight);
-
   const weightGoal: WeightGoal =
     startingWeight > targetWeight
       ? "lose"
       : startingWeight < targetWeight
         ? "gain"
         : "maintain";
-
-  if (weightGoal !== "maintain") {
-    const difference = calorieTarget - tdee;
-    if (Math.abs(difference) < 50) {
-      calorieTarget = difference >= 0 ? tdee + 50 : tdee - 50;
-    }
-  }
-
-  const calorieDifference = calorieTarget - tdee;
 
   if (weightGoal === "maintain") {
     const targetDate = new Date();
@@ -317,53 +286,42 @@ export function generateWeightGoalCalculations(
       startingWeight,
       targetWeight,
       weightGoal: "maintain" as const,
-      calorieTarget,
+      ratePercent: 0,
+      calorieTarget: tdee,
       targetDate: targetDate.toISOString().split("T")[0],
       calculatedWeeks: 1,
       weeklyChange: 0,
-      dailyChange: calorieDifference,
+      dailyChange: 0,
     };
   }
 
-  const effectiveCalorieChange =
-    weightGoal === "lose" ? -calorieDifference : calorieDifference;
-
-  if (effectiveCalorieChange <= 0) {
-    const fallbackDate = new Date();
-    fallbackDate.setDate(fallbackDate.getDate() + 365);
-
-    return {
-      startingWeight,
-      targetWeight,
-      weightGoal,
-      calorieTarget,
-      targetDate: fallbackDate.toISOString().split("T")[0],
-      calculatedWeeks: 52,
-      weeklyChange: 0,
-      dailyChange: calorieDifference,
-    };
-  }
-
-  const { weeksToGoal, expectedWeightLossPerWeek } = calculateTimeToGoal(
-    startingWeight,
-    targetWeight,
-    effectiveCalorieChange,
+  const percent = clampGoalRatePercent(
+    weightGoal,
+    ratePercent ?? GOAL_RATE_PERCENT[weightGoal].default,
   );
-
-  const finalWeeks = Number.isFinite(weeksToGoal) ? weeksToGoal : 52;
+  const { weeklyChange, dailyCalorieChange } = calculateGoalRate(
+    currentWeight,
+    weightGoal,
+    percent,
+  );
+  const weeksToGoal =
+    weeklyChange === 0
+      ? 52
+      : Math.ceil(
+          Math.abs(targetWeight - startingWeight) / Math.abs(weeklyChange),
+        );
   const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() + finalWeeks * 7);
+  targetDate.setDate(targetDate.getDate() + weeksToGoal * 7);
 
   return {
     startingWeight,
     targetWeight,
     weightGoal,
-    calorieTarget,
+    ratePercent: percent,
+    calorieTarget: tdee + dailyCalorieChange,
     targetDate: targetDate.toISOString().split("T")[0],
-    calculatedWeeks: finalWeeks,
-    weeklyChange: Number.isFinite(expectedWeightLossPerWeek)
-      ? expectedWeightLossPerWeek
-      : 0,
-    dailyChange: calorieDifference,
+    calculatedWeeks: weeksToGoal,
+    weeklyChange,
+    dailyChange: dailyCalorieChange,
   };
 }

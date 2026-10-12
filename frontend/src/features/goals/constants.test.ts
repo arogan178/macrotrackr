@@ -1,6 +1,4 @@
 import {
-  CALORIE_ADJUSTMENT_FACTORS,
-  CALORIE_RANGE_LABELS,
   CALORIES_PER_KG_FAT,
   CARBS_PERCENTAGE,
   CHART_COLORS,
@@ -14,34 +12,6 @@ import {
 } from "./constants";
 
 describe("goals constants", () => {
-  describe("CALORIE_ADJUSTMENT_FACTORS", () => {
-    it("should have lose factor of -500", () => {
-      expect(CALORIE_ADJUSTMENT_FACTORS.lose).toBe(-500);
-    });
-
-    it("should have maintain factor of 0", () => {
-      expect(CALORIE_ADJUSTMENT_FACTORS.maintain).toBe(0);
-    });
-
-    it("should have gain factor of 300", () => {
-      expect(CALORIE_ADJUSTMENT_FACTORS.gain).toBe(300);
-    });
-  });
-
-  describe("CALORIE_RANGE_LABELS", () => {
-    it("should have lose labels", () => {
-      expect(CALORIE_RANGE_LABELS.lose.min).toBe("Faster");
-    });
-
-    it("should have maintain labels", () => {
-      expect(CALORIE_RANGE_LABELS.maintain.mid).toBe("TDEE");
-    });
-
-    it("should have gain labels", () => {
-      expect(CALORIE_RANGE_LABELS.gain.max).toBe("Faster");
-    });
-  });
-
   describe("DEFAULT_TARGET_VALUES", () => {
     it("should have protein percentage 30", () => {
       expect(DEFAULT_TARGET_VALUES.proteinPercentage).toBe(30);

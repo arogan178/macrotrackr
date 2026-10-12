@@ -1,10 +1,6 @@
 import { api, unwrap } from "@/api/core";
 import type { WeightGoalFormValues } from "@/features/goals/types";
-import {
-  calculateCalorieTarget,
-  calculateWeeklyChange,
-  calculateWeeksToGoal,
-} from "@/utils/nutritionCalculations";
+import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
 
 interface SetWeightGoalPayload {
   startingWeight: number | null;
@@ -50,27 +46,23 @@ export const goalsApi = {
   /**
    * @throws {ApiError}
    */
-  createWeightGoal: async ({
-    goals,
-    tdee,
-  }: WeightGoalUpsertPayload) => {
+  createWeightGoal: async ({ goals, tdee }: WeightGoalUpsertPayload) => {
     const startingWeight = goals.startingWeight ?? 0;
     const targetWeight = goals.targetWeight ?? startingWeight;
+    const fallback = generateWeightGoalCalculations(
+      tdee,
+      startingWeight,
+      targetWeight,
+    );
     const payload = {
       startingWeight,
       targetWeight: goals.targetWeight ?? null,
       weightGoal: goals.weightGoal ?? null,
       startDate: goals.startDate ?? null,
       targetDate: goals.targetDate ?? null,
-      calorieTarget:
-        goals.calorieTarget ??
-        calculateCalorieTarget(tdee, startingWeight, targetWeight),
-      weeklyChange:
-        goals.weeklyChange ??
-        calculateWeeklyChange(startingWeight, targetWeight),
-      calculatedWeeks:
-        goals.calculatedWeeks ??
-        calculateWeeksToGoal(startingWeight, targetWeight),
+      calorieTarget: goals.calorieTarget ?? fallback.calorieTarget,
+      weeklyChange: goals.weeklyChange ?? fallback.weeklyChange,
+      calculatedWeeks: goals.calculatedWeeks ?? fallback.calculatedWeeks,
       dailyChange: goals.dailyChange ?? null,
     };
 
@@ -80,22 +72,18 @@ export const goalsApi = {
   /**
    * @throws {ApiError}
    */
-  updateWeightGoal: async ({
-    goals,
-    tdee,
-  }: WeightGoalUpsertPayload) => {
+  updateWeightGoal: async ({ goals, tdee }: WeightGoalUpsertPayload) => {
     const startingWeight = goals.startingWeight ?? 0;
     const targetWeight = goals.targetWeight ?? startingWeight;
+    const fallback = generateWeightGoalCalculations(
+      tdee,
+      startingWeight,
+      targetWeight,
+    );
     const payload = {
-      calorieTarget:
-        goals.calorieTarget ??
-        calculateCalorieTarget(tdee, startingWeight, targetWeight),
-      weeklyChange:
-        goals.weeklyChange ??
-        calculateWeeklyChange(startingWeight, targetWeight),
-      calculatedWeeks:
-        goals.calculatedWeeks ??
-        calculateWeeksToGoal(startingWeight, targetWeight),
+      calorieTarget: goals.calorieTarget ?? fallback.calorieTarget,
+      weeklyChange: goals.weeklyChange ?? fallback.weeklyChange,
+      calculatedWeeks: goals.calculatedWeeks ?? fallback.calculatedWeeks,
       dailyChange: goals.dailyChange ?? null,
       targetWeight: goals.targetWeight ?? null,
       weightGoal: goals.weightGoal ?? null,
