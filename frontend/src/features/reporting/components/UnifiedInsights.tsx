@@ -160,7 +160,7 @@ function UnifiedInsights({
           <div className="lg:col-span-1">
             <MetricCard
               title="Consistency Score"
-              tooltipText="Measures how consistently you track meals and hit your targets over time."
+              tooltipText="Measures how often you log and how steady your daily calories are."
               score={consistencyScore}
               delay={0}
             >
