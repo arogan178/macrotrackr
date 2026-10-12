@@ -94,9 +94,9 @@
     "title": "Open-Source MacroFactor Alternative for Calorie & Macro Tracking",
     "shortTitle": "MacroTrackr vs MacroFactor",
     "badge": "Open-Source & Transparent",
-    "tagline": "Weekly trend tracking with a free tier and open-source code",
-    "subtitle": "Get clear weekly calorie and macro averages for free, instead of paying $71.99 a year or $11.99 a month for adaptive coaching.",
-    "metaDescription": "MacroTrackr vs MacroFactor: Compare features, pricing, and philosophy. Learn how MacroTrackr delivers trend tracking and smooth logging with zero monthly lock-in.",
+    "tagline": "Adaptive expenditure with the maths shown, a free tier and open-source code",
+    "subtitle": "Measured expenditure, a smoothed trend weight and weekly target suggestions on every plan, instead of paying $71.99 a year or $11.99 a month.",
+    "metaDescription": "MacroTrackr vs MacroFactor: compare adaptive expenditure, trend weight, pricing and philosophy. MacroTrackr shows the maths behind every target and has a free tier.",
     "keyDifferentiators": [
       {
         "title": "No Mandatory Subscription",
@@ -104,7 +104,7 @@
       },
       {
         "title": "Open-Source Target Maths",
-        "description": "Your targets come from formulas in public code you can read and check, and nothing changes them without you."
+        "description": "Measured expenditure and suggested targets show their working on screen and in public code, and nothing changes without you."
       },
       {
         "title": "Self-Hosted Privacy",
@@ -132,8 +132,13 @@
         "competitor": "No"
       },
       {
-        "feature": "Weekly Trend Averages",
+        "feature": "Smoothed Trend Weight",
         "macrotrackr": "Free",
+        "competitor": "Included"
+      },
+      {
+        "feature": "Adaptive Expenditure",
+        "macrotrackr": "Free, working shown",
         "competitor": "Included"
       },
       {
@@ -143,7 +148,7 @@
       },
       {
         "feature": "Target Adjustment",
-        "macrotrackr": "Manual, open-source formulas",
+        "macrotrackr": "Weekly suggestion you approve, or manual",
         "competitor": "Coached, collaborative or manual"
       },
       {
@@ -155,7 +160,11 @@
     "faqs": [
       {
         "question": "How does MacroTrackr differ from MacroFactor?",
-        "answer": "MacroFactor is a subscription-only app built around adaptive expenditure coaching, with a manual mode for people who set their own targets. MacroTrackr is open source and free to self-host: you set your own targets from formulas you can read, and weekly averages are on every plan."
+        "answer": "MacroFactor is a subscription-only app built around adaptive expenditure coaching, with a manual mode for people who set their own targets. MacroTrackr is open source and free to self-host. It also measures your expenditure and suggests targets, but it shows the full working and only changes a target when you accept it."
+      },
+      {
+        "question": "Does MacroTrackr adjust my calories like MacroFactor?",
+        "answer": "It suggests and you decide. Once you have 14 fully logged days and 3 weigh-ins in the last 3 weeks, MacroTrackr measures your expenditure from your intake and smoothed weight trend. It can then suggest a weekly target with the sum shown, for example measured 2,350 minus 440 for losing 0.5% a week. Your target only changes when you choose to use it."
       },
       {
         "question": "Can I track weekly averages in MacroTrackr?",
