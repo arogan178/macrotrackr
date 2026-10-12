@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import {
   ChevronDownIcon,
+  CopyIcon,
   IconButton,
   IconButtonGroup,
   RepeatIcon,
@@ -23,6 +24,7 @@ interface EntryCardProps {
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
   onLogAgain?: (entry: MacroEntry) => void;
+  onCopyOrMove?: (entry: MacroEntry) => void;
   isMealSaved?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -41,6 +43,7 @@ export const EntryCard = memo(
     onSaveMeal,
     onUnsaveMeal,
     onLogAgain,
+    onCopyOrMove,
     isMealSaved,
     isSelectionMode,
     isSelected,
@@ -133,15 +136,29 @@ export const EntryCard = memo(
             <span className="ml-0.5 text-xs text-muted">g F</span>
           </span>
           {/* Beside the values: the header's three buttons already fill a phone row. */}
-          {onLogAgain && (
-            <IconButton
-              variant="custom"
-              buttonSize="sm"
-              className="ml-auto self-center text-muted hover:text-foreground"
-              icon={<RepeatIcon className="h-4 w-4" />}
-              onClick={() => onLogAgain(entry)}
-              ariaLabel="Log again"
-            />
+          {(onLogAgain ?? onCopyOrMove) && (
+            <span className="ml-auto flex self-center">
+              {onCopyOrMove && (
+                <IconButton
+                  variant="custom"
+                  buttonSize="sm"
+                  className="text-muted hover:text-foreground"
+                  icon={<CopyIcon className="h-4 w-4" />}
+                  onClick={() => onCopyOrMove(entry)}
+                  ariaLabel="Copy or move entry"
+                />
+              )}
+              {onLogAgain && (
+                <IconButton
+                  variant="custom"
+                  buttonSize="sm"
+                  className="text-muted hover:text-foreground"
+                  icon={<RepeatIcon className="h-4 w-4" />}
+                  onClick={() => onLogAgain(entry)}
+                  ariaLabel="Log again"
+                />
+              )}
+            </span>
           )}
         </div>
 

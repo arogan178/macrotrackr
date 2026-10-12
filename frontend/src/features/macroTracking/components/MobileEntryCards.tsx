@@ -34,6 +34,7 @@ const MobileEntryCards = memo(
       onSaveMeal,
       onUnsaveMeal,
       onLogAgain,
+      onCopyOrMove,
       isMealSaved,
       isDeleting,
       isSelectionMode,
@@ -154,6 +155,7 @@ const MobileEntryCards = memo(
           onSaveMeal={onSaveMeal}
           onUnsaveMeal={onUnsaveMeal}
           onLogAgain={onLogAgain}
+          onCopyOrMove={onCopyOrMove}
           isMealSaved={isMealSaved(entry.clientId)}
           isSelectionMode={isSelectionMode}
           isSelected={isEntrySelected(entry.clientId)}
