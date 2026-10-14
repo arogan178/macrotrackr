@@ -66,6 +66,24 @@ async function createManagedUser(label: string): Promise<ManagedUser> {
   return { clerkUserId: user.id, email, password };
 }
 
+// PostHog only knows the app's user id: identify sends no email. Read it from
+// the app's own /api/user/me calls during the journey.
+function watchAppUserId(page: Page): () => string {
+  let appUserId: string | undefined;
+  page.on("response", async (response) => {
+    if (!response.url().includes("/api/user/me") || !response.ok()) return;
+    const body = (await response.json().catch(() => null)) as {
+      id?: number;
+    } | null;
+    if (body?.id) appUserId = String(body.id);
+  });
+
+  return () => {
+    if (!appUserId) throw new Error("The journey never loaded /api/user/me");
+    return appUserId;
+  };
+}
+
 async function deleteManagedUser(user: ManagedUser): Promise<void> {
   const clerk = createClerkClient({
     secretKey: requireEnvironment("CLERK_SECRET_KEY"),
@@ -196,7 +214,9 @@ async function importMyFitnessPal(
   ).toBeVisible();
 }
 
-async function queryPostHogEvents(email: string): Promise<Map<string, number>> {
+async function queryPostHogEvents(
+  appUserId: string,
+): Promise<Map<string, number>> {
   const apiKey = requireEnvironment("POSTHOG_PERSONAL_API_KEY");
   const projectId = requireEnvironment("POSTHOG_PROJECT_ID");
   const host = (
@@ -206,7 +226,10 @@ async function queryPostHogEvents(email: string): Promise<Map<string, number>> {
     SELECT event, count() AS events
     FROM events
     WHERE timestamp >= now() - INTERVAL 1 HOUR
-      AND person.properties.email = '${escapeHogQlString(email)}'
+      AND person_id IN (
+        SELECT person_id FROM person_distinct_ids
+        WHERE distinct_id = '${escapeHogQlString(appUserId)}'
+      )
     GROUP BY event
     ORDER BY event
   `;
@@ -232,14 +255,14 @@ async function queryPostHogEvents(email: string): Promise<Map<string, number>> {
 
 async function expectPostHogEvents(
   expectedEvents: readonly string[],
-  user: ManagedUser,
+  appUserId: string,
   testInfo: TestInfo,
 ): Promise<void> {
   let observed = new Map<string, number>();
   await expect
     .poll(
       async () => {
-        observed = await queryPostHogEvents(user.email);
+        observed = await queryPostHogEvents(appUserId);
         return expectedEvents.filter((event) => !observed.has(event));
       },
       { intervals: [2_000, 5_000, 10_000], timeout: 60_000 },
@@ -261,12 +284,13 @@ test("fresh account reaches checkout and emits the managed funnel", async ({
   page,
 }, testInfo) => {
   const user = await createManagedUser("manual");
+  const appUserId = watchAppUserId(page);
   try {
     await registerThroughUi(page, user);
     await completeProfile(page, "new_to_tracking");
     await logManualMeal(page);
     await openPaywallAndCheckout(page);
-    await expectPostHogEvents(MANUAL_EVENTS, user, testInfo);
+    await expectPostHogEvents(MANUAL_EVENTS, appUserId(), testInfo);
   } finally {
     await deleteManagedUser(user);
   }
@@ -276,11 +300,12 @@ test("fresh importer account activates through historical data", async ({
   page,
 }, testInfo) => {
   const user = await createManagedUser("import");
+  const appUserId = watchAppUserId(page);
   try {
     await registerThroughUi(page, user);
     await completeProfile(page, "myfitnesspal");
     await importMyFitnessPal(page, testInfo);
-    await expectPostHogEvents(IMPORT_EVENTS, user, testInfo);
+    await expectPostHogEvents(IMPORT_EVENTS, appUserId(), testInfo);
   } finally {
     await deleteManagedUser(user);
   }
