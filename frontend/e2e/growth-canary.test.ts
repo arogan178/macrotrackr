@@ -259,20 +259,23 @@ async function expectPostHogEvents(
   testInfo: TestInfo,
 ): Promise<void> {
   let observed = new Map<string, number>();
-  await expect
-    .poll(
-      async () => {
-        observed = await queryPostHogEvents(appUserId);
-        return expectedEvents.filter((event) => !observed.has(event));
-      },
-      { intervals: [2_000, 5_000, 10_000], timeout: 60_000 },
-    )
-    .toEqual([]);
-
-  await writeFile(
-    testInfo.outputPath("posthog-events.json"),
-    JSON.stringify(Object.fromEntries(observed), null, 2),
-  );
+  try {
+    await expect
+      .poll(
+        async () => {
+          observed = await queryPostHogEvents(appUserId);
+          return expectedEvents.filter((event) => !observed.has(event));
+        },
+        { intervals: [5_000, 10_000, 15_000], timeout: 240_000 },
+      )
+      .toEqual([]);
+  } finally {
+    // Kept on failure too: which events did arrive is the useful part.
+    await writeFile(
+      testInfo.outputPath("posthog-events.json"),
+      JSON.stringify({ appUserId, events: Object.fromEntries(observed) }, null, 2),
+    );
+  }
 }
 
 test.skip(

@@ -10,6 +10,8 @@ export default defineConfig({
   forbidOnly: true,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
+  // The PostHog check waits on ingestion, which can lag a few minutes.
+  timeout: 300_000,
   reporter: [
     ["list"],
     ["json", { outputFile: "../test-results/growth-canary/report.json" }],
