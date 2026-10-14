@@ -10,6 +10,7 @@ const {
   setActive,
   signUpUpdate,
   clientState,
+  clerkState,
 } = vi.hoisted(() => ({
   handleRedirectCallback: vi.fn(),
   signOut: vi.fn(),
@@ -19,16 +20,18 @@ const {
   clientState: {
     signUp: undefined as Record<string, unknown> | undefined,
   },
+  clerkState: { isLoaded: true },
 }));
 
 vi.mock("@clerk/react", () => ({
+  // Mirrors IsomorphicClerk: no client until clerk-js has loaded.
   useClerk: () => ({
-    client: clientState,
+    client: clerkState.isLoaded ? clientState : undefined,
     handleRedirectCallback,
     setActive,
     signOut,
   }),
-  useAuth: () => ({ isLoaded: true, isSignedIn: false }),
+  useAuth: () => ({ isLoaded: clerkState.isLoaded, isSignedIn: false }),
   useUser: () => ({ user: null, isLoaded: true }),
 }));
 
@@ -48,6 +51,7 @@ describe("SSOCallbackPage", () => {
     vi.clearAllMocks();
     sessionStorage.clear();
     clientState.signUp = undefined;
+    clerkState.isLoaded = true;
     handleRedirectCallback.mockResolvedValue(undefined);
   });
 
@@ -113,6 +117,36 @@ describe("SSOCallbackPage", () => {
     await waitFor(() => {
       expect(signUpUpdate).toHaveBeenCalledWith({ legalAccepted: true });
     });
+    await waitFor(() => {
+      expect(setActive).toHaveBeenCalledWith({ session: "sess_1" });
+    });
+  });
+
+  /**
+   * After the Google redirect the page mounts before clerk-js has loaded. Run
+   * then, the repair saw no client and the sign-up stayed short of consent.
+   */
+  it("waits for Clerk to load before finishing the sign-up", async () => {
+    sessionStorage.setItem("macrotrackr.signup.legalAccepted", "true");
+    clerkState.isLoaded = false;
+    clientState.signUp = {
+      status: "missing_requirements",
+      missingFields: ["legal_accepted"],
+      verifications: { externalAccount: { status: "verified" } },
+      update: signUpUpdate,
+    };
+    signUpUpdate.mockResolvedValue({
+      status: "complete",
+      createdSessionId: "sess_1",
+      missingFields: [],
+    });
+
+    const { rerender } = render(<SSOCallbackPage />);
+    expect(handleRedirectCallback).not.toHaveBeenCalled();
+
+    clerkState.isLoaded = true;
+    rerender(<SSOCallbackPage />);
+
     await waitFor(() => {
       expect(setActive).toHaveBeenCalledWith({ session: "sess_1" });
     });
