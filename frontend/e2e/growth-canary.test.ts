@@ -91,6 +91,9 @@ async function registerThroughUi(page: Page, user: ManagedUser): Promise<void> {
   await page.getByLabel("Last Name").fill("Canary");
   await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
+  await page
+    .getByRole("checkbox", { name: /I agree to the Terms of Service/u })
+    .check();
   const signupResponsePromise = page.waitForResponse(
     (response) =>
       response.url().includes("/v1/client/sign_ups") &&
