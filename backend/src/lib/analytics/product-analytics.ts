@@ -27,10 +27,11 @@ export async function captureProductEvent(
     const response = await fetch(endpoint, {
       body: JSON.stringify({
         api_key: config.POSTHOG_KEY,
+        // Must be top level: PostHog rejects properties.$distinct_id with a 400.
+        distinct_id: String(productEvent.distinctId),
         event: productEvent.event,
         properties: {
           ...serializeProductProperties(productEvent),
-          $distinct_id: String(productEvent.distinctId),
           app_mode: config.APP_MODE,
           schema_version: PRODUCT_ANALYTICS_SCHEMA_VERSION,
         },

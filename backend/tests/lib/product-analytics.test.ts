@@ -115,9 +115,9 @@ describe("captureProductEvent", () => {
     expect(url).toBe("https://eu.i.posthog.com/capture/");
     expect(JSON.parse(String(request.body))).toEqual({
       api_key: "phc_test",
+      distinct_id: "42",
       event: "checkout_started",
       properties: {
-        $distinct_id: "42",
         app_mode: "managed",
         plan: "yearly",
         schema_version: 3,
