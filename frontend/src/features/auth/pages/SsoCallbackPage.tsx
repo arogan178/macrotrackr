@@ -55,6 +55,7 @@ function ClerkSsoCallbackPage() {
   const search = (useSearch({ strict: false }) ?? {}) as {
     redirectTo?: string;
     flow?: string;
+    failed?: string;
   };
   const [error, setError] = useState<string | null>(null);
   const [callbackResolution, setCallbackResolution] =
@@ -73,6 +74,9 @@ function ClerkSsoCallbackPage() {
     if (hasProcessedCallback.current || !authLoaded) return;
     hasProcessedCallback.current = true;
 
+    const failedCallbackUrl = new URL(globalThis.location.href);
+    failedCallbackUrl.searchParams.set("failed", "1");
+
     handleRedirectCallback({
       // We handle routing ourselves (step 2 below), so tell Clerk to stay put.
       //
@@ -87,6 +91,10 @@ function ClerkSsoCallbackPage() {
       // URL, which defaults to the hosted Account Portal on another origin.
       // Keep it here so the block below can finish the attempt in the app.
       continueSignUpUrl: globalThis.location.href,
+      // Clerk reports a failed callback by navigating to these rather than
+      // throwing, and they default to the hosted Account Portal. Come back here.
+      signInUrl: failedCallbackUrl.href,
+      signUpUrl: failedCallbackUrl.href,
     })
       .then(() => completePendingLegalConsent())
       .catch((error_) => {
@@ -297,8 +305,18 @@ function ClerkSsoCallbackPage() {
     signOut,
   ]);
 
+  const resolution =
+    callbackResolution ??
+    (search.failed
+      ? resolveSocialAuthError(
+          client?.signUp?.verifications?.externalAccount?.error ??
+            client?.signIn?.firstFactorVerification?.error,
+          isSignUpFlow ? "signup" : "signin",
+        )
+      : null);
+
   const primaryAction =
-    callbackResolution?.action === "switch-to-signin"
+    resolution?.action === "switch-to-signin"
       ? {
           label: "Go to sign in",
           onClick: () =>
@@ -307,7 +325,7 @@ function ClerkSsoCallbackPage() {
               search: returnToSearch,
             }),
         }
-      : callbackResolution?.action === "switch-to-signup"
+      : resolution?.action === "switch-to-signup"
         ? {
             label: "Go to sign up",
             onClick: () =>
@@ -347,7 +365,7 @@ function ClerkSsoCallbackPage() {
   const shownError =
     error ??
     (authLoaded && userLoaded && (!isSignedIn || !user)
-      ? callbackResolution?.message
+      ? resolution?.message
       : undefined);
 
   if (shownError) {
