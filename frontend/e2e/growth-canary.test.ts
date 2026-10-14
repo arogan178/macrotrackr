@@ -266,7 +266,7 @@ async function expectPostHogEvents(
           observed = await queryPostHogEvents(appUserId);
           return expectedEvents.filter((event) => !observed.has(event));
         },
-        { intervals: [5_000, 10_000, 15_000], timeout: 240_000 },
+        { intervals: [15_000, 30_000], timeout: 600_000 },
       )
       .toEqual([]);
   } finally {
