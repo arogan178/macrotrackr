@@ -11,6 +11,7 @@ const {
   signUpUpdate,
   clientState,
   clerkState,
+  searchState,
 } = vi.hoisted(() => ({
   handleRedirectCallback: vi.fn(),
   signOut: vi.fn(),
@@ -21,6 +22,7 @@ const {
     signUp: undefined as Record<string, unknown> | undefined,
   },
   clerkState: { isLoaded: true },
+  searchState: {} as Record<string, string>,
 }));
 
 vi.mock("@clerk/react", () => ({
@@ -38,7 +40,7 @@ vi.mock("@clerk/react", () => ({
 vi.mock("@tanstack/react-router", () => ({
   Navigate: () => null,
   useNavigate: () => navigate,
-  useSearch: () => ({ redirectTo: "/home", flow: "signin" }),
+  useSearch: () => ({ redirectTo: "/home", flow: "signin", ...searchState }),
 }));
 
 vi.mock("@/config/runtime", () => ({ isClerkAuthMode: true }));
@@ -52,6 +54,7 @@ describe("SSOCallbackPage", () => {
     sessionStorage.clear();
     clientState.signUp = undefined;
     clerkState.isLoaded = true;
+    for (const key of Object.keys(searchState)) delete searchState[key];
     handleRedirectCallback.mockResolvedValue(undefined);
   });
 
@@ -201,6 +204,46 @@ describe("SSOCallbackPage", () => {
     expect(handleRedirectCallback.mock.calls[0]?.[0].continueSignUpUrl).toBe(
       globalThis.location.href,
     );
+  });
+
+  /**
+   * Clerk signals a failed callback by navigating to its sign-in or sign-up
+   * URL, not by rejecting. Left at the defaults, that dropped the user on the
+   * hosted Account Portal with no explanation.
+   */
+  it("brings a failed callback back to this page", async () => {
+    render(<SSOCallbackPage />);
+
+    await waitFor(() => {
+      expect(handleRedirectCallback).toHaveBeenCalledOnce();
+    });
+
+    const params = handleRedirectCallback.mock.calls[0]?.[0] ?? {};
+    const failedUrl = new URL(globalThis.location.href);
+    failedUrl.searchParams.set("failed", "1");
+
+    expect(params.signInUrl).toBe(failedUrl.href);
+    expect(params.signUpUrl).toBe(failedUrl.href);
+  });
+
+  it("explains the provider error once Clerk sends the user back", async () => {
+    searchState.failed = "1";
+    searchState.flow = "signup";
+    clientState.signUp = {
+      status: "missing_requirements",
+      verifications: {
+        externalAccount: {
+          status: "failed",
+          error: { code: "external_account_exists", message: "Unable to link" },
+        },
+      },
+    };
+
+    render(<SSOCallbackPage />);
+
+    expect(
+      await screen.findByText(/couldn't finish signing you up with that provider/i),
+    ).toBeInTheDocument();
   });
 
   it("shows why the callback failed when nobody is signed in", async () => {

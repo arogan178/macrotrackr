@@ -7,6 +7,7 @@ export const Route = createFileRoute("/sso-callback")({
   validateSearch: (search: Record<string, unknown>) => ({
     redirectTo: search.redirectTo as string | undefined,
     flow: search.flow as string | undefined,
+    failed: search.failed as string | undefined,
   }),
   component: SSOCallbackPage,
 });
