@@ -68,7 +68,9 @@ function ClerkSsoCallbackPage() {
 
   // Step 1: Let Clerk process the OAuth redirect callback
   useEffect(() => {
-    if (hasProcessedCallback.current) return;
+    // Before clerk-js loads, handleRedirectCallback queues and resolves at once
+    // and `client` is undefined, so the consent repair below would never run.
+    if (hasProcessedCallback.current || !authLoaded) return;
     hasProcessedCallback.current = true;
 
     handleRedirectCallback({
@@ -156,7 +158,7 @@ function ClerkSsoCallbackPage() {
         );
       }
     }
-  }, [client, handleRedirectCallback, isSignUpFlow, setActive]);
+  }, [authLoaded, client, handleRedirectCallback, isSignUpFlow, setActive]);
 
   // Step 2: Once Clerk is loaded and user is signed in, handle routing
   useEffect(() => {
