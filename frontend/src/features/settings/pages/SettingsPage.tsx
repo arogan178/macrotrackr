@@ -228,8 +228,8 @@ export default function SettingsPage() {
             {activeTab === "data" && (
               <PageTransition key="data">
                 <div className="space-y-6">
-                  <DataExporter />
                   <DataImporter />
+                  <DataExporter />
                 </div>
               </PageTransition>
             )}

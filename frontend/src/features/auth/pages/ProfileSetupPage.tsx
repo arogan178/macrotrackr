@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/react";
 import { Navigate, useSearch } from "@tanstack/react-router";
 
@@ -34,6 +34,12 @@ function ClerkProfileSetupPage() {
     enabled: isLoaded && isSignedIn,
   });
   const normalizedRedirect = normalizeAuthRedirect(search.redirectTo);
+  // Decided once: finishing the form completes the profile, and the form picks
+  // the destination, so this guard must not redirect over it.
+  const [arrivedComplete, setArrivedComplete] = useState<boolean | null>(null);
+  if (isLoaded && isSignedIn && !isUserLoading && arrivedComplete === null) {
+    setArrivedComplete(resolveProfileCompletion(user) === true);
+  }
 
   useEffect(() => {
     sessionStorage.setItem("postAuthRedirect", normalizedRedirect);
@@ -54,7 +60,7 @@ function ClerkProfileSetupPage() {
   }
 
   // Redirect users who already completed onboarding.
-  if (!isUserLoading && resolveProfileCompletion(user) === true) {
+  if (arrivedComplete) {
     return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
   }
 
