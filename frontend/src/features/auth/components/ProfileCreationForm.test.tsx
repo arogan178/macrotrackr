@@ -158,8 +158,31 @@ describe("ProfileCreationForm steps", () => {
       }),
     );
     expect(navigate).toHaveBeenCalledWith({
+      to: "/settings",
+      search: { tab: "data" },
+      replace: true,
+    });
+  });
+
+  it("opens the log sheet for someone new to tracking", async () => {
+    const user = userEvent.setup();
+    vi.mocked(userApi.getUserDetails).mockResolvedValue({} as never);
+    render(<ProfileCreationForm />);
+    await fillAboutYou(user);
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.selectOptions(screen.getByLabelText(/how active are you/i), "3");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    await user.selectOptions(
+      screen.getByLabelText(/what are you switching from/i),
+      "new_to_tracking",
+    );
+    await user.click(screen.getByRole("radio", { name: "Maintain" }));
+    await user.click(screen.getByRole("button", { name: "Finish setup" }));
+
+    expect(navigate).toHaveBeenCalledWith({
       to: "/home",
-      search: { limit: 20, offset: 0 },
+      search: { limit: 20, offset: 0, log: 1 },
       replace: true,
     });
   });

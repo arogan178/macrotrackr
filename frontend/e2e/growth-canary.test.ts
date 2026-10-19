@@ -138,15 +138,20 @@ async function completeProfile(
     .selectOption(switchingSource);
   await page.getByRole("radio", { name: "Maintain" }).click();
   await page.getByRole("button", { name: "Finish setup" }).click();
-  await expect(page).toHaveURL(/\/home/u, { timeout: 30_000 });
+  // Switchers land on the importer; newcomers land on Home with the log sheet open.
+  await expect(page).toHaveURL(
+    switchingSource === "myfitnesspal" ? /\/settings/u : /\/home/u,
+    { timeout: 30_000 },
+  );
 }
 
 async function logManualMeal(page: Page): Promise<void> {
-  await page.getByLabel("Meal Name").fill("Growth canary meal");
-  await page.getByLabel("Protein").fill("30");
-  await page.getByLabel("Carbs").fill("40");
-  await page.getByLabel("Fats").fill("10");
-  await page.getByRole("button", { name: "Add Entry" }).click();
+  const sheet = page.getByRole("dialog", { name: "Log a meal" });
+  await sheet.getByLabel("Meal Name").fill("Growth canary meal");
+  await sheet.getByLabel("Protein").fill("30");
+  await sheet.getByLabel("Carbs").fill("40");
+  await sheet.getByLabel("Fats").fill("10");
+  await sheet.getByRole("button", { name: "Add Entry" }).click();
   await expect(page.getByText("Growth canary meal").first()).toBeVisible();
 }
 

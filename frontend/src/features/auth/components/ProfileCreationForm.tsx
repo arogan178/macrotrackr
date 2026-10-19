@@ -62,6 +62,14 @@ import {
 
 const TOTAL_STEPS = 3;
 
+// Sources with a supported export. Their history fills the dashboard on day one.
+const IMPORTABLE_SOURCES = new Set<string>([
+  "cronometer",
+  "loseit",
+  "macrofactor",
+  "myfitnesspal",
+]);
+
 type WeightGoalChoice = "lose" | "maintain" | "gain";
 
 interface ProfileValues {
@@ -334,11 +342,16 @@ export function ProfileCreationForm() {
         }),
       ]);
 
-      // Redirect to home with replace for a clean onboarding transition.
-      if (postSetupRedirect === "/home") {
+      // Send switchers to the importer and everyone else to their first log.
+      if (
+        postSetupRedirect === "/home" &&
+        IMPORTABLE_SOURCES.has(switchingSource)
+      ) {
+        navigate({ to: "/settings", search: { tab: "data" }, replace: true });
+      } else if (postSetupRedirect === "/home") {
         navigate({
           to: "/home",
-          search: { limit: 20, offset: 0 },
+          search: { limit: 20, offset: 0, log: 1 },
           replace: true,
         });
       } else {

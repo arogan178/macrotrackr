@@ -17,6 +17,7 @@ import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
 import { cn } from "@/lib/classnameUtilities";
 import { formatGrouped } from "@/lib/formatNumber";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -86,6 +87,7 @@ const CalorieSearch = memo(function CalorieSearch({
     isFetched,
     error: searchError,
   } = useFoodSearch(submittedQuery);
+  const productAnalytics = useProductAnalytics();
 
   const trimmedQuery = query.trim();
 
@@ -350,6 +352,12 @@ const CalorieSearch = memo(function CalorieSearch({
       : "";
 
   const statusMessage = searchErrorMessage || noResultsMessage;
+
+  useEffect(() => {
+    if (!noResultsMessage) return;
+
+    productAnalytics.capture({ event: "food_search_empty", properties: {} });
+  }, [noResultsMessage, productAnalytics, submittedQuery]);
 
   return (
     <div className="relative flex flex-col gap-3" ref={wrapperReference}>

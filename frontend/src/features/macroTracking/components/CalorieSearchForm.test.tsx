@@ -16,6 +16,12 @@ import { useStore } from "@/store/store";
 
 import CalorieSearchForm from "./CalorieSearchForm";
 
+const { captureMock } = vi.hoisted(() => ({ captureMock: vi.fn() }));
+
+vi.mock("@/lib/productAnalytics", () => ({
+  useProductAnalytics: () => ({ capture: captureMock }),
+}));
+
 vi.mock("@/api/macros", () => ({
   macrosApi: {
     search: vi.fn(),
@@ -377,6 +383,22 @@ describe("CalorieSearchForm", () => {
       expect(macrosApi.search).toHaveBeenCalledTimes(1);
       expect(macrosApi.search).toHaveBeenCalledWith({ query: "banana" });
       expect(screen.queryByRole("tab", { name: "Recents" })).not.toBeInTheDocument();
+    });
+
+    it("records a search that finds nothing", async () => {
+      mockSavedMeals([]);
+      vi.mocked(macrosApi.search).mockResolvedValue([]);
+      const input = renderAndType("zzqx");
+
+      fireEvent.keyDown(input, { key: "Enter" });
+
+      expect(
+        await screen.findByText("No results found for this food item"),
+      ).toBeInTheDocument();
+      expect(captureMock).toHaveBeenCalledWith({
+        event: "food_search_empty",
+        properties: {},
+      });
     });
   });
 
