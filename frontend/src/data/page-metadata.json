@@ -81,24 +81,24 @@
     "description": "Move meal history from MyFitnessPal, Cronometer, MacroFactor, or Lose It into MacroTrackr with a preview before anything is saved."
   },
   "/migrate/myfitnesspal": {
-    "title": "Export Your MyFitnessPal Data and Import It into MacroTrackr",
-    "description": "Download your MyFitnessPal nutrition CSV, then import it into MacroTrackr and preview every meal before anything is saved.",
-    "h1": "Export Your MyFitnessPal Data and Import It into MacroTrackr"
+    "title": "How to Export Your MyFitnessPal Data: Step-by-Step Guide",
+    "description": "Export MyFitnessPal data in 3 steps: choose Export under Nutrition or Reports, pick a date range, then download the ZIP. Then import it into MacroTrackr.",
+    "h1": "How to Export Your MyFitnessPal Data: Step-by-Step Guide"
   },
   "/migrate/cronometer": {
-    "title": "Export Your Cronometer Data and Import It into MacroTrackr",
-    "description": "Export your Cronometer diary as a CSV, then import it into MacroTrackr and review the parsed meals before saving them.",
-    "h1": "Export Your Cronometer Data and Import It into MacroTrackr"
+    "title": "How to Export Your Cronometer Data: Step-by-Step Guide",
+    "description": "Export Cronometer data in 3 steps: open Account Data in Account Settings, export diary servings as CSV, keep the headings. Then import it into MacroTrackr.",
+    "h1": "How to Export Your Cronometer Data: Step-by-Step Guide"
   },
   "/migrate/macrofactor": {
-    "title": "Export Your MacroFactor Data and Import It into MacroTrackr",
-    "description": "Export your MacroFactor nutrition history from Data Management, then import it into MacroTrackr with a full preview first.",
-    "h1": "Export Your MacroFactor Data and Import It into MacroTrackr"
+    "title": "How to Export Your MacroFactor Data: Step-by-Step Guide",
+    "description": "Export MacroFactor data in 3 steps: More, Data Management, Data Export, then choose Granular Export for meal history. Then import it into MacroTrackr.",
+    "h1": "How to Export Your MacroFactor Data: Step-by-Step Guide"
   },
   "/migrate/lose-it": {
-    "title": "Export Your Lose It! Data and Import It into MacroTrackr",
-    "description": "Download your Lose It! food log from your account, then import it into MacroTrackr and check every meal before saving.",
-    "h1": "Export Your Lose It! Data and Import It into MacroTrackr"
+    "title": "How to Export Your Lose It! Data: Step-by-Step Guide",
+    "description": "Export Lose It! data in 3 steps: sign in on desktop, open loseit.com/export/data, keep the food-log CSV. Then import it into MacroTrackr.",
+    "h1": "How to Export Your Lose It! Data: Step-by-Step Guide"
   },
   "/open-source": {
     "title": "Open Source Macro Tracker, Self-Hostable — MacroTrackr",
