@@ -183,6 +183,10 @@ function WeightGoalProgressChart({
     dataKey: "name",
     axisLine: { stroke: "var(--color-border)" },
     tickLine: false,
+    // Drop ticks by measured width: a count-based interval ran the dates
+    // together on a phone.
+    interval: "preserveStartEnd" as const,
+    minTickGap: 16,
   };
 
   const yAxisProps = {

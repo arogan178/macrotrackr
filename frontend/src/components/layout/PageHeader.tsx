@@ -36,8 +36,10 @@ export const PageHeader = ({
       )}
     </div>
 
+    {/* A phone needs the line for data. Every subtitle is either a tagline or
+        a date the page already shows. */}
     {subtitle && (
-      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted sm:mt-1.5 sm:text-sm">
+      <p className="mt-1.5 hidden max-w-2xl text-sm leading-relaxed text-muted sm:block">
         {subtitle}
       </p>
     )}

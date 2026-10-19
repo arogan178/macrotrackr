@@ -65,27 +65,27 @@ export default function DateRangeSelector({
       className="sticky z-30 mb-6 rounded-card border border-border bg-surface p-3"
       style={{ top: "var(--header-offset)" }}
     >
-      <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
-          <span className="text-xs sm:text-sm font-medium text-foreground shrink-0">Time Period:</span>
-          <TabBar
-            items={items}
-            activeKey={currentRange}
-            onChange={handleRangeChange}
-            isMotion
-            layoutId="activeRangeHighlight"
-            size="sm"
-            className="border border-border bg-surface-2 flex-nowrap shrink-0"
-          />
-          {!hasProAccess && (
-            <span className="w-full text-xs text-muted sm:w-auto">
-              30 and 90 day views are Pro
-            </span>
-          )}
-        </div>
+      {/* On a phone the tabs take their own full-width row under the label and
+          actions. Sharing one row, the tabs ran under the share button. */}
+      <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3">
+        <span className="text-xs sm:text-sm font-medium text-foreground shrink-0">Time Period:</span>
+        <TabBar
+          items={items}
+          activeKey={currentRange}
+          onChange={handleRangeChange}
+          isMotion
+          layoutId="activeRangeHighlight"
+          size="sm"
+          fullWidth
+          className="order-last border border-border bg-surface-2 flex-nowrap sm:order-none"
+        />
+        {!hasProAccess && (
+          <span className="order-last w-full text-xs text-muted sm:order-none sm:w-auto">
+            30 and 90 day views are Pro
+          </span>
+        )}
 
-        {/* Actions aligned right on same line */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="ml-auto flex items-center gap-2 shrink-0">
           {onShareClick && (
             <>
               <div className="flex md:hidden">

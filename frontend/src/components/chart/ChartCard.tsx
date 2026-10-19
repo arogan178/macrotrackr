@@ -39,9 +39,9 @@ function ChartCard({
       >
         {/* Header */}
         {(title ?? action) && (
-          <div className="mb-3.5 sm:mb-4 flex items-center justify-between">
+          <div className="mb-3.5 sm:mb-4 flex flex-wrap items-center justify-between gap-2">
             {title && (
-              <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
+              <h3 className="whitespace-nowrap text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
                 {title}
               </h3>
             )}
