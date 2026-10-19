@@ -1,16 +1,19 @@
-import { memo, useMemo, useRef } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
-import { Button, ChevronDownIcon, CopyIcon, IconButton } from "@/components/ui";
-import { formatGrouped } from "@/lib/formatNumber";
+import { Button, ChevronDownIcon, CopyIcon, IconButton, TrashIcon } from "@/components/ui";
+import Value from "@/components/ui/Value";
+import { DURATIONS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
+import { EntryActionsSheet } from "./EntryActionsSheet";
 import { EntryCard } from "./EntryCard";
 import { useEntryHistoryController } from "./EntryHistoryContext";
 import type {
   GroupedEntry,
 } from "./EntryHistoryShared";
+import { MacroSplitBar } from "./MacroSplitBar";
 
 interface MobileEntryCardsProps {
   groupedEntries: GroupedEntry[];
@@ -43,6 +46,7 @@ const MobileEntryCards = memo(
     } = controller;
 
     const containerReference = useRef<HTMLDivElement>(null);
+    const [openEntry, setOpenEntry] = useState<MacroEntry | null>(null);
 
     const totalEntries = useMemo(() => {
       return groupedEntries.reduce(
@@ -84,50 +88,45 @@ const MobileEntryCards = memo(
       overscan: 5,
     });
 
+    // A plain row, not a filled band: the day is a heading for the entries
+    // under it, and its split bar says what kind of day it was.
     const renderDateHeader = (group: GroupedEntry) => (
-      <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-border bg-surface-2 p-2.5 sm:p-4 transition-colors duration-300 hover:bg-surface-2"
-        onClick={() => toggleDateCollapse(group.date)}
-        whileHover={{ backgroundColor: "var(--color-surface-2)" }}
-        transition={{ duration: 0.2 }}
-      >
-        <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
-          <motion.div
-            animate={{
-              rotate: isDateCollapsed(group.date) ? -90 : 0,
-            }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="shrink-0"
+      <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border pr-1 pl-4">
+        <button
+          type="button"
+          aria-expanded={!isDateCollapsed(group.date)}
+          onClick={() => toggleDateCollapse(group.date)}
+          className="flex min-h-12 min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <motion.span
+            animate={{ rotate: isDateCollapsed(group.date) ? -90 : 0 }}
+            transition={{ duration: DURATIONS.instant }}
+            className="shrink-0 text-muted"
           >
-            <ChevronDownIcon className="text-foreground h-4 w-4" />
-          </motion.div>
-          <h3 className="text-xs sm:text-base font-semibold tracking-tight text-foreground whitespace-nowrap">
+            <ChevronDownIcon className="h-4 w-4" />
+          </motion.span>
+          <h3 className="truncate text-sm font-medium text-foreground">
             {formatDate(group.date)}
           </h3>
-        </div>
+        </button>
 
-        {/* Below sm the day shows kcal only: the grams pushed delete off the
-            row, and today's grams are in the summary above. */}
-        <div className="flex items-center gap-3 text-xs">
-          <span className="hidden font-medium tracking-tight text-protein whitespace-nowrap sm:inline">
-            {group.totals.protein}g P
-          </span>
-          <span className="hidden font-medium tracking-tight text-carbs whitespace-nowrap sm:inline">
-            {group.totals.carbs}g C
-          </span>
-          <span className="hidden font-medium tracking-tight text-fats whitespace-nowrap sm:inline">
-            {group.totals.fats}g F
-          </span>
-          <span className="font-medium tracking-tight text-foreground whitespace-nowrap">
-            {formatGrouped(group.totals.calories)} kcal
-          </span>
+        <div className="flex shrink-0 items-center gap-3">
+          <MacroSplitBar
+            protein={group.totals.protein}
+            carbs={group.totals.carbs}
+            fats={group.totals.fats}
+            className="w-12"
+          />
+          <Value value={group.totals.calories} unit="kcal" />
           <IconButton
-            variant="delete"
+            variant="custom"
+            className="text-muted hover:text-error"
+            icon={<TrashIcon className="h-4 w-4" />}
             onClick={(event) => handleDeleteDate(group.date, event)}
             ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
           />
         </div>
-      </motion.div>
+      </div>
     );
 
     // In the open day rather than its header, which has no room left on a phone.
@@ -148,16 +147,11 @@ const MobileEntryCards = memo(
       const card = (
         <EntryCard
           entry={entry}
-          onEdit={onEdit}
-          deleteEntry={deleteEntry}
+          onOpen={setOpenEntry}
           isDeleting={isDeleting(entry.clientId)}
           formatTimeFromEntry={formatTimeFromEntry}
           capitalizeFirstLetter={capitalizeFirstLetter}
           calculateCalories={calculateCalories}
-          onSaveMeal={onSaveMeal}
-          onUnsaveMeal={onUnsaveMeal}
-          onLogAgain={onLogAgain}
-          onCopyOrMove={onCopyOrMove}
           isMealSaved={isMealSaved(entry.clientId)}
           isSelectionMode={isSelectionMode}
           isSelected={isEntrySelected(entry.clientId)}
@@ -184,6 +178,20 @@ const MobileEntryCards = memo(
         </motion.div>
       );
     };
+
+    const actionsSheet = (
+      <EntryActionsSheet
+        entry={openEntry}
+        isMealSaved={openEntry ? isMealSaved(openEntry.clientId) : false}
+        onClose={() => setOpenEntry(null)}
+        onEdit={onEdit}
+        onDelete={deleteEntry}
+        onLogAgain={onLogAgain}
+        onCopyOrMove={onCopyOrMove}
+        onSaveMeal={onSaveMeal}
+        onUnsaveMeal={onUnsaveMeal}
+      />
+    );
 
     if (shouldVirtualize) {
       const items = virtualizer.getVirtualItems();
@@ -235,6 +243,7 @@ const MobileEntryCards = memo(
               );
             })}
           </div>
+          {actionsSheet}
         </div>
       );
     }
@@ -289,6 +298,7 @@ const MobileEntryCards = memo(
             </motion.div>
           ))}
         </AnimatePresence>
+        {actionsSheet}
       </div>
     );
   },

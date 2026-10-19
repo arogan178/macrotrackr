@@ -16,6 +16,7 @@ import {
   PlusCircleIcon,
   StateCard,
 } from "@/components/ui";
+import Heading from "@/components/ui/Heading";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { openLogSheet } from "@/lib/logSheet";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
@@ -379,19 +380,9 @@ const EntryHistoryComponent = function EntryHistory({
   // are the only motion here that carries information.
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between gap-4 md:hidden">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground">
-            Entry History
-          </h2>
-          <p className="mt-1 text-sm text-muted">
-            <AnimatedNumber value={history.length} />{" "}
-            {history.length === 1 ? "entry" : "entries"} across{" "}
-            <AnimatedNumber value={totalEntries.length} />{" "}
-            {totalEntries.length === 1 ? "day" : "days"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="mb-3 flex items-center justify-between gap-4 md:hidden">
+        <Heading level="panel">History</Heading>
+        <div className="flex items-center gap-1">
           {history.length > 0 && (
             <Button
               variant={isSelectionMode ? "primary" : "secondary"}

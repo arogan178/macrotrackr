@@ -6,6 +6,7 @@ import { macrosApi } from "@/api/macros";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
+import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
 import type { EntryDestination } from "@/features/macroTracking/components/CopyMoveEntryModal";
@@ -19,6 +20,7 @@ import {
   HistoryLoadingSkeleton,
 } from "@/features/macroTracking/components/HomePageSkeletons";
 import PartialDayControls from "@/features/macroTracking/components/PartialDayControls";
+import WeekStrip from "@/features/macroTracking/components/WeekStrip";
 import { useAddEntry } from "@/features/macroTracking/hooks/useAddEntry";
 import {
   useHistoryPagination,
@@ -451,6 +453,24 @@ export default function HomePage() {
             onChange={handleDateChange}
           />
         }
+        mobileHeader={
+          <div className="space-y-3 pb-4">
+            <Heading level="page">
+              {history.length > 0 || isLoading
+                ? isToday
+                  ? "Today"
+                  : getDisplayDate(parseISO(date))
+                : headerTitle}
+            </Heading>
+            <WeekStrip
+              date={date}
+              today={today}
+              oldestDate={oldestDate}
+              calorieTarget={effectiveCalorieTarget ?? 0}
+              onChange={handleDateChange}
+            />
+          </div>
+        }
       >
         <div className="space-y-3.5 sm:space-y-6">
           {/* The day comes first. On a phone the summary is what the user
@@ -477,13 +497,16 @@ export default function HomePage() {
                 )
               )}
 
-              {/* BMR and TDEE are reference figures, not the day's work. */}
+              {/* BMR and TDEE are reference figures, not the day's work. On a
+                  phone they live on Goals, beside the maintenance figure. */}
+              <div className="hidden md:block">
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
                 tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
                 isLoading={isLoading}
               />
+              </div>
             </div>
 
             {/* Below md the form lives in the Log sheet, reached from the tab
@@ -503,7 +526,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Panel padding="regular">
+          {/* Flat on a phone like the summary above; the days' dividers run to
+              the screen edge while their text keeps the page margin. */}
+          <Panel
+            padding="none"
+            className="max-md:rounded-none max-md:border-0 max-md:bg-transparent"
+          >
+            <div className="pt-6 md:p-6">
               {isLoading ? (
                 <HistoryLoadingSkeleton />
               ) : (
@@ -530,6 +559,7 @@ export default function HomePage() {
                   oldestDate={oldestDate}
                 />
               )}
+            </div>
           </Panel>
 
           <EditModal

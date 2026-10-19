@@ -1,30 +1,22 @@
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import {
-  ChevronDownIcon,
-  CopyIcon,
-  IconButton,
-  IconButtonGroup,
-  RepeatIcon,
-} from "@/components/ui";
+import { ChevronDownIcon, StarIcon } from "@/components/ui";
+import Value from "@/components/ui/Value";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
+import { MacroSplitBar } from "./MacroSplitBar";
 import { PendingSyncMarker } from "./PendingSyncMarker";
 
 interface EntryCardProps {
   entry: MacroEntry;
-  onEdit: (entry: MacroEntry) => void;
-  deleteEntry: (id: string) => void;
-  isDeleting: boolean;
   formatTimeFromEntry: (entry: MacroEntry) => string;
   capitalizeFirstLetter: (string: string) => string;
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
-  onSaveMeal?: (entry: MacroEntry) => void;
-  onUnsaveMeal?: (entry: MacroEntry) => void;
-  onLogAgain?: (entry: MacroEntry) => void;
-  onCopyOrMove?: (entry: MacroEntry) => void;
+  /** Opens the entry's actions. The row itself is the only control. */
+  onOpen: (entry: MacroEntry) => void;
+  isDeleting?: boolean;
   isMealSaved?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -34,16 +26,11 @@ interface EntryCardProps {
 export const EntryCard = memo(
   ({
     entry,
-    onEdit,
-    deleteEntry,
-    isDeleting,
     formatTimeFromEntry,
     capitalizeFirstLetter,
     calculateCalories,
-    onSaveMeal,
-    onUnsaveMeal,
-    onLogAgain,
-    onCopyOrMove,
+    onOpen,
+    isDeleting,
     isMealSaved,
     isSelectionMode,
     isSelected,
@@ -53,112 +40,78 @@ export const EntryCard = memo(
     const hasIngredients = Boolean(
       entry.ingredients && entry.ingredients.length > 1,
     );
+    const name = entry.foodName ?? entry.mealName;
+    const mealType = entry.mealType ? capitalizeFirstLetter(entry.mealType) : "";
 
     // No enter animation and no `layout`: these rows are virtualized, so motion
-    // projection was re-measuring rows the virtualizer had already measured,
-    // and a row fading up 12px while the list scrolls under it reads as jitter
-    // rather than arrival.
+    // projection would re-measure rows the virtualizer had already measured.
+    //
+    // One tap target per row. Five icon buttons per entry made the list a wall
+    // of controls; the actions now live in the sheet the row opens.
     return (
-      <div className="px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            {isSelectionMode && (
-              <input
-                type="checkbox"
-                className="h-5 w-5 rounded-control border-border text-primary focus:ring-primary/50"
-                checked={isSelected}
-                onChange={(event_) => {
-                  event_.stopPropagation();
-                  onToggleSelection?.(entry.clientId);
-                }}
-              />
-            )}
-            {hasIngredients && (
-              <button
-                type="button"
-                className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
-                onClick={() => setIsExpanded(!isExpanded)}
-                aria-label="Toggle ingredients"
-              >
-                <motion.div
-                  initial={false}
-                  animate={{ rotate: isExpanded ? -180 : 0 }}
-                  transition={{ duration: DURATIONS.instant }}
-                >
-                  <ChevronDownIcon className="h-4 w-4" />
-                </motion.div>
-              </button>
-            )}
-            <span className="text-sm font-medium tracking-tight text-foreground">
-              {formatTimeFromEntry(entry)}
-            </span>
-            <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
-              {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
-            </span>
-          </div>
-          {/* Selecting is its own task; per-entry actions only crowd the row. */}
-          {!isSelectionMode && (
-            <IconButtonGroup
-              onEdit={() => onEdit(entry)}
-              onDelete={() => deleteEntry(entry.clientId)}
-              isDeleting={isDeleting}
-              onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
-              onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}
-              isMealSaved={isMealSaved}
+      <div className={isDeleting ? "opacity-50" : undefined}>
+        <div className="flex items-stretch gap-1 px-4">
+          {isSelectionMode && (
+            <input
+              type="checkbox"
+              aria-label={`Select ${name ?? mealType}`}
+              className="h-5 w-5 self-center rounded-control border-border text-primary focus:ring-primary/50"
+              checked={isSelected}
+              onChange={() => onToggleSelection?.(entry.clientId)}
             />
           )}
-        </div>
-
-        {/* The name shares its row with copy and log-again, so the values
-            below get a full line and never wrap. */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-baseline gap-2">
-            <p className="min-w-0 truncate text-sm text-muted">
-              {entry.foodName ?? entry.mealName}
-            </p>
-            <PendingSyncMarker entry={entry} />
-          </div>
-          {!isSelectionMode && (onLogAgain ?? onCopyOrMove) && (
-            <span className="flex shrink-0">
-              {onCopyOrMove && (
-                <IconButton
-                  variant="custom"
-                  className="text-muted hover:text-foreground"
-                  icon={<CopyIcon className="h-4 w-4" />}
-                  onClick={() => onCopyOrMove(entry)}
-                  ariaLabel="Copy or move entry"
-                />
-              )}
-              {onLogAgain && (
-                <IconButton
-                  variant="custom"
-                  className="text-muted hover:text-foreground"
-                  icon={<RepeatIcon className="h-4 w-4" />}
-                  onClick={() => onLogAgain(entry)}
-                  ariaLabel="Log again"
-                />
-              )}
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 flex-col gap-1.5 py-3 text-left"
+            onClick={() =>
+              isSelectionMode ? onToggleSelection?.(entry.clientId) : onOpen(entry)
+            }
+          >
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0 truncate text-sm text-foreground">
+                {name ?? mealType}
+              </span>
+              <Value
+                value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+                unit="kcal"
+                className="shrink-0"
+              />
             </span>
+            <span className="flex items-center gap-2 text-xs text-muted">
+              <MacroSplitBar
+                protein={entry.protein}
+                carbs={entry.carbs}
+                fats={entry.fats}
+                className="order-last ml-auto w-12"
+              />
+              <span className="tabular-nums">{formatTimeFromEntry(entry)}</span>
+              {name ? <span>{mealType}</span> : null}
+              {isMealSaved && (
+                <StarIcon
+                  aria-label="Saved meal"
+                  className="h-3 w-3 fill-current text-primary"
+                />
+              )}
+              <PendingSyncMarker entry={entry} />
+            </span>
+          </button>
+          {hasIngredients && (
+            <button
+              type="button"
+              className="flex w-11 shrink-0 items-center justify-center text-muted hover:text-foreground"
+              onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-label="Show ingredients"
+            >
+              <motion.span
+                initial={false}
+                animate={{ rotate: isExpanded ? -180 : 0 }}
+                transition={{ duration: DURATIONS.instant }}
+              >
+                <ChevronDownIcon className="h-4 w-4" />
+              </motion.span>
+            </button>
           )}
-        </div>
-
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm tabular-nums">
-          <span className="font-medium">
-            {calculateCalories(entry.protein, entry.carbs, entry.fats)}
-            <span className="ml-1 text-xs text-muted">kcal</span>
-          </span>
-          <span className="text-protein">
-            {entry.protein}
-            <span className="ml-0.5 text-xs text-muted">g P</span>
-          </span>
-          <span className="text-carbs">
-            {entry.carbs}
-            <span className="ml-0.5 text-xs text-muted">g C</span>
-          </span>
-          <span className="text-fats">
-            {entry.fats}
-            <span className="ml-0.5 text-xs text-muted">g F</span>
-          </span>
         </div>
 
         <AnimatePresence>
@@ -171,20 +124,17 @@ export const EntryCard = memo(
                 height: { duration: DURATIONS.base, ease: EASINGS.out },
                 opacity: { duration: DURATIONS.base },
               }}
-              className="mt-4 overflow-hidden border-t border-border"
+              className="overflow-hidden px-4 pb-3"
             >
-              <div className="pt-4">
-                <h4 className="mb-3 text-xs font-semibold text-muted uppercase">
-                  Ingredients
-                </h4>
-                <div className="space-y-3">
+              <div>
+                <div className="divide-y divide-border border-l-2 border-border pl-3">
                   {entry.ingredients?.map((ing, index) => (
                     <div
                       key={index}
-                      className="flex flex-col gap-1 rounded-control bg-surface-2 p-3"
+                      className="flex flex-col gap-1 py-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="text-sm text-foreground">
                           {ing.name}
                         </span>
                         {ing.quantity && (

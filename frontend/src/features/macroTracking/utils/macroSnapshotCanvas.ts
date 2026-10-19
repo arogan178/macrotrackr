@@ -53,20 +53,20 @@ type FontWeight = 400 | 500 | 600 | 700;
  * keep the previous font).
  */
 function setFont(
-  ctx: CanvasRenderingContext2D,
+  context_: CanvasRenderingContext2D,
   weight: FontWeight,
   size: number,
   condensed = false,
 ) {
-  const context = ctx as CanvasRenderingContext2D & { fontStretch?: string };
+  const context = context_ as CanvasRenderingContext2D & { fontStretch?: string };
   if (typeof context.fontStretch === "string") {
     context.fontStretch = condensed ? "condensed" : "normal";
   }
-  ctx.font = `${weight} ${size}px ${FAMILY}`;
+  context_.font = `${weight} ${size}px ${FAMILY}`;
 }
 
 function roundedRect(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
@@ -74,28 +74,28 @@ function roundedRect(
   radius: number,
 ) {
   const r = Math.max(0, Math.min(radius, width / 2, height / 2));
-  if (typeof ctx.roundRect === "function") {
-    ctx.beginPath();
-    ctx.roundRect(x, y, width, height, r);
+  if (typeof context.roundRect === "function") {
+    context.beginPath();
+    context.roundRect(x, y, width, height, r);
 
     return;
   }
 
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + width - r, y);
-  ctx.arcTo(x + width, y, x + width, y + r, r);
-  ctx.lineTo(x + width, y + height - r);
-  ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
-  ctx.lineTo(x + r, y + height);
-  ctx.arcTo(x, y + height, x, y + height - r, r);
-  ctx.lineTo(x, y + r);
-  ctx.arcTo(x, y, x + r, y, r);
-  ctx.closePath();
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.lineTo(x + width - r, y);
+  context.arcTo(x + width, y, x + width, y + r, r);
+  context.lineTo(x + width, y + height - r);
+  context.arcTo(x + width, y + height, x + width - r, y + height, r);
+  context.lineTo(x + r, y + height);
+  context.arcTo(x, y + height, x, y + height - r, r);
+  context.lineTo(x, y + r);
+  context.arcTo(x, y, x + r, y, r);
+  context.closePath();
 }
 
 function fillPanel(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   x: number,
   y: number,
@@ -103,19 +103,19 @@ function fillPanel(
   height: number,
   radius = RADIUS_PANEL,
 ) {
-  ctx.fillStyle = palette.surface2;
-  roundedRect(ctx, x, y, width, height, radius);
-  ctx.fill();
+  context.fillStyle = palette.surface2;
+  roundedRect(context, x, y, width, height, radius);
+  context.fill();
 
-  ctx.strokeStyle = palette.border;
-  ctx.lineWidth = 2;
-  roundedRect(ctx, x, y, width, height, radius);
-  ctx.stroke();
+  context.strokeStyle = palette.border;
+  context.lineWidth = 2;
+  roundedRect(context, x, y, width, height, radius);
+  context.stroke();
 }
 
 /** A track and its fill. Flat, because a decorative gradient is not allowed. */
 function bar(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   x: number,
   y: number,
@@ -124,43 +124,43 @@ function bar(
   percent: number,
   colour: string,
 ) {
-  ctx.fillStyle = palette.surface3;
-  roundedRect(ctx, x, y, width, height, RADIUS_BAR);
-  ctx.fill();
+  context.fillStyle = palette.surface3;
+  roundedRect(context, x, y, width, height, RADIUS_BAR);
+  context.fill();
 
   if (percent <= 0) return;
   const fill = Math.max(height, (width * percent) / 100);
-  ctx.fillStyle = colour;
-  roundedRect(ctx, x, y, fill, height, RADIUS_BAR);
-  ctx.fill();
+  context.fillStyle = colour;
+  roundedRect(context, x, y, fill, height, RADIUS_BAR);
+  context.fill();
 }
 
 function dot(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   x: number,
   y: number,
   colour: string,
 ) {
-  ctx.fillStyle = colour;
-  ctx.beginPath();
-  ctx.arc(x, y, 6, 0, Math.PI * 2);
-  ctx.fill();
+  context.fillStyle = colour;
+  context.beginPath();
+  context.arc(x, y, 6, 0, Math.PI * 2);
+  context.fill();
 }
 
 /** Eyebrow: micro step — condensed, uppercase, wide tracking, muted. */
 function eyebrow(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   text: string,
   x: number,
   y: number,
   align: CanvasTextAlign = "left",
 ) {
-  setFont(ctx, 600, 20, true);
-  ctx.fillStyle = palette.muted;
-  ctx.textAlign = align;
-  ctx.fillText(text.toUpperCase(), x, y);
-  ctx.textAlign = "left";
+  setFont(context, 600, 20, true);
+  context.fillStyle = palette.muted;
+  context.textAlign = align;
+  context.fillText(text.toUpperCase(), x, y);
+  context.textAlign = "left";
 }
 
 const macroColour = (palette: SnapshotPalette, row: SnapshotMacroRow) =>
@@ -201,34 +201,34 @@ export function renderSnapshotToCanvas(
   canvas.width = SNAPSHOT_WIDTH;
   canvas.height = SNAPSHOT_HEIGHT;
 
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
+  const context = canvas.getContext("2d");
+  if (!context) {
     throw new Error("Unable to create 2D canvas rendering context");
   }
 
-  ctx.textBaseline = "alphabetic";
+  context.textBaseline = "alphabetic";
 
   // Page
-  ctx.fillStyle = palette.background;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = palette.background;
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
   // Card
-  ctx.fillStyle = palette.surface;
-  roundedRect(ctx, MARGIN, MARGIN, WIDTH - MARGIN * 2, CARD_H, RADIUS_CARD);
-  ctx.fill();
-  ctx.strokeStyle = palette.border;
-  ctx.lineWidth = 2;
-  roundedRect(ctx, MARGIN, MARGIN, WIDTH - MARGIN * 2, CARD_H, RADIUS_CARD);
-  ctx.stroke();
+  context.fillStyle = palette.surface;
+  roundedRect(context, MARGIN, MARGIN, WIDTH - MARGIN * 2, CARD_H, RADIUS_CARD);
+  context.fill();
+  context.strokeStyle = palette.border;
+  context.lineWidth = 2;
+  roundedRect(context, MARGIN, MARGIN, WIDTH - MARGIN * 2, CARD_H, RADIUS_CARD);
+  context.stroke();
 
   let y = MARGIN + PAD;
 
-  y = drawHeader(ctx, palette, model, y);
-  y = drawTitle(ctx, palette, model, y);
-  y = drawHero(ctx, palette, model, y) + GAP;
-  y = drawMacros(ctx, palette, model, y) + GAP;
-  y = drawDistribution(ctx, palette, model, y) + GAP;
-  drawFooter(ctx, palette, y);
+  y = drawHeader(context, palette, model, y);
+  y = drawTitle(context, palette, model, y);
+  y = drawHero(context, palette, model, y) + GAP;
+  y = drawMacros(context, palette, model, y) + GAP;
+  y = drawDistribution(context, palette, model, y) + GAP;
+  drawFooter(context, palette, y);
 
   return canvas;
 }
@@ -242,7 +242,7 @@ export function renderSnapshotToCanvas(
  * the square is still the brand colour, which reads as the mark at 44px.
  */
 function drawBrandMark(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   x: number,
   y: number,
@@ -254,17 +254,17 @@ function drawBrandMark(
   const scale = (size - inset * 2) / BRAND_MARK_VIEW_BOX.width;
   const drawnHeight = BRAND_MARK_VIEW_BOX.height * scale;
 
-  ctx.save();
-  ctx.translate(x + inset, y + (size - drawnHeight) / 2);
-  ctx.scale(scale, scale);
-  ctx.translate(-BRAND_MARK_VIEW_BOX.x, -BRAND_MARK_VIEW_BOX.y);
-  ctx.fillStyle = palette.background;
-  ctx.fill(new Path2D(BRAND_MARK_PATH), "evenodd");
-  ctx.restore();
+  context.save();
+  context.translate(x + inset, y + (size - drawnHeight) / 2);
+  context.scale(scale, scale);
+  context.translate(-BRAND_MARK_VIEW_BOX.x, -BRAND_MARK_VIEW_BOX.y);
+  context.fillStyle = palette.background;
+  context.fill(new Path2D(BRAND_MARK_PATH), "evenodd");
+  context.restore();
 }
 
 function drawHeader(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   model: SnapshotModel,
   top: number,
@@ -272,105 +272,105 @@ function drawHeader(
   const markSize = 44;
 
   // The mark carries the colour, the word is foreground.
-  ctx.fillStyle = palette.primary;
-  roundedRect(ctx, CONTENT_X, top, markSize, markSize, 12);
-  ctx.fill();
+  context.fillStyle = palette.primary;
+  roundedRect(context, CONTENT_X, top, markSize, markSize, 12);
+  context.fill();
 
-  drawBrandMark(ctx, palette, CONTENT_X, top, markSize);
+  drawBrandMark(context, palette, CONTENT_X, top, markSize);
 
-  setFont(ctx, 700, 30, true);
-  ctx.fillStyle = palette.foreground;
-  ctx.fillText("MacroTrackr", CONTENT_X + markSize + 16, top + 31);
+  setFont(context, 700, 30, true);
+  context.fillStyle = palette.foreground;
+  context.fillText("MacroTrackr", CONTENT_X + markSize + 16, top + 31);
 
   // Badge, right-aligned on the same baseline.
-  setFont(ctx, 600, 20, true);
+  setFont(context, 600, 20, true);
   const label = model.badge.toUpperCase();
-  const badgeW = ctx.measureText(label).width + 36;
+  const badgeW = context.measureText(label).width + 36;
   const badgeH = 40;
   const badgeX = CONTENT_X + CONTENT_W - badgeW;
 
-  ctx.fillStyle = palette.surface2;
-  roundedRect(ctx, badgeX, top + 2, badgeW, badgeH, badgeH / 2);
-  ctx.fill();
-  ctx.strokeStyle = palette.border2;
-  ctx.lineWidth = 2;
-  roundedRect(ctx, badgeX, top + 2, badgeW, badgeH, badgeH / 2);
-  ctx.stroke();
+  context.fillStyle = palette.surface2;
+  roundedRect(context, badgeX, top + 2, badgeW, badgeH, badgeH / 2);
+  context.fill();
+  context.strokeStyle = palette.border2;
+  context.lineWidth = 2;
+  roundedRect(context, badgeX, top + 2, badgeW, badgeH, badgeH / 2);
+  context.stroke();
 
-  ctx.fillStyle = palette.primary;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(label, badgeX + badgeW / 2, top + 2 + badgeH / 2);
-  ctx.textAlign = "left";
-  ctx.textBaseline = "alphabetic";
+  context.fillStyle = palette.primary;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(label, badgeX + badgeW / 2, top + 2 + badgeH / 2);
+  context.textAlign = "left";
+  context.textBaseline = "alphabetic";
 
   // Strong rule: this is a header division.
   const ruleY = top + HEADER_H - 16;
-  ctx.strokeStyle = palette.border2;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(CONTENT_X, ruleY);
-  ctx.lineTo(CONTENT_X + CONTENT_W, ruleY);
-  ctx.stroke();
+  context.strokeStyle = palette.border2;
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(CONTENT_X, ruleY);
+  context.lineTo(CONTENT_X + CONTENT_W, ruleY);
+  context.stroke();
 
   return top + HEADER_H;
 }
 
 function drawTitle(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   model: SnapshotModel,
   top: number,
 ): number {
-  eyebrow(ctx, palette, model.title, CONTENT_X, top + 26);
+  eyebrow(context, palette, model.title, CONTENT_X, top + 26);
 
-  setFont(ctx, 700, 44, true);
-  ctx.fillStyle = palette.foreground;
-  ctx.fillText(model.dateLabel, CONTENT_X, top + 76);
+  setFont(context, 700, 44, true);
+  context.fillStyle = palette.foreground;
+  context.fillText(model.dateLabel, CONTENT_X, top + 76);
 
   return top + TITLE_H;
 }
 
 function drawHero(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   model: SnapshotModel,
   top: number,
 ): number {
-  fillPanel(ctx, palette, CONTENT_X, top, CONTENT_W, HERO_H);
+  fillPanel(context, palette, CONTENT_X, top, CONTENT_W, HERO_H);
 
   const innerX = CONTENT_X + 32;
   const innerW = CONTENT_W - 64;
 
-  eyebrow(ctx, palette, "Calories", innerX, top + 44);
+  eyebrow(context, palette, "Calories", innerX, top + 44);
 
-  setFont(ctx, 500, 20);
-  ctx.fillStyle = palette.muted;
-  ctx.textAlign = "right";
-  ctx.fillText(
+  setFont(context, 500, 20);
+  context.fillStyle = palette.muted;
+  context.textAlign = "right";
+  context.fillText(
     `Target ${formatGrouped(model.calorieTarget)} kcal`,
     innerX + innerW,
     top + 44,
   );
-  ctx.textAlign = "left";
+  context.textAlign = "left";
 
   // Hero figure: condensed and bold, per the Value scale.
-  setFont(ctx, 700, 86, true);
-  ctx.fillStyle = palette.foreground;
+  setFont(context, 700, 86, true);
+  context.fillStyle = palette.foreground;
   const figure = formatGrouped(model.calories);
-  ctx.fillText(figure, innerX, top + 128);
-  const figureW = ctx.measureText(figure).width;
+  context.fillText(figure, innerX, top + 128);
+  const figureW = context.measureText(figure).width;
 
-  setFont(ctx, 500, 24);
-  ctx.fillStyle = palette.muted;
-  ctx.fillText(
+  setFont(context, 500, 24);
+  context.fillStyle = palette.muted;
+  context.fillText(
     `kcal of ${formatGrouped(model.calorieTarget)}`,
     innerX + figureW + 14,
     top + 128,
   );
 
   bar(
-    ctx,
+    context,
     palette,
     innerX,
     top + 156,
@@ -380,21 +380,21 @@ function drawHero(
     palette.primary,
   );
 
-  setFont(ctx, 600, 20);
-  ctx.fillStyle = palette.foreground;
-  ctx.fillText(`${model.caloriePercent}% of target`, innerX, top + 206);
+  setFont(context, 600, 20);
+  context.fillStyle = palette.foreground;
+  context.fillText(`${model.caloriePercent}% of target`, innerX, top + 206);
 
-  ctx.fillStyle = palette.muted;
-  setFont(ctx, 500, 20);
-  ctx.textAlign = "right";
-  ctx.fillText(model.calorieRemainder, innerX + innerW, top + 206);
-  ctx.textAlign = "left";
+  context.fillStyle = palette.muted;
+  setFont(context, 500, 20);
+  context.textAlign = "right";
+  context.fillText(model.calorieRemainder, innerX + innerW, top + 206);
+  context.textAlign = "left";
 
   return top + HERO_H;
 }
 
 function drawMacros(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   model: SnapshotModel,
   top: number,
@@ -405,130 +405,130 @@ function drawMacros(
   model.macros.forEach((row, index) => {
     const x = CONTENT_X + index * (colW + gap);
     const colour = macroColour(palette, row);
-    fillPanel(ctx, palette, x, top, colW, MACRO_H);
+    fillPanel(context, palette, x, top, colW, MACRO_H);
 
     const innerX = x + 24;
     const innerW = colW - 48;
 
-    dot(ctx, innerX + 6, top + 34, colour);
-    setFont(ctx, 600, 20, true);
-    ctx.fillStyle = colour;
-    ctx.fillText(row.label.toUpperCase(), innerX + 22, top + 41);
+    dot(context, innerX + 6, top + 34, colour);
+    setFont(context, 600, 20, true);
+    context.fillStyle = colour;
+    context.fillText(row.label.toUpperCase(), innerX + 22, top + 41);
 
-    setFont(ctx, 700, 54, true);
-    ctx.fillStyle = palette.foreground;
+    setFont(context, 700, 54, true);
+    context.fillStyle = palette.foreground;
     const grams = `${row.grams}`;
-    ctx.fillText(grams, innerX, top + 112);
-    const gramsW = ctx.measureText(grams).width;
+    context.fillText(grams, innerX, top + 112);
+    const gramsW = context.measureText(grams).width;
 
-    setFont(ctx, 500, 22);
-    ctx.fillStyle = palette.muted;
-    ctx.fillText("g", innerX + gramsW + 8, top + 112);
+    setFont(context, 500, 22);
+    context.fillStyle = palette.muted;
+    context.fillText("g", innerX + gramsW + 8, top + 112);
 
-    setFont(ctx, 500, 20);
-    ctx.fillStyle = palette.muted;
-    ctx.fillText(
+    setFont(context, 500, 20);
+    context.fillStyle = palette.muted;
+    context.fillText(
       `of ${row.targetGrams} g · ${row.percentOfTarget}%`,
       innerX,
       top + 148,
     );
 
-    bar(ctx, palette, innerX, top + 170, innerW, 10, row.barPercent, colour);
+    bar(context, palette, innerX, top + 170, innerW, 10, row.barPercent, colour);
 
-    setFont(ctx, 600, 20);
-    ctx.fillStyle = palette.foreground;
-    ctx.fillText(`${formatGrouped(row.calories)} kcal`, innerX, top + 222);
+    setFont(context, 600, 20);
+    context.fillStyle = palette.foreground;
+    context.fillText(`${formatGrouped(row.calories)} kcal`, innerX, top + 222);
 
-    setFont(ctx, 500, 20);
-    ctx.fillStyle = palette.muted;
-    ctx.textAlign = "right";
-    ctx.fillText(`${row.energyShare}%`, innerX + innerW, top + 222);
-    ctx.textAlign = "left";
+    setFont(context, 500, 20);
+    context.fillStyle = palette.muted;
+    context.textAlign = "right";
+    context.fillText(`${row.energyShare}%`, innerX + innerW, top + 222);
+    context.textAlign = "left";
   });
 
   return top + MACRO_H;
 }
 
 function drawDistribution(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   model: SnapshotModel,
   top: number,
 ): number {
-  fillPanel(ctx, palette, CONTENT_X, top, CONTENT_W, DIST_H);
+  fillPanel(context, palette, CONTENT_X, top, CONTENT_W, DIST_H);
 
   const innerX = CONTENT_X + 32;
   const innerW = CONTENT_W - 64;
 
-  eyebrow(ctx, palette, "Energy split", innerX, top + 42);
+  eyebrow(context, palette, "Energy split", innerX, top + 42);
 
-  setFont(ctx, 500, 20);
-  ctx.fillStyle = palette.muted;
-  ctx.textAlign = "right";
-  ctx.fillText(
+  setFont(context, 500, 20);
+  context.fillStyle = palette.muted;
+  context.textAlign = "right";
+  context.fillText(
     `${formatGrouped(model.totalMacroCalories)} kcal from macros`,
     innerX + innerW,
     top + 42,
   );
-  ctx.textAlign = "left";
+  context.textAlign = "left";
 
   const stripY = top + 60;
   const stripH = 16;
-  ctx.fillStyle = palette.surface3;
-  roundedRect(ctx, innerX, stripY, innerW, stripH, RADIUS_BAR);
-  ctx.fill();
+  context.fillStyle = palette.surface3;
+  roundedRect(context, innerX, stripY, innerW, stripH, RADIUS_BAR);
+  context.fill();
 
-  ctx.save();
-  roundedRect(ctx, innerX, stripY, innerW, stripH, RADIUS_BAR);
-  ctx.clip();
+  context.save();
+  roundedRect(context, innerX, stripY, innerW, stripH, RADIUS_BAR);
+  context.clip();
   let offset = innerX;
   model.macros.forEach((row, index) => {
     const isLast = index === model.macros.length - 1;
     const segment = isLast
       ? innerX + innerW - offset
       : (innerW * row.energyShare) / 100;
-    ctx.fillStyle = macroColour(palette, row);
-    ctx.fillRect(offset, stripY, segment, stripH);
+    context.fillStyle = macroColour(palette, row);
+    context.fillRect(offset, stripY, segment, stripH);
     offset += segment;
   });
-  ctx.restore();
+  context.restore();
 
   // Legend on an even three-column grid, so it cannot collide at any share.
   const legendY = top + 120;
   const columnW = innerW / 3;
   model.macros.forEach((row, index) => {
     const x = innerX + index * columnW;
-    dot(ctx, x + 6, legendY - 7, macroColour(palette, row));
-    setFont(ctx, 500, 20);
-    ctx.fillStyle = palette.foreground;
-    ctx.fillText(`${row.label} ${row.energyShare}%`, x + 22, legendY);
+    dot(context, x + 6, legendY - 7, macroColour(palette, row));
+    setFont(context, 500, 20);
+    context.fillStyle = palette.foreground;
+    context.fillText(`${row.label} ${row.energyShare}%`, x + 22, legendY);
   });
 
   return top + DIST_H;
 }
 
 function drawFooter(
-  ctx: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
   top: number,
 ) {
   const ruleY = top + 8;
-  ctx.strokeStyle = palette.border2;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(CONTENT_X, ruleY);
-  ctx.lineTo(CONTENT_X + CONTENT_W, ruleY);
-  ctx.stroke();
+  context.strokeStyle = palette.border2;
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(CONTENT_X, ruleY);
+  context.lineTo(CONTENT_X + CONTENT_W, ruleY);
+  context.stroke();
 
-  setFont(ctx, 500, 20);
-  ctx.fillStyle = palette.muted;
-  ctx.fillText("Logged with MacroTrackr", CONTENT_X, ruleY + 40);
+  setFont(context, 500, 20);
+  context.fillStyle = palette.muted;
+  context.fillText("Logged with MacroTrackr", CONTENT_X, ruleY + 40);
 
-  ctx.fillStyle = palette.primary;
-  setFont(ctx, 600, 20);
-  ctx.textAlign = "right";
-  ctx.fillText("macrotrackr.com", CONTENT_X + CONTENT_W, ruleY + 40);
-  ctx.textAlign = "left";
+  context.fillStyle = palette.primary;
+  setFont(context, 600, 20);
+  context.textAlign = "right";
+  context.fillText("macrotrackr.com", CONTENT_X + CONTENT_W, ruleY + 40);
+  context.textAlign = "left";
 }
 
 export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
