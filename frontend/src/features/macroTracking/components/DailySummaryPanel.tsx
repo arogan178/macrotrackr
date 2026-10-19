@@ -326,7 +326,8 @@ function DailySummaryInner({
     // On a phone the page is the panel: no box, the day sits on the background.
     <Panel
       padding="none"
-      className="flex flex-col max-md:rounded-none max-md:border-0 max-md:bg-transparent"
+      flatOnPhone
+      className="flex flex-col"
     >
       <div className="md:p-6">
         <div className="mb-3 hidden items-center justify-between md:flex">

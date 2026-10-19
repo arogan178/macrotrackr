@@ -530,7 +530,7 @@ export default function HomePage() {
               the screen edge while their text keeps the page margin. */}
           <Panel
             padding="none"
-            className="max-md:rounded-none max-md:border-0 max-md:bg-transparent"
+            flatOnPhone
           >
             <div className="pt-6 md:p-6">
               {isLoading ? (
