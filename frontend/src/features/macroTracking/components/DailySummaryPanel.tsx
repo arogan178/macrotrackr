@@ -6,6 +6,7 @@ import IconButton from "@/components/ui/IconButton";
 import Panel from "@/components/ui/Panel";
 import Value from "@/components/ui/Value";
 import MacroSnapshotModal from "@/features/macroTracking/components/MacroSnapshotModal";
+import TargetRow, { FILL_IN } from "@/features/macroTracking/components/TargetRow";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { formatGrouped } from "@/lib/formatNumber";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -17,7 +18,6 @@ import {
   calculateFatsCalories,
   calculateProteinCalories,
 } from "../calculations";
-import { TARGET_TOLERANCE, targetStatus } from "../utils/targetStatus";
 
 const DEFAULT_TARGET = {
   proteinPercentage: 30,
@@ -40,8 +40,6 @@ function calculatePercent(actual: number, targetValue: number): number {
   return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
 }
 
-/** Fills from zero once, on load: the page's single orchestrated moment. */
-const FILL_IN = "origin-left animate-[fill-in_700ms_ease-out]";
 
 interface CalorieGaugeProps {
   protein: number;
@@ -84,68 +82,6 @@ function CalorieGauge({ protein, carbs, fats, target }: CalorieGaugeProps) {
         />
       )}
     </div>
-  );
-}
-
-interface MacroRowProps {
-  name: string;
-  grams: number;
-  targetGrams: number;
-  colorClass: string;
-}
-
-/**
- * A macro against its target. The outlined band is "on target" (within 10%),
- * the fill is today; where the fill ends relative to the band is the answer.
- */
-function MacroRow({ name, grams, targetGrams, colorClass }: MacroRowProps) {
-  const status = targetStatus(grams, targetGrams);
-  const scale = Math.max(targetGrams * 1.25, grams) || 1;
-  const position = (value: number) => Math.min(100, (value / scale) * 100);
-  const bandStart = position(targetGrams * (1 - TARGET_TOLERANCE));
-  const bandEnd = position(targetGrams * (1 + TARGET_TOLERANCE));
-
-  return (
-    <li>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="flex items-baseline gap-2">
-          <span className={`h-2 w-2 shrink-0 self-center rounded-full ${colorClass}`} />
-          <span className="text-sm">{name}</span>
-          <Value value={grams} unit="g" suffix={`of ${targetGrams}`} className="ml-1" />
-        </span>
-        {status === "hit" ? (
-          <span className="text-xs font-medium text-primary">On target</span>
-        ) : status === "over" ? (
-          <Value
-            value={grams - targetGrams}
-            unit="g"
-            suffix="over"
-            className="text-warning"
-          />
-        ) : (
-          <Value
-            value={Math.max(0, targetGrams - grams)}
-            unit="g"
-            suffix="left"
-            className="text-muted"
-          />
-        )}
-      </div>
-      <div className="relative mt-2 h-2" aria-hidden>
-        <div className="absolute inset-0 overflow-hidden rounded-full bg-foreground/8">
-          <div
-            className={`h-full rounded-full ${colorClass} ${FILL_IN}`}
-            style={{ width: `${position(grams)}%` }}
-          />
-        </div>
-        {targetGrams > 0 && (
-          <div
-            className="absolute -top-1 -bottom-1 rounded-full border border-dashed border-muted"
-            style={{ left: `${bandStart}%`, width: `${bandEnd - bandStart}%` }}
-          />
-        )}
-      </div>
-    </li>
   );
 }
 
@@ -382,11 +318,12 @@ function DailySummaryInner({
 
       <ul className="mt-6 space-y-5 md:mt-0 md:border-t md:border-border md:p-6">
         {macroData.map((macro) => (
-          <MacroRow
+          <TargetRow
             key={macro.name}
             name={macro.name}
-            grams={macro.grams}
-            targetGrams={macro.targetGrams}
+            value={macro.grams}
+            target={macro.targetGrams}
+            unit="g"
             colorClass={macro.color}
           />
         ))}

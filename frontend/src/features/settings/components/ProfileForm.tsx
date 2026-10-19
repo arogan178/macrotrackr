@@ -99,14 +99,14 @@ export default function ProfileForm({
   }, [hasChanges, onHasChangesChange]);
 
   return (
-    <Panel padding="none">
+    <Panel padding="none" flatOnPhone>
       <form
         onSubmit={(event) => {
           event.preventDefault();
           void form.handleSubmit();
         }}
       >
-        <div className="space-y-4 p-4 sm:space-y-5 sm:p-6">
+        <div className="space-y-4 p-4 sm:space-y-5 sm:p-6 max-md:px-0">
         <div className="grid grid-cols-1 gap-3.5 sm:gap-4 md:grid-cols-2">
           <form.Field name="firstName">
             {(field) => (

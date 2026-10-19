@@ -327,7 +327,7 @@ const ConnectedAccountsForm = () => {
 
   if (!isLoaded) {
     return (
-      <CardContainer className="p-3.5 sm:p-6">
+      <CardContainer className="p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 rounded-control bg-surface-3" />
           <div className="h-16 rounded-control bg-surface-3" />
@@ -339,7 +339,7 @@ const ConnectedAccountsForm = () => {
 
   return (
     <>
-      <CardContainer className="p-3.5 sm:p-6">
+      <CardContainer className="p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0">
         {/* Login summary */}
         <div className="mb-6 rounded-card border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-start gap-3">

@@ -225,7 +225,7 @@ export default function ReportingPage() {
         {isHistoryLoading ? (
           <ReportingPageSkeleton />
         ) : (
-          <div className="flex flex-col gap-3.5 sm:gap-6">
+          <div className="flex flex-col gap-10 md:gap-6">
             <DateRangeSelector
               currentRange={dateRange}
               onRangeChange={handleRangeChange}

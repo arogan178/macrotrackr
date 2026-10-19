@@ -29,7 +29,10 @@ function ChartCard({
   minHeight = 150,
 }: ChartCardProps) {
   return (
-    <CardContainer className={`relative h-full p-3.5 sm:p-6 ${className}`}>
+    // Flat on a phone: the chart's own axes frame it; a box adds nothing.
+    <CardContainer
+      className={`relative h-full p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 ${className}`}
+    >
       <motion.div
         layout
         initial={{ opacity: 0 }}

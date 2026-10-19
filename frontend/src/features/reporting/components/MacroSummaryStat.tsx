@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
+import TargetRow from "@/features/macroTracking/components/TargetRow";
 import type { MacroType } from "@/types/macro";
 import { MACRO_COLORS } from "@/utils/constants/macro";
 
@@ -268,7 +269,49 @@ export default function MacroSummaryStats({
       : null;
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+    <>
+    {/* On a phone the four cards become four rows of one list, each figure
+        against its target band, so the summary reads top to bottom. */}
+    <div className="md:hidden">
+      <p className="mb-4 text-xs text-muted">
+        Daily average{trackedDays === undefined ? "" : ` over ${trackedDays} tracked ${trackedDays === 1 ? "day" : "days"}`}
+      </p>
+      <ul className="space-y-5">
+        <TargetRow
+          name="Calories"
+          value={avgCalories}
+          target={effectiveCalorieTarget}
+          unit="kcal"
+          colorClass="bg-primary"
+          shortfallLabel="under"
+        />
+        <TargetRow
+          name="Protein"
+          value={macroAvg.gProtein}
+          target={targetGrams.protein}
+          unit="g"
+          colorClass="bg-protein"
+          shortfallLabel="under"
+        />
+        <TargetRow
+          name="Carbs"
+          value={macroAvg.gCarbs}
+          target={targetGrams.carbs}
+          unit="g"
+          colorClass="bg-carbs"
+          shortfallLabel="under"
+        />
+        <TargetRow
+          name="Fats"
+          value={macroAvg.gFats}
+          target={targetGrams.fats}
+          unit="g"
+          colorClass="bg-fats"
+          shortfallLabel="under"
+        />
+      </ul>
+    </div>
+    <div className="mb-6 hidden grid-cols-2 gap-3 sm:gap-4 md:grid md:grid-cols-4">
       {/* Calories Card */}
       <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
@@ -360,5 +403,6 @@ export default function MacroSummaryStats({
         />
       </CardContainer>
     </div>
+    </>
   );
 }
