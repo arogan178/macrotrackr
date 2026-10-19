@@ -87,6 +87,14 @@ export type ProductEvent =
         | { entryMethod: "import"; importSource: ImportFormat };
     }
   | {
+      event: "log_sheet_opened";
+      properties: { trigger: "button" | "shortcut" };
+    }
+  | {
+      event: "food_search_empty";
+      properties: Record<string, never>;
+    }
+  | {
       event: "third_tracked_day";
       properties: { distinctDays: 3 };
     }
@@ -187,6 +195,9 @@ export function serializeProductProperties(
             import_source: productEvent.properties.importSource,
           }
         : { entry_method: productEvent.properties.entryMethod };
+    case "log_sheet_opened":
+    case "food_search_empty":
+      return productEvent.properties;
     case "third_tracked_day":
       return { distinct_days: productEvent.properties.distinctDays };
     case "import_previewed":

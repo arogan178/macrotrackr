@@ -1,7 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 
 import Modal from "@/components/ui/Modal";
 import { useLogSheet } from "@/lib/logSheet";
+import { useProductAnalytics } from "@/lib/productAnalytics";
 
 import { LogSheetFormSkeleton } from "./HomePageSkeletons";
 
@@ -19,6 +20,19 @@ const LogSheetForm = lazy(() => import("./LogSheetForm"));
  */
 export default function LogSheet() {
   const [isOpen, setOpen] = useLogSheet();
+  const productAnalytics = useProductAnalytics();
+  // Only the shortcut URL (`?log=1`) can open the sheet on first render.
+  const openedByShortcut = useRef(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    productAnalytics.capture({
+      event: "log_sheet_opened",
+      properties: { trigger: openedByShortcut.current ? "shortcut" : "button" },
+    });
+    openedByShortcut.current = false;
+  }, [isOpen, productAnalytics]);
 
   if (!isOpen) return null;
 
