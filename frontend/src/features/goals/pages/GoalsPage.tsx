@@ -41,6 +41,7 @@ export default function GoalsPage() {
     macroDailyTotals,
     habits,
     habitsLoading,
+    weightGoalsLoading,
     hasErrors,
   } = data;
 
@@ -155,7 +156,7 @@ export default function GoalsPage() {
                         user={data.safeUserSettings}
                         macroDailyTotals={macroDailyTotals}
                         weightGoals={normalizedWeightGoals}
-                        isLoading={false}
+                        isLoading={weightGoalsLoading}
                         onOpenModal={actions.openWeightGoalModal}
                         onDelete={actions.openDeleteConfirmModal}
                         macroTarget={macroTarget ?? undefined}

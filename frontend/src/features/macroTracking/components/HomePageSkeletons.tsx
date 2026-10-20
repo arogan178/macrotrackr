@@ -50,35 +50,65 @@ export const LogSheetFormSkeleton = () => (
   </div>
 );
 
+/** The day's shape on a phone: hero figure, gauge, then three macro rows. */
 export const DailySummaryLoadingSkeleton = () => (
-  <Panel className="flex flex-col">
-    <div className="mb-6 flex items-center justify-between">
-      <Skeleton className="h-6 w-1/3" />
-      <Skeleton className="h-8 w-1/4" />
+  <Panel padding="none" flatOnPhone>
+    <div aria-hidden="true" className="md:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-36" />
+          <Skeleton className="h-4 w-28" />
+        </div>
+        <Skeleton className="h-8 w-8" rounded="full" />
+      </div>
+      <Skeleton className="mt-5 h-3 w-full" rounded="full" />
+      <div className="mt-2 flex min-h-11 items-center justify-between">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-28" />
+      </div>
     </div>
-    <Skeleton className="mb-6 h-4 w-full" rounded="full" />
-    <div className="space-y-3">
+    <div
+      aria-hidden="true"
+      className="mt-6 space-y-5 md:mt-0 md:border-t md:border-border md:p-6"
+    >
       {[0, 1, 2].map((index) => (
-        <div key={index} className="space-y-2 border-t border-border pt-3">
-          <Skeleton className="h-4 w-1/4" />
-          <Skeleton className="h-3 w-full" rounded="full" />
+        <div key={index}>
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="mt-2 h-2 w-full" rounded="full" />
         </div>
       ))}
     </div>
   </Panel>
 );
 
+/** History's shape: heading and actions, a day row, then entry rows. It sits
+ *  inside the history panel, so it draws no panel of its own. */
 export const HistoryLoadingSkeleton = () => (
-  <Panel padding="none">
-    <div className="p-4 sm:p-6">
-      <Skeleton className="mb-3 h-6 w-1/4" />
-      <Skeleton className="h-4 w-1/6" />
-    </div>
-    {[0, 1, 2].map((index) => (
-      <div key={index} className="space-y-2 border-t border-border p-4 sm:p-6">
-        <Skeleton className="h-4 w-1/5" />
-        <Skeleton className="h-10" />
+  <div aria-hidden="true">
+    <div className="mb-3 flex items-center justify-between">
+      <Skeleton className="h-5 w-20" />
+      <div className="flex gap-2">
+        <Skeleton className="h-9 w-16" rounded="full" />
+        <Skeleton className="h-9 w-9" rounded="full" />
       </div>
-    ))}
-  </Panel>
+    </div>
+    <div className="-mx-4 border-y border-border sm:-mx-6 md:mx-0">
+      <div className="flex min-h-12 items-center justify-between border-b border-border px-4">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      {[0, 1, 2, 3].map((index) => (
+        <div key={index} className="space-y-2 border-b border-border px-4 py-3 last:border-b-0">
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="h-3 w-24" />
+        </div>
+      ))}
+    </div>
+  </div>
 );

@@ -3,6 +3,7 @@ import { calculateTrendWeights } from "@shared/trendWeight";
 
 import CardContainer from "@/components/form/CardContainer";
 import { StateCard, TargetIcon } from "@/components/ui/";
+import { WeightGoalSkeleton } from "@/features/goals/components/ui-states/GoalsLoadingSkeleton";
 import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { getTrendChange } from "@/features/goals/utils/weightLogUtilities";
 import { useFeatureLoading } from "@/hooks";
@@ -68,13 +69,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
 
   // Loading State
   if (isLoading) {
-    return (
-      <div
-        className={`flex h-60 animate-pulse items-center justify-center rounded-card bg-surface ${className}`}
-      >
-        <div className="h-full w-full rounded-card bg-surface" />
-      </div>
-    );
+    return <WeightGoalSkeleton />;
   }
 
   // Empty State
