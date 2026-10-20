@@ -65,6 +65,9 @@ function TabButton({
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:cursor-not-allowed disabled:opacity-50",
         sizeClasses,
+        // A tab fills its bar, so it needs no hit area beyond it; the one in the
+        // size spilled 2px past the bar and Android drew a scrollbar for it.
+        "after:content-none",
         baseRounded,
         fullWidth ? "w-full flex-1" : "",
         active ? "text-foreground" : "text-muted hover:bg-surface-2 hover:text-foreground",

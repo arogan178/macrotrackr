@@ -17,7 +17,7 @@ export const PageHeader = ({
   hasChanges = false,
   children,
 }: PageHeaderProps) => (
-  <div className="border-b border-border pb-3 sm:pb-6">
+  <div className="pb-4 sm:border-b sm:border-border sm:pb-6">
     <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
       <div>
         <Heading level="page">{title}</Heading>
@@ -25,7 +25,7 @@ export const PageHeader = ({
 
       {/* Right Side: Badges and Tabs */}
       {(hasChanges || children) && (
-        <div className="flex max-w-full shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex max-w-full shrink-0 items-center gap-2 max-sm:w-full sm:gap-3">
           {hasChanges && (
             <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning sm:px-3 sm:py-1">
               Unsaved Changes
