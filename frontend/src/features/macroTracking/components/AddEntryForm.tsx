@@ -742,7 +742,13 @@ function AddEntry({
             className="mt-3"
           />
 
-          <div className="mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4">
+          {/* In the sheet the total and Add stay pinned under the thumb while the fields scroll. */}
+          <div
+            className={cn(
+              "mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4",
+              inSheet && "sticky bottom-0 z-10 -mx-6 -mb-5 bg-surface px-6 pb-5",
+            )}
+          >
             <Value value={Number(calories) || 0} unit="kcal" size="stat" className="shrink-0" />
             <div className="flex items-center gap-2 shrink-0">
               {validationHint && (

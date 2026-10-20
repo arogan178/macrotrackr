@@ -2,7 +2,7 @@ import Value from "@/components/ui/Value";
 import { cn } from "@/lib/classnameUtilities";
 import { formatGrouped } from "@/lib/formatNumber";
 
-import { TARGET_TOLERANCE, targetStatus } from "../utils/targetStatus";
+import { targetStatus } from "../utils/targetStatus";
 
 /** Fills from zero once, on load: the page's single orchestrated moment. */
 export const FILL_IN = "origin-left animate-[fill-in_700ms_ease-out]";
@@ -21,16 +21,17 @@ interface TargetRowProps {
   shortfallLabel?: "left" | "under";
   /** Read before the figure, as in "avg 121 g". */
   valuePrefix?: string;
-  /** One figure per day: draws a bar per day against the band instead of one fill. */
+  /** One figure per day: draws a bar per day against the target line instead of one fill. */
   days?: number[];
+  /** Letters under the day bars; given to the last row only, as the shared axis. */
+  dayLabels?: string[];
 }
 
 /**
- * A figure against its target. The dashed band is "on target" (within 10%),
- * the fill is the figure; where the fill ends against the band is the answer,
- * and the right-hand status says it in three words at most. With `days`, each
- * day gets its own bar against the same band, coloured by whether it landed:
- * the pattern of a week reads before any figure.
+ * A figure against its target. The full track is the target, so a full bar is
+ * a target met and an orange one went past it; the right-hand status says it in
+ * three words at most. With `days`, each day gets its own bar against one target
+ * line, grey when it fell short: the pattern of a week reads before any figure.
  */
 export default function TargetRow({
   name,
@@ -41,12 +42,13 @@ export default function TargetRow({
   shortfallLabel = "left",
   valuePrefix,
   days,
+  dayLabels,
 }: TargetRowProps) {
   const status = targetStatus(value, target);
-  const scale = Math.max(target * 1.25, value, ...(days ?? [])) || 1;
-  const position = (amount: number) => Math.min(100, (amount / scale) * 100);
-  const bandStart = position(target * (1 - TARGET_TOLERANCE));
-  const bandEnd = position(target * (1 + TARGET_TOLERANCE));
+  const fill = target > 0 ? Math.min(100, (value / target) * 100) : 0;
+  // Day bars top out above the highest day, so an over day still shows how far.
+  const dayScale = Math.max(target, ...(days ?? [])) * 1.1 || 1;
+  const dayHeight = (amount: number) => (amount / dayScale) * 100;
 
   return (
     <li>
@@ -73,48 +75,49 @@ export default function TargetRow({
         )}
       </div>
       {days ? (
-        <div className="relative mt-2 flex h-10 items-end gap-px" aria-hidden>
-          {days.map((day, index) => {
-            const dayStatus = targetStatus(day, target);
+        <>
+          <div className="relative mt-2 flex h-12 items-end gap-px border-b border-border" aria-hidden>
+            {days.map((day, index) => {
+              const dayStatus = targetStatus(day, target);
 
-            return (
-              <div key={index} className="flex h-full flex-1 items-end justify-center">
-                <div
-                  className={cn(
-                    "min-h-0.5 w-full max-w-1.5 rounded-full",
-                    dayStatus === "empty"
-                      ? "bg-foreground/8"
-                      : dayStatus === "over"
-                        ? "bg-warning"
-                        : colorClass,
-                    dayStatus === "under" && "opacity-40",
-                  )}
-                  style={{ height: `${position(day)}%` }}
-                />
-              </div>
-            );
-          })}
-          {target > 0 && (
-            <div
-              className="absolute inset-x-0 border-y border-dashed border-muted"
-              style={{ bottom: `${bandStart}%`, height: `${bandEnd - bandStart}%` }}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="relative mt-2 h-2" aria-hidden>
-          <div className="absolute inset-0 overflow-hidden rounded-full bg-foreground/8">
-            <div
-              className={cn("h-full rounded-full", colorClass, FILL_IN)}
-              style={{ width: `${position(value)}%` }}
-            />
+              return (
+                <div key={index} className="flex h-full flex-1 items-end justify-center">
+                  <div
+                    className={cn(
+                      "min-h-0.5 w-full max-w-2 rounded-t-full",
+                      dayStatus === "empty" && "bg-foreground/8",
+                      dayStatus === "under" && "bg-foreground/25",
+                      dayStatus === "hit" && colorClass,
+                      dayStatus === "over" && "bg-warning",
+                    )}
+                    style={{ height: `${dayHeight(day)}%` }}
+                  />
+                </div>
+              );
+            })}
+            {target > 0 && (
+              <div
+                className="absolute inset-x-0 border-t border-dashed border-muted"
+                style={{ bottom: `${dayHeight(target)}%` }}
+              />
+            )}
           </div>
-          {target > 0 && (
-            <div
-              className="absolute -top-1 -bottom-1 rounded-full border border-dashed border-muted"
-              style={{ left: `${bandStart}%`, width: `${bandEnd - bandStart}%` }}
-            />
+          {dayLabels && (
+            <div className="mt-1 flex gap-px text-[10px] text-muted" aria-hidden>
+              {dayLabels.map((label, index) => (
+                <span key={index} className="flex-1 text-center">
+                  {label}
+                </span>
+              ))}
+            </div>
           )}
+        </>
+      ) : (
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-foreground/8" aria-hidden>
+          <div
+            className={cn("h-full rounded-full", status === "over" ? "bg-warning" : colorClass, FILL_IN)}
+            style={{ width: `${fill}%` }}
+          />
         </div>
       )}
     </li>

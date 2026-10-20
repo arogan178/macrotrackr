@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { format, parseISO } from "date-fns";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
@@ -23,7 +24,7 @@ interface MacroSummaryStatsProps {
   trackedDays?: number;
   totalDays?: number;
   /** Every day in the range, untracked days as zero; drawn as one bar per day on a phone. */
-  dailySeries?: MacroSummaryStatsProps["data"];
+  dailySeries?: (MacroSummaryStatsProps["data"][number] & { date: string })[];
   averages?: {
     calories: number;
     protein: number;
@@ -315,6 +316,11 @@ export default function MacroSummaryStats({
           colorClass="bg-fats"
           shortfallLabel="under"
           days={dailySeries?.map((day) => day.fats)}
+          dayLabels={
+            dailySeries && dailySeries.length <= 7
+              ? dailySeries.map((day) => format(parseISO(day.date), "EEEEE"))
+              : undefined
+          }
         />
       </ul>
     </div>

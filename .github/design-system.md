@@ -146,13 +146,27 @@ Four icons beside a name do not fit a 360px phone and read as clutter.
 (`CHIP` in `TargetRow.tsx`); a shortfall stays plain muted text. The tint is
 the status colour, so the chip reads before its words do.
 
+**A bar fills to its target.** A full track is the target met; past it the bar
+turns warning. No tolerance band: drawn against each row's own target it lands
+in the same place on every row and reads as a shared scale that is not there.
+
 **A period shows its days.** An average over a range draws one thin bar per day
-against the dashed target band, coloured by that day's status, as Google
-Health's "Last 7 days" rows do. A good average over a bad week is a lie told by
-omission.
+under a single dashed target line, on a baseline, as Google Health's "Last 7
+days" rows do. A day that hit takes the macro colour, a short day is grey, an
+over day is warning. A 7-day range labels its weekdays once, under the last
+row. A good average over a bad week is a lie told by omission.
 
 **Charts carry no chrome.** No axis lines, no tick marks; a few muted labels and
 the data. The reference apps draw neither.
+
+**What you are working on stays in reach.** A history day's header pins under
+the status bar while its entries scroll; the log sheet's total and Add button pin
+to the bottom while its fields scroll. A wrapper between a pinned element and
+the page must use `overflow-clip`, not `overflow-hidden`, or nothing pins.
+
+**Settings on a phone are rows, not tabs.** One 64px row per section with a hint
+and a chevron; tapping opens the section with a back link. Five tabs do not fit
+360px. Form fields are 48px tall on a phone with 14px type.
 
 ## Voice
 
