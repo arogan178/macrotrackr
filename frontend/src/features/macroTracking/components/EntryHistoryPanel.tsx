@@ -473,7 +473,10 @@ const EntryHistoryComponent = function EntryHistory({
           }}
         />
       ) : (
-        <div className="overflow-hidden rounded-control border border-border bg-transparent">
+        // On a phone the days run edge to edge of the panel: a bordered box
+        // here was a third level of nesting, and cost each entry 34px.
+        <div className="-mx-4 overflow-hidden border-y border-border sm:-mx-6 md:mx-0 md:rounded-control md:border">
+
           <EntryHistoryContext.Provider value={controller}>
             <div className="hidden md:block">
               <DesktopEntryTable groupedEntries={displayedEntries} />

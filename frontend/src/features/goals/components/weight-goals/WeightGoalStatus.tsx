@@ -4,7 +4,6 @@ import { memo } from "react";
 import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import CardContainer from "@/components/form/CardContainer";
 import {
   Button,
   CalendarIcon,
@@ -96,22 +95,18 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
     ? {
         text: "text-primary",
         bgLight: "bg-primary/10",
-        border: "border-primary/30",
       }
     : isWeightGain
       ? {
           text: "text-success",
           bgLight: "bg-success/10",
-          border: "border-success/30",
         }
       : {
           text: "text-carbs",
           bgLight: "bg-carbs/10",
-          border: "border-carbs/30",
         };
   const goalTextColor = goalStyles.text;
   const goalBgColorLight = goalStyles.bgLight;
-  const goalBorderColor = goalStyles.border;
 
   const formattedStartDate = formatDateShort(weightGoals?.startDate ?? "");
   const formattedTargetDate = formatDateShort(weightGoals?.targetDate ?? "");
@@ -156,10 +151,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-card border border-border bg-surface p-3.5 sm:p-6"
+      className="overflow-hidden rounded-card border border-border bg-surface"
     >
-      {/* Header */}
-      <div className="mb-3.5 sm:mb-6 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+      {/* One panel split by dividers. The sections used to be boxes inside the
+          box, and on a phone each level took another 24px off the width. */}
+      <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className={`rounded-control p-2 sm:p-3 ${goalBgColorLight} shrink-0`}>
@@ -207,8 +203,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         </div>
       </div>
 
-      {/* Goal Progress Visual */}
-      <CardContainer className="mb-3.5 sm:mb-6 border-border bg-surface-2 p-3 sm:p-5">
+      <div className="border-t border-border p-4 sm:px-6">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-baseline space-x-1.5 min-w-0">
             <span className="text-lg sm:text-2xl font-bold text-foreground">
@@ -299,20 +294,16 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             )}
           </div>
         )}
-      </CardContainer>
+      </div>
 
-      {/* Stats Grid */}
-      <div className="mb-3.5 sm:mb-6 grid grid-cols-3 gap-2 sm:gap-4">
-        <CardContainer
-          variant="interactive"
-          className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 p-2.5 sm:p-5 border ${goalBorderColor} ${goalBgColorLight}`}
-        >
+      <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
+        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
           <TrendingUpIcon
-            className={`${goalTextColor} h-4 w-4 sm:h-6 sm:w-6 shrink-0`}
+            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
           />
           <div className="min-w-0">
-            <p className="text-[11px] sm:text-sm font-medium text-muted truncate">Weekly Rate</p>
-            <p className="text-xs sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
+            <p className="text-xs sm:text-sm font-medium text-muted truncate">Weekly Rate</p>
+            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
               {isMaintenance ? "Maintain" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
                 <AnimatedNumber
@@ -323,17 +314,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </CardContainer>
-        <CardContainer
-          variant="interactive"
-          className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 p-2.5 sm:p-5 border ${goalBorderColor} ${goalBgColorLight}`}
-        >
+        </div>
+        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
           <CalendarIcon
-            className={`${goalTextColor} h-4 w-4 sm:h-6 sm:w-6 shrink-0`}
+            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
           />
           <div className="min-w-0">
-            <p className="text-[11px] sm:text-sm font-medium text-muted truncate">Est. Duration</p>
-            <p className="text-xs sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
+            <p className="text-xs sm:text-sm font-medium text-muted truncate">Est. Duration</p>
+            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
               {isMaintenance ? (
                 "Ongoing"
               ) : (
@@ -341,14 +329,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </CardContainer>
-        <CardContainer
-          variant="interactive"
-          className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 p-2.5 sm:p-5 border ${goalBorderColor} ${goalBgColorLight}`}
-        >
-          <TargetIcon className={`${goalTextColor} h-4 w-4 sm:h-6 sm:w-6 shrink-0`} />
+        </div>
+        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
+          <TargetIcon
+            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
+          />
           <div className="min-w-0">
-            <p className="text-[11px] sm:text-sm font-medium text-muted truncate">
+            <p className="text-xs sm:text-sm font-medium text-muted truncate">
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
@@ -357,7 +344,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
                     ? maintenanceLabel(true)
                     : "Est. TDEE"}
             </p>
-            <p className="text-xs sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
+            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
               {isMaintenance ? (
                 <AnimatedNumber value={tdee} suffix=" kcal" />
               ) : (
@@ -365,15 +352,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </CardContainer>
+        </div>
       </div>
 
-      {/* Nutrition section */}
-      <CardContainer className="border-border bg-surface-2 p-3 sm:p-5">
-        <h3 className="mb-2.5 sm:mb-4 text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
+      <div className="border-t border-border p-4 sm:p-6">
+        <h3 className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
           Daily Nutrition Target
         </h3>
-        <div className="mb-2 sm:mb-3 rounded-control border border-border bg-surface p-2.5 sm:p-3.5">
+        <div className="mb-4">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CalorieIcon className="h-4 w-4 text-primary shrink-0" />
@@ -407,7 +393,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             height="sm"
           />
         </div>
-        <div className="flex flex-col gap-2 sm:grid sm:grid-cols-3 sm:gap-3">
+        <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-6">
           <MacroNutrient
             label="Protein"
             current={macroDailyTotals.protein}
@@ -427,7 +413,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             color="fats"
           />
         </div>
-      </CardContainer>
+      </div>
     </motion.div>
   );
 });

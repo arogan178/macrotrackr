@@ -78,8 +78,8 @@ const MobileEntryCards = memo(
         const item = virtualItems[index];
         if (item.type === "header") return 60;
 
-        // A compact row: time, name, then one line of values.
-        return 116;
+        // Time and actions, name and actions, then one line of values.
+        return 132;
       },
       overscan: 5,
     });
@@ -91,7 +91,7 @@ const MobileEntryCards = memo(
         whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
       >
-        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink-0">
+        <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
           <motion.div
             animate={{
               rotate: isDateCollapsed(group.date) ? -90 : 0,
@@ -106,14 +106,16 @@ const MobileEntryCards = memo(
           </h3>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-3 text-[11px] sm:text-xs">
-          <span className="font-medium tracking-tight text-protein whitespace-nowrap">
+        {/* Below sm the day shows kcal only: the grams pushed delete off the
+            row, and today's grams are in the summary above. */}
+        <div className="flex items-center gap-3 text-xs">
+          <span className="hidden font-medium tracking-tight text-protein whitespace-nowrap sm:inline">
             {group.totals.protein}g P
           </span>
-          <span className="font-medium tracking-tight text-carbs whitespace-nowrap">
+          <span className="hidden font-medium tracking-tight text-carbs whitespace-nowrap sm:inline">
             {group.totals.carbs}g C
           </span>
-          <span className="font-medium tracking-tight text-fats whitespace-nowrap">
+          <span className="hidden font-medium tracking-tight text-fats whitespace-nowrap sm:inline">
             {group.totals.fats}g F
           </span>
           <span className="font-medium tracking-tight text-foreground whitespace-nowrap">
@@ -225,7 +227,7 @@ const MobileEntryCards = memo(
                       )}
                     </div>
                   ) : (
-                    <div className="p-4 pt-0">
+                    <div className="border-b border-border">
                       {renderEntryCard(item.entry)}
                     </div>
                   )}
@@ -273,8 +275,10 @@ const MobileEntryCards = memo(
                       },
                     }}
                   >
-                    <div className="space-y-3 p-4">
-                      {renderCopyDay(group)}
+                    {canCopyDate(group.date) && (
+                      <div className="px-4 pt-3">{renderCopyDay(group)}</div>
+                    )}
+                    <div className="divide-y divide-border">
                       {group.entries.map((entry, index) =>
                         renderEntryCard(entry, index),
                       )}

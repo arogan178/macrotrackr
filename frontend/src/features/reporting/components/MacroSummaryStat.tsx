@@ -179,9 +179,9 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         </div>
       </div>
       {/* Difference from Target */}
-      <div className="mt-auto flex items-baseline justify-between gap-2 border-t border-border pt-1">
+      <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 border-t border-border pt-1">
         <span className="mr-1.5 text-xs text-muted shrink-0">Difference:</span>
-        <div className="text-right min-w-0 whitespace-nowrap">
+        <div className="ml-auto text-right whitespace-nowrap">
           <span className="text-sm font-semibold text-foreground">
             <AnimatedNumber
               value={gramDelta}

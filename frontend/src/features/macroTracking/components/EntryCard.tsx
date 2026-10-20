@@ -59,8 +59,8 @@ export const EntryCard = memo(
     // and a row fading up 12px while the list scrolls under it reads as jitter
     // rather than arrival.
     return (
-      <div className="rounded-card border border-border bg-surface p-3 sm:p-4">
-        <div className="mb-2 flex items-center justify-between gap-2">
+      <div className="px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {isSelectionMode && (
               <input
@@ -96,28 +96,52 @@ export const EntryCard = memo(
               {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
             </span>
           </div>
-          <IconButtonGroup
-            onEdit={() => onEdit(entry)}
-            onDelete={() => deleteEntry(entry.clientId)}
-            isDeleting={isDeleting}
-            onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
-            onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}
-            isMealSaved={isMealSaved}
-          />
+          {/* Selecting is its own task; per-entry actions only crowd the row. */}
+          {!isSelectionMode && (
+            <IconButtonGroup
+              onEdit={() => onEdit(entry)}
+              onDelete={() => deleteEntry(entry.clientId)}
+              isDeleting={isDeleting}
+              onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
+              onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}
+              isMealSaved={isMealSaved}
+            />
+          )}
         </div>
 
-        {/* Not in the header: on a phone it pushes the action buttons out of the card. */}
-        {(Boolean(entry.foodName ?? entry.mealName) || entry.$hasPendingWrites) && (
-          <div className="mb-2 flex items-baseline justify-between gap-2">
+        {/* The name shares its row with copy and log-again, so the values
+            below get a full line and never wrap. */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-baseline gap-2">
             <p className="min-w-0 truncate text-sm text-muted">
               {entry.foodName ?? entry.mealName}
             </p>
             <PendingSyncMarker entry={entry} />
           </div>
-        )}
+          {!isSelectionMode && (onLogAgain ?? onCopyOrMove) && (
+            <span className="flex shrink-0">
+              {onCopyOrMove && (
+                <IconButton
+                  variant="custom"
+                  className="text-muted hover:text-foreground"
+                  icon={<CopyIcon className="h-4 w-4" />}
+                  onClick={() => onCopyOrMove(entry)}
+                  ariaLabel="Copy or move entry"
+                />
+              )}
+              {onLogAgain && (
+                <IconButton
+                  variant="custom"
+                  className="text-muted hover:text-foreground"
+                  icon={<RepeatIcon className="h-4 w-4" />}
+                  onClick={() => onLogAgain(entry)}
+                  ariaLabel="Log again"
+                />
+              )}
+            </span>
+          )}
+        </div>
 
-        {/* One line of values instead of four bordered boxes: a row was ~200px
-            tall, which fit roughly three entries on a phone screen. */}
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm tabular-nums">
           <span className="font-medium">
             {calculateCalories(entry.protein, entry.carbs, entry.fats)}
@@ -135,31 +159,6 @@ export const EntryCard = memo(
             {entry.fats}
             <span className="ml-0.5 text-xs text-muted">g F</span>
           </span>
-          {/* Beside the values: the header's three buttons already fill a phone row. */}
-          {(onLogAgain ?? onCopyOrMove) && (
-            <span className="ml-auto flex self-center">
-              {onCopyOrMove && (
-                <IconButton
-                  variant="custom"
-                  buttonSize="sm"
-                  className="text-muted hover:text-foreground"
-                  icon={<CopyIcon className="h-4 w-4" />}
-                  onClick={() => onCopyOrMove(entry)}
-                  ariaLabel="Copy or move entry"
-                />
-              )}
-              {onLogAgain && (
-                <IconButton
-                  variant="custom"
-                  buttonSize="sm"
-                  className="text-muted hover:text-foreground"
-                  icon={<RepeatIcon className="h-4 w-4" />}
-                  onClick={() => onLogAgain(entry)}
-                  ariaLabel="Log again"
-                />
-              )}
-            </span>
-          )}
         </div>
 
         <AnimatePresence>

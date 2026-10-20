@@ -9,7 +9,7 @@ interface MacroNutrientProps {
 
 function MacroNutrient({ label, current, target, color }: MacroNutrientProps) {
   return (
-    <div className="rounded-control border border-border bg-surface p-2.5 sm:p-3 transition-colors hover:border-border">
+    <div>
       <MacroIndicator
         name={label}
         value={current}

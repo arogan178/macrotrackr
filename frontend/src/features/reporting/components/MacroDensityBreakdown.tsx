@@ -57,7 +57,7 @@ const PercentageLabel = (properties: LabelProps) => {
     >
       <div className="flex h-full w-full items-center justify-center overflow-visible">
         <span
-          className="rounded-control bg-black/60 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-white"
+          className="rounded-control bg-black/60 px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-white sm:px-1.5 sm:text-[13px]"
           style={{
             textShadow: "0 1px 2px rgba(0,0,0,0.8)",
           }}

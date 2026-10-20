@@ -224,9 +224,6 @@ function DailySummaryInner({
           </Heading>
           <div className="flex items-center gap-2">
             {dayAction}
-            <span className="text-xs text-muted">
-              {completionPercentages.calories}% of target
-            </span>
             <IconButton
               variant="share"
               buttonSize="sm"
@@ -238,14 +235,18 @@ function DailySummaryInner({
         </div>
 
         {/* The one animated number on the page: the value that moves. */}
-        <Value
-          className="mt-3"
-          size="hero"
-          unit="kcal"
-          animate
-          value={macroCalories.total}
-          suffix={`of ${formatGrouped(dailyCalorieTarget)}`}
-        />
+        <div className="mt-3 flex items-baseline justify-between gap-3">
+          <Value
+            size="hero"
+            unit="kcal"
+            animate
+            value={macroCalories.total}
+            suffix={`of ${formatGrouped(dailyCalorieTarget)}`}
+          />
+          <span className="shrink-0 text-xs text-muted">
+            {completionPercentages.calories}% of target
+          </span>
+        </div>
 
         <ProgressBar
           progress={completionPercentages.calories}
