@@ -20,7 +20,7 @@ const statusConfig = {
     Icon: CheckIcon,
   },
   error: {
-    color: "text-primary",
+    color: "text-error",
     Icon: CloseIcon,
   },
   warning: {

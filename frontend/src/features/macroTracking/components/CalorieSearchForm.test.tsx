@@ -300,8 +300,8 @@ describe("CalorieSearchForm", () => {
 
     const recents = screen.getAllByRole("button", { name: /kcal/ });
     expect(recents.map((button) => button.textContent)).toEqual([
-      expect.stringMatching(/^Oats×3/),
-      expect.stringMatching(/^Apple(?!×)/),
+      expect.stringMatching(/^Oats.*3 times$/),
+      expect.stringMatching(/^Apple(?!.*times)/),
     ]);
   });
 

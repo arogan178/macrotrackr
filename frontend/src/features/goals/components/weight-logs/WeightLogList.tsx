@@ -19,6 +19,19 @@ import { formatWeight, type UnitSystem } from "@/utils/unitConversion";
 
 import LogWeightModal from "./LogWeightModal";
 
+// Most weigh-ins carry no real time, so midnight is left off rather than
+// printed as "12:00 AM"; the year appears once it stops being this one.
+function formatLogDate(date: Date): string {
+  const day = format(
+    date,
+    date.getFullYear() === new Date().getFullYear() ? "EEE d MMM" : "EEE d MMM yyyy",
+  );
+
+  return date.getHours() === 0 && date.getMinutes() === 0
+    ? day
+    : `${day}, ${format(date, "HH:mm")}`;
+}
+
 interface WeightLogListProps {
   isBulkConfirmModalOpen?: boolean;
   onBulkCancel?: () => void;
@@ -159,7 +172,7 @@ function WeightLogList({
           className="absolute inset-0 overflow-y-auto pr-2"
           onScroll={handleScroll}
         >
-          <ul className="space-y-2 pb-8">
+          <ul className="divide-y divide-border pb-8">
             {sortedLog.map((entry) => {
               // Double-check validity here just in case, though filter should handle it
               const entryDate = parseISO(entry.timestamp);
@@ -168,17 +181,14 @@ function WeightLogList({
               return (
                 <li
                   key={entry.id}
-                  className="group/item flex items-center justify-between rounded-control border border-border bg-surface-2 p-4 transition-colors duration-200 hover:border-border-2"
+                  className="group/item flex min-h-16 items-center justify-between gap-3"
                 >
-                  <div className="flex max-w-55 min-w-50 flex-col">
-                    <span className="block w-full truncate text-sm font-medium text-muted">
-                      {/* Format timestamp only if valid */}
-                      {isValidDate
-                        ? format(entryDate, "MMM d, yyyy 'at' p")
-                        : "Invalid Date"}
-                    </span>
-                    <span className="mt-1 text-lg font-bold tracking-tight text-foreground/90">
+                  <div className="flex min-w-0 flex-col">
+                    <span className="text-base font-semibold tracking-tight text-foreground tabular-nums">
                       {formatWeight(entry.weight, unitSystem)}
+                    </span>
+                    <span className="truncate text-xs text-muted">
+                      {isValidDate ? formatLogDate(entryDate) : "Unknown date"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

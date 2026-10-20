@@ -71,7 +71,7 @@ export function SecondFactorChallenge({
       transition={{ duration: 0.22, ease: "easeOut" }}
     >
       <div className="mb-5 flex items-center justify-between">
-        <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+        <p className="text-xs font-medium text-muted">
           {copy.title}
         </p>
         <button
@@ -124,7 +124,7 @@ export function SecondFactorChallenge({
 
       {alternatives.length > 0 ? (
         <div className="mt-5 border-t border-border pt-4">
-          <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+          <p className="mb-2 text-xs font-medium text-muted">
             Try another way
           </p>
           <div className="flex flex-col items-start gap-1">

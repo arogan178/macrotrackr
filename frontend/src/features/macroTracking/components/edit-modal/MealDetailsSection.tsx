@@ -60,17 +60,11 @@ export default function MealDetailsSection({
   const calories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5 md:p-6">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-medium text-muted">
-          Meal Details
-        </p>
-        <p className="text-xs text-muted">
-          {isMultiIngredient
-            ? "Totals update from ingredients below."
-            : "Adjust quantity, unit, or macros directly."}
-        </p>
-      </div>
+    // The sheet is the container; a bordered box inside it was a box in a box.
+    <section className="space-y-4 md:rounded-card md:border md:border-border md:bg-surface md:p-6">
+      {isMultiIngredient && (
+        <p className="text-xs text-muted">Totals update from the ingredients below.</p>
+      )}
 
       <TextField
         label="Food name"
@@ -109,7 +103,7 @@ export default function MealDetailsSection({
 
       {!isMultiIngredient && onQuantityChange && onUnitChange && (
         <QuantityUnitField
-          label="Quantity & unit"
+          label="Quantity"
           quantity={quantity}
           unit={(unit as UnitType) || "g"}
           onQuantityChange={onQuantityChange}

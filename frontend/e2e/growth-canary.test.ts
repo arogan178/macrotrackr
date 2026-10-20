@@ -129,9 +129,7 @@ async function completeProfile(
   await page.getByLabel(/Height/u).fill("180");
   await page.getByLabel(/Weight/u).fill("80");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page
-    .getByLabel("How active are you on a typical week?")
-    .selectOption("3");
+  await page.getByRole("radio", { name: /^Moderately active/u }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page
     .getByLabel("What are you switching from?")

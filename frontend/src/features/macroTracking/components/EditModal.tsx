@@ -493,7 +493,7 @@ export default function EditModal({
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        title="Edit nutrition entry"
+        title="Edit entry"
         variant="form"
         onSave={handleSaveWithReset}
         saveDisabled={!formValid || isSaving || !hasUnsavedChanges}

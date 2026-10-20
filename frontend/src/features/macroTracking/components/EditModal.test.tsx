@@ -87,7 +87,7 @@ describe("EditModal", () => {
     expect(screen.getByDisplayValue("Oatmeal")).toBeInTheDocument();
 
     // Quantity & Unit controls are rendered
-    expect(screen.getByText("Quantity & unit")).toBeInTheDocument();
+    expect(screen.getByText("Quantity")).toBeInTheDocument();
 
     // Single item convert button is rendered
     expect(

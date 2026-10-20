@@ -77,7 +77,7 @@ function HabitModal({
   }, [isOpen, habit, isEditMode, form]);
 
   // Determine the title and save button label based on the mode
-  const modalTitle = isEditMode ? "Edit habit" : "Add new habit";
+  const modalTitle = isEditMode ? "Edit habit" : "New habit";
   const saveLabel = isSubmitting
     ? "Saving..."
     : isEditMode

@@ -135,7 +135,7 @@ const DesktopEntryTable = memo(
                   {isSelectionMode && (
                     <input
                       type="checkbox"
-                      className="mr-2 h-4 w-4 rounded-control border-border text-primary focus:ring-primary/50"
+                      className="mr-2 h-4 w-4 rounded-control border-border accent-primary"
                       checked={isEntrySelected(entry.clientId)}
                       onChange={(event_) => {
                         event_.stopPropagation();

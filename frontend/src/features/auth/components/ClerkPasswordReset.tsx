@@ -148,7 +148,7 @@ export function ClerkPasswordReset({
       transition={{ duration: 0.22, ease: "easeOut" }}
     >
       <div className="mb-5 flex items-center justify-between">
-        <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+        <p className="text-xs font-medium text-muted">
           Reset password
         </p>
         <button type="button" onClick={onCancel} className={SECONDARY_BUTTON_CLASS}>

@@ -108,7 +108,7 @@ export default function GoalsPage() {
           onClose={actions.closeDeleteConfirmModal}
           title="Delete weight goal"
           variant="confirmation"
-          message="Are you sure you want to delete your current weight goal? This action cannot be undone."
+          message="This deletes your weight goal and its plan. Your weigh-ins stay. It cannot be undone."
           confirmLabel="Delete goal"
           cancelLabel="Cancel"
           onConfirm={actions.deleteWeightGoalConfirmed}

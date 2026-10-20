@@ -13,7 +13,6 @@ describe("AuthPageShell", () => {
   it("shows back-to-home button by default", () => {
     render(
       <AuthPageShell
-        eyebrow="Account Access"
         title="Welcome back"
         description="Sign in to continue."
       >
@@ -27,7 +26,6 @@ describe("AuthPageShell", () => {
   it("hides back-to-home button when disabled", () => {
     render(
       <AuthPageShell
-        eyebrow="Account Access"
         title="Welcome back"
         description="Sign in to continue."
         showBackToHome={false}

@@ -67,7 +67,7 @@ async function reachGoalStep(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^weight/i), "90");
   await user.click(screen.getByRole("button", { name: /continue/i }));
 
-  await user.selectOptions(screen.getByLabelText(/how active are you/i), "3");
+  await user.click(screen.getByRole("radio", { name: /^Moderately active/ }));
   await user.click(screen.getByRole("button", { name: /continue/i }));
 }
 

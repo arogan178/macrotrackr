@@ -401,7 +401,7 @@ const EntryHistoryComponent = function EntryHistory({
         <div className="flex items-center gap-1">
           {history.length > 0 && (
             <Button
-              variant={isSelectionMode ? "primary" : "secondary"}
+              variant="secondary"
               onClick={toggleSelectionMode}
               text={isSelectionMode ? "Cancel" : "Select"}
               buttonSize="sm"
@@ -436,7 +436,7 @@ const EntryHistoryComponent = function EntryHistory({
         <div className="flex gap-2">
           {history.length > 0 && (
             <Button
-              variant={isSelectionMode ? "primary" : "secondary"}
+              variant="secondary"
               onClick={toggleSelectionMode}
               text={isSelectionMode ? "Cancel selection" : "Group meals"}
               buttonSize="sm"
@@ -557,10 +557,14 @@ const EntryHistoryComponent = function EntryHistory({
                 <span className="text-sm font-medium whitespace-nowrap text-foreground">
                   {selectedEntryIds.size} selected
                 </span>
-                <span className="hidden h-4 w-px bg-border md:block" />
-                <span className="text-xs whitespace-nowrap text-muted">
-                  Select 2+ entries to group
-                </span>
+                {selectedEntryIds.size < 2 && (
+                  <>
+                    <span className="hidden h-4 w-px bg-border md:block" />
+                    <span className="text-xs whitespace-nowrap text-muted">
+                      Select 2 or more to group them
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="ml-2 flex items-center gap-2">

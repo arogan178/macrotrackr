@@ -76,7 +76,7 @@ describe("HabitModal", () => {
       />,
     );
 
-    expect(screen.getByText("Add new habit")).toBeInTheDocument();
+    expect(screen.getByText("New habit")).toBeInTheDocument();
     expect(screen.getByLabelText("Habit title")).toHaveValue("");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
     expect(screen.getByLabelText("Frequency")).toHaveValue("daily");

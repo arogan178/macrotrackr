@@ -244,7 +244,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
       if (generation !== startGenerationRef.current) return;
       setHasCamera(false);
       setMode("manual");
-      setErrorMessage("Camera access was not granted. Please enter the barcode numbers manually.");
+      setErrorMessage("Camera access is off. Type the barcode number instead.");
     }
   }, [handleLookup, stopCamera]);
 
@@ -280,7 +280,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
       size="md"
     >
       <div className="flex flex-col gap-4 p-4">
-        <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <div className="flex flex-col gap-3 border-b border-border pb-3">
           <p className="text-xs text-muted">
             Scan packaged food barcodes to log nutrition instantly.
           </p>
@@ -353,7 +353,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         {mode === "manual" || hasCamera === false ? (
           <form onSubmit={handleManualSubmit} className="flex flex-col gap-3">
             <label htmlFor="manual-barcode-input" className={formStyles.label}>
-              Barcode Number (EAN / UPC)
+              Barcode number
             </label>
             <div className="flex items-center gap-2">
               <input

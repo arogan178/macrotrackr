@@ -103,7 +103,7 @@ describe("ProfileCreationForm steps", () => {
     render(<ProfileCreationForm />);
     await fillAboutYou(user);
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.selectOptions(screen.getByLabelText(/how active are you/i), "3");
+    await user.click(screen.getByRole("radio", { name: /^Moderately active/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
     const finish = screen.getByRole("button", { name: "Finish setup" });
 
@@ -128,7 +128,7 @@ describe("ProfileCreationForm steps", () => {
     render(<ProfileCreationForm />);
     await fillAboutYou(user);
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.selectOptions(screen.getByLabelText(/how active are you/i), "3");
+    await user.click(screen.getByRole("radio", { name: /^Moderately active/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     await user.selectOptions(
@@ -170,7 +170,7 @@ describe("ProfileCreationForm steps", () => {
     render(<ProfileCreationForm />);
     await fillAboutYou(user);
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.selectOptions(screen.getByLabelText(/how active are you/i), "3");
+    await user.click(screen.getByRole("radio", { name: /^Moderately active/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     await user.selectOptions(

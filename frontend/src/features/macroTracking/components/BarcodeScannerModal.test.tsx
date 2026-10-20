@@ -222,7 +222,7 @@ describe("BarcodeScannerModal", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/camera access was not granted/i)).toBeInTheDocument();
+      expect(screen.getByText(/camera access is off/i)).toBeInTheDocument();
     });
     expect(screen.getByLabelText(/barcode number/i)).toBeInTheDocument();
   });

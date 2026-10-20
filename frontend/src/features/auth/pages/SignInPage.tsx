@@ -20,7 +20,6 @@ export default function SignInPage() {
   return (
     <QueryErrorBoundary>
       <AuthPageShell
-        eyebrow="Account Access"
         title="Welcome back"
         description="Sign in to pick up your tracking, saved meals, and goals right where you left them."
         showBackToHome={!isLocalAuthMode}

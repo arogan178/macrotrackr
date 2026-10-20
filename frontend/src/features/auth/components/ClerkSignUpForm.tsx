@@ -711,7 +711,7 @@ export function ClerkSignUpForm({
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
             <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+              <p className="text-xs font-medium text-muted">
                 Email sign up
               </p>
               <button
