@@ -11,6 +11,7 @@ import NumberField from "@/components/form/NumberField";
 import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TimeField from "@/components/form/TimeField";
 import { Button, PlusIcon, StarIcon, TrashIcon } from "@/components/ui";
+import Value from "@/components/ui/Value";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
 import { type Ingredient, MealType } from "@/types/macro";
@@ -21,6 +22,7 @@ import { MEAL_TYPE_OPTIONS } from "../constants";
 import { UnitConverter, type UnitType } from "../utils/units";
 
 import { formatEntryDate } from "./EntryHistoryHelpers";
+import { MacroSplitBar } from "./MacroSplitBar";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -732,16 +734,16 @@ function AddEntry({
             />
           </div>
 
+          {/* What the food is made of, live as the grams are typed. */}
+          <MacroSplitBar
+            protein={Number(protein) || 0}
+            carbs={Number(carbs) || 0}
+            fats={Number(fats) || 0}
+            className="mt-3"
+          />
+
           <div className="mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 shrink-0 min-w-0">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted truncate">
-                Total Calories
-              </span>
-              <span className="text-lg sm:text-2xl font-light tracking-tight text-foreground whitespace-nowrap">
-                {calories}
-                <span className="ml-1 text-xs font-normal text-muted">kcal</span>
-              </span>
-            </div>
+            <Value value={Number(calories) || 0} unit="kcal" size="stat" className="shrink-0" />
             <div className="flex items-center gap-2 shrink-0">
               {validationHint && (
                 <p className="text-right text-xs text-muted">
@@ -752,7 +754,7 @@ function AddEntry({
                 type="submit"
                 disabled={!canSubmit || _isSaving}
                 isLoading={_isSaving}
-                text={_isSaving ? "Saving..." : "Add Entry"}
+                text={_isSaving ? "Saving..." : "Add entry"}
                 leftIcon={
                   <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 }

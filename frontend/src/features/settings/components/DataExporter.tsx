@@ -73,7 +73,7 @@ export default function DataExporter() {
   };
 
   return (
-    <Panel title="Export your data" description="Download your data as CSV.">
+    <Panel title="Export your data" description="Download your data as CSV." flatOnPhone>
       <ul className="divide-y divide-border">
         {EXPORTS.map((item) => {
           const button = (

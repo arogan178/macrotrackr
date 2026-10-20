@@ -81,7 +81,7 @@ const BillingForm: React.FC = () => {
   }, [subscriptionStatus, showNotification, handleMutationError]);
 
   return (
-    <CardContainer className="p-3.5 sm:p-6">
+    <CardContainer className="p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0">
       {/* Current plan status bar */}
       <div className="mb-4 sm:mb-5 flex items-center justify-between border-b border-border pb-3.5">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted">

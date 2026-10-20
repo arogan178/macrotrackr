@@ -33,7 +33,7 @@ export default function TrendDisplay({
     typeof trend.firstAvg === "number";
 
   return (
-    <div className="flex flex-col justify-between rounded-control bg-surface-2 p-3.5 border border-border transition-colors hover:border-border">
+    <div className="flex flex-col justify-between rounded-control bg-surface-2 p-3.5 border border-border transition-colors hover:border-border max-md:rounded-none max-md:border-x-0 max-md:border-t-0 max-md:bg-transparent max-md:px-0">
       {/* Header: Icon + Title & Direction Badge */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -44,7 +44,7 @@ export default function TrendDisplay({
               {icon}
             </div>
           )}
-          <span className="text-xs font-semibold tracking-tight text-foreground/90 uppercase truncate">
+          <span className="text-sm font-semibold tracking-tight text-foreground truncate">
             {label}
           </span>
         </div>

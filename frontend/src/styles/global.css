@@ -134,6 +134,13 @@
   }
 }
 
+/* Home's one moment on load: the day's gauge and macro strips fill from zero. */
+@keyframes fill-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

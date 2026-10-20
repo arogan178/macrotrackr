@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ExpenditureResult } from "@shared/expenditure";
 
+import { ChevronDownIcon } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import Skeleton from "@/components/ui/Skeleton";
@@ -94,6 +95,7 @@ export default function ExpenditureCard({
       title="Maintenance calories"
       description="What you burn in a day, from your own log and weight trend."
       footer={footer}
+      flatOnPhone
     >
       <div className="grid grid-cols-2 gap-4">
         {measured && (
@@ -107,7 +109,13 @@ export default function ExpenditureCard({
         )}
       </div>
 
-      <div className="mt-4 space-y-1 text-sm text-muted">
+      {/* The working is detail: the figures above are the answer. */}
+      <details className="group mt-4 text-sm text-muted">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-xs text-muted transition-colors hover:text-foreground">
+          How this is worked out
+          <ChevronDownIcon className="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180" />
+        </summary>
+        <div className="space-y-1">
         {expenditure === undefined ? (
           <Skeleton lines={2} />
         ) : expenditure.status === "measured" ? (
@@ -118,7 +126,8 @@ export default function ExpenditureCard({
         <p className="text-xs">
           Days marked as partly logged are left out. Your targets do not change on their own.
         </p>
-      </div>
+        </div>
+      </details>
     </Panel>
   );
 }

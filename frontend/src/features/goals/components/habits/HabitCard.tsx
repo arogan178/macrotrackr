@@ -168,12 +168,18 @@ export default function HabitCard({
   const iconWrapperPadding = variant === "sm" ? "p-1.5" : "p-2";
 
   return (
-    <CardContainer variant="interactive" className="overflow-hidden bg-surface-2 p-0">
+    // On a phone a habit is a row in a list, not a tinted card: the icon and
+    // the bar carry its colour.
+    <CardContainer
+      variant="interactive"
+      className="overflow-hidden bg-surface-2 p-0 max-md:rounded-none max-md:border-0 max-md:bg-transparent"
+    >
       <div
         className={cn(
-          "h-full bg-gradient-to-r",
+          "h-full bg-gradient-to-r max-md:bg-none",
           getGradientClass(accentColor),
-          paddingClass
+          paddingClass,
+          "max-md:px-0"
         )}
       >
         {/* The actions wrap onto their own row when the title would not fit beside them */}

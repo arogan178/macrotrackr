@@ -25,6 +25,15 @@ export const PANEL_CLASS =
 
 export type PanelPadding = "none" | "compact" | "regular";
 
+/**
+ * Below md a flat panel drops its box and sits on the page, the way a phone
+ * reads best: sections separated by space, not borders, with the page margin
+ * as their only inset.
+ */
+export const FLAT_ON_PHONE =
+  "max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:bg-transparent";
+const FLAT_INSET = "max-md:px-0";
+
 const PADDING: Record<PanelPadding, string> = {
   none: "",
   compact: "p-4",
@@ -43,6 +52,8 @@ interface PanelProps
   padding?: PanelPadding;
   /** `true` steps the panel one surface level, for a nested object. */
   raised?: boolean;
+  /** Below md, no box: the panel's content sits straight on the page. */
+  flatOnPhone?: boolean;
   interactive?: boolean;
   children?: React.ReactNode;
 }
@@ -54,6 +65,7 @@ const Panel: React.FC<PanelProps> = ({
   footer,
   padding = "regular",
   raised = false,
+  flatOnPhone = false,
   interactive = false,
   className,
   children,
@@ -66,6 +78,7 @@ const Panel: React.FC<PanelProps> = ({
       className={cn(
         PANEL_CLASS,
         raised && "bg-surface-2",
+        flatOnPhone && FLAT_ON_PHONE,
         interactive &&
           "group cursor-pointer transition-colors duration-200 hover:border-border-2",
         className,
@@ -78,6 +91,7 @@ const Panel: React.FC<PanelProps> = ({
             "flex flex-wrap items-start justify-between gap-3 border-b-2",
             RULE_SECTION,
             padding === "none" ? "p-4 sm:p-6" : PADDING[padding],
+            flatOnPhone && "max-md:border-b-0 max-md:px-0 max-md:pt-0",
           )}
         >
           <div className="min-w-0">
@@ -92,7 +106,9 @@ const Panel: React.FC<PanelProps> = ({
         </div>
       )}
 
-      {children ? <div className={PADDING[padding]}>{children}</div> : null}
+      {children ? (
+        <div className={cn(PADDING[padding], flatOnPhone && FLAT_INSET)}>{children}</div>
+      ) : null}
 
       {footer ? (
         <div
@@ -100,6 +116,8 @@ const Panel: React.FC<PanelProps> = ({
             "border-t-2 bg-surface-2",
             RULE_SECTION,
             padding === "none" ? "p-4 sm:p-6" : PADDING[padding],
+            // Flat, the footer is the one filled surface left: an aside.
+            flatOnPhone && "max-md:rounded-card max-md:border-t-0",
           )}
         >
           {footer}

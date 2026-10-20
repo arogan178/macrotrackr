@@ -137,6 +137,7 @@ function MealTimeBreakdown({
           activeKey={selectedStat}
           onChange={setSelectedStat}
           size="sm"
+          fullWidth
           isMotion
           layoutId="meal-distribution-tab"
         />

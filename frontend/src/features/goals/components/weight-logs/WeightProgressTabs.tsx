@@ -32,11 +32,11 @@ function WeightProgressTabs({
   // Removed unused handleBulkConfirm placeholder to satisfy no-unused-vars
 
   return (
-    <div className="overflow-hidden rounded-card border border-border bg-surface">
+    <div className="overflow-hidden rounded-card border border-border bg-surface max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:bg-transparent">
       {/* The shared TabBar, not a bespoke green-underline set. This was the last
           tab strip in the app still drawing its own active state, so Goals had
           two different-looking tab controls stacked on one page. */}
-      <div className="flex items-center gap-3 border-b border-border p-3">
+      <div className="flex items-center gap-3 border-b border-border p-3 max-md:border-b-0 max-md:px-0">
         <TabBar
           items={tabs.map((tab) => ({
             key: tab.id,
@@ -68,7 +68,7 @@ function WeightProgressTabs({
       </div>
 
       {/* Tab Content Area */}
-      <div className="relative px-6 py-3">
+      <div className="relative px-6 py-3 max-md:px-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

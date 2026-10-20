@@ -107,7 +107,7 @@ function UnifiedInsights({
   // Handle loading state
   if (isLoading) {
     return (
-      <CardContainer className="flex min-h-[300px] items-center justify-center p-6 text-foreground">
+      <CardContainer className="max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 flex min-h-[300px] items-center justify-center p-6 text-foreground">
         <LoadingSpinner />
       </CardContainer>
     );
@@ -116,7 +116,7 @@ function UnifiedInsights({
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
-      <CardContainer className="flex min-h-[300px] items-center justify-center p-6 text-center">
+      <CardContainer className="max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 flex min-h-[300px] items-center justify-center p-6 text-center">
         <div>
           <p className="mb-2 text-xl font-semibold text-foreground">
             No data for this range
@@ -183,7 +183,7 @@ function UnifiedInsights({
                         duration={0.8}
                       />
                     </span>
-                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    <span className="text-[10px] font-medium text-muted">
                       score
                     </span>
                   </div>
@@ -228,7 +228,7 @@ function UnifiedInsights({
                             {pct}%
                           </span>
                         </RadialProgress>
-                        <span className="mt-2 text-xs font-medium tracking-wider text-muted uppercase">
+                        <span className="mt-2 text-xs font-medium text-muted">
                           {labels[index]}
                         </span>
                         <span className="text-[10px] text-muted/60">
@@ -266,7 +266,7 @@ function UnifiedInsights({
                         suffix="%"
                       />
                     </span>
-                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    <span className="text-[10px] font-medium text-muted">
                       of kcal
                     </span>
                   </div>
@@ -290,12 +290,12 @@ function UnifiedInsights({
           >
             <CardContainer
               variant="interactive"
-              className="flex h-full flex-col p-5"
+              className="flex h-full flex-col p-5 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0"
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-                    Tracking Analysis
+                  <h3 className="text-base font-semibold tracking-tight text-foreground">
+                    Tracking
                   </h3>
                   <InfoTooltip text="Evaluates how regularly and completely you log your meals over the selected period." />
                 </div>
@@ -342,8 +342,8 @@ function UnifiedInsights({
                       duration={0.5}
                     />
                   </p>
-                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
-                    Current Streak
+                  <p className="text-[10px] font-medium text-muted">
+                    Current streak
                   </p>
                 </div>
 
@@ -359,8 +359,8 @@ function UnifiedInsights({
                       duration={0.5}
                     />
                   </p>
-                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
-                    Best Streak
+                  <p className="text-[10px] font-medium text-muted">
+                    Best streak
                   </p>
                 </div>
 
@@ -376,8 +376,8 @@ function UnifiedInsights({
                       duration={0.5}
                     />
                   </p>
-                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
-                    Missed Days
+                  <p className="text-[10px] font-medium text-muted">
+                    Missed days
                   </p>
                 </div>
 
@@ -398,7 +398,7 @@ function UnifiedInsights({
                     />
                     <span className="text-lg text-muted/60">%</span>
                   </p>
-                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                  <p className="text-[10px] font-medium text-muted">
                     Complete
                   </p>
                 </div>
@@ -425,11 +425,11 @@ function UnifiedInsights({
           >
             <CardContainer
               variant="interactive"
-              className="flex h-full flex-col p-5"
+              className="flex h-full flex-col p-5 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0"
             >
               <div className="mb-4 flex items-center gap-2">
-                <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-                  Trend Analysis
+                <h3 className="text-base font-semibold tracking-tight text-foreground">
+                  Trends
                 </h3>
                 <InfoTooltip text="Compares average intake in the initial part of the selected range against recent days to show trajectory." />
               </div>

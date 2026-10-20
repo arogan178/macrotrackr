@@ -81,6 +81,7 @@ function MetricCardInner({
     >
       <Panel
         padding={isCompact ? "none" : "regular"}
+        flatOnPhone
         className={cn("flex h-full flex-col", isCompact && "p-3")}
       >
         <div

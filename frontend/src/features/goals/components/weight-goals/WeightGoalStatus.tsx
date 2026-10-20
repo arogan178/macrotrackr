@@ -1,25 +1,21 @@
 // src/features/goals/components/WeightGoalStatus.tsx
 
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
   Button,
-  CalendarIcon,
-  CalorieIcon,
-  ChevronRightIcon,
   IconButtonGroup,
-  ProgressBar,
-  TargetIcon,
-  TrendingUpIcon,
   WeightIcon,
 } from "@/components/ui";
 import {
   computeDailyDifferenceForDisplay,
-  computeEffectiveTargetCalories,
 } from "@/features/goals/utils/calorie";
-import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
+import {
+  calculateGoalProgress,
+  getGoalStatus,
+} from "@/features/goals/utils/goalUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { formatDateShort } from "@/utils/dateUtilities";
@@ -31,7 +27,6 @@ import {
 } from "@/utils/unitConversion";
 import { maintenanceLabel } from "@/utils/userConstants";
 
-import MacroNutrient from "../macros/MacroNutrient";
 
 interface WeightGoalStatusProps {
   startingWeight: number;
@@ -52,18 +47,41 @@ interface WeightGoalStatusProps {
   trendChange?: number;
 }
 
+const PACE: Record<ReturnType<typeof getGoalStatus>, { label: string; className: string }> = {
+  ahead: { label: "Ahead", className: "bg-primary/12 text-primary" },
+  "on-track": { label: "On pace", className: "bg-primary/12 text-primary" },
+  behind: { label: "Behind", className: "bg-warning/12 text-warning" },
+  completed: { label: "Reached", className: "bg-primary/12 text-primary" },
+};
+
+function PacePill({ pace }: { pace: ReturnType<typeof getGoalStatus> }) {
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PACE[pace].className}`}>
+      {PACE[pace].label}
+    </span>
+  );
+}
+
+function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0 px-3 py-3 first:pl-0 md:px-6 md:first:pl-6">
+      <dt className="truncate text-xs text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm font-semibold whitespace-nowrap text-foreground">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
 const WeightGoalStatus = memo(function WeightGoalStatus({
   startingWeight,
   targetWeight,
   tdee,
   tdeeIsOverride = false,
-  macroDailyTotals,
   weightGoals,
   onEdit,
   onDelete,
   onLogWeight,
-  targetCalories,
-  macroTarget,
   unitSystem = "metric",
   trendWeight,
   trendChange,
@@ -79,14 +97,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const isWeightGain = weightGoal === "gain";
   const isMaintenance = weightGoal === "maintain";
 
-  const effectiveCalorieTarget =
-    targetCalories ??
-    computeEffectiveTargetCalories(tdee, weightGoals ?? undefined);
 
   const goalTypeLabel = isWeightLoss
-    ? "Weight Loss"
+    ? "Weight loss"
     : isWeightGain
-      ? "Weight Gain"
+      ? "Weight gain"
       : "Maintenance";
 
   // Normalize goal colors to your tokenized palette so bg classes exist in Tailwind output
@@ -111,21 +126,6 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const formattedStartDate = formatDateShort(weightGoals?.startDate ?? "");
   const formattedTargetDate = formatDateShort(weightGoals?.targetDate ?? "");
 
-  const targetPercentages = macroTarget ?? {
-    proteinPercentage: 30,
-    carbsPercentage: 40,
-    fatsPercentage: 30,
-  };
-
-  const targetProteinGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.proteinPercentage) / 100 / 4,
-  );
-  const targetCarbsGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.carbsPercentage) / 100 / 4,
-  );
-  const targetFatsGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9,
-  );
 
   let trendChangeText: string | undefined;
   if (trendChange !== undefined) {
@@ -146,273 +146,151 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
     50,
   );
 
+  const pace = weightGoals ? getGoalStatus(weightGoals) : undefined;
+  const remainingWeight = Math.abs(targetWeight - startingWeight);
+  // Where the current and trend weights sit on the start-to-target line.
+  const journeySpan = targetWeight - goalStartingWeight;
+  const along = (weight: number) =>
+    journeySpan === 0
+      ? 0
+      : Math.min(100, Math.max(0, ((weight - goalStartingWeight) / journeySpan) * 100));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="overflow-hidden rounded-card border border-border bg-surface"
+      className="rounded-card border border-border bg-surface max-md:rounded-none max-md:border-0 max-md:bg-transparent md:overflow-hidden"
     >
-      {/* One panel split by dividers. The sections used to be boxes inside the
-          box, and on a phone each level took another 24px off the width. */}
-      <div className="flex flex-col gap-2.5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`rounded-control p-2 sm:p-3 ${goalBgColorLight} shrink-0`}>
-              <WeightIcon className={`h-5 w-5 sm:h-7 sm:w-7 ${goalTextColor}`} />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base sm:text-xl font-bold tracking-tight text-foreground/90 whitespace-nowrap">
-                {goalTypeLabel} Plan
-              </h2>
-              <p className="text-xs sm:text-sm text-muted whitespace-nowrap">
-                {formattedStartDate} → {formattedTargetDate}
-              </p>
-            </div>
+      <div className="flex items-start justify-between gap-3 md:p-6 md:pb-0">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`shrink-0 rounded-control p-2 ${goalBgColorLight}`}>
+            <WeightIcon className={`h-5 w-5 ${goalTextColor}`} />
           </div>
-          <div className="flex items-center gap-1.5 sm:hidden shrink-0">
-            <IconButtonGroup
-              onEdit={onEdit}
-              onDelete={onDelete}
-              editLabel="Edit weight goal"
-              deleteLabel="Delete weight goal"
-              isDeleting={false}
-            />
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
+              {goalTypeLabel} plan
+            </h2>
+            <p className="text-xs whitespace-nowrap text-muted">
+              {formattedStartDate} to {formattedTargetDate}
+            </p>
           </div>
         </div>
-
-        <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-          <Button
-            variant="primary"
-            onClick={onLogWeight}
-            text="Log Weight"
-            leftIcon={<WeightIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            ariaLabel="Log current weight"
-            buttonSize="sm"
-            className="w-full sm:w-auto text-xs sm:text-sm px-3 py-1.5 justify-center"
-          />
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
-            <IconButtonGroup
-              onEdit={onEdit}
-              onDelete={onDelete}
-              editLabel="Edit weight goal"
-              deleteLabel="Delete weight goal"
-              isDeleting={false}
-            />
-          </div>
-        </div>
+        <IconButtonGroup
+          onEdit={onEdit}
+          onDelete={onDelete}
+          editLabel="Edit weight goal"
+          deleteLabel="Delete weight goal"
+          isDeleting={false}
+        />
       </div>
 
-      <div className="border-t border-border p-4 sm:px-6">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="flex items-baseline space-x-1.5 min-w-0">
-            <span className="text-lg sm:text-2xl font-bold text-foreground">
+      {/* The plan as one line: start on the left, target on the right, you on
+          it. How far the dot has travelled is the progress; the pill says
+          whether that is where the calendar expects you to be. */}
+      <div className="mt-6 md:px-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="flex items-baseline gap-2">
+            <span className="font-stretch-condensed text-4xl font-semibold tracking-tight text-foreground tabular-nums">
               <AnimatedNumber
                 value={fromKg(startingWeight, unitSystem)}
                 toFixedValue={1}
-                suffix={` ${unit}`}
               />
             </span>
-            {!isMaintenance && (
-              <>
-                <ChevronRightIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5 shrink-0 text-muted" />
-                <span className="text-lg sm:text-2xl font-bold text-foreground">
-                  <AnimatedNumber
-                    value={fromKg(targetWeight, unitSystem)}
-                    toFixedValue={1}
-                    suffix={` ${unit}`}
-                  />
-                </span>
-              </>
-            )}
-            {isMaintenance && (
-              <span className="text-sm sm:text-lg text-foreground font-medium">
-                Maintaining Weight
-              </span>
-            )}
-          </div>
-          {!isMaintenance && (
-            <div className="flex items-center gap-1 shrink-0">
-              <span className="text-base sm:text-lg font-semibold text-foreground">
-                {progressPercentage}%
-              </span>
-            </div>
-          )}
+            <span className="text-sm text-muted">{unit}</span>
+          </span>
+          {pace && !isMaintenance && <PacePill pace={pace} />}
         </div>
 
         {!isMaintenance && (
           <>
-            <div className="mb-1.5 flex items-center justify-between text-xs">
-              <span className={`${goalTextColor} font-medium`}>
-                {isWeightLoss ? "↓ " : "↑ "}
-                <AnimatedNumber
-                  value={fromKg(
-                    Math.abs(targetWeight - goalStartingWeight),
-                    unitSystem,
-                  )}
-                  toFixedValue={1}
-                  suffix={` ${unit} goal`}
+            <div className="relative mt-4 h-2" aria-hidden>
+              <div className="absolute inset-0 overflow-hidden rounded-full bg-foreground/8">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${progressPercentage}%` }}
                 />
-              </span>
+              </div>
+              {trendWeight !== undefined && (
+                <div
+                  className="absolute -top-1 -bottom-1 w-0.5 -translate-x-1/2 rounded-full bg-muted"
+                  style={{ left: `${along(trendWeight)}%` }}
+                />
+              )}
+              <div
+                className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-foreground"
+                style={{ left: `${Math.min(progressPercentage, 100)}%` }}
+              />
             </div>
-            <ProgressBar
-              progress={progressPercentage}
-              color={isWeightLoss ? "accent" : isWeightGain ? "green" : "blue"}
-              height="md"
-              className="mb-1"
-            />
-            <div className="mt-1 flex justify-between text-xs text-muted">
-              <span>
-                Start:{" "}
-                <AnimatedNumber
-                  value={fromKg(goalStartingWeight, unitSystem)}
-                  toFixedValue={1}
-                  suffix={` ${unit}`}
-                />
-              </span>
-              <span>
-                Target:{" "}
-                <AnimatedNumber
-                  value={fromKg(targetWeight, unitSystem)}
-                  toFixedValue={1}
-                  suffix={` ${unit}`}
-                />
-              </span>
+            <div className="mt-2 flex justify-between text-xs text-muted tabular-nums">
+              <span>{formatWeight(goalStartingWeight, unitSystem)}</span>
+              <span>{formatWeight(targetWeight, unitSystem)}</span>
             </div>
+            <p className="mt-3 text-sm text-muted">
+              <span className="text-foreground">
+                {formatWeight(remainingWeight, unitSystem)}
+              </span>{" "}
+              to go, {progressPercentage}% of the way
+            </p>
           </>
         )}
+
         {trendWeight !== undefined && (
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2.5 text-xs">
-            <span className="text-muted">
+          <p className="mt-1 flex flex-wrap justify-between gap-x-3 text-xs text-muted">
+            <span>
               Trend weight{" "}
-              <span className="font-semibold text-foreground">
-                {formatWeight(trendWeight, unitSystem)}
-              </span>
+              <span className="text-foreground">{formatWeight(trendWeight, unitSystem)}</span>
             </span>
-            {trendChangeText && (
-              <span className="text-muted">{trendChangeText}</span>
-            )}
-          </div>
+            {trendChangeText && <span>{trendChangeText}</span>}
+          </p>
         )}
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
-        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
-          <TrendingUpIcon
-            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
+      <dl className="mt-6 grid grid-cols-3 divide-x divide-border border-y border-border md:mt-6">
+        <Stat label="Weekly rate">
+          {isMaintenance ? (
+            "Maintain"
+          ) : (
+            <>
+              {isWeightLoss ? "↓ " : "↑ "}
+              <AnimatedNumber
+                value={fromKg(Math.abs(weeklyChange), unitSystem)}
+                toFixedValue={2}
+                suffix={` ${unit}/wk`}
+              />
+            </>
+          )}
+        </Stat>
+        <Stat label="Duration">
+          {isMaintenance ? "Ongoing" : <AnimatedNumber value={calculatedWeeks} suffix=" wks" />}
+        </Stat>
+        <Stat
+          label={
+            isWeightLoss
+              ? "Daily deficit"
+              : isWeightGain
+                ? "Daily surplus"
+                : tdeeIsOverride
+                  ? maintenanceLabel(true)
+                  : "Est. TDEE"
+          }
+        >
+          <AnimatedNumber
+            value={isMaintenance ? tdee : dailyDifference}
+            suffix=" kcal"
           />
-          <div className="min-w-0">
-            <p className="text-xs sm:text-sm font-medium text-muted truncate">Weekly Rate</p>
-            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
-              {isMaintenance ? "Maintain" : `${isWeightLoss ? "↓" : "↑"} `}
-              {!isMaintenance && (
-                <AnimatedNumber
-                  value={fromKg(Math.abs(weeklyChange), unitSystem)}
-                  toFixedValue={2}
-                  suffix={` ${unit}/wk`}
-                />
-              )}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
-          <CalendarIcon
-            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
-          />
-          <div className="min-w-0">
-            <p className="text-xs sm:text-sm font-medium text-muted truncate">Est. Duration</p>
-            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
-              {isMaintenance ? (
-                "Ongoing"
-              ) : (
-                <AnimatedNumber value={calculatedWeeks} suffix=" wks" />
-              )}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3 px-3 py-3 sm:p-5">
-          <TargetIcon
-            className={`${goalTextColor} hidden h-6 w-6 shrink-0 sm:block`}
-          />
-          <div className="min-w-0">
-            <p className="text-xs sm:text-sm font-medium text-muted truncate">
-              {isWeightLoss
-                ? "Daily Deficit"
-                : isWeightGain
-                  ? "Daily Surplus"
-                  : tdeeIsOverride
-                    ? maintenanceLabel(true)
-                    : "Est. TDEE"}
-            </p>
-            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground/90 whitespace-nowrap">
-              {isMaintenance ? (
-                <AnimatedNumber value={tdee} suffix=" kcal" />
-              ) : (
-                <AnimatedNumber value={dailyDifference} suffix=" kcal" />
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
+        </Stat>
+      </dl>
 
-      <div className="border-t border-border p-4 sm:p-6">
-        <h3 className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
-          Daily Nutrition Target
-        </h3>
-        <div className="mb-4">
-          <div className="mb-1.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CalorieIcon className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold text-foreground">
-                Calories
-              </span>
-            </div>
-            <div className="text-xs sm:text-sm font-medium text-foreground">
-              <span>
-                <AnimatedNumber value={Math.round(macroDailyTotals.calories)} />
-              </span>
-              <span className="mx-1 text-muted">/</span>
-              <span className="text-muted">
-                <AnimatedNumber
-                  value={Math.round(effectiveCalorieTarget)}
-                  suffix=" kcal"
-                />
-              </span>
-            </div>
-          </div>
-          <ProgressBar
-            progress={Math.min(
-              100,
-              effectiveCalorieTarget > 0
-                ? Math.round(
-                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
-                  )
-                : 0,
-            )}
-            color={"accent"}
-            height="sm"
-          />
-        </div>
-        <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-6">
-          <MacroNutrient
-            label="Protein"
-            current={macroDailyTotals.protein}
-            target={targetProteinGrams}
-            color="protein"
-          />
-          <MacroNutrient
-            label="Carbs"
-            current={macroDailyTotals.carbs}
-            target={targetCarbsGrams}
-            color="carbs"
-          />
-          <MacroNutrient
-            label="Fats"
-            current={macroDailyTotals.fats}
-            target={targetFatsGrams}
-            color="fats"
-          />
-        </div>
+      <div className="mt-6 md:px-6 md:pb-6">
+        <Button
+          variant="primary"
+          onClick={onLogWeight}
+          text="Log weight"
+          leftIcon={<WeightIcon className="h-4 w-4" />}
+          ariaLabel="Log current weight"
+          className="w-full justify-center"
+        />
       </div>
     </motion.div>
   );

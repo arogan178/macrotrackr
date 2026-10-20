@@ -62,11 +62,12 @@ export default function DateRangeSelector({
   return (
     <motion.div
       layout
-      className="sticky z-30 mb-6 rounded-card border border-border bg-surface p-3"
+      className="z-30 mb-6 max-md:mb-0 md:sticky rounded-card border border-border bg-surface p-3 max-md:rounded-none max-md:border-0 max-md:bg-background max-md:px-0"
       style={{ top: "var(--header-offset)" }}
     >
       {/* On a phone the tabs take their own full-width row under the label and
-          actions. Sharing one row, the tabs ran under the share button. */}
+          actions, and the bar scrolls away: pinned, two rows hid a sixth of
+          the screen. */}
       <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3">
         <span className="text-xs sm:text-sm font-medium text-foreground shrink-0">Time Period:</span>
         <TabBar

@@ -10,7 +10,10 @@ export default function ActionCard({
   bgColor,
 }: ActionCardProps) {
   return (
-    <CardContainer variant="interactive" className="p-5">
+    <CardContainer
+      variant="interactive"
+      className="p-5 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-4"
+    >
       <div className="mb-3 flex items-center">
         <div className={cn("mr-3 rounded-control p-2", bgColor)}>{icon}</div>
         <h4 className="text-base font-semibold tracking-tight text-foreground/90">{title}</h4>

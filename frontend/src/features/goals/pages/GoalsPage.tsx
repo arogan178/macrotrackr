@@ -148,7 +148,8 @@ export default function GoalsPage() {
             <AnimatePresence mode="wait">
               {ui.activeTab === "goals" ? (
                 <PageTransition key="goals">
-                  <div className="space-y-6">
+                  {/* Sections are told apart by space on a phone, not boxes. */}
+                  <div className="space-y-10 md:space-y-6">
                     {data.safeUserSettings && (
                       <WeightGoalDashboard
                         user={data.safeUserSettings}
