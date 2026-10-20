@@ -59,6 +59,11 @@ Colour, radius, surface and motion values come from `frontend/src/style.css` and
 `text-muted`, `rounded-card`); a hex literal in a component is drift by
 definition.
 
+Never hand-write a utility-named class (`.bg-surface-2`) in a stylesheet. `@theme`
+already generates it inside Tailwind's utilities layer; a copy outside any layer
+outranks every variant, so `max-md:bg-transparent` and `hover:bg-surface-3`
+silently stop working on anything that also carries the base class.
+
 ## Rules with reasons
 
 **Size and width carry hierarchy; weight is nearly flat.** `TYPE_SCALE` has six
