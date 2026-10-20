@@ -127,8 +127,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
     tick: { fill: "var(--text-muted)", fontSize: 11 },
-    axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
-    tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
+    axisLine: false,
+    tickLine: false,
     padding: { left: 10, right: 10 },
     interval: hasData ? getAdaptiveInterval(data.length) : "preserveStartEnd",
     height: 30, // Default height, can be overridden
@@ -137,8 +137,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
 
   const defaultYAxisProps: Partial<YAxisProps> = {
     tick: { fill: "var(--text-muted)", fontSize: 11 },
-    axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
-    tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
+    axisLine: false,
+    tickLine: false,
     tickFormatter: (value) =>
       typeof value === "number" ? formatGrouped(value) : String(value),
     width: 40, // Default width, can be overridden

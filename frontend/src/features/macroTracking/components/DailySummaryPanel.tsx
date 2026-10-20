@@ -6,8 +6,9 @@ import IconButton from "@/components/ui/IconButton";
 import Panel from "@/components/ui/Panel";
 import Value from "@/components/ui/Value";
 import MacroSnapshotModal from "@/features/macroTracking/components/MacroSnapshotModal";
-import TargetRow, { FILL_IN } from "@/features/macroTracking/components/TargetRow";
+import TargetRow, { CHIP, FILL_IN } from "@/features/macroTracking/components/TargetRow";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
+import { cn } from "@/lib/classnameUtilities";
 import { formatGrouped } from "@/lib/formatNumber";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { getDisplayDate } from "@/utils/dateUtilities";
@@ -18,6 +19,7 @@ import {
   calculateFatsCalories,
   calculateProteinCalories,
 } from "../calculations";
+import { targetStatus } from "../utils/targetStatus";
 
 const DEFAULT_TARGET = {
   proteinPercentage: 30,
@@ -282,9 +284,11 @@ function DailySummaryInner({
                   value={Math.abs(remaining)}
                   className={isOver ? "text-warning" : undefined}
                 />
-                <p className="mt-1 text-sm text-muted">
-                  {isOver ? "over" : "left of"}{" "}
-                  {formatGrouped(dailyCalorieTarget)}
+                <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+                  {isOver ? "over" : "left of"} {formatGrouped(dailyCalorieTarget)}
+                  {targetStatus(macroCalories.total, dailyCalorieTarget) === "hit" && (
+                    <span className={cn(CHIP, "bg-primary/12 text-primary")}>On target</span>
+                  )}
                 </p>
               </>
             ) : (

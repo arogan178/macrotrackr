@@ -257,6 +257,7 @@ export default function ReportingPage() {
                       trackedDays={trackedDays}
                       totalDays={totalDays}
                       averages={averages}
+                      dailySeries={dailySeries}
                     />
                   );
                 })()}

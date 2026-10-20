@@ -155,29 +155,31 @@ export const BUTTON_VARIANTS = {
 // Icon button size mapping (square, for icon-only buttons).
 //
 // `min-h-*`/`min-w-*` are not decoration: IconButton renders through Button,
-// which contributes `min-h-11` from BUTTON_SIZES. `min-height` and `height` are
-// different properties, so tailwind-merge cannot collapse them and `h-9` lost
-// to `min-h-11` — every icon button computed 36w x 44h and `rounded-full` drew
-// that as a vertical ellipse. Pinning both axes keeps a circle a circle.
+// which contributes a `min-h-*` from BUTTON_SIZES. `min-height` and `height`
+// are different properties, so tailwind-merge cannot collapse them and `h-9`
+// lost to `min-h-11` — every icon button computed 36w x 44h and `rounded-full`
+// drew that as a vertical ellipse. Pinning both axes keeps a circle a circle.
 //
-// `md` is the default and therefore meets the same 44px touch floor as
-// BUTTON_SIZES. `sm` is the dense in-row exception, never a primary action.
+// Sizes are what the eye sees; TOUCH_TARGET keeps each one 48px to a thumb.
 export const ICON_BUTTON_SIZES = {
-  sm: "p-2 w-9 h-9 min-w-9 min-h-9", // 36px
-  md: "p-2.5 w-11 h-11 min-w-11 min-h-11", // 44px
-  lg: "p-3 w-12 h-12 min-w-12 min-h-12", // 48px
+  sm: "p-1.5 w-8 h-8 min-w-8 min-h-8", // 32px
+  md: "p-2 w-9 h-9 min-w-9 min-h-9", // 36px
+  lg: "p-2.5 w-11 h-11 min-w-11 min-h-11", // 44px
 } as const;
 
+// An invisible 48px hit area centred on the control (Android's minimum), so a
+// button can look small on a phone without being harder to hit.
+export const TOUCH_TARGET =
+  "relative after:absolute after:top-1/2 after:left-1/2 after:size-full after:min-h-12 after:min-w-12 after:-translate-1/2";
+
 // Button size mapping (rectangular, for text/icon buttons).
-// The 44px touch minimum lives here rather than being bolted on per call site:
-// `sm` used to render 30px tall, which is why a dozen callers hand-wrote
-// `min-h-11`. `xs` is deliberately smaller and is for non-touch affordances
-// inside a row, never for a primary action.
+// `xs` is deliberately left without TOUCH_TARGET: it is for non-touch
+// affordances inside a row, never for a primary action.
 export const BUTTON_SIZES = {
   xs: "min-h-8 px-2.5 py-1 text-xs",
-  sm: "min-h-11 px-3.5 py-2 text-xs",
-  md: "min-h-11 px-4 py-2.5 text-sm",
-  lg: "min-h-12 px-5 py-3 text-base",
+  sm: `min-h-9 px-3 py-1.5 text-xs ${TOUCH_TARGET}`,
+  md: `min-h-10 px-4 py-2 text-sm ${TOUCH_TARGET}`,
+  lg: "min-h-11 px-5 py-2.5 text-base",
 } as const;
 
 // Motion. Three durations and two curves, because 23 durations and 9 ease

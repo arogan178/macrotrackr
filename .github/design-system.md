@@ -132,6 +132,28 @@ prop is the whole reproduction. Changing the standard is one line in that file.
 longer than its track. Print the real figure beside it. A day over target is
 information the user came for.
 
+**A control looks small and hits big.** Every tap target is 48px, Android's
+floor and what Google Health, Fitbit and Oskel measure at. The visible control
+can be smaller: `Button` sizes are 36 and 40px, icon buttons 32 and 36px, and
+`TOUCH_TARGET` (`UiConstants.ts`) adds an invisible 48px hit area around them.
+A hand-built `<button>` under 48px takes `TOUCH_TARGET` too.
+
+**One action in reach, the rest behind a menu.** A row shows its primary action
+and a `⋮`; secondary and destructive actions live in the menu or sheet it opens.
+Four icons beside a name do not fit a 360px phone and read as clutter.
+
+**A verdict is a chip.** "On target" and "X over" sit in a tinted pill
+(`CHIP` in `TargetRow.tsx`); a shortfall stays plain muted text. The tint is
+the status colour, so the chip reads before its words do.
+
+**A period shows its days.** An average over a range draws one thin bar per day
+against the dashed target band, coloured by that day's status, as Google
+Health's "Last 7 days" rows do. A good average over a bad week is a lie told by
+omission.
+
+**Charts carry no chrome.** No axis lines, no tick marks; a few muted labels and
+the data. The reference apps draw neither.
+
 ## Voice
 
 Write like a panel on the back of a packet: state what happened, in the units

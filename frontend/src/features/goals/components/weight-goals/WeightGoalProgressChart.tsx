@@ -181,7 +181,7 @@ function WeightGoalProgressChart({
 
   const xAxisProps = {
     dataKey: "name",
-    axisLine: { stroke: "var(--color-border)" },
+    axisLine: false,
     tickLine: false,
     // Drop ticks by measured width: a count-based interval ran the dates
     // together on a phone.

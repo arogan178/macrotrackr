@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
+import { TOUCH_TARGET } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
 
 import { InfoIcon } from "./Icons";
@@ -27,7 +28,7 @@ export function InfoTooltip({ text, className }: { text: string; className?: str
         ref={triggerReference}
         type="button"
         aria-label="More information"
-        className={cn("relative flex items-center justify-center focus:outline-none", className)}
+        className={cn(TOUCH_TARGET, "flex items-center justify-center focus:outline-none", className)}
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onClick={() => setIsVisible(!isVisible)}

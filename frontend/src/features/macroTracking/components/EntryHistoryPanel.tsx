@@ -17,7 +17,7 @@ import {
   StateCard,
 } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
-import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+import { DURATIONS, EASINGS, TOUCH_TARGET } from "@/components/utils/UiConstants";
 import { openLogSheet } from "@/lib/logSheet";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -484,7 +484,7 @@ const EntryHistoryComponent = function EntryHistory({
                 <button
                   type="button"
                   onClick={loadMoreDates}
-                  className={`flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
+                  className={`${TOUCH_TARGET} flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}

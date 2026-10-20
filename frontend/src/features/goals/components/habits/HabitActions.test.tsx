@@ -26,9 +26,11 @@ function renderActions(current: number, isComplete: boolean) {
 }
 
 describe("HabitActions", () => {
-  it("removes one unit of progress", async () => {
+  it("keeps add progress in reach and removes progress from the menu", async () => {
     const { onDecrement } = renderActions(3, false);
 
+    expect(screen.getByRole("button", { name: "Add progress" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "More actions" }));
     fireEvent.click(screen.getByRole("button", { name: "Remove progress" }));
 
     await waitFor(() => expect(onDecrement).toHaveBeenCalledWith("h1"));
@@ -37,10 +39,10 @@ describe("HabitActions", () => {
   it("offers nothing to undo at 0", () => {
     renderActions(0, false);
 
+    fireEvent.click(screen.getByRole("button", { name: "More actions" }));
     expect(
       screen.queryByRole("button", { name: "Remove progress" }),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "More actions" }));
     expect(
       screen.queryByRole("button", { name: "Reset today" }),
     ).not.toBeInTheDocument();
@@ -53,6 +55,7 @@ describe("HabitActions", () => {
       screen.queryByRole("button", { name: "Add progress" }),
     ).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "More actions" }));
     fireEvent.click(screen.getByRole("button", { name: "Remove progress" }));
     await waitFor(() => expect(onDecrement).toHaveBeenCalledWith("h1"));
 
@@ -68,7 +71,7 @@ describe("HabitActions", () => {
     expect(
       screen.queryByRole("button", { name: "Delete habit" }),
     ).not.toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "More actions" }));
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
