@@ -208,7 +208,7 @@ export default function SettingsPage() {
         }
       >
         {!isPhoneSectionOpen && (
-          <ul className="divide-y divide-border border-y border-border md:hidden">
+          <ul className="divide-y divide-border border-t border-border md:hidden">
             {SECTIONS.map(({ key, label, hint, Icon }) => (
               <li key={key}>
                 <button
