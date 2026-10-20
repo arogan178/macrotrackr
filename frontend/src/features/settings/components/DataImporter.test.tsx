@@ -11,21 +11,21 @@ describe("DataImporter", () => {
     },
   });
 
-  it("renders 1-Click Data Importer header and supported platform badges", () => {
+  it("renders the import header and supported platform badges", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <DataImporter />
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText("1-Click Data Importer")).toBeDefined();
+    expect(screen.getByText("Import your history")).toBeDefined();
     expect(screen.getByText("MyFitnessPal")).toBeDefined();
     expect(screen.getByText("Cronometer")).toBeDefined();
     expect(screen.getByText("MacroFactor")).toBeDefined();
     expect(screen.getByText("Lose It!")).toBeDefined();
     expect(screen.getByText("MacroTrackr")).toBeDefined();
     expect(
-      screen.getByText("Click to browse or drag and drop your export file"),
+      screen.getByText("Choose your export file"),
     ).toBeDefined();
   });
 });

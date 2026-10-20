@@ -9,8 +9,15 @@ import {
   ResetIcon,
   TrashIcon,
 } from "@/components/ui";
+import { TOUCH_TARGET } from "@/components/utils/UiConstants";
+import { cn } from "@/lib/classnameUtilities";
 import { logger } from "@/lib/logger";
 import type { HabitFrequency } from "@/types/habit";
+
+// 36px to the eye, 48px to a thumb.
+const HABIT_ACTION = `${TOUCH_TARGET} inline-flex h-9 w-9 items-center justify-center rounded-full`;
+const MENU_ITEM =
+  "flex min-h-12 w-full items-center px-3 text-left text-foreground hover:bg-surface-2";
 
 interface HabitActionsProps {
   habitId: string;
@@ -107,76 +114,59 @@ function HabitActions({
       className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
       ref={menuReference}
     >
-      {handleDecrement && (
-        <button
-          onClick={handleDecrement}
-          disabled={isActionInProgress}
-          className="rounded-full p-1.5 text-foreground hover:bg-primary/10 hover:text-primary"
-          title="Remove progress"
-          aria-label="Remove progress"
-        >
-          <MinusCircleIcon size="sm" />
-        </button>
-      )}
-      {/* Progress increment button */}
+      {/* One action in reach; the rest wait behind the menu. */}
       {!isComplete && (
         <button
           onClick={handleIncrement}
           disabled={isActionInProgress}
-          className="rounded-full p-1.5 text-foreground hover:bg-primary/10 hover:text-primary"
+          className={`${HABIT_ACTION} text-foreground hover:bg-primary/10 hover:text-primary`}
           title="Add progress"
+          aria-label="Add progress"
         >
           <PlusCircleIcon size="sm" />
         </button>
       )}
-      {/* Mark complete button - moved outside menu */}
-      {!isComplete && (
-        <button
-          onClick={handleComplete}
-          disabled={isActionInProgress}
-          className="mx-0.5 rounded-full p-1.5 text-foreground hover:bg-success/10 hover:text-success"
-          title="Mark complete"
-        >
-          <CheckIcon size="sm" />
-        </button>
-      )}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
+        className={`${HABIT_ACTION} text-foreground hover:bg-surface-2 hover:text-foreground`}
         title="More actions"
+        aria-label="More actions"
+        aria-expanded={isMenuOpen}
       >
         <MoreVerticalIcon size="sm" />
       </button>
-      {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-control border border-border bg-surface py-0.5 text-xs">
+        <div className="absolute top-full right-0 z-50 mt-1 w-48 rounded-control border border-border bg-surface py-1 text-sm">
+          {!isComplete && (
+            <button onClick={handleComplete} disabled={isActionInProgress} className={MENU_ITEM}>
+              <CheckIcon size="sm" className="mr-2 text-success" />
+              Mark complete
+            </button>
+          )}
+          {handleDecrement && (
+            <button onClick={handleDecrement} disabled={isActionInProgress} className={MENU_ITEM}>
+              <MinusCircleIcon size="sm" className="mr-2" />
+              Remove progress
+            </button>
+          )}
           {onEdit && !isComplete && (
-            <button
-              onClick={handleEdit}
-              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
-            >
-              <EditIcon size="sm" className="mr-1.5" />
+            <button onClick={handleEdit} className={MENU_ITEM}>
+              <EditIcon size="sm" className="mr-2" />
               Edit
             </button>
           )}
-
           {handleReset && (
-            <button
-              onClick={handleReset}
-              disabled={isActionInProgress}
-              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
-            >
-              <ResetIcon size="sm" className="mr-1.5" />
+            <button onClick={handleReset} disabled={isActionInProgress} className={MENU_ITEM}>
+              <ResetIcon size="sm" className="mr-2" />
               {frequency === "weekly" ? "Reset this week" : "Reset today"}
             </button>
           )}
-
           <button
             onClick={handleDelete}
             disabled={isActionInProgress}
-            className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface-2"
+            className={cn(MENU_ITEM, "text-error")}
           >
-            <TrashIcon size="sm" className="mr-1.5" />
+            <TrashIcon size="sm" className="mr-2" />
             Delete
           </button>
         </div>

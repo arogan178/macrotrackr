@@ -82,7 +82,7 @@ export function SocialAuthOptions({
 
       <div className="my-6 flex items-center">
         <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
+        <span className="mx-4 text-xs font-medium text-muted">
           or
         </span>
         <div className="flex-1 border-t border-border" />

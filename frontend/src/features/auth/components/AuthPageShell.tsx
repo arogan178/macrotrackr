@@ -4,7 +4,6 @@ import CardContainer from "@/components/form/CardContainer";
 import AppHeader from "@/components/layout/AppHeader";
 
 interface AuthPageShellProps {
-  eyebrow: string;
   title: string;
   description: string;
   children: ReactNode;
@@ -13,7 +12,6 @@ interface AuthPageShellProps {
 }
 
 export default function AuthPageShell({
-  eyebrow,
   title,
   description,
   children,
@@ -28,10 +26,7 @@ export default function AuthPageShell({
         <section className="flex w-full flex-col items-center justify-center">
           <div className={`w-full ${panelClassName}`}>
             <div className="mb-5 px-1 text-center">
-              <p className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">
-                {eyebrow}
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
                 {title}
               </h1>
               <p className="mt-2 text-sm text-muted">{description}</p>

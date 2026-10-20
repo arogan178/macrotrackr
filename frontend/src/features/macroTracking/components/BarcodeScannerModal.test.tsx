@@ -106,9 +106,9 @@ describe("BarcodeScannerModal", () => {
       />
     );
 
-    expect(screen.getByText("Barcode Scanner")).toBeInTheDocument();
+    expect(screen.getByText("Barcode scanner")).toBeInTheDocument();
 
-    const manualButton = screen.getByRole("button", { name: "Enter Barcode Manually" });
+    const manualButton = screen.getByRole("button", { name: "Enter barcode manually" });
     fireEvent.click(manualButton);
 
     const input = screen.getByLabelText(/barcode number/i);
@@ -222,7 +222,7 @@ describe("BarcodeScannerModal", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/camera access was not granted/i)).toBeInTheDocument();
+      expect(screen.getByText(/camera access is off/i)).toBeInTheDocument();
     });
     expect(screen.getByLabelText(/barcode number/i)).toBeInTheDocument();
   });
@@ -241,7 +241,7 @@ describe("BarcodeScannerModal", () => {
       />
     );
 
-    const manualButton = screen.getByRole("button", { name: "Enter Barcode Manually" });
+    const manualButton = screen.getByRole("button", { name: "Enter barcode manually" });
     fireEvent.click(manualButton);
 
     const input = screen.getByLabelText(/barcode number/i);

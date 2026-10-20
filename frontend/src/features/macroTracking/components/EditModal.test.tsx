@@ -87,7 +87,7 @@ describe("EditModal", () => {
     expect(screen.getByDisplayValue("Oatmeal")).toBeInTheDocument();
 
     // Quantity & Unit controls are rendered
-    expect(screen.getByText("Quantity & Unit")).toBeInTheDocument();
+    expect(screen.getByText("Quantity")).toBeInTheDocument();
 
     // Single item convert button is rendered
     expect(
@@ -221,11 +221,11 @@ describe("EditModal", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Meal Type")).toHaveValue("breakfast");
+    expect(screen.getByLabelText("Meal type")).toHaveValue("breakfast");
     expect(screen.getByLabelText(/^Date/)).toHaveValue("2026-07-27");
     expect(screen.getByLabelText(/^Time/)).toHaveValue("08:00");
 
-    fireEvent.change(screen.getByLabelText("Meal Type"), {
+    fireEvent.change(screen.getByLabelText("Meal type"), {
       target: { value: "snack" },
     });
     fireEvent.change(screen.getByLabelText(/^Date/), {
@@ -264,7 +264,7 @@ describe("EditModal", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
 

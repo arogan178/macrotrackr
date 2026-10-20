@@ -64,6 +64,7 @@ export function useGoalsData() {
 
   const {
     data: weightGoalsFromQuery,
+    isPending: weightGoalsLoading,
     isError: isWeightGoalsError,
     error: weightGoalsError,
   } = useWeightGoals();
@@ -86,6 +87,7 @@ export function useGoalsData() {
     habits,
     habitsLoading,
     currentWeightGoals,
+    weightGoalsLoading,
     hasErrors,
     errors,
   };

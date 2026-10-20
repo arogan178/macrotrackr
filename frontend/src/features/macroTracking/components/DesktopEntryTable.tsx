@@ -135,7 +135,7 @@ const DesktopEntryTable = memo(
                   {isSelectionMode && (
                     <input
                       type="checkbox"
-                      className="mr-2 h-4 w-4 rounded-control border-border text-primary focus:ring-primary/50"
+                      className="mr-2 h-4 w-4 rounded-control border-border accent-primary"
                       checked={isEntrySelected(entry.clientId)}
                       onChange={(event_) => {
                         event_.stopPropagation();
@@ -177,7 +177,7 @@ const DesktopEntryTable = memo(
 
             return (
               <div className="flex flex-col items-center text-center text-sm text-foreground">
-                <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
+                <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-muted">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
                 {(entry.foodName ?? entry.mealName) && (
@@ -533,7 +533,7 @@ const DesktopEntryTable = memo(
                   {headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
-                      className="flex items-center justify-center px-4 py-3 text-center text-[10px] font-medium tracking-wider text-muted uppercase"
+                      className="flex items-center justify-center px-4 py-3 text-center text-[10px] font-medium text-muted"
                       style={{ width: columnWidth(header.column.id) }}
                     >
                       {header.isPlaceholder

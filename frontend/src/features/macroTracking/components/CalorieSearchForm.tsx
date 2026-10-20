@@ -13,6 +13,7 @@ import {
   TabBar,
 } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import Value from "@/components/ui/Value";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
 import { cn } from "@/lib/classnameUtilities";
@@ -25,6 +26,7 @@ import { rankFrequentFoods } from "../utils/frequentFoods";
 import { UnitConverter, type UnitType } from "../utils/units";
 
 import BarcodeScannerModal from "./BarcodeScannerModal";
+import { MacroSplitBar } from "./MacroSplitBar";
 import SavedMealEditModal from "./SavedMealEditModal";
 import SavedMealsList from "./SavedMealsList";
 
@@ -480,7 +482,7 @@ const CalorieSearch = memo(function CalorieSearch({
               <TabBar
                 items={[
                   { key: "recents", label: "Recents" },
-                  { key: "savedMeals", label: "Saved Meals" },
+                  { key: "savedMeals", label: "Saved meals" },
                 ]}
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as ActiveTab)}
@@ -543,22 +545,24 @@ const CalorieSearch = memo(function CalorieSearch({
                             }}
                             className="w-full rounded-control px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-foreground">
+                            {/* The same row as History: name and kcal, then
+                                meal and the macro split, instead of a sentence
+                                of labelled figures. */}
+                            <div className="flex items-baseline justify-between gap-3">
+                              <span className="min-w-0 truncate text-sm text-foreground">
                                 {entryName}
-                                {count > 1 && (
-                                  <span className="ml-2 text-xs text-muted">
-                                    ×{count}
-                                  </span>
-                                )}
                               </span>
-                              <span className="text-xs text-muted capitalize">
-                                {entry.mealType}
-                              </span>
+                              <Value value={cals} unit="kcal" className="shrink-0" />
                             </div>
-                            <div className="mt-0.5 text-xs text-muted">
-                              Calories: {formatGrouped(cals)} kcal | Protein: {entry.protein}g,
-                              Carbs: {entry.carbs}g, Fats: {entry.fats}g
+                            <div className="mt-1 flex items-center gap-2 text-xs text-muted">
+                              <span className="capitalize">{entry.mealType}</span>
+                              {count > 1 && <span>{count} times</span>}
+                              <MacroSplitBar
+                                protein={entry.protein}
+                                carbs={entry.carbs}
+                                fats={entry.fats}
+                                className="ml-auto w-12"
+                              />
                             </div>
                           </button>
                         );

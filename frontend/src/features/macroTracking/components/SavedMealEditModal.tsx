@@ -117,7 +117,7 @@ export default function SavedMealEditModal({
         />
         <Dropdown
           id="saved-meal-type"
-          label="Meal Type"
+          label="Meal type"
           options={MEAL_TYPE_OPTIONS.map((option) => ({
             value: option.value,
             label: option.display,

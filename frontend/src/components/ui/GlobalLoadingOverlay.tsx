@@ -7,9 +7,11 @@ import { useCriticalLoading } from "@/hooks/useGlobalLoading";
 import LoadingSpinner from "./LoadingSpinner";
 
 function GlobalLoadingOverlay() {
-  const { isLoading } = useCriticalLoading();
+  // Saves only. A first load used to blur the page and float a spinner over
+  // the skeleton that already showed where the content would land.
+  const { isMutationLoading } = useCriticalLoading();
 
-  const visible = useDeferredVisibility(isLoading, {
+  const visible = useDeferredVisibility(isMutationLoading, {
     delayMs: 200,
     minVisibleMs: 400,
   });

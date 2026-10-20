@@ -55,7 +55,7 @@ export const EntryCard = memo(
             <input
               type="checkbox"
               aria-label={`Select ${name ?? mealType}`}
-              className="h-5 w-5 self-center rounded-control border-border text-primary focus:ring-primary/50"
+              className="h-5 w-5 self-center rounded-control border-border accent-primary"
               checked={isSelected}
               onChange={() => onToggleSelection?.(entry.clientId)}
             />

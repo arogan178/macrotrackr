@@ -2,14 +2,31 @@ import { memo, useState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 
 import CardContainer from "@/components/form/CardContainer";
-import InfoCard from "@/components/form/InfoCard";
 import MacroTarget from "@/components/macros/MacroTarget";
-import { Button, CheckIcon, InfoIcon } from "@/components/ui";
+import { Button, CheckIcon } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 import { handleApiError } from "@/utils/errorHandling";
+
+const MACRO_NOTES = [
+  {
+    name: "Protein",
+    dot: "bg-protein",
+    text: "Repairs and builds muscle. For muscle growth keep it between 20 and 35%.",
+  },
+  {
+    name: "Carbs",
+    dot: "bg-carbs",
+    text: "Your main source of energy. Most people do well at 45 to 65%.",
+  },
+  {
+    name: "Fats",
+    dot: "bg-fats",
+    text: "Needed for hormones and for absorbing vitamins. Keep it between 20 and 35%.",
+  },
+];
 
 interface MacroTargetFormProps {
   macroTarget: MacroTargetSettings | null;
@@ -76,18 +93,18 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
       {/* Left side - Main content (4 cols) */}
       <div className="flex h-full flex-col lg:col-span-4">
-        <CardContainer className="h-full p-3.5 sm:p-6">
+        <CardContainer className="h-full p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:p-0">
           <div className="mb-4 sm:mb-6">
             <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
-              Macro Target Settings
+              Macro target settings
             </h3>
             <p className="mt-1 text-xs sm:text-sm text-muted">
-              Adjust sliders to set preferred daily macronutrient percentages.
+              Drag a slider to change your split. Lock one to hold it while you move the others.
             </p>
           </div>
 
           {/* Show skeleton loader when loading or when we don't have valid values yet */}
-          <div className="rounded-card border border-border bg-surface-2 p-5">
+          <div className="rounded-card border border-border bg-surface-2 p-5 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:p-0">
             {macroTarget ? (
               <form.Field name="target">
                 {(field) => (
@@ -193,7 +210,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 isLoading={isPending}
                 loadingText="Saving..."
                 disabled={!hasChanges}
-                text="Save Targets"
+                text="Save targets"
                 buttonSize="lg"
                 variant="primary"
                 ariaLabel="Save macro targets"
@@ -204,43 +221,23 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
         </CardContainer>
       </div>
 
-      {/* Right side - Info panel (2 cols) */}
+      {/* Right side - what each macro is for, and the range most people land in */}
       <div className="flex h-full flex-col lg:col-span-2">
-        <CardContainer className="h-full bg-surface-2 p-3.5 sm:p-6">
-          <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
-            Understanding Macros
+        <CardContainer className="h-full bg-surface-2 p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:p-0">
+          <h3 className="mb-4 text-base font-semibold tracking-tight text-foreground">
+            Understanding macros
           </h3>
-          <div className="flex-1 space-y-4">
-            <InfoCard
-              title="Protein"
-              description="Essential for muscle repair and growth."
-              color="protein"
-            />
-
-            <InfoCard
-              title="Carbohydrates"
-              description="Your body's primary energy source."
-              color="carbs"
-            />
-
-            <InfoCard
-              title="Fats"
-              description="Essential for hormone production and nutrient absorption."
-              color="fats"
-            />
-
-            <InfoCard
-              title="Tips"
-              color="indigo"
-              icon={<InfoIcon className="h-4 w-4 text-primary" />}
-            >
-              <ul className="mt-2 space-y-2 text-sm text-muted">
-                <li>• For muscle growth keep protein between 20-35% </li>
-                <li>• Carbs work best at 45-65%</li>
-                <li>• Fats should stay between 20-35%</li>
-              </ul>
-            </InfoCard>
-          </div>
+          <dl className="space-y-4">
+            {MACRO_NOTES.map((note) => (
+              <div key={note.name}>
+                <dt className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <span className={`h-2 w-2 rounded-full ${note.dot}`} />
+                  {note.name}
+                </dt>
+                <dd className="mt-1 text-sm text-muted">{note.text}</dd>
+              </div>
+            ))}
+          </dl>
         </CardContainer>
       </div>
     </div>

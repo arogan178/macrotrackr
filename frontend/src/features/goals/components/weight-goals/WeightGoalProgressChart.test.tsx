@@ -28,7 +28,7 @@ describe("WeightGoalProgressChart", () => {
   it("opens the log weight modal from the empty state", async () => {
     render(<WeightGoalProgressChart />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Log Weight" }));
+    await userEvent.click(screen.getByRole("button", { name: "Log weight" }));
 
     expect(useStore.getState().isLogWeightModalOpen).toBe(true);
   });

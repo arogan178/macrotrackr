@@ -1,7 +1,8 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
-import { CheckIcon, TargetIcon } from "@/components/ui";
+import { TargetIcon } from "@/components/ui";
 import ProgressBar from "@/components/ui/ProgressBar";
+import { CHIP } from "@/features/macroTracking/components/TargetRow";
 import { cn } from "@/lib/classnameUtilities";
 import type { HabitGoal } from "@/types/habit";
 
@@ -258,10 +259,7 @@ export default function HabitCard({
               </span>
             )}
             {resolvedShow.completionBadge && isComplete && (
-              <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs text-success">
-                <CheckIcon size="sm" />
-                Complete
-              </span>
+              <span className={cn(CHIP, "bg-primary/12 text-primary")}>Complete</span>
             )}
           </div>
         )}

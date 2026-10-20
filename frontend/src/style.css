@@ -113,17 +113,10 @@
   --tracking-wider: 0.1em;
 }
 
-/* Surface utility classes */
-.bg-surface-2 {
-  background-color: var(--color-surface-2);
-}
-.bg-surface-3 {
-  background-color: var(--color-surface-3);
-}
-.border-surface-2,
-.border-border-2 {
-  border-color: var(--color-border-2);
-}
+/* No hand-written colour utilities here: @theme already generates
+   `bg-surface-2` and friends inside the utilities layer. Copies out here are
+   unlayered, so they beat every variant: `max-md:bg-transparent` and
+   `hover:bg-surface-3` silently lost to a plain `bg-surface-2`. */
 
 /* Disabled state */
 button:disabled,

@@ -15,6 +15,7 @@ import {
   ReportingIcon,
   SettingsIcon,
 } from "@/components/ui/Icons";
+import { TOUCH_TARGET } from "@/components/utils/UiConstants";
 import {
   CALCULATOR_TOOLS,
   TOOLS_HUB_PATH,
@@ -43,7 +44,7 @@ const linkClasses =
 const activeLinkClasses = "bg-surface-2 font-semibold text-foreground";
 
 const iconButtonClasses =
-  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors duration-200 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  `${TOUCH_TARGET} inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors duration-200 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`;
 
 const useHeaderNavigation = () => {
   const location = useLocation();

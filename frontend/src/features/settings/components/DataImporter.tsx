@@ -197,10 +197,10 @@ export default function DataImporter() {
       <Panel padding="none">
         <div className="border-b border-border p-4">
           <div className="flex flex-col gap-1">
-            <Heading level="panel">1-Click Data Importer</Heading>
+            <Heading level="panel">Import your history</Heading>
             <p className="text-sm text-muted">
-              Import historical meals and weights seamlessly from MyFitnessPal,
-              Cronometer, MacroFactor, Lose It!, or native backups.
+              Bring in meals and weigh-ins from MyFitnessPal, Cronometer,
+              MacroFactor, Lose It! or a MacroTrackr backup.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export default function DataImporter() {
                   buttonSize="md"
                   onClick={handleReset}
                   leftIcon={<UploadIcon className="h-4 w-4" />}
-                  text="Import Another File"
+                  text="Import another file"
                 />
               </div>
             </div>
@@ -291,10 +291,10 @@ export default function DataImporter() {
                   <UploadIcon className="h-6 w-6" />
                 </div>
                 <span className="text-sm font-medium text-foreground">
-                  Click to browse or drag and drop your export file
+                  Choose your export file
                 </span>
                 <span className="mt-1 text-xs text-muted">
-                  Supports CSV and JSON exports up to 25 MB
+                  CSV or JSON, up to 25 MB
                 </span>
               </button>
 
@@ -349,19 +349,19 @@ export default function DataImporter() {
               {/* Import Preview Metric Cards */}
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <div className="rounded-card border border-border bg-surface-2 p-3">
-                  <span className="text-xs text-muted">Total Meals</span>
+                  <span className="text-xs text-muted">Total meals</span>
                   <div className="mt-1 text-lg font-semibold text-foreground">
                     {parsedData.summary.totalMeals}
                   </div>
                 </div>
                 <div className="rounded-card border border-border bg-surface-2 p-3">
-                  <span className="text-xs text-muted">Days Tracked</span>
+                  <span className="text-xs text-muted">Days tracked</span>
                   <div className="mt-1 text-lg font-semibold text-foreground">
                     {parsedData.summary.macroSummary.uniqueDays}
                   </div>
                 </div>
                 <div className="rounded-card border border-border bg-surface-2 p-3">
-                  <span className="text-xs text-muted">Avg Daily Calories</span>
+                  <span className="text-xs text-muted">Avg daily calories</span>
                   <div className="mt-1 text-lg font-semibold text-foreground">
                     {parsedData.summary.macroSummary.avgDailyCalories}{" "}
                     <span className="text-xs font-normal text-muted">kcal</span>

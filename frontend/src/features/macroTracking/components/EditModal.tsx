@@ -477,11 +477,11 @@ export default function EditModal({
         <Modal
           isOpen={showUnsavedWarning}
           onClose={cancelDiscard}
-          title="Unsaved Changes"
+          title="Unsaved changes"
           variant="form"
           onSave={confirmDiscard}
-          saveLabel="Discard Changes"
-          cancelLabel="Keep Editing"
+          saveLabel="Discard changes"
+          cancelLabel="Keep editing"
           size="sm"
         >
           <p className="text-sm text-foreground">
@@ -493,7 +493,7 @@ export default function EditModal({
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        title="Edit Nutrition Entry"
+        title="Edit entry"
         variant="form"
         onSave={handleSaveWithReset}
         saveDisabled={!formValid || isSaving || !hasUnsavedChanges}

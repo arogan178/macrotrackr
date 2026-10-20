@@ -19,8 +19,8 @@ function WeightProgressTabs({
   const [activeTab, setActiveTab] = useState<TabId>("chart");
 
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
-    { id: "chart", label: "Progress Chart", icon: BarChartIcon },
-    { id: "list", label: "Weight Log", icon: BookIcon },
+    { id: "chart", label: "Progress chart", icon: BarChartIcon },
+    { id: "list", label: "Weight log", icon: BookIcon },
   ];
   // Use TanStack Query hooks instead of Zustand store
   const { data: weightLog = [], isLoading } = useWeightLog();
@@ -53,8 +53,8 @@ function WeightProgressTabs({
           isMotion
           layoutId="weightProgressTab"
           size="sm"
+          fullWidth
         />
-        <div className="flex-1" />
         {/* Delete All Button */}
         {activeTab === "list" && weightLog.length > 1 && (
           <IconButton

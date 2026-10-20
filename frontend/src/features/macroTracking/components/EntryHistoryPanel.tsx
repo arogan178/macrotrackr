@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { format, subDays } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -17,7 +18,7 @@ import {
   StateCard,
 } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
-import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+import { DURATIONS, EASINGS, TOUCH_TARGET } from "@/components/utils/UiConstants";
 import { openLogSheet } from "@/lib/logSheet";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -148,11 +149,26 @@ const EntryHistoryComponent = function EntryHistory({
 
   const todayFormatted = useMemo(() => formatEntryDate(todayISO()), []);
 
+  const yesterdayFormatted = useMemo(
+    () => formatEntryDate(format(subDays(new Date(), 1), "yyyy-MM-dd")),
+    [],
+  );
+
+  // "Yesterday" and "Sat 18 Oct" read faster than "Oct 18, 2026"; the year
+  // only appears once it stops being this one.
   const formatDate = useCallback(
     (dateString: string) => {
-      return dateString === todayFormatted ? "Today" : dateString;
+      if (dateString === todayFormatted) return "Today";
+      if (dateString === yesterdayFormatted) return "Yesterday";
+      const date = new Date(dateString);
+      if (Number.isNaN(date.getTime())) return dateString;
+
+      return format(
+        date,
+        date.getFullYear() === new Date().getFullYear() ? "EEE d MMM" : "d MMM yyyy",
+      );
     },
-    [todayFormatted],
+    [todayFormatted, yesterdayFormatted],
   );
 
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
@@ -385,7 +401,7 @@ const EntryHistoryComponent = function EntryHistory({
         <div className="flex items-center gap-1">
           {history.length > 0 && (
             <Button
-              variant={isSelectionMode ? "primary" : "secondary"}
+              variant="secondary"
               onClick={toggleSelectionMode}
               text={isSelectionMode ? "Cancel" : "Select"}
               buttonSize="sm"
@@ -420,9 +436,9 @@ const EntryHistoryComponent = function EntryHistory({
         <div className="flex gap-2">
           {history.length > 0 && (
             <Button
-              variant={isSelectionMode ? "primary" : "secondary"}
+              variant="secondary"
               onClick={toggleSelectionMode}
-              text={isSelectionMode ? "Cancel Selection" : "Group Meals"}
+              text={isSelectionMode ? "Cancel selection" : "Group meals"}
               buttonSize="sm"
             />
           )}
@@ -466,7 +482,7 @@ const EntryHistoryComponent = function EntryHistory({
       ) : (
         // On a phone the days run edge to edge of the panel: a bordered box
         // here was a third level of nesting, and cost each entry 34px.
-        <div className="-mx-4 overflow-hidden border-y border-border sm:-mx-6 md:mx-0 md:rounded-control md:border">
+        <div className="-mx-4 overflow-clip border-y border-border sm:-mx-6 md:mx-0 md:rounded-control md:border">
 
           <EntryHistoryContext.Provider value={controller}>
             <div className="hidden md:block">
@@ -484,13 +500,13 @@ const EntryHistoryComponent = function EntryHistory({
                 <button
                   type="button"
                   onClick={loadMoreDates}
-                  className={`flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
+                  className={`${TOUCH_TARGET} flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}
                 >
                   {isLoadingMore && <LoadingSpinner />}
-                  <span>Load More Dates</span>
+                  <span>Show older days</span>
                   <ChevronDownIcon className="h-4 w-4 text-foreground" />
                 </button>
               )}
@@ -501,7 +517,7 @@ const EntryHistoryComponent = function EntryHistory({
                   onClick={showLessDates}
                   className="flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
                 >
-                  <span>Show Less</span>
+                  <span>Show less</span>
                   <ChevronDownIcon className="h-4 w-4 rotate-180" />
                 </button>
               )}
@@ -541,17 +557,21 @@ const EntryHistoryComponent = function EntryHistory({
                 <span className="text-sm font-medium whitespace-nowrap text-foreground">
                   {selectedEntryIds.size} selected
                 </span>
-                <span className="hidden h-4 w-px bg-border md:block" />
-                <span className="text-xs whitespace-nowrap text-muted">
-                  Select 2+ entries to group
-                </span>
+                {selectedEntryIds.size < 2 && (
+                  <>
+                    <span className="hidden h-4 w-px bg-border md:block" />
+                    <span className="text-xs whitespace-nowrap text-muted">
+                      Select 2 or more to group them
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="ml-2 flex items-center gap-2">
                 <Button
                   variant="primary"
                   onClick={handleCreateGroupMeal}
-                  text="Save Group"
+                  text="Save group"
                   disabled={selectedEntryIds.size < 2}
                   buttonSize="sm"
                   className="whitespace-nowrap"
@@ -584,12 +604,12 @@ const EntryHistoryComponent = function EntryHistory({
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
-        title="Delete Entries"
+        title="Delete entries"
         variant="confirmation"
         message={`Are you sure you want to delete all entries for ${
           dateToDelete ? formatDate(dateToDelete) : ""
         }? This action cannot be undone.`}
-        confirmLabel="Delete All"
+        confirmLabel="Delete all"
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
         isDanger
@@ -602,7 +622,7 @@ const EntryHistoryComponent = function EntryHistory({
         variant="confirmation"
         message={`Add ${entriesToCopy.length} ${
           entriesToCopy.length === 1 ? "entry" : "entries"
-        } from ${dateToCopy ?? ""} to today, at the same times and meals?`}
+        } from ${dateToCopy ? formatDate(dateToCopy) : ""} to today, at the same times and meals?`}
         confirmLabel="Copy"
         cancelLabel="Cancel"
         onConfirm={confirmCopyDate}
@@ -622,7 +642,7 @@ const EntryHistoryComponent = function EntryHistory({
       <Modal
         isOpen={isGroupModalOpen}
         onClose={() => setIsGroupModalOpen(false)}
-        title="Save Grouped Meal"
+        title="Save grouped meal"
         variant="form"
       >
         <div className="space-y-4">
@@ -635,7 +655,7 @@ const EntryHistoryComponent = function EntryHistory({
               htmlFor="groupMealName"
               className="mb-2 block text-sm font-medium text-foreground"
             >
-              Meal Name
+              Meal name
             </label>
             <input
               id="groupMealName"
@@ -664,7 +684,7 @@ const EntryHistoryComponent = function EntryHistory({
             />
             <Button
               variant="primary"
-              text="Save Meal"
+              text="Save meal"
               onClick={confirmGroupMeals}
               disabled={!groupMealName.trim()}
             />

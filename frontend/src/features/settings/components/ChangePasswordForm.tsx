@@ -82,13 +82,6 @@ const ChangePasswordForm = () => {
         }}
         className="space-y-4 sm:space-y-5"
       >
-        <div className="rounded-card border border-border bg-surface-2 p-3.5 sm:p-4">
-          <p className="text-xs sm:text-sm text-muted">
-            <strong className="text-foreground">Security note:</strong> For your
-            protection, enter your current password before setting a new one.
-          </p>
-        </div>
-
         <div className="grid grid-cols-1 gap-3.5 sm:gap-4">
           <form.Field
             name="currentPassword"
@@ -99,7 +92,7 @@ const ChangePasswordForm = () => {
           >
             {(field) => (
               <TextField
-                label="Current Password"
+                label="Current password"
                 type="password"
                 value={field.state.value}
                 onChange={field.handleChange}
@@ -124,7 +117,7 @@ const ChangePasswordForm = () => {
             >
               {(field) => (
                 <TextField
-                  label="New Password"
+                  label="New password"
                   type="password"
                   value={field.state.value}
                   onChange={field.handleChange}
@@ -179,7 +172,7 @@ const ChangePasswordForm = () => {
           >
             {(field) => (
               <TextField
-                label="Confirm New Password"
+                label="Confirm new password"
                 type="password"
                 value={field.state.value}
                 onChange={field.handleChange}
@@ -209,7 +202,7 @@ const ChangePasswordForm = () => {
               !confirmPassword ||
               passwordStrength < 3
             }
-            text="Change Password"
+            text="Change password"
             buttonSize="md"
             variant="primary"
             className="w-full sm:w-auto"

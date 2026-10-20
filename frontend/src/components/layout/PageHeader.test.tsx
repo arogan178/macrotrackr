@@ -17,13 +17,13 @@ describe("PageHeader", () => {
 
   it("renders the subtitle and children when provided", () => {
     render(
-      <PageHeader title="Your Goals" subtitle="Tuesday, 12 August" hasChanges>
+      <PageHeader title="Your goals" subtitle="Tuesday, 12 August" hasChanges>
         <button type="button">Tab</button>
       </PageHeader>,
     );
 
     expect(screen.getByText("Tuesday, 12 August")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tab" })).toBeInTheDocument();
-    expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
   });
 });

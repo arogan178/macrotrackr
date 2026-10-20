@@ -59,6 +59,11 @@ Colour, radius, surface and motion values come from `frontend/src/style.css` and
 `text-muted`, `rounded-card`); a hex literal in a component is drift by
 definition.
 
+Never hand-write a utility-named class (`.bg-surface-2`) in a stylesheet. `@theme`
+already generates it inside Tailwind's utilities layer; a copy outside any layer
+outranks every variant, so `max-md:bg-transparent` and `hover:bg-surface-3`
+silently stop working on anything that also carries the base class.
+
 ## Rules with reasons
 
 **Size and width carry hierarchy; weight is nearly flat.** `TYPE_SCALE` has six
@@ -131,6 +136,42 @@ prop is the whole reproduction. Changing the standard is one line in that file.
 **A number is never clamped to look better.** Clamp the bar — a bar cannot be
 longer than its track. Print the real figure beside it. A day over target is
 information the user came for.
+
+**A control looks small and hits big.** Every tap target is 48px, Android's
+floor and what Google Health, Fitbit and Oskel measure at. The visible control
+can be smaller: `Button` sizes are 36 and 40px, icon buttons 32 and 36px, and
+`TOUCH_TARGET` (`UiConstants.ts`) adds an invisible 48px hit area around them.
+A hand-built `<button>` under 48px takes `TOUCH_TARGET` too.
+
+**One action in reach, the rest behind a menu.** A row shows its primary action
+and a `⋮`; secondary and destructive actions live in the menu or sheet it opens.
+Four icons beside a name do not fit a 360px phone and read as clutter.
+
+**A verdict is a chip.** "On target" and "X over" sit in a tinted pill
+(`CHIP` in `TargetRow.tsx`); a shortfall stays plain muted text. The tint is
+the status colour, so the chip reads before its words do.
+
+**A bar fills to its target.** A full track is the target met; past it the bar
+turns warning. No tolerance band: drawn against each row's own target it lands
+in the same place on every row and reads as a shared scale that is not there.
+
+**A period shows its days.** An average over a range draws one thin bar per day
+under a single dashed target line, on a baseline, as Google Health's "Last 7
+days" rows do. A day that hit takes the macro colour, a short day is grey, an
+over day is warning. A 7-day range labels its weekdays once, under the last
+row. A good average over a bad week is a lie told by omission.
+
+**Charts carry no chrome.** No axis lines, no tick marks; a few muted labels and
+the data. The reference apps draw neither.
+
+**What you are working on stays in reach.** A history day's header pins under
+the status bar while its entries scroll; the log sheet's total and Add button pin
+to the bottom while its fields scroll. A wrapper between a pinned element and
+the page must use `overflow-clip`, not `overflow-hidden`, or nothing pins.
+
+**Settings on a phone are rows, not tabs.** One 64px row per section with a hint
+and a chevron; tapping opens the section with a back link. Five tabs do not fit
+360px. Form fields are 48px tall on a phone with 14px type.
 
 ## Voice
 

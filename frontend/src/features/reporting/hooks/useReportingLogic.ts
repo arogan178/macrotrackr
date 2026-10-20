@@ -28,7 +28,7 @@ function buildReportingData(
   dateRange: string,
 ): {
   aggregatedData: ReportingChartRow[];
-  dailySeries: ReportingChartRow[];
+  dailySeries: (ReportingChartRow & { date: string })[];
 } {
   if (!history?.length) {
     return {

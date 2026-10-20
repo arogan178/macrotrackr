@@ -52,7 +52,7 @@ export default function TrendsChartSection({
 
   return (
     <ChartCard
-      title="Intake Trends"
+      title="Intake trends"
       className="w-full"
       minHeight={320}
       action={
@@ -69,6 +69,7 @@ export default function TrendsChartSection({
       <LineChartComponent
         data={dailySeries}
         lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
+        showLegend={activeTab !== "calories"}
         isLoading={isHistoryLoading || !isHistoryReady}
         showNoDataMessage={chartShowNoDataMessage}
         height={320}

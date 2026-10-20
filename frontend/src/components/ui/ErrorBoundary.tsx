@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<
                 <WarningIcon className="mx-auto mb-3 h-12 w-12" />
                 <h2 className="mb-1 text-center text-xl font-bold text-foreground">
                   {this.state.isQueryError
-                    ? "Data Loading Error"
+                    ? "Data loading error"
                     : "Something went wrong"}
                 </h2>
                 <p className="text-center text-foreground">

@@ -673,7 +673,7 @@ export function ClerkSignInForm({
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
             <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+              <p className="text-xs font-medium text-muted">
                 Email sign in
               </p>
               <button
@@ -762,7 +762,7 @@ export function ClerkSignInForm({
               loadingStrategy={loadingStrategy}
             />
 
-            <LegalConsentNotice lead="A provider creates an account if you do not have one." />
+            <LegalConsentNotice lead="New here? This creates your account." />
           </motion.div>
         )}
       </AnimatePresence>

@@ -129,9 +129,7 @@ async function completeProfile(
   await page.getByLabel(/Height/u).fill("180");
   await page.getByLabel(/Weight/u).fill("80");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page
-    .getByLabel("How active are you on a typical week?")
-    .selectOption("3");
+  await page.getByRole("radio", { name: /^Moderately active/u }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page
     .getByLabel("What are you switching from?")
@@ -189,7 +187,7 @@ async function importMyFitnessPal(
   );
 
   await page.goto("/settings?tab=data");
-  await expect(page.getByText("1-Click Data Importer")).toBeVisible();
+  await expect(page.getByText("Import your history")).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles(fixturePath);
   await expect(page.getByText("Growth canary oats")).toBeVisible();
   await page.getByRole("button", { name: "Import 1 Entries" }).click();

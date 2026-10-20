@@ -56,7 +56,7 @@ describe("LogWeightModal", () => {
     expect(input).toHaveValue(165.5);
     expect(screen.getByText("lb")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Log Weight" }));
+    await user.click(screen.getByRole("button", { name: "Log weight" }));
 
     await waitFor(() => expect(addWeightLog).toHaveBeenCalledTimes(1));
     expect(addWeightLog.mock.calls[0][0].weight).toBe(75.07);
@@ -80,7 +80,7 @@ describe("LogWeightModal", () => {
     render(<LogWeightModal isOpen onClose={vi.fn()} unitSystem="imperial" />);
 
     await user.type(screen.getByLabelText("Weight"), "100");
-    await user.click(screen.getByRole("button", { name: "Log Weight" }));
+    await user.click(screen.getByRole("button", { name: "Log weight" }));
 
     expect(screen.getByText("Weight must be at least 111 lb.")).toBeInTheDocument();
     expect(addWeightLog).not.toHaveBeenCalled();
@@ -104,7 +104,7 @@ describe("LogWeightModal", () => {
 
     await user.clear(input);
     await user.type(input, "175");
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     await waitFor(() => expect(updateWeightLog).toHaveBeenCalledTimes(1));
     expect(updateWeightLog).toHaveBeenCalledWith({
@@ -127,7 +127,7 @@ describe("LogWeightModal", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     await waitFor(() => expect(updateWeightLog).toHaveBeenCalledTimes(1));
     expect(updateWeightLog.mock.calls[0][0].weight).toBe(80);

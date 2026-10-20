@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import {
   BalanceIcon,
   ClipboardIcon,
-  LightningIcon,
+  Heading,
   NutrientIcon,
   ProteinIcon,
 } from "@/components/ui";
@@ -66,25 +66,25 @@ export default function RecommendationsSection({
   // cards regardless of the data is filler, not advice.
   const suggestions = [
     macroBalance.currentRatio !== "0/0/0" && {
-      title: "Macro Split",
+      title: "Macro split",
       bgColor: "bg-surface-2 text-foreground",
       message: macroBalance.recommendations,
       icon: <BalanceIcon className="h-5 w-5" />,
     },
     averages.calories > 0 && {
-      title: "Protein Share",
+      title: "Protein share",
       bgColor: "bg-surface-2 text-foreground",
       message: macroDensity.message,
       icon: <NutrientIcon className="h-5 w-5" />,
     },
     protein && {
-      title: "Protein Intake",
+      title: "Protein intake",
       bgColor: "bg-surface-2 text-foreground",
       message: protein,
       icon: <ProteinIcon className="h-5 w-5" />,
     },
     tracking && {
-      title: "Tracking Gaps",
+      title: "Tracking gaps",
       bgColor: "bg-surface-2 text-foreground",
       message: tracking,
       icon: <ClipboardIcon className="h-5 w-5" />,
@@ -105,12 +105,9 @@ export default function RecommendationsSection({
       transition={{ duration: 0.3, delay: 0.5 }}
       className="flex flex-col gap-6"
     >
-      <div className="flex items-center text-foreground/90">
-        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-control bg-primary/10">
-          <LightningIcon className="h-5 w-5 text-primary" />
-        </div>
-        <h3 className="text-xl font-bold tracking-tight">Suggestions</h3>
-      </div>
+      <Heading level="panel" as="h3">
+        Suggestions
+      </Heading>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {suggestions.map((suggestion) => (

@@ -1,16 +1,16 @@
 import { memo } from "react";
-import { motion } from "motion/react";
 
 import type { SavedMeal } from "@/api/savedMeals";
 import Button from "@/components/ui/Button";
 import { EditIcon, TrashIcon } from "@/components/ui/Icons";
+import Value from "@/components/ui/Value";
+import { TOUCH_TARGET } from "@/components/utils/UiConstants";
 import { isLocalAuthMode } from "@/config/runtime";
 import {
   useDeleteSavedMeal,
   useSavedMeals,
 } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
-import { formatGrouped } from "@/lib/formatNumber";
 import type { Ingredient, MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -44,7 +44,7 @@ const SavedMealsList = memo(
     if (isLoading) {
       return (
         <div className={cn("space-y-2", className)}>
-          <div className="text-sm font-medium text-muted">Saved Meals</div>
+          <div className="text-sm font-medium text-muted">Saved meals</div>
           <div className="flex gap-2">
             {[1, 2, 3].map((index) => (
               <div
@@ -67,71 +67,54 @@ const SavedMealsList = memo(
 
     return (
       <div className={cn("space-y-3", className)}>
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-foreground">Quick Add</div>
-          {!isPro && (
-            <div className="text-xs text-muted">
-              {count}/{limit} meals saved
-            </div>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {matchingMeals.length === 0 && (
-            <div className="text-sm text-muted">No saved meals match</div>
-          )}
-          {matchingMeals.map((meal) => {
-            const calories = Math.round(
-              calculateCaloriesFromMacros(meal.protein, meal.carbs, meal.fats),
-            );
+        {!isPro && (
+          <div className="text-xs text-muted">
+            {count} of {limit} meals saved
+          </div>
+        )}
+        {matchingMeals.length === 0 ? (
+          <div className="text-sm text-muted">No saved meals match</div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {matchingMeals.map((meal) => {
+              const calories = Math.round(
+                calculateCaloriesFromMacros(meal.protein, meal.carbs, meal.fats),
+              );
 
-            return (
-              <motion.div
-                key={meal.id}
-                className="group flex items-center gap-1 rounded-control border border-border bg-surface py-1 pr-1 pl-3 transition-[background-color,border-color] duration-200 hover:border-primary/30 hover:bg-surface-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <button
-                  type="button"
-                  onClick={() => onSelectMeal(meal)}
-                  className="flex items-center gap-2 py-1 pr-1 outline-none"
-                >
-                  <span className="text-sm font-medium text-foreground">
-                    {meal.name}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {formatGrouped(calories)} kcal
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={(event_) => {
-                    event_.stopPropagation();
-                    onEditMeal(meal);
-                  }}
-                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,color] duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100 hover:text-foreground"
-                  title="Edit saved meal"
-                  aria-label={`Edit ${meal.name}`}
-                >
-                  <EditIcon className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(event_) => {
-                    event_.stopPropagation();
-                    deleteMeal.mutate(meal.id);
-                  }}
-                  disabled={deleteMeal.isPending}
-                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
-                  title="Delete saved meal"
-                  aria-label={`Delete ${meal.name}`}
-                >
-                  <TrashIcon className="h-3.5 w-3.5" />
-                </button>
-              </motion.div>
-            );
-          })}
-        </div>
+              return (
+                <li key={meal.id} className="flex min-h-12 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onSelectMeal(meal)}
+                    className="flex min-w-0 flex-1 items-baseline justify-between gap-3 py-2 text-left outline-none"
+                  >
+                    <span className="min-w-0 truncate text-sm text-foreground">
+                      {meal.name}
+                    </span>
+                    <Value value={calories} unit="kcal" className="shrink-0" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onEditMeal(meal)}
+                    className={`${TOUCH_TARGET} rounded-control p-1.5 text-muted hover:text-foreground`}
+                    aria-label={`Edit ${meal.name}`}
+                  >
+                    <EditIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteMeal.mutate(meal.id)}
+                    disabled={deleteMeal.isPending}
+                    className={`${TOUCH_TARGET} rounded-control p-1.5 text-muted hover:text-error disabled:opacity-50`}
+                    aria-label={`Delete ${meal.name}`}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
         {!isPro && count >= limit && (
           <div className="text-xs text-muted">
             Meal limit reached.{" "}

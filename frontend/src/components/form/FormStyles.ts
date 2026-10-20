@@ -10,9 +10,10 @@ export const formStyles = {
   // Container spacing
   container: "space-y-2",
 
-  // Input styles
+  // Input styles. A field is a tap target too: 48px tall on a phone, where it
+  // used to be 34px with 12px type.
   input: {
-    base: "w-full px-3 sm:px-3.5 py-2 sm:py-2.5 bg-surface-2 border rounded-control text-xs sm:text-sm text-foreground placeholder:text-xs sm:placeholder:text-sm placeholder:text-muted/70 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-200",
+    base: "w-full min-h-12 sm:min-h-0 px-3 sm:px-3.5 py-2 sm:py-2.5 bg-surface-2 border rounded-control text-sm text-foreground placeholder:text-sm placeholder:text-muted/70 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-200",
     error: "border-error",
     normal: "border-border hover:border-border-2",
     withIcon: "pl-9 sm:pl-10",

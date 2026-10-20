@@ -5,7 +5,6 @@ import UpgradeModal from "@/components/billing/UpgradeModal";
 import {
   Button,
   ExportIcon,
-  IconButton,
   LockIcon,
   ShareIcon,
   TabBar,
@@ -62,14 +61,13 @@ export default function DateRangeSelector({
   return (
     <motion.div
       layout
-      className="z-30 mb-6 max-md:mb-0 md:sticky rounded-card border border-border bg-surface p-3 max-md:rounded-none max-md:border-0 max-md:bg-background max-md:px-0"
+      className="z-30 mb-6 max-md:mb-0 md:sticky rounded-card border border-border bg-surface p-3 max-md:rounded-none max-md:border-0 max-md:bg-background max-md:p-0"
       style={{ top: "var(--header-offset)" }}
     >
-      {/* On a phone the tabs take their own full-width row under the label and
-          actions, and the bar scrolls away: pinned, two rows hid a sixth of
-          the screen. */}
+      {/* On a phone the tabs are the whole bar and it scrolls away: the label
+          repeats the tabs, and share and export sit on the page title's row. */}
       <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3">
-        <span className="text-xs sm:text-sm font-medium text-foreground shrink-0">Time Period:</span>
+        <span className="hidden shrink-0 text-sm font-medium text-foreground md:inline">Time Period:</span>
         <TabBar
           items={items}
           activeKey={currentRange}
@@ -86,50 +84,27 @@ export default function DateRangeSelector({
           </span>
         )}
 
-        <div className="ml-auto flex items-center gap-2 shrink-0">
+        <div className="ml-auto hidden shrink-0 items-center gap-2 md:flex">
           {onShareClick && (
-            <>
-              <div className="flex md:hidden">
-                <IconButton
-                  variant="share"
-                  ariaLabel="Share macro snapshot"
-                  onClick={onShareClick}
-                  disabled={isExportDisabled}
-                />
-              </div>
-              <div className="hidden md:flex">
-                <Button
-                  onClick={onShareClick}
-                  disabled={isExportDisabled}
-                  ariaLabel="Share macro snapshot"
-                  variant="secondary"
-                  leftIcon={<ShareIcon size="sm" />}
-                >
-                  Share Snapshot
-                </Button>
-              </div>
-            </>
-          )}
-
-          <div className="flex md:hidden">
-            <IconButton
-              variant="export"
-              ariaLabel="Export data as CSV file"
-              onClick={onExportClick}
-              disabled={isExportDisabled}
-            />
-          </div>
-          <div className="hidden md:flex">
             <Button
-              onClick={onExportClick}
+              onClick={onShareClick}
               disabled={isExportDisabled}
-              ariaLabel="Export data as CSV file"
-              className="flex items-center rounded-control border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
-              leftIcon={<ExportIcon />}
+              ariaLabel="Share macro snapshot"
+              variant="secondary"
+              leftIcon={<ShareIcon size="sm" />}
             >
-              Export CSV
+              Share snapshot
             </Button>
-          </div>
+          )}
+          <Button
+            onClick={onExportClick}
+            disabled={isExportDisabled}
+            ariaLabel="Export data as CSV file"
+            className="flex items-center rounded-control border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
+            leftIcon={<ExportIcon />}
+          >
+            Export CSV
+          </Button>
         </div>
       </div>
       <UpgradeModal

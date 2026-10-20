@@ -94,6 +94,14 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       >
         {children}
       </main>
+      {/* The app draws edge to edge; without a fill, scrolled content runs
+          under the status bar's clock and icons. Zero height on the web. */}
+      {isAuthenticated && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-0 z-70 h-(--sat) bg-background md:hidden"
+        />
+      )}
       {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
       {isAuthenticated && <LogSheet />}
       <OfflineBar />

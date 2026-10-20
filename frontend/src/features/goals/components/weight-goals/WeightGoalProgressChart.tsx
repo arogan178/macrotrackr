@@ -15,6 +15,7 @@ import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 import { formatGrouped } from "@/lib/formatNumber";
 import { useStore } from "@/store/store";
+import { formatDateShort } from "@/utils/dateUtilities";
 import {
   formatWeight,
   fromKg,
@@ -50,7 +51,7 @@ function WeightCustomTooltip({
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy")
-            : (label ?? "Date Unavailable")}
+            : (label ?? "Date unavailable")}
         </div>
         {rows.map((row) => (
           <div key={row.label} className="mt-1 flex items-center gap-2">
@@ -181,7 +182,7 @@ function WeightGoalProgressChart({
 
   const xAxisProps = {
     dataKey: "name",
-    axisLine: { stroke: "var(--color-border)" },
+    axisLine: false,
     tickLine: false,
     // Drop ticks by measured width: a count-based interval ran the dates
     // together on a phone.
@@ -208,11 +209,11 @@ function WeightGoalProgressChart({
 
   const emptyStateComponent = (
     <StateCard
-      title="Track Your Progress"
+      title="Track your progress"
       message="Start logging your weight to see your progress charted over time."
       icon={<BarChartIcon className="h-14 w-14 text-primary" strokeWidth={1} />}
       action={{
-        label: "Log Weight",
+        label: "Log weight",
         onClick: () => setLogWeightModalOpen(true),
         variant: "ghost",
       }}
@@ -222,21 +223,10 @@ function WeightGoalProgressChart({
 
   return (
     <div className="flex h-96 flex-col">
-      <div className="mb-2 h-5 text-sm text-foreground">
-        {chartData.length > 0 && (
-          <span>
-            {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
-            {format(
-              parseISO(
-                chartData.length > 0
-                  ? (chartData[chartData.length - 1]?.fullDate ?? "")
-                  : "",
-              ),
-              "MMM d, yyyy",
-            )}
-          </span>
-        )}
-      </div>
+      <p className="mb-2 h-5 text-xs text-muted">
+        {chartData.length > 0 &&
+          `${formatDateShort(chartData[0].fullDate)} to ${formatDateShort(chartData.at(-1)?.fullDate ?? "")}`}
+      </p>
       <div className="grow">
         <LineChartComponent
           data={chartData as ChartDataPoint[]}

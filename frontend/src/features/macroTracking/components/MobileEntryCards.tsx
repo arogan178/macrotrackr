@@ -89,9 +89,10 @@ const MobileEntryCards = memo(
     });
 
     // A plain row, not a filled band: the day is a heading for the entries
-    // under it, and its split bar says what kind of day it was.
+    // under it, and its split bar says what kind of day it was. It pins below
+    // the status bar while its entries scroll, so a long day keeps its name.
     const renderDateHeader = (group: GroupedEntry) => (
-      <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border pr-1 pl-4">
+      <div className="sticky top-(--sat) z-10 flex min-h-12 items-center justify-between gap-3 border-b border-border bg-background pr-1 pl-4">
         <button
           type="button"
           aria-expanded={!isDateCollapsed(group.date)}

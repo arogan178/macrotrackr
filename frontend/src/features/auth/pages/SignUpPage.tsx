@@ -20,7 +20,6 @@ export default function SignUpPage() {
   return (
     <QueryErrorBoundary>
       <AuthPageShell
-        eyebrow="New Account"
         title="Create your account"
         description="Set up your MacroTrackr account and start building your meals, history, and goals."
         showBackToHome={!isLocalAuthMode}

@@ -122,8 +122,8 @@ describe("AddEntryForm", () => {
       </>,
     );
 
-    expect(screen.getByRole("textbox", { name: "Meal Name" })).toBeVisible();
-    expect(screen.getByRole("combobox", { name: "Meal Type" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Meal name" })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: "Meal type" })).toBeVisible();
     for (const name of ["Protein", "Carbs", "Fats"]) {
       expect(screen.getByRole("spinbutton", { name })).toBeVisible();
     }

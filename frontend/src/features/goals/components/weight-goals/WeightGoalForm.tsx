@@ -284,7 +284,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           >
             {(field) => (
               <WeightField
-                label="Starting Weight"
+                label="Starting weight"
                 value={field.state.value}
                 onChange={field.handleChange}
                 unitSystem={unitSystem}
@@ -306,7 +306,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           >
             {(field) => (
               <WeightField
-                label="Target Weight"
+                label="Target weight"
                 value={field.state.value}
                 onChange={field.handleChange}
                 unitSystem={unitSystem}
@@ -320,7 +320,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
         </div>
         {!tdee && (
           <div className="rounded-control border border-warning/30 bg-warning/10 p-4 text-warning">
-            <p className="text-sm font-semibold">Profile Details Incomplete</p>
+            <p className="text-sm font-semibold">Profile details incomplete</p>
             <p className="mt-1 text-xs">
               Please complete your profile details (Date of Birth, Gender,
               Height, Weight, and Activity Level) in Settings to calculate your

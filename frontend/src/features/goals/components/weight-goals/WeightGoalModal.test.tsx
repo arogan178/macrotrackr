@@ -54,10 +54,10 @@ describe("WeightGoalModal", () => {
     createGoal.mockResolvedValue(undefined);
     const { onClose } = renderModal();
 
-    const target = await screen.findByLabelText("Target Weight");
+    const target = await screen.findByLabelText("Target weight");
     await user.clear(target);
     await user.type(target, "75");
-    await user.click(screen.getByRole("button", { name: "Set Goal" }));
+    await user.click(screen.getByRole("button", { name: "Set goal" }));
 
     expect(createGoal).toHaveBeenCalledWith({
       tdee: 2500,
@@ -80,7 +80,7 @@ describe("WeightGoalModal", () => {
     createGoal.mockResolvedValue(undefined);
     renderModal();
 
-    const target = await screen.findByLabelText("Target Weight");
+    const target = await screen.findByLabelText("Target weight");
     await user.clear(target);
     await user.type(target, "75");
 
@@ -98,7 +98,7 @@ describe("WeightGoalModal", () => {
       ),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Set Goal" }));
+    await user.click(screen.getByRole("button", { name: "Set goal" }));
     expect(createGoal).toHaveBeenCalledWith(
       expect.objectContaining({
         goals: expect.objectContaining({
@@ -114,7 +114,7 @@ describe("WeightGoalModal", () => {
     const user = userEvent.setup();
     renderModal("imperial");
 
-    const target = await screen.findByLabelText("Target Weight");
+    const target = await screen.findByLabelText("Target weight");
     await user.clear(target);
     await user.type(target, "185");
 
@@ -150,14 +150,14 @@ describe("WeightGoalModal", () => {
     expect(
       screen.getByText("Daily calorie target: 1,900 kcal"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Update Goal" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Update goal" })).toBeDisabled();
 
     fireEvent.change(screen.getByRole("slider"), { target: { value: "0.5" } });
     expect(
       screen.getByText("Daily calorie target: 2,060 kcal"),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Update Goal" }));
+    await user.click(screen.getByRole("button", { name: "Update goal" }));
     expect(updateGoal).toHaveBeenCalledWith(
       expect.objectContaining({
         goals: expect.objectContaining({
@@ -172,8 +172,8 @@ describe("WeightGoalModal", () => {
   it("explains an out-of-range or missing target and blocks saving", async () => {
     const user = userEvent.setup();
     renderModal();
-    const target = await screen.findByLabelText("Target Weight");
-    const save = screen.getByRole("button", { name: "Set Goal" });
+    const target = await screen.findByLabelText("Target weight");
+    const save = screen.getByRole("button", { name: "Set goal" });
 
     await user.clear(target);
     expect(screen.getByText("Target weight is required")).toBeInTheDocument();
@@ -195,7 +195,7 @@ describe("WeightGoalModal", () => {
   it("states the limits in pounds for imperial users", async () => {
     const user = userEvent.setup();
     renderModal("imperial");
-    const target = await screen.findByLabelText("Target Weight");
+    const target = await screen.findByLabelText("Target weight");
 
     await user.clear(target);
     await user.type(target, "50");

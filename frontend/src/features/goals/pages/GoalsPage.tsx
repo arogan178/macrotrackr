@@ -41,6 +41,7 @@ export default function GoalsPage() {
     macroDailyTotals,
     habits,
     habitsLoading,
+    weightGoalsLoading,
     hasErrors,
   } = data;
 
@@ -70,7 +71,7 @@ export default function GoalsPage() {
   return (
     <DashboardPageContainer>
       <FeaturePage
-        title="Your Goals"
+        title="Your goals"
         subtitle="Track your progress and stay motivated on your health journey"
         headerChildren={
           <TabBar
@@ -89,7 +90,7 @@ export default function GoalsPage() {
                 label: (
                   <>
                     <TargetIcon className="h-4 w-4" />
-                    Macro Targets
+                    Macro targets
                   </>
                 ),
               },
@@ -97,7 +98,7 @@ export default function GoalsPage() {
             activeKey={ui.activeTab}
             onChange={(key) => ui.setActiveTab(key as typeof ui.activeTab)}
             layoutId="goalsTabHighlight"
-            ariaLabel="Goals Tabs"
+            ariaLabel="Goals tabs"
             size="sm"
             fullWidth
           />
@@ -106,10 +107,10 @@ export default function GoalsPage() {
         <Modal
           isOpen={ui.isDeleteConfirmModalOpen}
           onClose={actions.closeDeleteConfirmModal}
-          title="Delete Weight Goal"
+          title="Delete weight goal"
           variant="confirmation"
-          message="Are you sure you want to delete your current weight goal? This action cannot be undone."
-          confirmLabel="Delete Goal"
+          message="This deletes your weight goal and its plan. Your weigh-ins stay. It cannot be undone."
+          confirmLabel="Delete goal"
           cancelLabel="Cancel"
           onConfirm={actions.deleteWeightGoalConfirmed}
           isDanger
@@ -155,7 +156,7 @@ export default function GoalsPage() {
                         user={data.safeUserSettings}
                         macroDailyTotals={macroDailyTotals}
                         weightGoals={normalizedWeightGoals}
-                        isLoading={false}
+                        isLoading={weightGoalsLoading}
                         onOpenModal={actions.openWeightGoalModal}
                         onDelete={actions.openDeleteConfirmModal}
                         macroTarget={macroTarget ?? undefined}

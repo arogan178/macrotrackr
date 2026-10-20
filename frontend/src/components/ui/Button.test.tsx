@@ -37,21 +37,19 @@ describe("Button utilities", () => {
       expect(classes).toContain("custom-class");
     });
 
-    it("meets the 44px touch minimum without a per-call override", () => {
-      // `sm` used to render 30px tall, so call sites hand-wrote `min-h-11`.
-      for (const size of ["sm", "md", "lg"]) {
-        expect(getButtonClasses("primary", size)).toContain("min-h-1");
+    it("keeps a 48px hit area while looking smaller", () => {
+      for (const size of ["sm", "md"]) {
+        expect(getButtonClasses("primary", size)).toContain("after:min-h-12");
       }
 
-      expect(BUTTON_SIZES.sm).toContain("min-h-11");
-      expect(BUTTON_SIZES.md).toContain("min-h-11");
+      expect(BUTTON_SIZES.lg).toContain("min-h-11");
     });
   });
 
   describe("BUTTON_SIZES", () => {
     it("keeps xs out of the touch-target contract", () => {
       // xs is for non-touch affordances inside a row, never a primary action.
-      expect(BUTTON_SIZES.xs).not.toContain("min-h-11");
+      expect(BUTTON_SIZES.xs).not.toContain("after:min-h-12");
     });
   });
 });

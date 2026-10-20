@@ -22,7 +22,6 @@ function ResetPasswordRoute() {
 
   return (
     <AuthPageShell
-      eyebrow="Password Recovery"
       title="Reset your password"
       description={
         isLocalAuthMode

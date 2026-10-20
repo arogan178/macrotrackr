@@ -7,7 +7,10 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import {
   AwardIcon,
+  BackIcon,
   Button,
+  ChevronRightIcon,
+  Heading,
   LinkIcon,
   LockIcon,
   LogoutIcon,
@@ -32,11 +35,32 @@ import { useLogout } from "@/hooks/auth/useAuthQueries";
 import { countUnsentEntries } from "@/hooks/queries/macro/entryStore";
 import { useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { cn } from "@/lib/classnameUtilities";
 
 type TabType = "profile" | "data" | "billing" | "accounts" | "security";
 
 const BILLING_TAB_ENABLED = isManagedBillingMode;
 const ACCOUNTS_TAB_ENABLED = isClerkAuthMode;
+
+interface Section {
+  key: TabType;
+  label: string;
+  hint: string;
+  Icon: typeof UserIcon;
+}
+
+// One list feeds the desktop tab bar and the phone's rows.
+const SECTIONS: Section[] = [
+  { key: "profile", label: "Profile", hint: "Body stats and units", Icon: UserIcon },
+  { key: "data", label: "Data", hint: "Import and export", Icon: UploadIcon },
+  ...(BILLING_TAB_ENABLED
+    ? [{ key: "billing", label: "Billing", hint: "Plan and payments", Icon: AwardIcon } satisfies Section]
+    : []),
+  ...(ACCOUNTS_TAB_ENABLED
+    ? [{ key: "accounts", label: "Accounts", hint: "Connected sign-ins", Icon: LinkIcon } satisfies Section]
+    : []),
+  { key: "security", label: "Security", hint: "Password and account deletion", Icon: LockIcon },
+];
 
 // Valid tab values for validation
 const VALID_TABS = new Set<TabType>([
@@ -85,6 +109,9 @@ export default function SettingsPage() {
   };
 
   const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
+  // On a phone the page opens as a list of sections; a ?tab= link opens one directly.
+  const [isPhoneSectionOpen, setIsPhoneSectionOpen] = useState(Boolean(search.tab));
+  const activeSection = SECTIONS.find((section) => section.key === activeTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
@@ -141,125 +168,129 @@ export default function SettingsPage() {
       <FeaturePage
         title="Settings"
         subtitle="Manage your account preferences and profile details"
+        mobileHeader={
+          isPhoneSectionOpen ? (
+            <div className="pb-4">
+              <button
+                type="button"
+                onClick={() => setIsPhoneSectionOpen(false)}
+                className="-ml-1 flex min-h-12 items-center gap-1 text-sm text-muted hover:text-foreground"
+              >
+                <BackIcon className="h-4 w-4" />
+                Settings
+              </button>
+              <Heading level="page">{activeSection?.label}</Heading>
+            </div>
+          ) : (
+            <Heading level="page" className="pb-4">
+              Settings
+            </Heading>
+          )
+        }
         headerChildren={
           <TabBar
-            items={[
-              {
-                key: "profile",
-                label: (
-                  <>
-                    <UserIcon className="h-4 w-4" />
-                    Profile
-                  </>
-                ),
-              },
-              {
-                key: "data",
-                label: (
-                  <>
-                    <UploadIcon className="h-4 w-4" />
-                    Data
-                  </>
-                ),
-              },
-              ...(BILLING_TAB_ENABLED
-                ? [
-                    {
-                      key: "billing",
-                      label: (
-                        <>
-                          <AwardIcon className="h-4 w-4" />
-                          Billing
-                        </>
-                      ),
-                    },
-                  ]
-                : []),
-              ...(ACCOUNTS_TAB_ENABLED
-                ? [
-                    {
-                      key: "accounts",
-                      label: (
-                        <>
-                          <LinkIcon className="h-4 w-4" />
-                          Accounts
-                        </>
-                      ),
-                    },
-                  ]
-                : []),
-              {
-                key: "security",
-                label: (
-                  <>
-                    <LockIcon className="h-4 w-4" />
-                    Security
-                  </>
-                ),
-              },
-            ]}
+            items={SECTIONS.map(({ key, label, Icon }) => ({
+              key,
+              label: (
+                <>
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </>
+              ),
+            }))}
             activeKey={activeTab}
             onChange={(key) => handleTabChange(key as typeof activeTab)}
             layoutId="settingsTabHighlight"
-            ariaLabel="Settings Tabs"
+            ariaLabel="Settings tabs"
             size="sm"
             fullWidth
           />
         }
       >
-        {isSettingsLoading ? (
-          <SettingsLoadingSkeleton />
-        ) : settingsQueryError ? (
-          <div className="p-6 text-center">
-            <p className="text-error">
-              Failed to load settings. Please try again.
-            </p>
-          </div>
-        ) : settingsData ? (
-          <AnimatePresence mode="wait">
-            {activeTab === "profile" && (
-              <PageTransition key="profile">
-                <ProfileForm
-                  settings={settingsData}
-                  onHasChangesChange={setHasSettingsChanges}
-                />
-              </PageTransition>
-            )}
-            {activeTab === "data" && (
-              <PageTransition key="data">
-                <div className="space-y-6">
-                  <DataImporter />
-                  <DataExporter />
-                </div>
-              </PageTransition>
-            )}
-            {BILLING_TAB_ENABLED && activeTab === "billing" && (
-              <PageTransition key="billing">
-                <BillingForm />
-              </PageTransition>
-            )}
-            {ACCOUNTS_TAB_ENABLED && activeTab === "accounts" && (
-              <PageTransition key="accounts">
-                <ConnectedAccountsForm />
-              </PageTransition>
-            )}
-            {activeTab === "security" && (
-              <PageTransition key="security">
-                <div className="space-y-6">
-                  <ChangePasswordForm />
-                  <DeleteAccountForm />
-                </div>
-              </PageTransition>
-            )}
-          </AnimatePresence>
-        ) : (
-          <SettingsLoadingSkeleton />
+        {!isPhoneSectionOpen && (
+          <ul className="divide-y divide-border border-t border-border md:hidden">
+            {SECTIONS.map(({ key, label, hint, Icon }) => (
+              <li key={key}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleTabChange(key);
+                    setIsPhoneSectionOpen(true);
+                  }}
+                  className="flex min-h-16 w-full items-center gap-3 text-left"
+                >
+                  <Icon className="h-5 w-5 shrink-0 text-muted" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm text-foreground">{label}</span>
+                    <span className="block truncate text-xs text-muted">{hint}</span>
+                  </span>
+                  <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted" />
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
 
-        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:mt-8 sm:flex-row sm:items-center">
+        <div className={isPhoneSectionOpen ? undefined : "max-md:hidden"}>
+          {isSettingsLoading ? (
+            <SettingsLoadingSkeleton />
+          ) : settingsQueryError ? (
+            <div className="p-6 text-center">
+              <p className="text-error">
+                Failed to load settings. Please try again.
+              </p>
+            </div>
+          ) : settingsData ? (
+            <AnimatePresence mode="wait">
+              {activeTab === "profile" && (
+                <PageTransition key="profile">
+                  <ProfileForm
+                    settings={settingsData}
+                    onHasChangesChange={setHasSettingsChanges}
+                  />
+                </PageTransition>
+              )}
+              {activeTab === "data" && (
+                <PageTransition key="data">
+                  <div className="space-y-6">
+                    <DataImporter />
+                    <DataExporter />
+                  </div>
+                </PageTransition>
+              )}
+              {BILLING_TAB_ENABLED && activeTab === "billing" && (
+                <PageTransition key="billing">
+                  <BillingForm />
+                </PageTransition>
+              )}
+              {ACCOUNTS_TAB_ENABLED && activeTab === "accounts" && (
+                <PageTransition key="accounts">
+                  <ConnectedAccountsForm />
+                </PageTransition>
+              )}
+              {activeTab === "security" && (
+                <PageTransition key="security">
+                  <div className="space-y-6">
+                    <ChangePasswordForm />
+                    <DeleteAccountForm />
+                  </div>
+                </PageTransition>
+              )}
+            </AnimatePresence>
+          ) : (
+            <SettingsLoadingSkeleton />
+          )}
+        </div>
+
+        <div
+          className={cn(
+            "mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:mt-8 sm:flex-row sm:items-center",
+            isPhoneSectionOpen && "max-md:hidden",
+          )}
+        >
           <div>
             <h3 className="text-sm font-medium text-foreground">
-              Account Session
+              Account session
             </h3>
             <p className="text-xs text-muted">
               Sign out of your account on this device
@@ -278,11 +309,11 @@ export default function SettingsPage() {
         <Modal
           isOpen={showConfirmModal}
           onClose={cancelTabChange}
-          title="Unsaved Changes"
+          title="Unsaved changes"
           variant="confirmation"
           message="You have unsaved changes that will be lost. Do you want to continue?"
-          confirmLabel="Discard Changes"
-          cancelLabel="Keep Editing"
+          confirmLabel="Discard changes"
+          cancelLabel="Keep editing"
           onConfirm={confirmTabChange}
           isDanger
         />

@@ -7,7 +7,7 @@ import ProFeature from "@/components/billing/ProFeature";
 import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { StateCard } from "@/components/ui";
+import { Heading, IconButton, StateCard } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 import { MacroSnapshotModal } from "@/features/macroTracking/components";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
@@ -186,9 +186,9 @@ export default function ReportingPage() {
       totalDays > 0 ? Math.round((trackedDays / totalDays) * 100) : 0;
     const rangeLabel =
       dateRange === "week"
-        ? "Weekly Summary"
+        ? "Weekly summary"
         : dateRange === "month"
-          ? "Monthly Summary"
+          ? "Monthly summary"
           : "90-Day Overview";
 
     return {
@@ -221,7 +221,29 @@ export default function ReportingPage() {
 
   return (
     <DashboardPageContainer>
-      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
+      <FeaturePage
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        mobileHeader={
+          <div className="flex items-center justify-between gap-3">
+            <Heading level="page">{headerTitle}</Heading>
+            <div className="flex items-center gap-1">
+              <IconButton
+                variant="share"
+                ariaLabel="Share macro snapshot"
+                onClick={() => setIsSnapshotOpen(true)}
+                disabled={aggregatedData.length === 0 || isHistoryLoading}
+              />
+              <IconButton
+                variant="export"
+                ariaLabel="Export data as CSV file"
+                onClick={handleDownloadCSV}
+                disabled={aggregatedData.length === 0 || isHistoryLoading}
+              />
+            </div>
+          </div>
+        }
+      >
         {isHistoryLoading ? (
           <ReportingPageSkeleton />
         ) : (
@@ -257,6 +279,7 @@ export default function ReportingPage() {
                       trackedDays={trackedDays}
                       totalDays={totalDays}
                       averages={averages}
+                      dailySeries={dailySeries}
                     />
                   );
                 })()}

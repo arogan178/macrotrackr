@@ -15,11 +15,10 @@ import Reveal from "@/components/animation/Reveal";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import HeightField from "@/components/form/HeightField";
-import InfoCard from "@/components/form/InfoCard";
 import WeightField from "@/components/form/WeightField";
 import Button from "@/components/ui/Button";
 import { TYPE_SCALE } from "@/components/ui/Heading";
-import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
+import { CheckIcon } from "@/components/ui/Icons";
 import Panel, { RULE_HAIRLINE } from "@/components/ui/Panel";
 import Value from "@/components/ui/Value";
 import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
@@ -137,7 +136,7 @@ const SUMMARY_LABEL = cn(TYPE_SCALE.small, "text-muted");
 
 function StepIndicator({ step }: { step: number }) {
   return (
-    <p className="text-xs font-medium tracking-wide text-muted uppercase">
+    <p className="text-xs font-medium text-muted">
       Step {step} of {TOTAL_STEPS}
     </p>
   );
@@ -380,7 +379,7 @@ export function ProfileCreationForm() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">About you</h2>
           <p className="mt-2 text-muted">
-            Hi {displayName} — these details set your calorie baseline.
+            Hi {displayName}. These details set your calorie baseline.
           </p>
           {socialData && (
             <p className="mt-1 text-sm text-success">
@@ -517,37 +516,54 @@ export function ProfileCreationForm() {
           >
             {(field) => (
               <div>
-                <Dropdown
-                  label="How active are you on a typical week?"
-                  value={activityLevel?.toString() ?? ""}
-                  onChange={(value: string | number) => {
-                    const normalizedValue = String(value);
-                    field.handleChange(
-                      normalizedValue ? Number(normalizedValue) : null,
+                {/* Five choices fit on a phone; a dropdown hid them behind a tap. */}
+                <p id="activity-question" className="text-sm font-medium text-muted">
+                  How active are you on a typical week?
+                </p>
+                <div
+                  className="mt-2 grid grid-cols-1 gap-2"
+                  role="radiogroup"
+                  aria-labelledby="activity-question"
+                >
+                  {Object.entries(ACTIVITY_LEVELS).map(([key, { label }]) => {
+                    const match = /^(.*?)\s*\((.*)\)$/.exec(label);
+                    const name = match?.[1] ?? label;
+                    const detail = match?.[2] ?? "";
+                    const isSelected = activityLevel === Number(key);
+
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => field.handleChange(Number(key))}
+                        className={cn(
+                          "flex min-h-14 cursor-pointer flex-col justify-center rounded-control border px-4 py-2 text-left transition-colors",
+                          "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none",
+                          isSelected
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-surface-2 hover:border-primary/40",
+                        )}
+                      >
+                        <span className="text-sm font-medium text-foreground">{name}</span>
+                        {detail && (
+                          <span className="text-xs text-muted">
+                            {detail.charAt(0).toUpperCase() + detail.slice(1)}
+                          </span>
+                        )}
+                      </button>
                     );
-                  }}
-                  options={[
-                    { value: "", label: "Select activity level" },
-                    ...Object.entries(ACTIVITY_LEVELS).map(
-                      ([key, { label }]) => ({
-                        value: key,
-                        label,
-                      }),
-                    ),
-                  ]}
-                  required
-                />
+                  })}
+                </div>
                 <FieldError message={field.state.meta.errors[0]} />
               </div>
             )}
           </form.Field>
 
-          <InfoCard
-            title="What counts as activity"
-            description="Include both structured exercise and everyday movement — a job on your feet counts."
-            color="indigo"
-            icon={<InfoIcon />}
-          />
+          <p className="text-xs text-muted">
+            Count everyday movement as well as exercise: a job on your feet counts.
+          </p>
         </div>
 
         <div className="flex gap-3">

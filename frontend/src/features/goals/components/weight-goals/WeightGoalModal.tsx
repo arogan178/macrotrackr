@@ -88,11 +88,11 @@ function WeightGoalModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={weightGoals ? "Edit Weight Goal" : "Set Weight Goal"}
+      title={weightGoals ? "Edit weight goal" : "Set weight goal"}
       variant="form"
       onSave={handleModalSave}
       saveDisabled={!canSave || isLoading}
-      saveLabel={weightGoals ? "Update Goal" : "Set Goal"}
+      saveLabel={weightGoals ? "Update goal" : "Set goal"}
       size="lg"
     >
       {errorMessage && (

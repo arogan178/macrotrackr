@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 import { billingApi, type BillingDetailsResponse } from "@/api/billing";
-import CardContainer from "@/components/form/CardContainer";
 import {
   Button,
   ExternalLinkIcon,
@@ -41,9 +41,7 @@ const ProBillingView: React.FC<{
   const price = billingDetails?.price ?? "";
   const paymentMethod = billingDetails?.paymentMethod;
   const renewalDate = billingDetails?.subscription?.currentPeriodEnd
-    ? new Date(
-        billingDetails.subscription.currentPeriodEnd,
-      ).toLocaleDateString()
+    ? format(new Date(billingDetails.subscription.currentPeriodEnd), "d MMM yyyy")
     : undefined;
   // A cancelled Stripe subscription stays active until the period it paid for ends.
   const status = billingDetails?.subscription?.cancelAtPeriodEnd
@@ -59,7 +57,7 @@ const ProBillingView: React.FC<{
     status === "active"
       ? "Active"
       : status === "past_due"
-        ? "Past Due"
+        ? "Past due"
         : status === "canceled"
           ? "Canceled"
           : status === "unpaid"
@@ -81,70 +79,52 @@ const ProBillingView: React.FC<{
               <WarningIcon className="h-4 w-4 text-warning" />
             </span>
             <span>
-              <span className="font-bold">Payment Issue:</span> Your
+              <span className="font-semibold">Payment issue:</span> Your
               subscription is {status}. Please update your payment method to
               restore access.
             </span>
           </p>
         </div>
       )}
-      <div className="relative mb-6 overflow-hidden rounded-card border border-success/30 bg-success/10 p-6">
-        <div className="relative">
-          {/* Header with status */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <div>
-                <span className="text-lg font-semibold text-success">
-                  Pro Plan Member
-                </span>
-                <div className="mt-1 flex items-center" />
-              </div>
-            </div>
-            <span
-              className={`inline-flex items-center rounded-control border px-2.5 py-1 text-xs font-semibold ${statusTone}`}
-            >
-              {statusLabel}
-            </span>
-          </div>
-
-          {/* Subscription details in clean grid */}
-          <CardContainer
-            variant="transparent"
-            className="mb-4 bg-surface-2 p-5"
+      {/* The plan as rows, like the rest of Settings: only what is known. */}
+      <dl className="mb-6 divide-y divide-border border-b border-border text-sm">
+        <div className="flex min-h-12 items-center justify-between gap-3">
+          <dt className="text-muted">Status</dt>
+          <dd
+            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusTone}`}
           >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-muted">Plan & Price</div>
-                <div className="font-semibold text-foreground">
-                  {price || "-"}
-                </div>
-              </div>
-              <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-muted">
-                  {isCanceled ? "Expires" : "Renews"}
-                </div>
-                <div className="font-semibold text-foreground">
-                  {renewalDate ?? "-"}
-                </div>
-              </div>
-              <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-muted">Payment</div>
-                <div className="font-semibold text-foreground">
-                  {paymentMethod
-                    ? `${paymentMethod.brand.toUpperCase()} •••• ${paymentMethod.last4}`
-                    : "Not available"}
-                </div>
-              </div>
-            </div>
-          </CardContainer>
-
-          <p className="text-sm leading-relaxed text-muted">
-            {isCanceled
-              ? "Your Pro access will continue until the expiration date shown above. You can resume your subscription from Manage Subscription before then."
-              : "Enjoy unlimited access to all premium features. Manage your subscription, view invoices, or update payment methods below."}
-          </p>
+            {statusLabel}
+          </dd>
         </div>
-      </div>
+        {price && (
+          <div className="flex min-h-12 items-center justify-between gap-3">
+            <dt className="text-muted">Price</dt>
+            <dd className="text-foreground">{price}</dd>
+          </div>
+        )}
+        {renewalDate && (
+          <div className="flex min-h-12 items-center justify-between gap-3">
+            <dt className="text-muted">{isCanceled ? "Pro until" : "Renews"}</dt>
+            <dd className="text-foreground">{renewalDate}</dd>
+          </div>
+        )}
+        {(paymentMethod ?? isPlayBilled) && (
+          <div className="flex min-h-12 items-center justify-between gap-3">
+            <dt className="text-muted">Payment</dt>
+            <dd className="text-foreground">
+              {paymentMethod
+                ? `${paymentMethod.brand.toUpperCase()} •••• ${paymentMethod.last4}`
+                : "Google Play"}
+            </dd>
+          </div>
+        )}
+      </dl>
+      {isCanceled && (
+        <p className="mb-6 text-sm text-muted">
+          Pro stays on until the date above. You can resume it from Manage
+          subscription before then.
+        </p>
+      )}
       {isPlayBilled ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted">
@@ -167,14 +147,14 @@ const ProBillingView: React.FC<{
           <Button
             onClick={() => setShow(true)}
             isLoading={isLoading}
-            loadingText="Opening Portal..."
+            loadingText="Opening portal..."
             fullWidth
             variant="primary"
             className={isActionRequired ? "animate-pulse" : ""}
             leftIcon={<ExternalLinkIcon />}
             ariaLabel="Manage your Pro subscription"
           >
-            {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
+            {isActionRequired ? "Fix payment issue" : "Manage subscription"}
           </Button>
           {!isCanceled && (
             <Button
@@ -183,7 +163,7 @@ const ProBillingView: React.FC<{
               fullWidth
               ariaLabel="Cancel your Pro subscription"
             >
-              Cancel Subscription
+              Cancel subscription
             </Button>
           )}
         </div>
@@ -193,7 +173,7 @@ const ProBillingView: React.FC<{
       <Modal
         isOpen={showCancel}
         onClose={() => setShowCancel(false)}
-        title="Cancel Subscription"
+        title="Cancel subscription"
         size="md"
         variant="form"
         hideDefaultButtons
@@ -246,7 +226,7 @@ const ProBillingView: React.FC<{
       <Modal
         isOpen={show}
         onClose={() => setShow(false)}
-        title="Manage Subscription"
+        title="Manage subscription"
         size="md"
         variant="form"
         hideDefaultButtons

@@ -6,7 +6,6 @@ import Button from "@/components/ui/Button";
 import {
   AppleIcon,
   CloseIcon,
-  EmailIcon,
   GoogleIcon,
   ShieldCheckIcon,
 } from "@/components/ui/Icons";
@@ -248,42 +247,24 @@ const ConnectedAccountsForm = () => {
     const displayEmail = account.emailAddress ?? "Connected";
 
     return (
-      <div
-        key={account.provider}
-        className="rounded-card border border-border bg-surface-2 p-5 transition-colors duration-200 hover:border-border-2"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`rounded-control p-2 ${provider.bgColor}`}>
-              <ProviderIcon className={`h-5 w-5 ${provider.color}`} />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">{provider.name}</p>
-              <p className="text-sm text-muted">{displayEmail}</p>
-            </div>
+      <li key={account.provider} className="flex min-h-16 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <ProviderIcon className={`h-5 w-5 shrink-0 ${provider.color}`} />
+          <div className="min-w-0">
+            <p className="text-sm text-foreground">{provider.name}</p>
+            <p className="truncate text-xs text-muted">{displayEmail}</p>
           </div>
-          <Button
-            variant="ghost"
-            buttonSize="sm"
-            onClick={() =>
-              handleDisconnectClick(providerKey, account.emailAddress ?? "")
-            }
-            className="text-muted hover:text-error"
-            ariaLabel={`Disconnect ${provider.name}`}
-          >
-            <CloseIcon size="sm" />
-          </Button>
         </div>
-        <div className="mt-3 rounded-control bg-surface-3 px-3 py-2">
-          <p className="text-xs text-muted">
-            <span className="font-medium text-foreground">
-              Sign in with {provider.name}:
-            </span>{" "}
-            Use <span className="font-medium text-primary">{displayEmail}</span>{" "}
-            to access this account
-          </p>
-        </div>
-      </div>
+        <Button
+          variant="ghost"
+          buttonSize="sm"
+          onClick={() => handleDisconnectClick(providerKey, account.emailAddress ?? "")}
+          className="text-muted hover:text-error"
+          ariaLabel={`Disconnect ${provider.name}`}
+        >
+          <CloseIcon size="sm" />
+        </Button>
+      </li>
     );
   };
 
@@ -308,7 +289,7 @@ const ConnectedAccountsForm = () => {
           Connect {provider.name}
         </Button>
         <p className="px-1 text-xs text-muted">
-          Verify identity → Sign in with {provider.name} → Account linked
+          You confirm it is you, then sign in with {provider.name} once.
         </p>
       </div>
     );
@@ -340,95 +321,39 @@ const ConnectedAccountsForm = () => {
   return (
     <>
       <CardContainer className="p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0">
-        {/* Login summary */}
-        <div className="mb-6 rounded-card border border-primary/20 bg-primary/5 p-5">
-          <div className="flex items-start gap-3">
-            <EmailIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div>
-              <p className="font-medium text-foreground">
-                Your account can be accessed with:
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {allLoginEmails.map((email) => (
-                  <span
-                    key={email}
-                    className="rounded-full border border-border bg-surface-2 px-3 py-1 text-sm font-medium text-foreground"
-                  >
-                    {email}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-3 text-xs text-muted">
-                Use any of these emails/providers to sign in. All methods link
-                to the same account.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Email/Password authentication status */}
-        {hasPassword && (
-          <div className="mb-6">
-            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
-              Email & Password
-            </h4>
-            <div className="rounded-card border border-border bg-surface-2 p-5 transition-colors duration-200 hover:border-border-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-control bg-primary/10 p-2">
-                    <ShieldCheckIcon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      Email & Password
-                    </p>
-                    <p className="text-sm text-muted">
-                      {user?.primaryEmailAddress?.emailAddress ??
-                        "Password enabled"}
-                    </p>
-                  </div>
-                </div>
-                <span className="rounded-full bg-success/20 px-3 py-1 text-xs font-medium text-success">
-                  Active
-                </span>
-              </div>
-              <div className="mt-3 rounded-control bg-surface-3 px-3 py-2">
-                <p className="text-xs text-muted">
-                  <span className="font-medium text-foreground">
-                    Sign in with password:
-                  </span>{" "}
-                  Use{" "}
-                  <span className="font-medium text-primary">
-                    {user?.primaryEmailAddress?.emailAddress}
-                  </span>
+        {/* Every way in, as one list: the summary box above it used to repeat
+            these same addresses. */}
+        <div className="mb-6">
+        <h4 className="mb-1 text-sm font-medium text-muted">Ways to sign in</h4>
+        <ul className="divide-y divide-border border-b border-border">
+          {hasPassword && (
+            <li className="flex min-h-16 items-center gap-3">
+              <ShieldCheckIcon className="h-5 w-5 shrink-0 text-muted" />
+              <div className="min-w-0">
+                <p className="text-sm text-foreground">Email and password</p>
+                <p className="truncate text-xs text-muted">
+                  {user?.primaryEmailAddress?.emailAddress ?? "Password enabled"}
                 </p>
               </div>
-            </div>
-          </div>
+            </li>
+          )}
+          {externalAccounts.map((account) =>
+            renderConnectedAccount({
+              provider: account.provider,
+              emailAddress: account.emailAddress,
+            }),
+          )}
+        </ul>
+        {allLoginEmails.length > 1 && (
+          <p className="mt-2 text-xs text-muted">All of these open the same account.</p>
         )}
-
-        {/* Connected social accounts */}
-        {externalAccounts.length > 0 && (
-          <div className="mb-6">
-            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
-              Social Accounts
-            </h4>
-            <div className="space-y-3">
-              {externalAccounts.map((account) =>
-                renderConnectedAccount({
-                  provider: account.provider,
-                  emailAddress: account.emailAddress,
-                }),
-              )}
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* Available providers to connect */}
         {availableProviders.length > 0 && (
           <div>
-            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
-              Connect More Accounts
+            <h4 className="mb-3 text-sm font-medium text-muted">
+              Connect more accounts
             </h4>
             {showLinkIntentHint && (
               <div className="mb-3 rounded-control border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
@@ -461,7 +386,7 @@ const ConnectedAccountsForm = () => {
         onClose={closeModal}
         title={
           modal.type === "warning"
-            ? "Cannot Disconnect"
+            ? "Cannot disconnect"
             : `Disconnect ${modal.provider ? PROVIDERS[modal.provider].name : ""}`
         }
         variant="confirmation"

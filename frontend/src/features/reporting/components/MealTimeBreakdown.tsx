@@ -108,7 +108,7 @@ function MealTimeBreakdown({
   if (mealTypeDistribution.length === 0) {
     return (
       <ChartCard
-        title="Meal Distribution"
+        title="Meal distribution"
         isEmpty
         emptyMessage="No meal data available for selected period."
         action={
@@ -129,7 +129,7 @@ function MealTimeBreakdown({
 
   return (
     <ChartCard
-      title="Meal Distribution"
+      title="Meal distribution"
       className="w-full"
       action={
         <TabBar
@@ -184,11 +184,11 @@ function MealTimeBreakdown({
                     duration={0.5}
                   />
                 </div>
-                <div className="text-xs font-medium tracking-wider text-muted uppercase">
-                  {selectedStat === "count" ? "Total Meals" : "Avg / Day"}
+                <div className="text-xs font-medium text-muted">
+                  {selectedStat === "count" ? "Total meals" : "Daily average"}
                 </div>
                 {selectedStat !== "count" && (
-                  <div className="text-[10px] text-muted/60 uppercase">
+                  <div className="text-[10px] text-muted/60">
                     {getUnitForStat(selectedStat)}
                   </div>
                 )}
