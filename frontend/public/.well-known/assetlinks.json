@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.macrotrackr.app",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_PLAY_APP_SIGNING_SHA256"]
+      "sha256_cert_fingerprints": ["F5:30:99:35:3E:1E:2A:BF:B8:F6:0B:12:59:CE:B8:F6:8F:EE:C3:3F:59:2D:37:74:14:A4:82:2B:4A:6E:43:86"]
     }
   }
 ]

@@ -13,17 +13,14 @@ once the domain proves it owns the package, and it does so by fetching
 root of macrotrackr.com by Cloudflare, with the correct content type and no
 redirects. Nothing needs to change in the infra repo.
 
-## The one thing left to fill in
+## The fingerprint
 
-The file currently ships a placeholder fingerprint, so verification will still
-fail. Replace `REPLACE_WITH_PLAY_APP_SIGNING_SHA256` with the real value:
-
-Play Console → Setup → App signing → **SHA-256 certificate fingerprint**.
-
-With Play App Signing that is the certificate *Google* re-signs with, not your
-local upload key — using the upload key's fingerprint is the usual reason this
-silently keeps failing. If you also ship a locally-signed release build, add its
-fingerprint as a second entry in the same array.
+The file lists the **Play App Signing** certificate (Play Console → Test and
+release → App integrity → App signing key, SHA-256). Google re-signs every
+build from the App Bundle with that key, so it is the one Android checks; the
+local upload key's fingerprint would silently fail verification. If you ever
+ship a locally signed release build, add its fingerprint as a second entry in
+the same array.
 
 ## Checking it
 
@@ -31,11 +28,10 @@ fingerprint as a second entry in the same array.
 cd frontend && bun run verify:assetlinks
 ```
 
-That validates the deployed file: correct relation and namespace, package name
-matches `com.macrotrackr.app`, and every fingerprint is a real uppercase
-colon-separated SHA-256. It exits non-zero while the placeholder is in place.
-Once the real fingerprint is committed, add it to the `lint` script so a bad
-edit can't reach production.
+That validates the file: correct relation and namespace, package name matches
+`com.macrotrackr.app`, and every fingerprint is a real uppercase
+colon-separated SHA-256. It runs as part of `bun run lint`, so a bad edit
+fails CI.
 
 After deploying, confirm on a device:
 
