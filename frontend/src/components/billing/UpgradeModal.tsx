@@ -50,7 +50,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
       message={description}
       onConfirm={onUpgrade}
       confirmLabel="Upgrade to Pro"
-      cancelLabel="Maybe Later"
+      cancelLabel="Maybe later"
       size="md"
       hideCancelButton
     >

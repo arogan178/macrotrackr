@@ -186,9 +186,9 @@ export default function ReportingPage() {
       totalDays > 0 ? Math.round((trackedDays / totalDays) * 100) : 0;
     const rangeLabel =
       dateRange === "week"
-        ? "Weekly Summary"
+        ? "Weekly summary"
         : dateRange === "month"
-          ? "Monthly Summary"
+          ? "Monthly summary"
           : "90-Day Overview";
 
     return {

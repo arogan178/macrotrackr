@@ -44,8 +44,9 @@ const PercentageLabel = (properties: LabelProps) => {
       : properties.value
         ? Number(properties.value)
         : 0;
-  // Only show label if value is significant enough to fit
-  if (value < 0.05 || height < 20) return;
+  // Only where the label fits: on a phone the bars are too narrow and 21
+  // percentages buried the chart they described.
+  if (value < 0.05 || height < 20 || width < 36) return;
 
   return (
     <foreignObject
@@ -86,7 +87,7 @@ const MacroDensityBreakdown = ({
     !loading && Array.isArray(data) && data.length === 0 && isHistoryReady;
 
   return (
-    <ChartCard title="Macro Distribution" className="w-full">
+    <ChartCard title="Macro distribution" className="w-full">
       {loading || showNoData ? (
         <div className="flex h-75 w-full items-center justify-center">
           {loading ? (

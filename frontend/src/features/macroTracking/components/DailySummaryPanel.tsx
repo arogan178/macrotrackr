@@ -230,7 +230,7 @@ function DailySummaryInner({
 
   const snapshotData: MacroSnapshotData = useMemo(
     () => ({
-      title: date ? "Daily Macros" : "Today's Macros",
+      title: date ? "Daily macros" : "Today's Macros",
       dateLabel: getDisplayDate(date ? parseISO(date) : new Date()),
       calories: macroCalories.total,
       calorieTarget: dailyCalorieTarget,
@@ -302,7 +302,7 @@ function DailySummaryInner({
             variant="share"
             buttonSize="sm"
             iconSize="sm"
-            ariaLabel="Share Snapshot"
+            ariaLabel="Share snapshot"
             onClick={() => setIsSnapshotOpen(true)}
           />
         </div>

@@ -89,7 +89,7 @@ function HabitTracker({
           </div>
         ) : habits.length === 0 ? (
           <StateCard
-            title="Start Building Habits"
+            title="Start building habits"
             message="Add your first habit goal to begin tracking your progress."
             icon={
               <div className="inline-block rounded-card bg-surface p-4">
@@ -99,7 +99,7 @@ function HabitTracker({
             action={
               onAddHabit
                 ? {
-                    label: "Add First Habit",
+                    label: "Add first habit",
                     onClick: onAddHabit,
                     variant: "primary",
                     icon: <PlusIcon size="sm" />,

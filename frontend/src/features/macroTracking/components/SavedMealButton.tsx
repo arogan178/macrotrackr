@@ -33,7 +33,7 @@ export default function SavedMealButton({
   const handleSave = async () => {
     try {
       await createSavedMeal.mutateAsync({
-        name: mealName || "Saved Meal",
+        name: mealName || "Saved meal",
         protein,
         carbs,
         fats,

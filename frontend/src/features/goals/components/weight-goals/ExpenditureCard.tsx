@@ -72,7 +72,7 @@ function missingSentence(
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <Heading level="micro" className="text-muted">
+      <Heading level="small" as="p" className="text-muted">
         {label}
       </Heading>
       <Value value={value} unit="kcal" size="stat" />

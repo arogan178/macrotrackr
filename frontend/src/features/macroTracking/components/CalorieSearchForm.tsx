@@ -480,7 +480,7 @@ const CalorieSearch = memo(function CalorieSearch({
               <TabBar
                 items={[
                   { key: "recents", label: "Recents" },
-                  { key: "savedMeals", label: "Saved Meals" },
+                  { key: "savedMeals", label: "Saved meals" },
                 ]}
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as ActiveTab)}

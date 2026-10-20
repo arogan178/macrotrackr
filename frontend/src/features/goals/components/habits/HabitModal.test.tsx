@@ -76,23 +76,23 @@ describe("HabitModal", () => {
       />,
     );
 
-    expect(screen.getByText("Add New Habit")).toBeInTheDocument();
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("");
+    expect(screen.getByText("Add new habit")).toBeInTheDocument();
+    expect(screen.getByLabelText("Habit title")).toHaveValue("");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
     expect(screen.getByLabelText("Frequency")).toHaveValue("daily");
     expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
-    const save = screen.getByRole("button", { name: "Save Habit" });
+    const save = screen.getByRole("button", { name: "Save habit" });
     expect(save).toBeDisabled();
 
-    await user.type(screen.getByLabelText("Habit Title"), "   ");
+    await user.type(screen.getByLabelText("Habit title"), "   ");
     expect(screen.getByText("Title is required")).toBeInTheDocument();
     expect(save).toBeDisabled();
 
-    await user.type(screen.getByLabelText("Habit Title"), "Walk");
+    await user.type(screen.getByLabelText("Habit title"), "Walk");
     expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
     expect(save).toBeEnabled();
 
-    await user.clear(screen.getByLabelText("Habit Title"));
+    await user.clear(screen.getByLabelText("Habit title"));
     expect(screen.getByText("Title is required")).toBeInTheDocument();
     expect(save).toBeDisabled();
   });
@@ -109,8 +109,8 @@ describe("HabitModal", () => {
     const { rerender } = render(<HabitModal {...properties} />);
     rerender(<HabitModal {...properties} />);
 
-    expect(screen.getByText("Edit Habit")).toBeInTheDocument();
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("Read");
+    expect(screen.getByText("Edit habit")).toBeInTheDocument();
+    expect(screen.getByLabelText("Habit title")).toHaveValue("Read");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
     expect(screen.getByLabelText("Frequency")).toHaveValue("weekly");
     expect(
@@ -119,7 +119,7 @@ describe("HabitModal", () => {
     expect(
       screen.getByRole("button", { name: "Select Purple color" }),
     ).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
     expect(document.querySelector('input[name="current"]')).toHaveAttribute(
       "value",
       "3",
@@ -154,12 +154,12 @@ describe("HabitModal", () => {
       <HabitModal isOpen onClose={vi.fn()} onSubmit={onSubmit} mode="add" />,
     );
 
-    await user.type(screen.getByLabelText("Habit Title"), "Walk");
+    await user.type(screen.getByLabelText("Habit title"), "Walk");
     await user.type(screen.getByLabelText("Target"), "{Backspace}2");
     await user.selectOptions(screen.getByLabelText("Frequency"), "weekly");
     await user.click(screen.getByRole("button", { name: "Calendar icon" }));
     await user.click(screen.getByRole("button", { name: "Select Red color" }));
-    await user.click(screen.getByRole("button", { name: "Save Habit" }));
+    await user.click(screen.getByRole("button", { name: "Save habit" }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledWith(
@@ -188,8 +188,8 @@ describe("HabitModal", () => {
       />,
     );
 
-    await user.type(screen.getByLabelText("Habit Title"), " more");
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.type(screen.getByLabelText("Habit title"), " more");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(onSubmit).toHaveBeenCalledWith(
       {
@@ -220,7 +220,7 @@ describe("HabitModal", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
     expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
 
     await act(async () => resolveSave());
@@ -234,12 +234,12 @@ describe("HabitModal", () => {
       <HabitModal isOpen onClose={vi.fn()} onSubmit={onSubmit} mode="add" />,
     );
 
-    await user.type(screen.getByLabelText("Habit Title"), "Meditate");
-    await user.click(screen.getByRole("button", { name: "Save Habit" }));
+    await user.type(screen.getByLabelText("Habit title"), "Meditate");
+    await user.click(screen.getByRole("button", { name: "Save habit" }));
 
     expect(showNotification).toHaveBeenCalledWith("Unable to save", "error");
-    expect(screen.getByRole("button", { name: "Save Habit" })).toBeEnabled();
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("Meditate");
+    expect(screen.getByRole("button", { name: "Save habit" })).toBeEnabled();
+    expect(screen.getByLabelText("Habit title")).toHaveValue("Meditate");
   });
 
   it("starts afresh each time it opens", async () => {
@@ -252,21 +252,21 @@ describe("HabitModal", () => {
       <HabitModal {...properties} isOpen habit={baseHabit} mode="edit" />,
     );
 
-    await user.clear(screen.getByLabelText("Habit Title"));
+    await user.clear(screen.getByLabelText("Habit title"));
     expect(screen.getByText("Title is required")).toBeInTheDocument();
 
     rerender(<HabitModal {...properties} isOpen={false} mode="add" />);
     rerender(<HabitModal {...properties} isOpen mode="add" />);
 
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("");
+    expect(screen.getByLabelText("Habit title")).toHaveValue("");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
     expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save Habit" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save habit" })).toBeDisabled();
 
     rerender(<HabitModal {...properties} isOpen={false} mode="add" />);
     rerender(<HabitModal {...properties} isOpen habit={baseHabit} mode="edit" />);
 
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("Read");
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
+    expect(screen.getByLabelText("Habit title")).toHaveValue("Read");
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
   });
 });

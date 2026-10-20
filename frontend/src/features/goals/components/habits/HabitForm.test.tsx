@@ -27,7 +27,7 @@ describe("HabitForm", () => {
   it("renders form fields, preview, and hidden progress inputs", () => {
     const { container } = renderForm(7);
 
-    expect(screen.getByLabelText("Habit Title")).toHaveValue("Drink Water");
+    expect(screen.getByLabelText("Habit title")).toHaveValue("Drink Water");
     expect(screen.getByLabelText("Target")).toHaveValue(10);
     expect(
       screen.getByRole("group", { name: "Icon selection" }),
@@ -52,7 +52,7 @@ describe("HabitForm", () => {
     const user = userEvent.setup();
     renderForm();
 
-    const title = screen.getByLabelText("Habit Title");
+    const title = screen.getByLabelText("Habit title");
     await user.clear(title);
     await user.type(title, "Read 20 pages");
 
@@ -128,7 +128,7 @@ describe("HabitForm", () => {
   it("requires a title that is more than whitespace", async () => {
     const user = userEvent.setup();
     renderForm();
-    const title = screen.getByLabelText("Habit Title");
+    const title = screen.getByLabelText("Habit title");
 
     expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
 

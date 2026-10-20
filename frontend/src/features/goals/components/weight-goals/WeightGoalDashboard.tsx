@@ -82,16 +82,16 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
     return (
       <CardContainer className={className}>
         <StateCard
-          title="Set Your Weight Goal"
+          title="Set your weight goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
           icon={<TargetIcon className="h-14 w-14 text-primary" />}
           action={{
-            label: "Set Weight Goal",
+            label: "Set weight goal",
             onClick: onOpenModal, // Trigger modal open
             variant: "primary",
           }}
           secondaryAction={{
-            label: "Log Weight",
+            label: "Log weight",
             onClick: handleOpenLogWeightModal,
           }}
           size="md"

@@ -93,7 +93,7 @@ export default function DateRangeSelector({
               variant="secondary"
               leftIcon={<ShareIcon size="sm" />}
             >
-              Share Snapshot
+              Share snapshot
             </Button>
           )}
           <Button

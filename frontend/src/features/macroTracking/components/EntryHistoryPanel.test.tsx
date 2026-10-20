@@ -248,7 +248,7 @@ describe("EntryHistoryHelpers & Panel", () => {
     expect(screen.getAllByText("Protein Shake").length).toBeGreaterThan(0);
   });
 
-  it("renders Load More Dates button and triggers onLoadMore when hasMore is true even if currently loaded dates count < 5", async () => {
+  it("renders the show older days button and triggers onLoadMore when hasMore is true even if currently loaded dates count < 5", async () => {
     const queryClient = createQueryClient();
     let loadMoreCalled = false;
 
@@ -294,7 +294,7 @@ describe("EntryHistoryHelpers & Panel", () => {
       </QueryClientProvider>,
     );
 
-    const loadMoreButton = screen.getByRole("button", { name: /load more dates/i });
+    const loadMoreButton = screen.getByRole("button", { name: /show older days/i });
     expect(loadMoreButton).toBeDefined();
 
     loadMoreButton.click();
@@ -336,7 +336,7 @@ describe("EntryHistoryHelpers & Panel", () => {
     );
 
     fireEvent.click(screen.getAllByLabelText("Delete all entries for Today")[0]);
-    fireEvent.click(await screen.findByRole("button", { name: "Delete All" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Delete all" }));
 
     expect(deleteEntry).toHaveBeenCalledWith("entry-41", { undoable: false });
   });
@@ -400,7 +400,7 @@ describe("EntryHistoryPanel re-logging", () => {
     renderPanel([todayEntry, ...pastEntries], { onCopyDayToToday: vi.fn() });
 
     expect(
-      screen.getAllByLabelText("Copy Jul 30, 2026 to today").length,
+      screen.getAllByLabelText(/^Copy .*30 Jul.* to today$/).length,
     ).toBeGreaterThan(0);
     expect(screen.queryByLabelText("Copy Today to today")).toBeNull();
   });
@@ -412,10 +412,10 @@ describe("EntryHistoryPanel re-logging", () => {
     const onCopyDayToToday = vi.fn();
     renderPanel(pastEntries, { onCopyDayToToday });
 
-    fireEvent.click(screen.getAllByLabelText("Copy Jul 30, 2026 to today")[0]);
+    fireEvent.click(screen.getAllByLabelText(/^Copy .*30 Jul.* to today$/)[0]);
     expect(
       await screen.findByText(
-        "Add 2 entries from Jul 30, 2026 to today, at the same times and meals?",
+        /^Add 2 entries from .*30 Jul.* to today, at the same times and meals\?$/,
       ),
     ).toBeInTheDocument();
     expect(onCopyDayToToday).not.toHaveBeenCalled();

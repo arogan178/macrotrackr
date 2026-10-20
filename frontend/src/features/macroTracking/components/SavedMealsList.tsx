@@ -44,7 +44,7 @@ const SavedMealsList = memo(
     if (isLoading) {
       return (
         <div className={cn("space-y-2", className)}>
-          <div className="text-sm font-medium text-muted">Saved Meals</div>
+          <div className="text-sm font-medium text-muted">Saved meals</div>
           <div className="flex gap-2">
             {[1, 2, 3].map((index) => (
               <div
@@ -68,7 +68,7 @@ const SavedMealsList = memo(
     return (
       <div className={cn("space-y-3", className)}>
         <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-foreground">Quick Add</div>
+          <div className="text-sm font-medium text-foreground">Quick add</div>
           {!isPro && (
             <div className="text-xs text-muted">
               {count}/{limit} meals saved

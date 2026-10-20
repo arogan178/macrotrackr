@@ -189,7 +189,7 @@ async function importMyFitnessPal(
   );
 
   await page.goto("/settings?tab=data");
-  await expect(page.getByText("1-Click Data Importer")).toBeVisible();
+  await expect(page.getByText("Import your history")).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles(fixturePath);
   await expect(page.getByText("Growth canary oats")).toBeVisible();
   await page.getByRole("button", { name: "Import 1 Entries" }).click();

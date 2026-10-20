@@ -32,7 +32,7 @@ describe("WeightLogList", () => {
   it("opens the log weight modal from the empty state", async () => {
     render(<WeightLogList />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Log Weight" }));
+    await userEvent.click(screen.getByRole("button", { name: "Log weight" }));
 
     expect(useStore.getState().isLogWeightModalOpen).toBe(true);
   });
@@ -57,7 +57,7 @@ describe("WeightLogList", () => {
 
     await userEvent.clear(input);
     await userEvent.type(input, "175");
-    await userEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
 
     await waitFor(() =>
       expect(updateWeightLog).toHaveBeenCalledWith({

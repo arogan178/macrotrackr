@@ -276,7 +276,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
         stopCamera();
         onClose();
       }}
-      title="Barcode Scanner"
+      title="Barcode scanner"
       size="md"
     >
       <div className="flex flex-col gap-4 p-4">
@@ -290,7 +290,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
               variant={mode === "camera" ? "primary" : "secondary"}
               buttonSize="sm"
               onClick={() => setMode("camera")}
-              ariaLabel="Use Camera Scanner"
+              ariaLabel="Use camera scanner"
               className="text-xs"
               leftIcon={<CameraIcon className="h-3.5 w-3.5" />}
             >
@@ -301,7 +301,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
               variant={mode === "manual" ? "primary" : "secondary"}
               buttonSize="sm"
               onClick={() => setMode("manual")}
-              ariaLabel="Enter Barcode Manually"
+              ariaLabel="Enter barcode manually"
               className="text-xs"
               leftIcon={<BarcodeIcon className="h-3.5 w-3.5" />}
             >
@@ -317,7 +317,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
               playsInline
               muted
               className="h-full w-full object-cover"
-              aria-label="Live Camera Feed"
+              aria-label="Live camera feed"
             />
             {/* Viewfinder Target Frame */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
@@ -341,9 +341,9 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
                   variant="secondary"
                   buttonSize="sm"
                   onClick={startCamera}
-                  ariaLabel="Start Camera"
+                  ariaLabel="Start camera"
                 >
-                  Start Camera
+                  Start camera
                 </Button>
               </div>
             )}

@@ -551,7 +551,7 @@ function AddEntry({
           <div className="mb-3.5 sm:mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 sm:items-start">
             <div className="col-span-1">
               <QuantityUnitField
-                label="Quantity/Unit"
+                label="Quantity"
                 quantity={quantity}
                 unit={unit}
                 onQuantityChange={(value) =>
@@ -565,7 +565,7 @@ function AddEntry({
               <div className="space-y-2">
                 <div className="relative flex h-6 items-center justify-between">
                   <label htmlFor={mealNameInputId} className={formStyles.label}>
-                    Meal Name
+                    Meal name
                   </label>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
@@ -579,7 +579,7 @@ function AddEntry({
                           ? "bg-primary/15 text-primary hover:bg-primary/25"
                           : "text-muted hover:bg-muted/10 hover:text-foreground",
                       )}
-                      aria-label="Save as Meal"
+                      aria-label="Save as meal"
                       title={saveAsMeal ? "Will save as reusable meal" : "Save as reusable meal"}
                     >
                       <StarIcon
@@ -588,7 +588,7 @@ function AddEntry({
                           saveAsMeal ? "fill-current text-primary" : "",
                         )}
                       />
-                      <span>{saveAsMeal ? "Saved as Meal" : "Save as Meal"}</span>
+                      <span>{saveAsMeal ? "Saved as meal" : "Save as meal"}</span>
                     </button>
                     <AnimatePresence>
                       {(searchResult ?? mealName.length > 0) && (
@@ -628,7 +628,7 @@ function AddEntry({
 
           <div className="mb-3.5 sm:mb-5">
             <Dropdown
-              label="Meal Type"
+              label="Meal type"
               options={MEAL_TYPE_OPTIONS.map((option) => ({
                 value: option.value,
                 label: option.display,

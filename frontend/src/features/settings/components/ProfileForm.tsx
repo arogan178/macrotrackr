@@ -111,7 +111,7 @@ export default function ProfileForm({
           <form.Field name="firstName">
             {(field) => (
               <TextField
-                label="First Name"
+                label="First name"
                 value={field.state.value}
                 onChange={field.handleChange}
                 error={field.state.meta.errors[0]}
@@ -123,7 +123,7 @@ export default function ProfileForm({
           <form.Field name="lastName">
             {(field) => (
               <TextField
-                label="Last Name"
+                label="Last name"
                 value={field.state.value}
                 onChange={field.handleChange}
                 error={field.state.meta.errors[0]}
@@ -148,7 +148,7 @@ export default function ProfileForm({
           <form.Field name="dateOfBirth">
             {(field) => (
               <DateField
-                label="Date of Birth"
+                label="Date of birth"
                 value={field.state.value ?? ""}
                 onChange={field.handleChange}
                 error={field.state.meta.errors[0]}
@@ -218,7 +218,7 @@ export default function ProfileForm({
           <form.Field name="activityLevel">
             {(field) => (
               <Dropdown
-                label="Activity Level"
+                label="Activity level"
                 value={field.state.value ?? ""}
                 onChange={(value) =>
                   field.handleChange(value ? Number(value) : undefined)

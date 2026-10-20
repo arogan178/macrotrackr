@@ -1,7 +1,5 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 
-import InfoCard from "@/components/form/InfoCard";
-import { InfoIcon } from "@/components/ui";
 import { useMacroTargetCore as useEditableMacroTargetCore } from "@/features/macroTracking/hooks/useMacroTargetCore";
 import type { MacroTargetState, MacroType } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
@@ -18,7 +16,6 @@ const MacroTarget = memo(
     initialValues = DEFAULT_MACRO_TARGET,
     onTargetChange,
   }: MacroTargetProps) => {
-    const [helpVisible, setHelpVisible] = useState(false);
 
     const { target, handleChange, toggleLock } = useEditableMacroTargetCore(
       initialValues,
@@ -41,38 +38,6 @@ const MacroTarget = memo(
 
     return (
       <div className="space-y-6 py-2">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-foreground">Macro Target</h3>
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={() => setHelpVisible(!helpVisible)}
-              className="rounded-full p-1 text-foreground transition-colors hover:bg-surface-2 hover:text-primary"
-              aria-label={helpVisible ? "Hide help" : "Show help"}
-              title="How to use this tool"
-            >
-              <InfoIcon className="" />
-            </button>
-          </div>
-        </div>
-
-        {helpVisible && (
-          <InfoCard
-            title="Tips for adjusting your macros:"
-            color="accent"
-            icon={<InfoIcon className="" />}
-          >
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-foreground">
-              <li>Drag the sliders to adjust percentages</li>
-              <li>
-                Click the lock icon to keep a macro fixed while adjusting others
-              </li>
-              <li>Total will always equal 100%</li>
-              <li>Each macro requires at least 5%</li>
-            </ul>
-          </InfoCard>
-        )}
-
         <div className="relative mb-6 h-2 overflow-hidden rounded-full bg-surface">
           <div
             className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein/80 to-protein"

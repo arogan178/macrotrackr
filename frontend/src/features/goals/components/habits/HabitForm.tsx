@@ -141,7 +141,7 @@ function HabitForm({ form, currentProgress = 0 }: HabitFormProps) {
       <form.Field name="title" validators={{ onChange: validateTitle }}>
         {(field) => (
           <TextField
-            label="Habit Title"
+            label="Habit title"
             value={field.state.value}
             onChange={field.handleChange}
             placeholder="Enter a title for your habit"

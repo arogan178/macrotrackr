@@ -154,7 +154,7 @@ export default function IngredientsPanel({
                         <div className="sticky top-0 z-10 -mb-1 pt-2">
                           <div className="flex items-center gap-2 rounded-control border border-border bg-surface-2 px-3 py-2">
                             <span className="h-px flex-1 bg-border" />
-                            <span className="shrink-0 text-[10px] font-semibold tracking-[0.14em] text-muted uppercase">
+                            <span className="shrink-0 text-[10px] font-medium text-muted">
                               {ingredient.sourceEntryName}
                             </span>
                             <span className="h-px flex-1 bg-border" />

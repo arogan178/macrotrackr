@@ -83,10 +83,8 @@ const BillingForm: React.FC = () => {
   return (
     <CardContainer className="p-3.5 sm:p-6 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0">
       {/* Current plan status bar */}
-      <div className="mb-4 sm:mb-5 flex items-center justify-between border-b border-border pb-3.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-          Current Plan Status
-        </span>
+      <div className="flex min-h-12 items-center justify-between border-b border-border text-sm">
+        <span className="text-muted">Plan</span>
         <div
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-semibold",
@@ -97,7 +95,7 @@ const BillingForm: React.FC = () => {
           role="status"
           aria-label={`Current plan: ${hasProAccess ? "Pro" : "Free"}`}
         >
-          {hasProAccess ? "Pro Plan" : "Free Plan"}
+          {hasProAccess ? "Pro plan" : "Free plan"}
         </div>
       </div>
 

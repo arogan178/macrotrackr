@@ -74,7 +74,7 @@ const mockSavedMeals = (meals: SavedMeal[]) => {
 
 const openSavedMealEditor = async (mealName: string) => {
   fireEvent.focus(screen.getByRole("textbox", { name: "Search for food" }));
-  fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Saved meals" }));
   fireEvent.click(
     await screen.findByRole("button", { name: `Edit ${mealName}` }),
   );
@@ -346,7 +346,7 @@ describe("CalorieSearchForm", () => {
       mockSavedMeals([oats, { ...oats, id: 6, name: "Chicken bowl" }]);
       renderAndType("CHICK");
 
-      fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+      fireEvent.click(screen.getByRole("tab", { name: "Saved meals" }));
 
       expect(await screen.findByText("Chicken bowl")).toBeInTheDocument();
       expect(screen.queryByText("Oats")).not.toBeInTheDocument();
@@ -358,7 +358,7 @@ describe("CalorieSearchForm", () => {
       renderAndType("pizza");
 
       expect(screen.getByText("No recents match")).toBeInTheDocument();
-      fireEvent.click(screen.getByRole("tab", { name: "Saved Meals" }));
+      fireEvent.click(screen.getByRole("tab", { name: "Saved meals" }));
       expect(await screen.findByText("No saved meals match")).toBeInTheDocument();
     });
 
@@ -424,9 +424,9 @@ describe("CalorieSearchForm", () => {
     const scanButton = screen.getByRole("button", { name: "Scan barcode" });
     fireEvent.click(scanButton);
 
-    expect(screen.getByText("Barcode Scanner")).toBeInTheDocument();
+    expect(screen.getByText("Barcode scanner")).toBeInTheDocument();
 
-    const manualTab = screen.getByRole("button", { name: "Enter Barcode Manually" });
+    const manualTab = screen.getByRole("button", { name: "Enter barcode manually" });
     fireEvent.click(manualTab);
 
     const barcodeInput = screen.getByLabelText(/barcode number/i);
@@ -492,7 +492,7 @@ describe("CalorieSearchForm", () => {
         }),
       ],
     });
-    expect(screen.getByRole("tab", { name: "Saved Meals" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Saved meals" })).toBeInTheDocument();
   });
 
   it("only renames and retypes a multi-ingredient saved meal", async () => {
@@ -519,7 +519,7 @@ describe("CalorieSearchForm", () => {
       screen.getByText("Macros come from its 2 ingredients."),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Meal Type"), {
+    fireEvent.change(screen.getByLabelText("Meal type"), {
       target: { value: "dinner" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));

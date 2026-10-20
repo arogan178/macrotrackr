@@ -138,11 +138,11 @@ function WeightLogList({
     return (
       <div className="h-60">
         <StateCard
-          title="No Weight Logged Yet"
+          title="No weight logged yet"
           message="Your recorded weights will appear here."
           icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
           action={{
-            label: "Log Weight",
+            label: "Log weight",
             onClick: () => setLogWeightModalOpen(true),
           }}
           size="sm"
@@ -241,7 +241,7 @@ function WeightLogList({
         <Modal
           isOpen={isConfirmModalOpen}
           onClose={handleCancelDelete}
-          title="Confirm Deletion"
+          title="Confirm deletion"
           variant="confirmation"
           message={`Are you sure you want to delete the weight entry (${formatWeight(
             itemToDelete.weight,
@@ -252,7 +252,7 @@ function WeightLogList({
               ? format(parseISO(itemToDelete.timestamp), "PPPp")
               : "an invalid date"
           }?`}
-          confirmLabel="Delete Entry"
+          confirmLabel="Delete entry"
           cancelLabel="Cancel"
           onConfirm={handleConfirmDelete}
           isDanger
@@ -271,12 +271,12 @@ function WeightLogList({
         <Modal
           isOpen={isBulkConfirmModalOpen}
           onClose={onBulkCancel}
-          title="Delete All Entries"
+          title="Delete all entries"
           variant="confirmation"
           message={
             "Are you sure you want to delete ALL weight log entries? This action cannot be undone."
           }
-          confirmLabel="Delete All"
+          confirmLabel="Delete all"
           cancelLabel="Cancel"
           onConfirm={handleConfirmBulkDelete}
           isDanger

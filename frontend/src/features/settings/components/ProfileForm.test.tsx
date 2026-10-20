@@ -109,7 +109,7 @@ describe("ProfileForm", () => {
 
   it("validates the name as it is typed and blocks saving", async () => {
     const { user } = renderForm();
-    const firstName = screen.getByLabelText("First Name");
+    const firstName = screen.getByLabelText("First name");
 
     await user.clear(firstName);
     expect(firstName).toHaveAccessibleDescription("First name required");
@@ -145,7 +145,7 @@ describe("ProfileForm", () => {
   it("saves once an error is fixed after another field was edited", async () => {
     mutateAsync.mockResolvedValue({ success: true, message: "" });
     const { user } = renderForm();
-    const firstName = screen.getByLabelText("First Name");
+    const firstName = screen.getByLabelText("First name");
     const weight = screen.getByLabelText("Weight");
 
     await user.clear(firstName);
@@ -174,7 +174,7 @@ describe("ProfileForm", () => {
     mutateAsync.mockResolvedValue({ success: true, message: "" });
     const { user, onHasChangesChange } = renderForm();
 
-    await user.type(screen.getByLabelText("Last Name"), "s");
+    await user.type(screen.getByLabelText("Last name"), "s");
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
     expect(onHasChangesChange).toHaveBeenLastCalledWith(true);
 
@@ -196,23 +196,23 @@ describe("ProfileForm", () => {
     mutateAsync.mockRejectedValue(new Error("Network down"));
     const { user } = renderForm();
 
-    await user.type(screen.getByLabelText("Last Name"), "s");
+    await user.type(screen.getByLabelText("Last name"), "s");
     await user.click(saveButton());
 
     expect(notifications()).toEqual([
       { message: "Failed to save settings: Network down", type: "error" },
     ]);
-    expect(screen.getByLabelText("Last Name")).toHaveValue("Users");
+    expect(screen.getByLabelText("Last name")).toHaveValue("Users");
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
   });
 
   it("reads as saved again when an edit is undone", async () => {
     const { user } = renderForm();
 
-    await user.type(screen.getByLabelText("Last Name"), "s");
+    await user.type(screen.getByLabelText("Last name"), "s");
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("Last Name"), "{Backspace}");
+    await user.type(screen.getByLabelText("Last name"), "{Backspace}");
     expect(screen.getByText("All changes saved")).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
   });

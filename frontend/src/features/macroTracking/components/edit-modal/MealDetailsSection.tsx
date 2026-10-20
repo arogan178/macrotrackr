@@ -62,7 +62,7 @@ export default function MealDetailsSection({
   return (
     <section className="space-y-4 rounded-card border border-border bg-surface p-5 md:p-6">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+        <p className="text-xs font-medium text-muted">
           Meal Details
         </p>
         <p className="text-xs text-muted">
@@ -73,7 +73,7 @@ export default function MealDetailsSection({
       </div>
 
       <TextField
-        label="Food Name"
+        label="Food name"
         value={mealName}
         onChange={onMealNameChange}
         placeholder="Enter food name"
@@ -83,7 +83,7 @@ export default function MealDetailsSection({
       <div className="grid gap-4 md:grid-cols-3">
         <Dropdown
           id="edit-meal-type"
-          label="Meal Type"
+          label="Meal type"
           options={MEAL_TYPE_OPTIONS.map((option) => ({
             value: option.value,
             label: option.display,
@@ -109,7 +109,7 @@ export default function MealDetailsSection({
 
       {!isMultiIngredient && onQuantityChange && onUnitChange && (
         <QuantityUnitField
-          label="Quantity & Unit"
+          label="Quantity & unit"
           quantity={quantity}
           unit={(unit as UnitType) || "g"}
           onQuantityChange={onQuantityChange}
@@ -147,7 +147,7 @@ export default function MealDetailsSection({
 
       <div className="grid gap-3 sm:grid-cols-4">
         <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
+          <p className="text-[11px] font-medium text-muted">
             Calories
           </p>
           <p className="mt-2 text-2xl font-semibold text-foreground">
@@ -155,7 +155,7 @@ export default function MealDetailsSection({
           </p>
         </div>
         <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-protein uppercase">
+          <p className="text-[11px] font-medium text-protein">
             Protein
           </p>
           <p className="mt-2 text-xl font-semibold text-foreground">
@@ -163,7 +163,7 @@ export default function MealDetailsSection({
           </p>
         </div>
         <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-carbs uppercase">
+          <p className="text-[11px] font-medium text-carbs">
             Carbs
           </p>
           <p className="mt-2 text-xl font-semibold text-foreground">
@@ -171,7 +171,7 @@ export default function MealDetailsSection({
           </p>
         </div>
         <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-fats uppercase">
+          <p className="text-[11px] font-medium text-fats">
             Fats
           </p>
           <p className="mt-2 text-xl font-semibold text-foreground">

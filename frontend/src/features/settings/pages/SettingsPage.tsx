@@ -201,7 +201,7 @@ export default function SettingsPage() {
             activeKey={activeTab}
             onChange={(key) => handleTabChange(key as typeof activeTab)}
             layoutId="settingsTabHighlight"
-            ariaLabel="Settings Tabs"
+            ariaLabel="Settings tabs"
             size="sm"
             fullWidth
           />
@@ -290,7 +290,7 @@ export default function SettingsPage() {
         >
           <div>
             <h3 className="text-sm font-medium text-foreground">
-              Account Session
+              Account session
             </h3>
             <p className="text-xs text-muted">
               Sign out of your account on this device
@@ -309,11 +309,11 @@ export default function SettingsPage() {
         <Modal
           isOpen={showConfirmModal}
           onClose={cancelTabChange}
-          title="Unsaved Changes"
+          title="Unsaved changes"
           variant="confirmation"
           message="You have unsaved changes that will be lost. Do you want to continue?"
-          confirmLabel="Discard Changes"
-          cancelLabel="Keep Editing"
+          confirmLabel="Discard changes"
+          cancelLabel="Keep editing"
           onConfirm={confirmTabChange}
           isDanger
         />

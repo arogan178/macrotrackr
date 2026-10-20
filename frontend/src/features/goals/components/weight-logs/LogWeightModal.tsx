@@ -155,7 +155,7 @@ function LogWeightModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={entry ? "Edit Weight Entry" : "Log Your Weight"}
+      title={entry ? "Edit weight entry" : "Log your weight"}
       variant="form"
       onSave={handleSave}
       saveDisabled={
@@ -165,7 +165,7 @@ function LogWeightModal({
         !weight ||
         !!formError
       }
-      saveLabel={entry ? "Save Changes" : "Log Weight"}
+      saveLabel={entry ? "Save changes" : "Log weight"}
       buttonSize="lg"
     >
       <div className="space-y-4">
