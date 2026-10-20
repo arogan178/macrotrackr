@@ -52,4 +52,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The barcode scanner opens the camera through the webview's getUserMedia;
+         without the declaration Android denies it before any prompt. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Optional, so Play does not hide the app from devices without a camera. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>
