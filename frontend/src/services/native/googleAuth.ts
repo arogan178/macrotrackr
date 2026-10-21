@@ -104,7 +104,10 @@ export async function signInWithNativeGoogle({
 
       return "signed_in";
     }
+    // A second factor can't be completed here; the web flow can.
     logger.warn("Google sign-in ticket did not complete:", result.status);
+
+    return "use_web";
   } catch (error) {
     logger.warn("Google sign-in ticket was refused:", error);
   }

@@ -14,7 +14,7 @@ async function getGoogleKey(kid: string): Promise<GoogleKey | undefined> {
     return find();
   }
 
-  const response = await fetch(GOOGLE_CERTS_URL);
+  const response = await fetch(GOOGLE_CERTS_URL, { signal: AbortSignal.timeout(5000) });
   if (!response.ok) {
     throw new Error(`Google certificates request failed: ${response.status}`);
   }

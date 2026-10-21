@@ -57,6 +57,13 @@ describe("signInWithNativeGoogle", () => {
       "the backend has native sign-in switched off",
       () => exchangeGoogleIdToken.mockRejectedValue(new ApiError("Not found", 404, "NOT_FOUND")),
     ],
+    [
+      "the account needs a second factor",
+      () => {
+        exchangeGoogleIdToken.mockResolvedValue({ ticket: "ticket_1" });
+        signIn.create.mockResolvedValue({ status: "needs_second_factor", createdSessionId: null });
+      },
+    ],
   ])("falls back to the web flow when %s", async (_label, arrange) => {
     arrange();
     expect(await run()).toBe("use_web");
