@@ -1,4 +1,5 @@
 import type { Database } from "bun:sqlite";
+import type { ClerkClient } from "elysia-clerk";
 import { Elysia } from "elysia";
 import {
   type UserRow,
@@ -27,6 +28,10 @@ import {
   readSessionTokenFromRequest,
 } from "../../lib/auth/session";
 import { publishUserSyncEvent } from "../../lib/sync/eventBus";
+import {
+  findClerkUserForGoogle,
+  verifyGoogleIdToken,
+} from "../../lib/auth/google-native";
 import { getConfig } from "../../config";
 import { captureProductEvent } from "../../lib/analytics/product-analytics";
 import { AuthSchemas } from "./schemas";
@@ -693,6 +698,57 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
             summary: "Sync Clerk user with database",
             description:
               "Creates or updates a user in our database based on Clerk authentication",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .post(
+        "/google-native",
+        async (context) => {
+          const config = getConfig();
+          const { clerk } = context as unknown as { clerk?: ClerkClient };
+          const androidClientIds = (config.GOOGLE_ANDROID_CLIENT_IDS ?? "")
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean);
+          if (
+            config.AUTH_MODE !== "clerk" ||
+            !clerk ||
+            !config.GOOGLE_WEB_CLIENT_ID ||
+            androidClientIds.length === 0
+          ) {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          const identity = await verifyGoogleIdToken(context.body.idToken, {
+            webClientId: config.GOOGLE_WEB_CLIENT_ID,
+            androidClientIds,
+          });
+          if (!identity) {
+            context.set.status = 401;
+            throw new AuthenticationError("Google sign-in could not be verified.");
+          }
+
+          // No linked account: the app signs up through Clerk's web OAuth.
+          const clerkUserId = await findClerkUserForGoogle(clerk, identity);
+          if (!clerkUserId) {
+            return { ticket: null };
+          }
+
+          const { token } = await clerk.signInTokens.createSignInToken({
+            userId: clerkUserId,
+            expiresInSeconds: 60,
+          });
+          logger.info({ clerkUserId }, "[google-native] Issued sign-in ticket");
+
+          return { ticket: token };
+        },
+        {
+          body: AuthSchemas.googleNative,
+          response: AuthSchemas.googleNativeResponse,
+          detail: {
+            summary: "Exchange an Android Google ID token for a Clerk sign-in ticket",
             tags: ["Auth"],
           },
         },

@@ -72,6 +72,11 @@ const BaseEnvSchema = z.object({
   CLERK_PUBLISHABLE_KEY: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
   CLERK_WEBHOOK_SECRET: z.string().optional(),
+  // Native Google sign-in on Android. Clerk refuses the picker's ID tokens
+  // because their `azp` is the Android client, so the backend verifies them.
+  GOOGLE_WEB_CLIENT_ID: z.string().optional(),
+  // Comma-separated: the debug and Play-signed builds have separate clients.
+  GOOGLE_ANDROID_CLIENT_IDS: z.string().optional(),
 
   POSTHOG_KEY: z.string().optional(),
   POSTHOG_HOST: z.url("POSTHOG_HOST must be a valid URL").optional(),

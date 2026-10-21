@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
-import { useClerk } from "@clerk/react";
 import { useSignIn, useSignUp } from "@clerk/react/legacy";
 import { resolveSignupSource } from "@shared/product-analytics";
 import { useNavigate } from "@tanstack/react-router";
@@ -34,8 +33,7 @@ import {
 import { logger } from "@/lib/logger";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 import {
-  exchangeNativeGoogleTokenWithClerk,
-  nativeGoogleSignIn,
+  signInWithNativeGoogle,
 } from "@/services/native/googleAuth";
 import { isNativePlatform } from "@/services/native/platform";
 import { useStore } from "@/store/store";
@@ -88,7 +86,6 @@ export function ClerkSignUpForm({
 }: ClerkSignUpFormProps) {
   const productAnalytics = useProductAnalytics();
   const navigate = useNavigate();
-  const clerk = useClerk();
   const { isLoaded, signUp, setActive } = useSignUp();
   const {
     isLoaded: isSignInLoaded,
@@ -236,58 +233,28 @@ export function ClerkSignUpForm({
 
     try {
       if (strategy === "oauth_google" && isNativePlatform()) {
-        logger.info("Initiating native Google Sign-In on mobile...");
-        let googleAuthRes = null;
-        try {
-          googleAuthRes = await Promise.race([
-            nativeGoogleSignIn(),
-            new Promise<null>((_, reject) =>
-              setTimeout(
-                () => reject(new Error("Native Google Sign-In timed out")),
-                10000,
-              ),
-            ),
-          ]);
-        } catch (nativeError) {
-          logger.warn(
-            "Native Google Sign-In failed or timed out:",
-            nativeError,
-          );
-        }
-
-        if (googleAuthRes?.idToken) {
-          logger.info(
-            "Native Google Sign-In obtained idToken, exchanging with Clerk...",
-          );
-          const success = await exchangeNativeGoogleTokenWithClerk({
-            idToken: googleAuthRes.idToken,
-            clerk,
-            signIn,
-            signUp,
-            setActive,
+        const outcome = await signInWithNativeGoogle({
+          signIn,
+          setActive: setSignInActive,
+        });
+        if (outcome === "signed_in") {
+          showNotification("Signed in with Google successfully!", "success");
+          navigate({
+            to: "/auth-ready",
+            search: { redirectTo: normalizedRedirect },
+            replace: true,
           });
 
-          if (success) {
-            showNotification("Signed in with Google successfully!", "success");
-            navigate({
-              to: "/auth-ready",
-              search: { redirectTo: normalizedRedirect },
-              replace: true,
-            });
-
-            return;
-          }
-          logger.warn("Native Google token exchange returned false.");
+          return;
+        }
+        if (outcome === "cancelled") return;
+        if (outcome === "failed") {
           showNotification(
             "Google sign-in could not be completed. Please try again in a moment.",
             "warning",
           );
 
           return;
-        } else {
-          logger.info(
-            "Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...",
-          );
         }
       }
 

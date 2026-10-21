@@ -1,5 +1,7 @@
 import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
 
+import { authApi } from "@/api/auth";
+import { ApiError } from "@/api/core";
 import { logger } from "@/lib/logger";
 
 import { isNativePlatform } from "./platform";
@@ -26,19 +28,20 @@ export function initNativeGoogleAuth(): void {
   }
 }
 
-export async function nativeGoogleSignIn(): Promise<{ idToken: string; email?: string } | null> {
-  if (!isNativePlatform()) return null;
+type GoogleSignInResult = { idToken: string } | "cancelled" | null;
 
+async function pickGoogleAccount(): Promise<GoogleSignInResult> {
   try {
     initNativeGoogleAuth();
+    // The plugin silently reuses the last account; forgetting it first shows
+    // the picker, so someone with two Google accounts can choose.
+    await GoogleAuth.signOut().catch(() => undefined);
     const user = await GoogleAuth.signIn();
-    // The token only ever hangs off `authentication`; the old `user.idToken`
-    // fallback read a property the plugin does not define.
     const idToken = user?.authentication?.idToken;
     if (idToken) {
-      return { idToken, email: user.email };
+      return { idToken };
     }
-    logger.warn("Native GoogleAuth succeeded but no idToken returned:", user);
+    logger.warn("Native GoogleAuth succeeded but no idToken returned");
 
     return null;
   } catch (error: any) {
@@ -49,155 +52,62 @@ export async function nativeGoogleSignIn(): Promise<{ idToken: string; email?: s
       errString.includes("popup_closed") ||
       error?.code === 12501
     ) {
-      logger.info("Native GoogleAuth user cancelled sign-in");
-
-      return null;
+      return "cancelled";
     }
-    logger.warn("Native GoogleAuth signIn failed or cancelled:", error);
+    logger.warn("Native GoogleAuth signIn failed:", error);
 
     return null;
   }
 }
 
-export async function exchangeNativeGoogleTokenWithClerk({
-  idToken,
-  clerk,
+/**
+ * `use_web` means continue with Clerk's web OAuth: the picker failed, or no
+ * account has this Google login linked yet, so it has to sign up there.
+ */
+export type NativeGoogleOutcome = "signed_in" | "cancelled" | "use_web" | "failed";
+
+/**
+ * Clerk refuses the picker's ID token itself (its `azp` is the Android client),
+ * so the backend verifies it and returns a one-time sign-in ticket.
+ */
+export async function signInWithNativeGoogle({
   signIn,
-  signUp,
   setActive,
 }: {
-  idToken: string;
-  clerk?: any;
-  signIn?: any;
-  signUp?: any;
-  setActive: (params: { session: string }) => Promise<void>;
-}): Promise<boolean> {
-  const getSessionId = (res: any) =>
-    res?.createdSessionId ||
-    res?.signIn?.createdSessionId ||
-    res?.signUp?.createdSessionId ||
-    (res?.status === "complete" ? res?.createdSessionId : null);
-
-  const tryTransfer = async (): Promise<boolean> => {
-    try {
-      logger.info("[ClerkNativeAuth] Attempting signIn.create({ transfer: true })...");
-      const transferRes = await signIn?.create?.({ transfer: true });
-      const transferSessionId = getSessionId(transferRes);
-      if (transferSessionId) {
-        logger.info("[ClerkNativeAuth] signIn.create({ transfer: true }) succeeded!", transferSessionId);
-        await setActive({ session: transferSessionId });
-
-        return true;
-      }
-      if (transferRes?.status === "complete") {
-        logger.info("[ClerkNativeAuth] signIn.create({ transfer: true }) status complete:", transferRes);
-
-        return true;
-      }
-    } catch (transferError: any) {
-      const message = transferError?.errors
-        ? JSON.stringify(transferError.errors)
-        : transferError?.message || JSON.stringify(transferError);
-      logger.warn(`[ClerkNativeAuth] transfer failed: ${message}`);
-    }
-
-    return false;
+  signIn: {
+    create: (params: { strategy: "ticket"; ticket: string }) => Promise<{
+      status: string | null;
+      createdSessionId: string | null;
+    }>;
   };
+  setActive: (params: { session: string }) => Promise<void>;
+}): Promise<NativeGoogleOutcome> {
+  const picked = await pickGoogleAccount();
+  if (picked === "cancelled") return "cancelled";
+  if (!picked) return "use_web";
 
-  // Step 1: Official Clerk method for Google ID Tokens
-  if (clerk?.authenticateWithGoogleOneTap) {
-    try {
-      logger.info("[ClerkNativeAuth] Attempting clerk.authenticateWithGoogleOneTap...");
-      const res = await clerk.authenticateWithGoogleOneTap({ token: idToken });
-      const createdSessionId = getSessionId(res);
-
-      if (createdSessionId) {
-        logger.info("[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap succeeded!", createdSessionId);
-        await setActive({ session: createdSessionId });
-
-        return true;
-      }
-
-      if (clerk?.handleGoogleOneTapCallback) {
-        try {
-          await clerk.handleGoogleOneTapCallback(res, {
-            signInFallbackRedirectUrl: "/sso-callback",
-          });
-
-          return true;
-        } catch (callbackError) {
-          logger.warn("[ClerkNativeAuth] handleGoogleOneTapCallback warning:", callbackError);
-        }
-      }
-
-      if (res?.status === "complete") {
-        logger.info("[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap complete:", res);
-
-        return true;
-      }
-    } catch (err: any) {
-      const isTooManyRequests = err?.errors?.some((e: any) => e?.code === "too_many_requests") || err?.code === "too_many_requests";
-      const isExternalAccountExists = err?.errors?.some(
-        (e: any) => e?.code === "external_account_exists" || e?.code === "form_identifier_exists"
-      );
-      const message = err?.errors
-        ? JSON.stringify(err.errors)
-        : err?.message || JSON.stringify(err);
-      logger.warn(`[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap failed: ${message}`);
-
-      if (isTooManyRequests) {
-        logger.warn("[ClerkNativeAuth] Rate limit reached on Clerk API.");
-
-        return false;
-      }
-
-      if (isExternalAccountExists) {
-        const transferred = await tryTransfer();
-        if (transferred) return true;
-      }
-    }
-  }
-
-  // Step 2: Fallback attempt via signIn / signUp google_one_tap (single pair)
+  let ticket: string | null;
   try {
-    logger.info("[ClerkNativeAuth] Trying signIn.create({ strategy: 'google_one_tap' })...");
-    const res = await signIn?.create?.({ strategy: "google_one_tap", token: idToken });
-    const createdSessionId = getSessionId(res);
-    if (createdSessionId) {
-      await setActive({ session: createdSessionId });
+    ({ ticket } = await authApi.exchangeGoogleIdToken(picked.idToken));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return "use_web";
+    logger.warn("Google ID token exchange failed:", error);
 
-      return true;
-    }
-  } catch (err: any) {
-    const isTooManyRequests = err?.errors?.some((e: any) => e?.code === "too_many_requests");
-    const isExternalAccountExists = err?.errors?.some(
-      (e: any) => e?.code === "external_account_exists" || e?.code === "form_identifier_exists"
-    );
-    if (isTooManyRequests) return false;
-    if (isExternalAccountExists) {
-      const transferred = await tryTransfer();
-      if (transferred) return true;
-    }
+    return "failed";
+  }
+  if (!ticket) return "use_web";
 
-    try {
-      logger.info("[ClerkNativeAuth] Trying signUp.create({ strategy: 'google_one_tap' })...");
-      const signUpRes = await signUp?.create?.({ strategy: "google_one_tap", token: idToken });
-      const createdSessionId = getSessionId(signUpRes);
-      if (createdSessionId) {
-        await setActive({ session: createdSessionId });
+  try {
+    const result = await signIn.create({ strategy: "ticket", ticket });
+    if (result.status === "complete" && result.createdSessionId) {
+      await setActive({ session: result.createdSessionId });
 
-        return true;
-      }
-    } catch (signUpError: any) {
-      const isTransferred = signUpError?.errors?.some(
-        (e: any) => e?.code === "external_account_exists" || e?.code === "form_identifier_exists"
-      );
-      if (isTransferred) {
-        const transferred = await tryTransfer();
-        if (transferred) return true;
-      }
+      return "signed_in";
     }
+    logger.warn("Google sign-in ticket did not complete:", result.status);
+  } catch (error) {
+    logger.warn("Google sign-in ticket was refused:", error);
   }
 
-  return false;
+  return "failed";
 }

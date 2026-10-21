@@ -155,6 +155,7 @@ const SENSITIVE_AUTH_PATHS = new Set([
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/change-password",
+  "/api/auth/google-native",
 ]);
 
 export function isSensitiveAuthRequest(request: Request): boolean {

@@ -38,6 +38,14 @@ export const AuthSchemas = {
 
   successResponse: SuccessResponseSchema,
 
+  googleNative: t.Object({
+    idToken: t.String({ minLength: 1, maxLength: 4096 }),
+  }),
+
+  googleNativeResponse: t.Object({
+    ticket: t.Nullable(t.String()),
+  }),
+
   authResponse: t.Object({
     success: t.Boolean(),
     message: t.Optional(t.String()),

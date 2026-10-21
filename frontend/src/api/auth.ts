@@ -108,6 +108,14 @@ export const authApi = {
     unwrap(api.api.auth["change-password"].post({ currentPassword, newPassword })),
 
   /**
+   * Swaps an Android Google ID token for a Clerk sign-in ticket, or null when
+   * no account has that Google login linked.
+   * @throws {ApiError}
+   */
+  exchangeGoogleIdToken: async (idToken: string): Promise<{ ticket: string | null }> =>
+    unwrap(api.api.auth["google-native"].post({ idToken })),
+
+  /**
    * @throws {ApiError}
    */
   syncUser: async ({ token }: { token?: string } = {}): Promise<AuthSyncResponse> =>

@@ -36,6 +36,8 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/api/billing/webhook",
   // Public: the pricing page has to know what it may sell before sign-in.
   "/api/billing/capabilities",
+  // Public: proves who the caller is with a Google ID token instead.
+  "/api/auth/google-native",
   "/api/docs",
   "/api/docs/json",
   "/",
