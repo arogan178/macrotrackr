@@ -28,7 +28,7 @@ export const syncRoutes = new Elysia({ prefix: "/api/sync" })
           context.set.status = 409;
           return {
             code: "NO_LOCAL_SESSION",
-            message: "Sync tickets require a local session",
+            message: "Sync tickets require a session token",
           };
         }
 

@@ -65,8 +65,12 @@ describe("authenticateSyncTicket", () => {
     const request = new Request(`https://api.test/api/sync/events?ticket=${ticket}`);
 
     expect(await authenticateSyncTicket(request, clerk)).toEqual({ userId: "user_1", sessionId: "sess_1" });
-    const [verified] = clerk.authenticateRequest.mock.calls[0] as unknown as [Request];
+    const [verified, options] = clerk.authenticateRequest.mock.calls[0] as unknown as [
+      Request,
+      { authorizedParties?: string[] },
+    ];
     expect(verified.headers.get("authorization")).toBe("Bearer clerk-session-jwt");
+    expect(options.authorizedParties?.length).toBeGreaterThan(0);
   });
 
   it("burns the ticket after one connect", async () => {

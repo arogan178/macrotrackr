@@ -30,7 +30,7 @@ type ClerkContextObject = {
   };
   authenticateRequest?: (
     request: Request,
-    options?: { authorizedParties?: string[] },
+    options?: { secretKey?: string; publishableKey?: string; authorizedParties?: string[] },
   ) => Promise<{ toAuth: () => unknown }>;
 };
 
@@ -244,7 +244,11 @@ export async function authenticateSyncTicket(
 
   const state = await clerkClient.authenticateRequest(
     new Request(request.url, { headers: { authorization: `Bearer ${sessionToken}` } }),
-    { authorizedParties: getAuthorizedParties() },
+    {
+      secretKey: config.CLERK_SECRET_KEY,
+      publishableKey: config.CLERK_PUBLISHABLE_KEY,
+      authorizedParties: getAuthorizedParties(),
+    },
   );
 
   return normalizeAuthResult(state.toAuth());
