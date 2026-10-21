@@ -4,6 +4,7 @@ import { config } from "../config";
 import { AuthIntegrationError } from "../lib/http/errors";
 import { logger } from "../lib/observability/logger";
 import { getInternalUserId } from "../lib/auth/clerk-utils";
+import { readSessionTokenFromRequest } from "../lib/auth/session";
 import type { Database } from "bun:sqlite";
 
 type ClerkAuthResult = {
@@ -27,6 +28,10 @@ type ClerkContextObject = {
   users?: {
     getUser?: (userId: string) => Promise<ClerkUserObject>;
   };
+  authenticateRequest?: (
+    request: Request,
+    options?: { authorizedParties?: string[] },
+  ) => Promise<{ toAuth: () => unknown }>;
 };
 
 // Define paths exempt from authentication checks.
@@ -219,6 +224,32 @@ function getAuthorizedParties(): string[] | undefined {
   return origins.size > 0 ? [...origins] : undefined;
 }
 
+/**
+ * EventSource cannot send an Authorization header, and the native app's Clerk
+ * cookie never reaches this API, so the sync stream redeems a one-time ticket
+ * holding the session token instead.
+ */
+export async function authenticateSyncTicket(
+  request: Request | undefined,
+  clerk: unknown,
+): Promise<ClerkAuthResult | null> {
+  if (!request || new URL(request.url).pathname !== "/api/sync/events") {
+    return null;
+  }
+  const sessionToken = readSessionTokenFromRequest(request);
+  const clerkClient = clerk as ClerkContextObject | null;
+  if (!sessionToken || !clerkClient?.authenticateRequest) {
+    return null;
+  }
+
+  const state = await clerkClient.authenticateRequest(
+    new Request(request.url, { headers: { authorization: `Bearer ${sessionToken}` } }),
+    { authorizedParties: getAuthorizedParties() },
+  );
+
+  return normalizeAuthResult(state.toAuth());
+}
+
 export const clerkAuthMiddleware = clerkPlugin({
   publishableKey: config.CLERK_PUBLISHABLE_KEY,
   secretKey: config.CLERK_SECRET_KEY,
@@ -261,7 +292,10 @@ export const clerkAuthMiddleware = clerkPlugin({
     }
 
     try {
-      const authResult = resolveAuthResult(auth);
+      let authResult = resolveAuthResult(auth);
+      if (!authResult?.userId) {
+        authResult = await authenticateSyncTicket(request, clerk);
+      }
 
       if (!authResult?.userId) {
         logger.warn({ path, requestPath }, "No valid Clerk session token found in context");

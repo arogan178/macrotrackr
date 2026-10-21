@@ -2,13 +2,12 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { api, getFullUrl, unwrap } from "@/api/core";
-import { getToken } from "@/utils/tokenStorage";
 
 /**
  * EventSource cannot send an Authorization header, so the stream has to carry
  * its credential in the URL. Trade the session token for a single-use ticket
  * first — query strings end up in proxy logs, history and Referer headers.
- * Clerk mode authenticates the stream with cookies and never needs one.
+ * Clerk needs one too: the native app's Clerk cookie never reaches the API.
  */
 async function requestSyncTicket(): Promise<string | null> {
   try {
@@ -162,9 +161,7 @@ export function useRealtimeSync(isAuthenticated: boolean) {
       cleanupSSE();
 
       const baseUrl = getFullUrl("/api/sync/events");
-      // Only local sessions authenticate through the URL; Clerk mode uses the
-      // cookie, exactly as before.
-      const ticket = getToken() ? await requestSyncTicket() : null;
+      const ticket = await requestSyncTicket();
       if (isCancelled) {
         return;
       }

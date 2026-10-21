@@ -18,7 +18,8 @@ vi.mock("../../src/lib/auth/clerk-utils", () => ({
   getInternalUserId: vi.fn(),
 }));
 
-import { isExemptPath } from "../../src/middleware/clerk-auth";
+import { issueSyncTicket } from "../../src/lib/auth/sync-ticket";
+import { authenticateSyncTicket, isExemptPath } from "../../src/middleware/clerk-auth";
 
 describe("isExemptPath", () => {
   it("allows exact public endpoints", () => {
@@ -48,5 +49,48 @@ describe("isExemptPath", () => {
     expect(isExemptPath("/API/BILLING/WEBHOOK")).toBe(false);
     expect(isExemptPath("api/docs")).toBe(false);
     expect(isExemptPath("")).toBe(false);
+  });
+});
+
+describe("authenticateSyncTicket", () => {
+  function clerkReturning(userId: string | null) {
+    return {
+      authenticateRequest: vi.fn(async () => ({ toAuth: () => ({ userId, sessionId: "sess_1" }) })),
+    };
+  }
+
+  it("verifies the session token a sync ticket was minted from", async () => {
+    const clerk = clerkReturning("user_1");
+    const { ticket } = issueSyncTicket("clerk-session-jwt");
+    const request = new Request(`https://api.test/api/sync/events?ticket=${ticket}`);
+
+    expect(await authenticateSyncTicket(request, clerk)).toEqual({ userId: "user_1", sessionId: "sess_1" });
+    const [verified] = clerk.authenticateRequest.mock.calls[0] as unknown as [Request];
+    expect(verified.headers.get("authorization")).toBe("Bearer clerk-session-jwt");
+  });
+
+  it("burns the ticket after one connect", async () => {
+    const clerk = clerkReturning("user_1");
+    const { ticket } = issueSyncTicket("clerk-session-jwt");
+    const request = () => new Request(`https://api.test/api/sync/events?ticket=${ticket}`);
+
+    await authenticateSyncTicket(request(), clerk);
+    expect(await authenticateSyncTicket(request(), clerk)).toBeNull();
+  });
+
+  it("ignores tickets on any other endpoint", async () => {
+    const clerk = clerkReturning("user_1");
+    const { ticket } = issueSyncTicket("clerk-session-jwt");
+    const request = new Request(`https://api.test/api/user/me?ticket=${ticket}`);
+
+    expect(await authenticateSyncTicket(request, clerk)).toBeNull();
+    expect(clerk.authenticateRequest).not.toHaveBeenCalled();
+  });
+
+  it("rejects a token Clerk does not accept", async () => {
+    const { ticket } = issueSyncTicket("expired-jwt");
+    const request = new Request(`https://api.test/api/sync/events?ticket=${ticket}`);
+
+    expect((await authenticateSyncTicket(request, clerkReturning(null)))?.userId).toBeUndefined();
   });
 });
