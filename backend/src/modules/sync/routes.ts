@@ -23,12 +23,12 @@ export const syncRoutes = new Elysia({ prefix: "/api/sync" })
 
         const sessionToken = readSessionTokenFromRequest(context.request);
         if (!sessionToken) {
-          // Clerk mode authenticates the stream with cookies and never asks
-          // for a ticket, so there is nothing to mint here.
+          // A cookie-only session has no token to put in a ticket; the
+          // stream falls back to the cookie.
           context.set.status = 409;
           return {
             code: "NO_LOCAL_SESSION",
-            message: "Sync tickets require a local session",
+            message: "Sync tickets require a session token",
           };
         }
 
