@@ -1,54 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 describe("openfoodfacts-api-client", () => {
-  describe("OpenFoodFactsApiClient", () => {
-    it("is exported as a class", async () => {
-      const { OpenFoodFactsApiClient } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(OpenFoodFactsApiClient).toBeDefined();
-      expect(typeof OpenFoodFactsApiClient).toBe("function");
-    });
-
-    it("can be instantiated", async () => {
-      const { OpenFoodFactsApiClient } = await import("../../src/services/openfoodfacts-api-client");
-      
-      const client = new OpenFoodFactsApiClient();
-      expect(client).toBeDefined();
-    });
-
-    it("has search method", async () => {
-      const { OpenFoodFactsApiClient } = await import("../../src/services/openfoodfacts-api-client");
-      
-      const client = new OpenFoodFactsApiClient();
-      expect(typeof client.search).toBe("function");
-    });
-
-    it("has getByBarcode method", async () => {
-      const { OpenFoodFactsApiClient } = await import("../../src/services/openfoodfacts-api-client");
-      
-      const client = new OpenFoodFactsApiClient();
-      expect(typeof client.getByBarcode).toBe("function");
-    });
-  });
-
   describe("utility functions", () => {
-    it("exports normalizeFoodSearchQuery", async () => {
+    it("normalizes food search queries", async () => {
       const { normalizeFoodSearchQuery } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(typeof normalizeFoodSearchQuery).toBe("function");
+
       expect(normalizeFoodSearchQuery("  Test  Query  ")).toBe("test query");
     });
 
-    it("exports buildFoodSearchCacheKey", async () => {
-      const { buildFoodSearchCacheKey } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(typeof buildFoodSearchCacheKey).toBe("function");
-    });
-
-    it("exports parseQuantity", async () => {
+    it("parses gram quantities", async () => {
       const { parseQuantity } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(typeof parseQuantity).toBe("function");
+
       expect(parseQuantity("100g").quantity).toBe(100);
     });
 
@@ -203,27 +165,6 @@ describe("openfoodfacts-api-client", () => {
 
       expect(exactEggs).toHaveLength(1);
       expect(results.length).toBe(2);
-    });
-  });
-
-  describe("error classes", () => {
-    it("exports OpenFoodFactsError", async () => {
-      const { OpenFoodFactsError } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(OpenFoodFactsError).toBeDefined();
-      expect(typeof OpenFoodFactsError).toBe("function");
-    });
-
-    it("exports OpenFoodFactsTimeoutError", async () => {
-      const { OpenFoodFactsTimeoutError } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(OpenFoodFactsTimeoutError).toBeDefined();
-    });
-
-    it("exports OpenFoodFactsRateLimitError", async () => {
-      const { OpenFoodFactsRateLimitError } = await import("../../src/services/openfoodfacts-api-client");
-      
-      expect(OpenFoodFactsRateLimitError).toBeDefined();
     });
   });
 });

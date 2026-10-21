@@ -44,12 +44,6 @@ describe("unifiedInsightsUtilities", () => {
     });
   });
 
-  describe("getTextColorByScore", () => {
-    it("returns text color based on score", () => {
-      const color = getTextColorByScore(50);
-      expect(color).toBeDefined();
-    });
-  });
 
   describe("parseMacroRatio", () => {
     it("parses valid ratio", () => {

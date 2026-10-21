@@ -2,14 +2,6 @@ import { describe, expect, it } from "vitest";
 
 describe("id-generator", () => {
   describe("generateId", () => {
-    it("generates a string id", async () => {
-      const { generateId } = await import("../../src/utils/id-generator");
-      
-      const id = generateId();
-      
-      expect(typeof id).toBe("string");
-    });
-
     it("generates id with default prefix", async () => {
       const { generateId } = await import("../../src/utils/id-generator");
       

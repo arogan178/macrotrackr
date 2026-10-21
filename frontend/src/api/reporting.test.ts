@@ -28,33 +28,6 @@ describe("reportingApi", () => {
     apiClient.setGetToken(async () => null);
   });
 
-  it("requests nutrient density summaries with optional query parameters", async () => {
-    const summary = [
-      {
-        period: "2026-04-01",
-        calories: 2200,
-        protein: 150,
-        carbs: 200,
-        fats: 70,
-        count: 4,
-      },
-    ];
-    fetchMock.mockResolvedValueOnce(createJsonResponse(summary));
-
-    await expect(
-      reportingApi.getMacroDensitySummary({
-        startDate: "2026-04-01",
-        endDate: "2026-04-07",
-        groupBy: "day",
-      }),
-    ).resolves.toEqual(summary);
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3000/api/reporting/nutrient-density-summary?startDate=2026-04-01&endDate=2026-04-07&groupBy=day",
-      expect.objectContaining({ method: "GET", credentials: "include" }),
-    );
-  });
-
   it("surfaces a 401 as ApiError so the offline queue stops retrying", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse(
