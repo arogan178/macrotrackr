@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { handleError } from "../../../src/lib/http/responses";
 
@@ -40,6 +40,14 @@ vi.mock("../../../src/lib/auth/session", () => ({
     readSessionTokenFromRequestMock(...arguments_),
 }));
 
+const verifyGoogleIdTokenMock = vi.fn();
+const findClerkUserForGoogleMock = vi.fn();
+vi.mock("../../../src/lib/auth/google-native", () => ({
+  verifyGoogleIdToken: (...arguments_: unknown[]) => verifyGoogleIdTokenMock(...arguments_),
+  findClerkUserForGoogle: (...arguments_: unknown[]) =>
+    findClerkUserForGoogleMock(...arguments_),
+}));
+
 import { resetConfigCache } from "../../../src/config";
 
 import { authRoutes } from "../../../src/modules/auth/routes";
@@ -76,6 +84,7 @@ interface AuthTestAppOptions {
       deleteUser?: (userId: string) => Promise<unknown>;
     };
   };
+  clerk?: unknown;
 }
 
 function createAuthTestApp(
@@ -97,7 +106,9 @@ function createAuthTestApp(
     options.clerkClient ?
       baseApp.decorate("clerkClient", options.clerkClient)
     : baseApp;
-  const scopedApp = appWithClerkClient as unknown as Elysia;
+  const appWithClerk =
+    options.clerk ? appWithClerkClient.decorate("clerk", options.clerk) : appWithClerkClient;
+  const scopedApp = appWithClerk as unknown as Elysia;
 
   return scopedApp
     .derive({ as: "scoped" }, () => ({
@@ -907,6 +918,77 @@ describe("auth routes", () => {
       await expect(response.json()).resolves.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+  });
+
+  describe("POST /api/auth/google-native", () => {
+    const createSignInTokenMock = vi.fn();
+    const clerk = { signInTokens: { createSignInToken: createSignInTokenMock } };
+    const identity = { sub: "google-sub-1", email: "player@gmail.com" };
+
+    beforeEach(() => {
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      process.env.GOOGLE_WEB_CLIENT_ID = "web-client";
+      process.env.GOOGLE_ANDROID_CLIENT_IDS = "debug-client, play-client";
+      resetConfigCache();
+      verifyGoogleIdTokenMock.mockReset().mockResolvedValue(identity);
+      findClerkUserForGoogleMock.mockReset().mockResolvedValue("user_owner");
+      createSignInTokenMock.mockReset().mockResolvedValue({ token: "ticket_1" });
+    });
+
+    afterEach(() => {
+      delete process.env.GOOGLE_WEB_CLIENT_ID;
+      delete process.env.GOOGLE_ANDROID_CLIENT_IDS;
+    });
+
+    it("issues a short-lived ticket for the linked account", async () => {
+      const app = createAuthTestApp(fakeDb, { clerk });
+
+      const response = await postJson(app, "/api/auth/google-native", { idToken: "token" });
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ ticket: "ticket_1" });
+      expect(verifyGoogleIdTokenMock).toHaveBeenCalledWith("token", {
+        webClientId: "web-client",
+        androidClientIds: ["debug-client", "play-client"],
+      });
+      expect(createSignInTokenMock).toHaveBeenCalledWith({
+        userId: "user_owner",
+        expiresInSeconds: 60,
+      });
+    });
+
+    it("returns no ticket when no account has this Google login", async () => {
+      findClerkUserForGoogleMock.mockResolvedValue(null);
+      const app = createAuthTestApp(fakeDb, { clerk });
+
+      const response = await postJson(app, "/api/auth/google-native", { idToken: "token" });
+
+      await expect(response.json()).resolves.toEqual({ ticket: null });
+      expect(createSignInTokenMock).not.toHaveBeenCalled();
+    });
+
+    it("refuses a token that does not verify", async () => {
+      verifyGoogleIdTokenMock.mockResolvedValue(null);
+      const app = createAuthTestApp(fakeDb, { clerk });
+
+      const response = await postJson(app, "/api/auth/google-native", { idToken: "token" });
+
+      expect(response.status).toBe(401);
+      expect(createSignInTokenMock).not.toHaveBeenCalled();
+    });
+
+    it("is not found until both client IDs are configured", async () => {
+      delete process.env.GOOGLE_ANDROID_CLIENT_IDS;
+      resetConfigCache();
+      const app = createAuthTestApp(fakeDb, { clerk });
+
+      const response = await postJson(app, "/api/auth/google-native", { idToken: "token" });
+
+      expect(response.status).toBe(404);
+      expect(verifyGoogleIdTokenMock).not.toHaveBeenCalled();
     });
   });
 });

@@ -67,10 +67,6 @@ vi.mock("motion/react", () => {
   };
 });
 
-vi.mock("@clerk/react", () => ({
-  useClerk: () => ({}),
-}));
-
 vi.mock("@clerk/react/legacy", () => ({
   useSignIn: () => ({
     isLoaded: true,
@@ -98,8 +94,7 @@ vi.mock("@/services/biometrics", () => ({
 }));
 
 vi.mock("@/services/native/googleAuth", () => ({
-  exchangeNativeGoogleTokenWithClerk: vi.fn(),
-  nativeGoogleSignIn: vi.fn(),
+  signInWithNativeGoogle: vi.fn(),
 }));
 
 vi.mock("@/services/native/platform", () => ({
