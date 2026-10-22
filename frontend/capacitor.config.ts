@@ -31,6 +31,11 @@ const config: CapacitorConfig = {
     ],
   },
   plugins: {
+    LocalNotifications: {
+      // Single-colour mark from res/drawable, tinted with --color-primary.
+      smallIcon: "ic_stat_macrotrackr",
+      iconColor: "#57c04a",
+    },
     GoogleAuth: {
       scopes: ["profile", "email"],
       serverClientId: "880247591600-g42kbb95b131mcjfrn838ruj89pe0mp5.apps.googleusercontent.com",

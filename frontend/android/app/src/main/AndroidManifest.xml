@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="false"
@@ -55,6 +56,11 @@
     <!-- The barcode scanner opens the camera through the webview's getUserMedia;
          without the declaration Android denies it before any prompt. -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Meal reminders are scheduled as inexact alarms. The notifications plugin
+         declares exact alarms too, which Play restricts to alarm and calendar apps. -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        tools:node="remove" />
     <!-- Optional, so Play does not hide the app from devices without a camera. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

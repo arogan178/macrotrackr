@@ -72,6 +72,10 @@ export function useLogout() {
       void import("@/hooks/queries/macro/entryStore").then(({ clearSignedOutAccount }) =>
         clearSignedOutAccount(),
       );
+      // Reminders are this account's; none should fire for whoever signs in next.
+      void import("@/features/reminders/mealReminders").then(({ clearMealReminders }) =>
+        clearMealReminders(),
+      );
 
       // Also specifically invalidate auth queries to ensure they're cleared
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });

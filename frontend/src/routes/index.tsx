@@ -8,7 +8,7 @@ const LandingPage = React.lazy(() => import("@/features/landing/pages/LandingPag
 
 export const Route = createFileRoute("/")({
   component: () => (
-    <PublicSelfHostedGate>
+    <PublicSelfHostedGate gateInApp>
       <RedirectSignedInToApp>
         <LandingPage />
       </RedirectSignedInToApp>

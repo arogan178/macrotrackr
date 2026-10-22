@@ -37,7 +37,7 @@
     },
     "frontend": {
       "name": "macrotrackr-frontend",
-      "version": "3.1.0",
+      "version": "3.6.0",
       "dependencies": {
         "@capacitor/android": "^8.4.2",
         "@capacitor/app": "^8.1.1",
@@ -45,6 +45,7 @@
         "@capacitor/core": "^8.4.2",
         "@capacitor/ios": "^8.4.2",
         "@capacitor/keyboard": "^8.0.5",
+        "@capacitor/local-notifications": "^8.3.1",
         "@capacitor/preferences": "^8.0.1",
         "@capacitor/screen-orientation": "^8.0.1",
         "@capacitor/splash-screen": "^8.0.2",
@@ -353,6 +354,8 @@
     "@capacitor/ios": ["@capacitor/ios@8.5.2", "", { "peerDependencies": { "@capacitor/core": "^8.5.0" } }, "sha512-eOT2S67AfTFG7KN0T3oxwAajrJz4rSye+ODfvChiwrk0F/+kWufFM1qU6cDjGJUOfwdAoeuEpZyWHSwZlu4GFg=="],
 
     "@capacitor/keyboard": ["@capacitor/keyboard@8.0.6", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-Bbe+9V0qaT6dzEFJEK7BUWR01l2+vZE8FM5ITF/WgKtx+G6eGZ6d5+YiSMRJBAK0VGjdO59v8yiQ10Doa5KyvQ=="],
+
+    "@capacitor/local-notifications": ["@capacitor/local-notifications@8.3.1", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-F7zu/+p/mIR958YP4axOkeI5hBKRaXDyYjbNPrAil2wWfd7OxScPSTvP9t85NpQ0eULVRu0/sntoxOg6ck477A=="],
 
     "@capacitor/preferences": ["@capacitor/preferences@8.0.1", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-T6no3ebi79XJCk91U3Jp/liJUwgBdvHR+s6vhvPkPxSuch7z3zx5Rv1bdWM6sWruNx+pViuEGqZvbfCdyBvcHQ=="],
 

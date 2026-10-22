@@ -8,6 +8,7 @@ import {
   BarChart,
   BarChart2,
   Beef,
+  Bell,
   Book,
   Calendar,
   Camera,
@@ -161,6 +162,7 @@ export const BarChartIcon = createIcon(BarChart);
 export const CheckCircleIcon = createIcon(CheckCircle);
 export const DumbbellIcon = createIcon(Dumbbell);
 export const AwardIcon = createIcon(Award);
+export const BellIcon = createIcon(Bell);
 export const HeartIcon = createIcon(Heart);
 export const BookIcon = createIcon(Book);
 export const CoffeeIcon = createIcon(Coffee);
