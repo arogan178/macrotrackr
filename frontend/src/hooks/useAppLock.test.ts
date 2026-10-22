@@ -9,6 +9,10 @@ const { native, biometrics, appState } = vi.hoisted(() => ({
     isAppLockEnabled: vi.fn(),
     verifyBiometricIdentity: vi.fn(),
     removeLegacyBiometricCredentials: vi.fn(),
+    checkBiometricAvailability: vi.fn(async () => ({
+      isAvailable: true,
+      biometryType: "Fingerprint",
+    })),
   },
   appState: {
     listener: undefined as ((s: { isActive: boolean }) => void) | undefined,
@@ -58,6 +62,14 @@ describe("useAppLock", () => {
       expect(biometrics.verifyBiometricIdentity).toHaveBeenCalledTimes(1),
     );
     expect(result.current.isLocked).toBe(true);
+  });
+
+  it("names the device's biometric for the lock screen", async () => {
+    const { result } = renderHook(() => useAppLock(true));
+
+    await waitFor(() =>
+      expect(result.current.biometricLabel).toBe("fingerprint"),
+    );
   });
 
   it("unlocks once the biometric check passes", async () => {

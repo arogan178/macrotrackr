@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
+import { AppLockOffer } from "@/components/auth/AppLockOffer";
 import { AppLockScreen } from "@/components/auth/AppLockScreen";
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import LogSheet from "@/features/macroTracking/components/LogSheet";
@@ -111,9 +112,11 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <InstallPrompt clearsTabBar={isAuthenticated} />
       <UpdatePrompt />
       <NotificationManager />
+      {isAuthenticated && !appLock.isLocked && <AppLockOffer />}
       {appLock.isLocked && (
         <AppLockScreen
           isChecking={appLock.isChecking}
+          biometricLabel={appLock.biometricLabel}
           onUnlock={() => void appLock.unlock()}
         />
       )}

@@ -37,25 +37,21 @@ describe("AppLockForm", () => {
     render(<AppLockForm />);
 
     await userEvent.click(
-      await screen.findByLabelText("Require unlock to open the app"),
+      await screen.findByLabelText("Ask for my fingerprint"),
     );
 
     await waitFor(() =>
       expect(biometrics.setAppLockEnabled).toHaveBeenCalledWith(true),
     );
     expect(biometrics.verifyBiometricIdentity).toHaveBeenCalledTimes(1);
-    expect(
-      screen.getByLabelText("Require unlock to open the app"),
-    ).toBeChecked();
+    expect(screen.getByLabelText("Ask for my fingerprint")).toBeChecked();
   });
 
   it("leaves the lock off when the check is cancelled", async () => {
     biometrics.verifyBiometricIdentity.mockResolvedValue(false);
     render(<AppLockForm />);
 
-    const toggle = await screen.findByLabelText(
-      "Require unlock to open the app",
-    );
+    const toggle = await screen.findByLabelText("Ask for my fingerprint");
     await userEvent.click(toggle);
 
     await waitFor(() => expect(toggle).toBeEnabled());
@@ -74,7 +70,7 @@ describe("AppLockForm", () => {
       expect(biometrics.checkBiometricAvailability).toHaveBeenCalled(),
     );
     expect(
-      screen.queryByLabelText("Require unlock to open the app"),
+      screen.queryByLabelText("Ask for my fingerprint"),
     ).not.toBeInTheDocument();
   });
 });

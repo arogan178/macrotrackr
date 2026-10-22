@@ -8,6 +8,7 @@ import {
 import { logger } from "@/lib/logger";
 
 const APP_LOCK_KEY = "app_lock_enabled";
+const APP_LOCK_OFFERED_KEY = "app_lock_offered";
 
 // Earlier builds saved the account password for a sign-in button.
 const LEGACY_SERVER_ID = "com.macrotrackr.app";
@@ -102,6 +103,17 @@ export async function setAppLockEnabled(enabled: boolean): Promise<void> {
     : Preferences.remove({ key: APP_LOCK_KEY }));
 }
 
+/** Whether the post-sign-in offer to turn the lock on has been shown. */
+export async function wasAppLockOffered(): Promise<boolean> {
+  const { value } = await Preferences.get({ key: APP_LOCK_OFFERED_KEY });
+
+  return value === "true";
+}
+
+export async function markAppLockOffered(): Promise<void> {
+  await Preferences.set({ key: APP_LOCK_OFFERED_KEY, value: "true" });
+}
+
 /**
  * Deletes a password saved by an earlier build, so none outlives the update.
  */
@@ -124,8 +136,8 @@ export async function removeLegacyBiometricCredentials(): Promise<void> {
 }
 
 /**
- * Turns the app lock off and removes any legacy password. Runs on sign-out so
- * the next account on this device starts unlocked; never throws, so it cannot
+ * Turns the app lock off, re-arms the offer and removes any legacy password.
+ * Runs on sign-out so the next account on this device starts unlocked; never throws, so it cannot
  * block the sign-out itself.
  */
 export async function clearAppLock(): Promise<void> {
@@ -135,6 +147,7 @@ export async function clearAppLock(): Promise<void> {
 
   try {
     await setAppLockEnabled(false);
+    await Preferences.remove({ key: APP_LOCK_OFFERED_KEY });
   } catch (error) {
     logger.error("Failed to turn off the app lock:", error);
   }

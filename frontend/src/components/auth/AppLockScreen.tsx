@@ -1,22 +1,31 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "@tanstack/react-router";
+import { FingerprintPattern, ScanFace } from "lucide-react";
 
-import { LockIcon } from "@/components/ui/Icons";
-import StateCard from "@/components/ui/StateCard";
+import Button from "@/components/ui/Button";
+import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 interface AppLockScreenProps {
   isChecking: boolean;
+  biometricLabel: string;
   onUnlock: () => void;
 }
 
 /**
- * Covers the signed-in app until the biometric check passes. Above every
- * other layer, notifications included, and everything else on the page goes
- * inert so modals and portals cannot be focused or read behind it.
+ * Covers the signed-in app until the biometric check passes, dressed as the
+ * sign-in page. The session is still there; "Sign in another way" ends it.
+ * Above every other layer, notifications included, and everything else on the
+ * page goes inert so modals and portals cannot be focused or read behind it.
  */
-export function AppLockScreen({ isChecking, onUnlock }: AppLockScreenProps) {
+export function AppLockScreen({
+  isChecking,
+  biometricLabel,
+  onUnlock,
+}: AppLockScreenProps) {
   const logout = useLogout();
+  const navigate = useNavigate();
   const screenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,30 +42,44 @@ export function AppLockScreen({ isChecking, onUnlock }: AppLockScreenProps) {
     };
   }, []);
 
+  const Icon = biometricLabel === "Face ID" ? ScanFace : FingerprintPattern;
+
   return createPortal(
     <div
       ref={screenRef}
       role="dialog"
       aria-modal="true"
-      aria-label="MacroTrackr is locked"
-      className="fixed inset-0 z-120 flex items-center justify-center bg-background px-4 pt-(--sat) pb-(--sab)"
+      aria-label="Sign in to MacroTrackr"
+      className="fixed inset-0 z-120 overflow-y-auto bg-background"
     >
       {!isChecking && (
-        <StateCard
-          title="MacroTrackr is locked"
-          message="Unlock with your fingerprint, face or device PIN."
-          icon={
-            <span className="inline-flex items-center justify-center rounded-full border border-border bg-surface-2 p-3.5">
-              <LockIcon className="h-10 w-10 text-muted" strokeWidth={1.5} />
-            </span>
-          }
-          action={{ label: "Unlock", onClick: onUnlock }}
-          secondaryAction={{
-            label: "Sign out",
-            onClick: () => logout.mutate(),
-            variant: "ghost",
-          }}
-        />
+        <AuthPageShell
+          title="Welcome back"
+          description={`Sign in with your ${biometricLabel} to pick up where you left off.`}
+          showBackToHome={false}
+        >
+          <div className="space-y-3">
+            <Button type="button" fullWidth onClick={onUnlock}>
+              <span className="flex items-center justify-center gap-2">
+                <Icon className="h-5 w-5" />
+                <span>Sign in with {biometricLabel}</span>
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              fullWidth
+              onClick={() =>
+                logout.mutate(undefined, {
+                  onSuccess: () =>
+                    navigate({ to: "/login", search: { returnTo: undefined } }),
+                })
+              }
+            >
+              Sign in another way
+            </Button>
+          </div>
+        </AuthPageShell>
       )}
     </div>,
     document.body,

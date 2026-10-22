@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 
 import Panel from "@/components/ui/Panel";
+import { biometricLabel } from "@/services/biometricLabel";
 import type { BiometricAvailability } from "@/services/biometrics";
 import { useStore } from "@/store/store";
 
@@ -9,7 +10,8 @@ import { useStore } from "@/store/store";
 const loadBiometrics = () => import("@/services/biometrics");
 
 /**
- * The app lock setting. Native only, and only once the device has a
+ * The biometric sign-in setting (an app lock: the session stays signed in and
+ * the biometric unlocks it). Native only, and only once the device has a
  * biometric enrolled. Turning it on asks for one first, so the user proves
  * they can unlock before the lock can shut them out.
  */
@@ -43,6 +45,8 @@ const AppLockForm = () => {
     return null;
   }
 
+  const label = biometricLabel(availability.biometryType);
+
   const handleChange = async (next: boolean) => {
     setIsSaving(true);
     try {
@@ -51,14 +55,17 @@ const AppLockForm = () => {
       if (
         next &&
         !(await verifyBiometricIdentity(
-          "Confirm it's you to turn on the app lock",
+          `Confirm it's you to turn on sign-in with ${label}`,
         ))
       ) {
         return;
       }
       await setAppLockEnabled(next);
       setEnabled(next);
-      showNotification(next ? "App lock on" : "App lock off", "success");
+      showNotification(
+        next ? `Sign-in with ${label} on` : `Sign-in with ${label} off`,
+        "success",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -66,8 +73,8 @@ const AppLockForm = () => {
 
   return (
     <Panel
-      title="App lock"
-      description={`Ask for ${availability.biometryType === "Biometrics" ? "your fingerprint or face" : availability.biometryType} when MacroTrackr opens, and after 5 minutes away.`}
+      title={`Sign in with ${label}`}
+      description={`Ask for your ${label} when MacroTrackr opens, and after 5 minutes away.`}
     >
       <label className="flex min-h-11 items-center gap-3 text-sm text-foreground">
         <input
@@ -78,7 +85,7 @@ const AppLockForm = () => {
           className="h-4 w-4 rounded border-border accent-primary"
           name="app-lock"
         />
-        Require unlock to open the app
+        Ask for my {label}
       </label>
     </Panel>
   );

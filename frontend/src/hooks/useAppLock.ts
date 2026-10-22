@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 
+import { biometricLabel } from "@/services/biometricLabel";
+
 // Long enough that switching to another app and back does not lock.
 export const LOCK_AFTER_BACKGROUND_MS = 5 * 60 * 1000;
 
@@ -29,6 +31,7 @@ export function useAppLock(isSignedIn: boolean) {
     isNative ? "checking" : "unlocked",
   );
   const isPrompting = useRef(false);
+  const [label, setBiometricLabel] = useState("face or fingerprint");
 
   // Signing out clears the setting, so the next sign-in reads it afresh.
   const [wasSignedIn, setWasSignedIn] = useState(isSignedIn);
@@ -61,11 +64,16 @@ export function useAppLock(isSignedIn: boolean) {
     if (!isNative || !isSignedIn || state !== "checking") return;
     let cancelled = false;
     void loadBiometrics()
-      .then(({ isAppLockEnabled }) => isAppLockEnabled())
-      .then((enabled) => {
-        if (!cancelled) setState(enabled ? "locked" : "unlocked");
+      .then(async (biometrics) => {
+        const [enabled, availability] = await Promise.all([
+          biometrics.isAppLockEnabled(),
+          biometrics.checkBiometricAvailability(),
+        ]);
+        if (cancelled) return;
+        setBiometricLabel(biometricLabel(availability.biometryType));
+        setState(enabled ? "locked" : "unlocked");
       })
-      // Fail closed: the lock screen still offers Unlock and Sign out.
+      // Fail closed: the lock screen still offers both ways back in.
       .catch(() => {
         if (!cancelled) setState("locked");
       });
@@ -115,6 +123,7 @@ export function useAppLock(isSignedIn: boolean) {
   return {
     isLocked: isSignedIn && state !== "unlocked",
     isChecking: state === "checking",
+    biometricLabel: label,
     unlock,
   };
 }

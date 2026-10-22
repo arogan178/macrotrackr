@@ -1,35 +1,72 @@
+import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AppLockScreen } from "./AppLockScreen";
 
-const { mutate } = vi.hoisted(() => ({ mutate: vi.fn() }));
+const { mutate, navigate } = vi.hoisted(() => ({
+  mutate: vi.fn(),
+  navigate: vi.fn(),
+}));
 vi.mock("@/hooks/auth/useAuthQueries", () => ({
   useLogout: () => ({ mutate }),
 }));
+vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
+vi.mock("@/features/auth/components/AuthPageShell", () => ({
+  default: ({ title, children }: { title: string; children: ReactNode }) => (
+    <section>
+      <h1>{title}</h1>
+      {children}
+    </section>
+  ),
+}));
+
+function renderScreen(onUnlock = vi.fn()) {
+  return render(
+    <AppLockScreen
+      isChecking={false}
+      biometricLabel="fingerprint"
+      onUnlock={onUnlock}
+    />,
+  );
+}
 
 describe("AppLockScreen", () => {
   it("makes everything behind it inert, and restores it on unlock", () => {
     const modalRoot = document.createElement("div");
     document.body.append(modalRoot);
 
-    const { unmount } = render(
-      <AppLockScreen isChecking={false} onUnlock={vi.fn()} />,
-    );
+    const { unmount } = renderScreen();
 
     expect(modalRoot.inert).toBe(true);
-    expect(screen.getByRole("button", { name: "Unlock" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Sign in with fingerprint" }),
+    ).toBeVisible();
 
     unmount();
     expect(modalRoot.inert).toBe(false);
     modalRoot.remove();
   });
 
-  it("offers sign-out as a way out", () => {
-    render(<AppLockScreen isChecking={false} onUnlock={vi.fn()} />);
+  it("asks for the biometric from the sign-in button", () => {
+    const onUnlock = vi.fn();
+    renderScreen(onUnlock);
 
-    screen.getByRole("button", { name: "Sign out" }).click();
+    screen.getByRole("button", { name: "Sign in with fingerprint" }).click();
+
+    expect(onUnlock).toHaveBeenCalled();
+  });
+
+  it("signs out and opens the sign-in page for another way in", () => {
+    mutate.mockImplementation((_variables, options) => options.onSuccess());
+    renderScreen();
+
+    screen.getByRole("button", { name: "Sign in another way" }).click();
 
     expect(mutate).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith({
+      to: "/login",
+      search: { returnTo: undefined },
+    });
   });
 });
