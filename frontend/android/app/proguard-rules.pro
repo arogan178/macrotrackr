@@ -1,9 +1,5 @@
 # ProGuard/R8 rules for the release build.
 #
-# minifyEnabled is still false in build.gradle. These rules are staged so that
-# turning it on is a one-line change rather than a debugging session — see
-# docs/android-release-build.md before flipping it.
-#
 # The recurring hazard in a Capacitor app is reflection: the bridge resolves
 # plugins and their methods by name at runtime, so R8 sees no caller and
 # strips them. Nothing fails at build time; the app just loses a feature.
@@ -25,7 +21,8 @@
     @com.getcapacitor.PluginMethod <methods>;
 }
 
-# This app's own plugins, both named explicitly in MainActivity.registerPlugin.
+# This app's own plugin, registered in MainActivity, and GoogleAuth, loaded
+# from capacitor.plugins.json.
 -keep class com.macrotrackr.app.PlayBillingPlugin { *; }
 -keep class com.codetrixstudio.capacitor.GoogleAuth.** { *; }
 

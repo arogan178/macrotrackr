@@ -49,7 +49,6 @@
         "@capacitor/preferences": "^8.0.1",
         "@capacitor/screen-orientation": "^8.0.1",
         "@capacitor/splash-screen": "^8.0.2",
-        "@capacitor/status-bar": "^8.0.3",
         "@capgo/capacitor-native-biometric": "^8.6.2",
         "@clerk/react": "^6.14.1",
         "@codetrix-studio/capacitor-google-auth": "3.4.0-rc.4",
@@ -362,8 +361,6 @@
     "@capacitor/screen-orientation": ["@capacitor/screen-orientation@8.0.2", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-4hC/LBRI3m0Mm3J+U7NyFd3WtQt/GryYgutOqygP1NTw3eAn1p1d+88Z8GwsuGpRj2vxyWySDUJSndXyAfxwUw=="],
 
     "@capacitor/splash-screen": ["@capacitor/splash-screen@8.0.2", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-0C6rYScr13WfAE9nPl4ScOQynmjFv9NT3Th+RZkD4ezYHmER6mcl1/lDYsv7jg3Rj3FOvLrlTlmNkUrr83kZzQ=="],
-
-    "@capacitor/status-bar": ["@capacitor/status-bar@8.0.4", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-ZMzBUyHBzwDUxcHadEhvOvmoPmMQGMZgaMRJu8ohELeI6IaxoVH9ZhdF/OHnY3/yykv3Glev8Tnbh4aZY/0B0w=="],
 
     "@capgo/capacitor-native-biometric": ["@capgo/capacitor-native-biometric@8.7.0", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-zEczRhtnY3XuMJfwgDbapGTZ35+5ApfRKNT7WGQ7jXzr7W2zfsi1yhIp1yksKggwGA91ZIO4CDIVIka+onvxhg=="],
 

@@ -13,6 +13,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Shows behind the system bars when an older WebView needs the bridge padded
+             for them. Matches the app's background colour. -->
+        <item name="android:windowBackground">@color/app_background</item>
     </style>
 
 

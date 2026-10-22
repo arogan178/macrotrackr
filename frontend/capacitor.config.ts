@@ -49,9 +49,8 @@ const config: CapacitorConfig = {
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
     },
-    StatusBar: {
+    SystemBars: {
       style: "DARK",
-      backgroundColor: "#000000",
     },
     Keyboard: {
       // `body` resizes the document itself, which moves a position: fixed
