@@ -1,10 +1,13 @@
 import React, { useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
+import { AppLockOffer } from "@/components/auth/AppLockOffer";
+import { AppLockScreen } from "@/components/auth/AppLockScreen";
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import LogSheet from "@/features/macroTracking/components/LogSheet";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
+import { useAppLock } from "@/hooks/useAppLock";
 import { openLogSheet } from "@/lib/logSheet";
 
 import AppHeader from "./AppHeader";
@@ -62,6 +65,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useUser({ enabled: shouldFetchUser });
   const isAuthenticated =
     isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
+  const appLock = useAppLock({ isLoaded, isSignedIn });
 
   return (
     <div
@@ -108,6 +112,15 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <InstallPrompt clearsTabBar={isAuthenticated} />
       <UpdatePrompt />
       <NotificationManager />
+      {isAuthenticated && !appLock.isLocked && <AppLockOffer />}
+      {appLock.isLocked && (
+        <AppLockScreen
+          isChecking={appLock.isChecking}
+          biometricLabel={appLock.biometricLabel}
+          onUnlock={() => void appLock.unlock()}
+          onUnlockWithDeviceCredential={appLock.unlockWithDeviceCredential}
+        />
+      )}
     </div>
   );
 };

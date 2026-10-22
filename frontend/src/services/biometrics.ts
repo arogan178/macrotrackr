@@ -7,164 +7,156 @@ import {
 
 import { logger } from "@/lib/logger";
 
-const BIOMETRIC_SERVER_ID = "com.macrotrackr.app";
-const BIOMETRIC_STORED_KEY = "has_biometric_credentials";
+const APP_LOCK_KEY = "app_lock_enabled";
+const APP_LOCK_OFFERED_KEY = "app_lock_offered";
+
+// Earlier builds saved the account password for a sign-in button.
+const LEGACY_SERVER_ID = "com.macrotrackr.app";
+const LEGACY_STORED_KEY = "has_biometric_credentials";
 
 export interface BiometricAvailability {
   isAvailable: boolean;
-  hasStoredCredentials: boolean;
   biometryType: "Face ID" | "Touch ID" | "Fingerprint" | "Biometrics" | "None";
-  reason?: string;
 }
 
-export interface StoredBiometricCredentials {
-  username: string;
-  password?: string;
-}
+const UNAVAILABLE: BiometricAvailability = {
+  isAvailable: false,
+  biometryType: "None",
+};
 
 /**
  * Checks if biometric hardware (Face ID, Touch ID, Android Fingerprint) is supported and enrolled.
  */
 export async function checkBiometricAvailability(): Promise<BiometricAvailability> {
   if (!Capacitor.isNativePlatform()) {
-    return {
-      isAvailable: false,
-      hasStoredCredentials: false,
-      biometryType: "None",
-      reason: "Biometrics not supported in browser mode",
-    };
+    return UNAVAILABLE;
   }
 
   try {
     const result = await NativeBiometric.isAvailable();
     if (!result.isAvailable) {
-      return {
-        isAvailable: false,
-        hasStoredCredentials: false,
-        biometryType: "None",
-        reason: "Biometric authentication not set up or disabled",
-      };
+      return UNAVAILABLE;
     }
 
-    const flag = await Preferences.get({ key: BIOMETRIC_STORED_KEY });
-    const hasStoredCredentials = flag.value === "true";
-
-    let biometryType: BiometricAvailability["biometryType"] = "Biometrics";
     switch (result.biometryType) {
       case BiometryType.FACE_ID:
-        biometryType = "Face ID";
-        break;
+        return { isAvailable: true, biometryType: "Face ID" };
       case BiometryType.TOUCH_ID:
-        biometryType = "Touch ID";
-        break;
+        return { isAvailable: true, biometryType: "Touch ID" };
       case BiometryType.FINGERPRINT:
-        biometryType = "Fingerprint";
-        break;
-      case BiometryType.MULTIPLE:
-        biometryType = "Biometrics";
-        break;
+        return { isAvailable: true, biometryType: "Fingerprint" };
       default:
-        biometryType = "Biometrics";
-        break;
+        return { isAvailable: true, biometryType: "Biometrics" };
     }
-
-    return {
-      isAvailable: true,
-      hasStoredCredentials,
-      biometryType,
-    };
   } catch (error) {
     logger.error("Failed to check biometric availability:", error);
 
-    return {
-      isAvailable: false,
-      hasStoredCredentials: false,
-      biometryType: "None",
-      reason:
-        error instanceof Error ? error.message : "Failed to query biometrics",
-    };
+    return UNAVAILABLE;
   }
 }
 
 /**
- * Saves login credentials / session secret securely in native Keychain / KeyStore.
+ * Shows the system biometric prompt. On iOS it falls back to the passcode
+ * itself; Android shows Cancel instead, and the lock screen offers
+ * verifyDeviceCredential as a separate step.
+ * Resolves false when the user cancels or the check fails.
  */
-export async function saveBiometricCredentials(
-  username: string,
-  secretToken: string,
+export async function verifyBiometricIdentity(
+  reason: string,
+): Promise<boolean> {
+  return verify("Biometric verification cancelled or failed:", {
+    reason,
+    title: "Unlock MacroTrackr",
+    useFallback: true,
+    allowedBiometryTypes: [
+      BiometryType.FINGERPRINT,
+      BiometryType.FACE_AUTHENTICATION,
+    ],
+  });
+}
+
+/**
+ * Asks for the device PIN, pattern or password on its own. Some Android builds
+ * drop the PIN from a combined biometric-or-PIN prompt, so it gets its own.
+ */
+export async function verifyDeviceCredential(reason: string): Promise<boolean> {
+  // A PIN-only prompt needs Android 11; older versions get the combined one.
+  const androidVersion = Number(/Android (\d+)/.exec(navigator.userAgent)?.[1]);
+  const allowedBiometryTypes =
+    androidVersion >= 11
+      ? [BiometryType.DEVICE_CREDENTIAL]
+      : [BiometryType.FACE_AUTHENTICATION, BiometryType.DEVICE_CREDENTIAL];
+
+  return verify("Device credential verification cancelled or failed:", {
+    reason,
+    title: "Unlock MacroTrackr",
+    allowedBiometryTypes,
+  });
+}
+
+async function verify(
+  failureMessage: string,
+  options: Parameters<typeof NativeBiometric.verifyIdentity>[0],
 ): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
     return false;
   }
 
   try {
-    await NativeBiometric.setCredentials({
-      username,
-      password: secretToken,
-      server: BIOMETRIC_SERVER_ID,
-    });
-    await Preferences.set({ key: BIOMETRIC_STORED_KEY, value: "true" });
-    logger.info("Saved biometric credentials securely to KeyStore/Keychain");
+    await NativeBiometric.verifyIdentity(options);
 
     return true;
   } catch (error) {
-    logger.error("Failed to save biometric credentials:", error);
+    logger.warn(failureMessage, error);
 
     return false;
   }
 }
 
-/**
- * Verifies user's Face ID / Touch ID / Fingerprint identity and retrieves saved credentials.
- * Note: NativeBiometric.getCredentials() triggers the biometric prompt natively on Android & iOS.
- */
-export async function authenticateWithBiometrics(): Promise<StoredBiometricCredentials | null> {
+export async function isAppLockEnabled(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
-    return null;
+    return false;
+  }
+
+  const { value } = await Preferences.get({ key: APP_LOCK_KEY });
+
+  return value === "true";
+}
+
+export async function setAppLockEnabled(enabled: boolean): Promise<void> {
+  await (enabled
+    ? Preferences.set({ key: APP_LOCK_KEY, value: "true" })
+    : Preferences.remove({ key: APP_LOCK_KEY }));
+}
+
+/** Whether the post-sign-in offer to turn the lock on has been shown. */
+export async function wasAppLockOffered(): Promise<boolean> {
+  const { value } = await Preferences.get({ key: APP_LOCK_OFFERED_KEY });
+
+  return value === "true";
+}
+
+export async function markAppLockOffered(): Promise<void> {
+  await Preferences.set({ key: APP_LOCK_OFFERED_KEY, value: "true" });
+}
+
+/**
+ * Deletes a password saved by an earlier build, so none outlives the update.
+ */
+export async function removeLegacyBiometricCredentials(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) {
+    return;
   }
 
   try {
-    // NativeBiometric.getCredentials prompts the OS biometric dialog directly
-    const credentials = await NativeBiometric.getCredentials({
-      server: BIOMETRIC_SERVER_ID,
+    const { isSaved } = await NativeBiometric.isCredentialsSaved({
+      server: LEGACY_SERVER_ID,
     });
-
-    if (!credentials?.username) {
-      logger.warn("No stored credentials found in KeyStore/Keychain");
-
-      return null;
+    if (isSaved) {
+      await NativeBiometric.deleteCredentials({ server: LEGACY_SERVER_ID });
     }
-
-    return {
-      username: credentials.username,
-      password: credentials.password,
-    };
+    await Preferences.remove({ key: LEGACY_STORED_KEY });
   } catch (error) {
-    logger.warn("Biometric authentication cancelled or failed:", error);
-
-    return null;
-  }
-}
-
-/**
- * Deletes saved biometric credentials from native KeyStore / Keychain.
- */
-export async function clearBiometricCredentials(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) {
-    return false;
-  }
-
-  try {
-    await NativeBiometric.deleteCredentials({
-      server: BIOMETRIC_SERVER_ID,
-    });
-    await Preferences.remove({ key: BIOMETRIC_STORED_KEY });
-    logger.info("Cleared biometric credentials from KeyStore/Keychain");
-
-    return true;
-  } catch (error) {
-    logger.error("Failed to clear biometric credentials:", error);
-
-    return false;
+    logger.error("Failed to delete legacy biometric credentials:", error);
   }
 }

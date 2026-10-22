@@ -11,7 +11,7 @@ import { queryKeys } from "@/lib/queryKeys";
  * rather than failing quietly.
  */
 const unreachable =
-  <TVariables,>(name: string) =>
+  <TVariables>(name: string) =>
   async (_variables: TVariables): Promise<never> => {
     throw new Error(`${name} requires Clerk, which this page did not mount.`);
   };
@@ -27,7 +27,9 @@ export function useUser(_options?: { enabled?: boolean }) {
 }
 
 export function useLogout() {
-  return useMutation({ mutationFn: unreachable<void>("useLogout") });
+  return useMutation({
+    mutationFn: unreachable<{ toSignIn?: boolean } | undefined>("useLogout"),
+  });
 }
 
 export function useChangePassword() {

@@ -1,0 +1,182 @@
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { LOCK_AFTER_BACKGROUND_MS, useAppLock } from "./useAppLock";
+
+const { native, platform, biometrics, appState } = vi.hoisted(() => ({
+  native: { value: true },
+  platform: { value: "android" },
+  biometrics: {
+    isAppLockEnabled: vi.fn(),
+    verifyBiometricIdentity: vi.fn(),
+    verifyDeviceCredential: vi.fn(),
+    removeLegacyBiometricCredentials: vi.fn(),
+    checkBiometricAvailability: vi.fn(async () => ({
+      isAvailable: true,
+      biometryType: "Fingerprint",
+    })),
+  },
+  appState: {
+    listener: undefined as ((s: { isActive: boolean }) => void) | undefined,
+  },
+}));
+
+vi.mock("@capacitor/core", () => ({
+  Capacitor: {
+    isNativePlatform: () => native.value,
+    getPlatform: () => platform.value,
+  },
+}));
+vi.mock("@/services/biometrics", () => biometrics);
+vi.mock("@capacitor/app", () => ({
+  App: {
+    addListener: vi.fn(async (_event, listener) => {
+      appState.listener = listener;
+
+      return { remove: vi.fn() };
+    }),
+  },
+}));
+
+const SIGNED_IN = { isLoaded: true, isSignedIn: true };
+const SIGNED_OUT = { isLoaded: true, isSignedIn: false };
+const LOADING = { isLoaded: false, isSignedIn: false };
+
+async function goToBackgroundFor(ms: number) {
+  await waitFor(() => expect(appState.listener).toBeDefined());
+  act(() => appState.listener!({ isActive: false }));
+  vi.setSystemTime(Date.now() + ms);
+  act(() => appState.listener!({ isActive: true }));
+}
+
+describe("useAppLock", () => {
+  beforeEach(() => {
+    native.value = true;
+    platform.value = "android";
+    appState.listener = undefined;
+    biometrics.isAppLockEnabled.mockResolvedValue(true);
+    biometrics.verifyBiometricIdentity.mockResolvedValue(false);
+    vi.useFakeTimers({ toFake: ["Date"] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
+
+  it("starts locked and asks for a biometric straight away", async () => {
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    expect(result.current.isLocked).toBe(true);
+    await waitFor(() =>
+      expect(biometrics.verifyBiometricIdentity).toHaveBeenCalledTimes(1),
+    );
+    expect(result.current.isLocked).toBe(true);
+  });
+
+  it("names the device's biometric for the lock screen", async () => {
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    await waitFor(() =>
+      expect(result.current.biometricLabel).toBe("fingerprint"),
+    );
+  });
+
+  it("unlocks once the biometric check passes", async () => {
+    biometrics.verifyBiometricIdentity.mockResolvedValue(true);
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    await waitFor(() => expect(result.current.isLocked).toBe(false));
+  });
+
+  it("unlocks with the device PIN on Android", async () => {
+    biometrics.verifyDeviceCredential.mockResolvedValue(true);
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+    await waitFor(() =>
+      expect(biometrics.verifyBiometricIdentity).toHaveBeenCalled(),
+    );
+
+    await act(async () => {
+      await result.current.unlockWithDeviceCredential?.();
+    });
+
+    expect(result.current.isLocked).toBe(false);
+  });
+
+  it("leaves the PIN to the system prompt on iOS", () => {
+    platform.value = "ios";
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    expect(result.current.unlockWithDeviceCredential).toBeUndefined();
+  });
+
+  it("stays unlocked when the lock is off", async () => {
+    biometrics.isAppLockEnabled.mockResolvedValue(false);
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    await waitFor(() => expect(result.current.isLocked).toBe(false));
+    expect(biometrics.verifyBiometricIdentity).not.toHaveBeenCalled();
+  });
+
+  it("stays locked when the setting cannot be read", async () => {
+    biometrics.isAppLockEnabled.mockRejectedValue(new Error("unavailable"));
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    await waitFor(() => expect(result.current.isChecking).toBe(false));
+    expect(result.current.isLocked).toBe(true);
+  });
+
+  it("never locks on the web", () => {
+    native.value = false;
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+
+    expect(result.current.isLocked).toBe(false);
+  });
+
+  it("locks again only after five minutes in the background", async () => {
+    biometrics.verifyBiometricIdentity.mockResolvedValue(true);
+    const { result } = renderHook(() => useAppLock(SIGNED_IN));
+    await waitFor(() => expect(result.current.isLocked).toBe(false));
+
+    biometrics.verifyBiometricIdentity.mockResolvedValue(false);
+    await goToBackgroundFor(LOCK_AFTER_BACKGROUND_MS - 1000);
+    await act(async () => {});
+    expect(result.current.isLocked).toBe(false);
+
+    await goToBackgroundFor(LOCK_AFTER_BACKGROUND_MS);
+    await waitFor(() => expect(result.current.isLocked).toBe(true));
+  });
+
+  it("leaves a sign-in made in this run unlocked", async () => {
+    const { result, rerender } = renderHook((auth) => useAppLock(auth), {
+      initialProps: SIGNED_OUT,
+    });
+
+    rerender(SIGNED_IN);
+    await act(async () => {});
+
+    expect(result.current.isLocked).toBe(false);
+    expect(biometrics.verifyBiometricIdentity).not.toHaveBeenCalled();
+  });
+
+  it("locks a session restored at launch, even while auth is loading first", async () => {
+    const { result, rerender } = renderHook((auth) => useAppLock(auth), {
+      initialProps: LOADING,
+    });
+
+    rerender(SIGNED_IN);
+
+    expect(result.current.isLocked).toBe(true);
+    await waitFor(() =>
+      expect(biometrics.verifyBiometricIdentity).toHaveBeenCalled(),
+    );
+  });
+
+  it("deletes a password saved by an earlier build", async () => {
+    renderHook(() => useAppLock(LOADING));
+
+    await waitFor(() =>
+      expect(biometrics.removeLegacyBiometricCredentials).toHaveBeenCalled(),
+    );
+  });
+});

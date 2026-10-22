@@ -5,11 +5,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { authApi } from "@/api/auth";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
-import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
-import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { queryKeys } from "@/lib/queryKeys";
-import { saveBiometricCredentials } from "@/services/biometrics";
 import { useStore } from "@/store/store";
 
 interface LocalSignInFormProps {
@@ -26,8 +23,8 @@ export function LocalSignInForm({
   const { showNotification } = useStore();
 
   const form = useForm({
-    defaultValues: { email: "", password: "", enableBiometrics: false },
-    onSubmit: async ({ value: { email, password, enableBiometrics } }) => {
+    defaultValues: { email: "", password: "" },
+    onSubmit: async ({ value: { email, password } }) => {
       try {
         const normalizedEmail = email.trim().toLowerCase();
         await authApi.login({
@@ -37,11 +34,6 @@ export function LocalSignInForm({
         await queryClient.invalidateQueries({
           queryKey: queryKeys.auth.session(),
         });
-        // Save credentials for Biometric sign-in on future app launches,
-        // only when the user explicitly opted in
-        if (enableBiometrics) {
-          await saveBiometricCredentials(normalizedEmail, password);
-        }
         showNotification("Signed in successfully!", "success");
 
         const destination = normalizeAuthRedirect(redirectTo);
@@ -68,8 +60,6 @@ export function LocalSignInForm({
 
   return (
     <div className="w-full">
-      <BiometricSignInButton redirectTo={redirectTo} />
-
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -103,15 +93,6 @@ export function LocalSignInForm({
               placeholder="••••••••"
               name="password"
               autoComplete="current-password"
-            />
-          )}
-        </form.Field>
-
-        <form.Field name="enableBiometrics">
-          {(field) => (
-            <BiometricOptInCheckbox
-              checked={field.state.value}
-              onChange={field.handleChange}
             />
           )}
         </form.Field>

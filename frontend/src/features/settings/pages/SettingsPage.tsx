@@ -29,6 +29,7 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
+import AppLockForm from "@/features/settings/components/AppLockForm";
 import DeleteAccountForm from "@/features/settings/components/DeleteAccountForm";
 import { useBeforeUnload } from "@/hooks";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
@@ -271,6 +272,7 @@ export default function SettingsPage() {
               {activeTab === "security" && (
                 <PageTransition key="security">
                   <div className="space-y-6">
+                    <AppLockForm />
                     <ChangePasswordForm />
                     <DeleteAccountForm />
                   </div>

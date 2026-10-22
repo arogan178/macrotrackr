@@ -7,7 +7,6 @@ import { userApi, type UserDetailsResponse } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { clearBiometricCredentials } from "@/services/biometrics";
 import { removeToken } from "@/utils/tokenStorage";
 
 interface ChangePasswordData {
@@ -22,7 +21,11 @@ export function useUser(options?: { enabled?: boolean }) {
       try {
         return await userApi.getUserDetails();
       } catch (error) {
-        if (error instanceof Error && hasStatus(error) && error.status === 401) {
+        if (
+          error instanceof Error &&
+          hasStatus(error) &&
+          error.status === 401
+        ) {
           return null;
         }
         throw error;
@@ -40,36 +43,44 @@ export function useLogout() {
   const logLogoutError = createMutationErrorLogger("Logout failed");
 
   return useMutation({
-    mutationFn: async (): Promise<void> => {
+    // toSignIn lands on the sign-in page in the same navigation, rather than a
+    // second navigate() that would interrupt the page transition.
+    mutationFn: async (_options?: { toSignIn?: boolean }): Promise<void> => {
       removeToken();
       apiClient.setAuthToken(null);
-      // Drop any opt-in biometric credentials from the KeyStore/Keychain
-      await clearBiometricCredentials();
       try {
         await authApi.logout();
       } catch (error) {
         // 401: the server session is already gone, e.g. the account was just deleted.
-        if (!(error instanceof Error && hasStatus(error) && error.status === 401)) {
+        if (
+          !(error instanceof Error && hasStatus(error) && error.status === 401)
+        ) {
           throw error;
         }
       }
     },
-    onSuccess: () => {
+    onSuccess: (_data, options) => {
       queryClient.clear();
       // Loaded on demand so the offline store stays off the first page load.
-      void import("@/hooks/queries/macro/entryStore").then(({ clearSignedOutAccount }) =>
-        clearSignedOutAccount(),
+      void import("@/hooks/queries/macro/entryStore").then(
+        ({ clearSignedOutAccount }) => clearSignedOutAccount(),
       );
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       queryClient.removeQueries({ queryKey: queryKeys.auth.session() });
-      navigate({ to: "/" });
+      if (options?.toSignIn) {
+        navigate({ to: "/login", search: { returnTo: undefined } });
+      } else {
+        navigate({ to: "/" });
+      }
     },
     onError: logLogoutError,
   });
 }
 
 export function useChangePassword() {
-  const logChangePasswordError = createMutationErrorLogger("Change password failed");
+  const logChangePasswordError = createMutationErrorLogger(
+    "Change password failed",
+  );
 
   return useMutation({
     mutationFn: async (data: ChangePasswordData): Promise<void> => {
