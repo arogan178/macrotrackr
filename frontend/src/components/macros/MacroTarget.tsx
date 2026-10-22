@@ -6,17 +6,27 @@ import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
 import MacroSlider from "./MacroSlider";
 
+const NOTES: Record<MacroType, string> = {
+  protein: "Repairs and builds muscle.",
+  carbs: "Your main source of energy.",
+  fats: "Needed for hormones and absorbing vitamins.",
+};
+
+const KCAL_PER_GRAM: Record<MacroType, number> = { protein: 4, carbs: 4, fats: 9 };
+
 interface MacroTargetProps {
   initialValues?: MacroTargetState;
   onTargetChange: (target: MacroTargetState) => void;
+  /** The daily calorie target, so each share can be read in grams. */
+  calorieTarget?: number;
 }
 
 const MacroTarget = memo(
   ({
     initialValues = DEFAULT_MACRO_TARGET,
     onTargetChange,
+    calorieTarget,
   }: MacroTargetProps) => {
-
     const { target, handleChange, toggleLock } = useEditableMacroTargetCore(
       initialValues,
       (updatedTarget) => {
@@ -29,6 +39,11 @@ const MacroTarget = memo(
       [target.lockedMacros],
     );
 
+    const grams = (macro: MacroType, percentage: number) =>
+      calorieTarget
+        ? (calorieTarget * percentage) / 100 / KCAL_PER_GRAM[macro]
+        : undefined;
+
     const isSliderDisabled = useCallback(
       (macro: MacroType) => {
         return target.lockedMacros.length === 2 && !isLocked(macro);
@@ -37,32 +52,29 @@ const MacroTarget = memo(
     );
 
     return (
-      <div className="space-y-6 py-2">
-        <div className="relative mb-6 h-2 overflow-hidden rounded-full bg-surface">
+      <div className="py-2">
+        {/* The split as one bar, solid fills like the Home gauge. */}
+        <div
+          className="mb-2 flex h-2 overflow-hidden rounded-full bg-foreground/8"
+          aria-hidden
+        >
           <div
-            className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein/80 to-protein"
+            className="h-full bg-protein"
             style={{ width: `${target.proteinPercentage}%` }}
-            aria-label={`Protein: ${target.proteinPercentage}%`}
           />
           <div
-            className="absolute top-0 h-2 bg-gradient-to-r from-carbs to-carbs/80"
-            style={{
-              width: `${target.carbsPercentage}%`,
-              left: `${target.proteinPercentage}%`,
-            }}
-            aria-label={`Carbs: ${target.carbsPercentage}%`}
+            className="h-full bg-carbs"
+            style={{ width: `${target.carbsPercentage}%` }}
           />
           <div
-            className="absolute top-0 h-2 bg-gradient-to-r from-fats to-fats/80"
-            style={{
-              width: `${target.fatsPercentage}%`,
-              left: `${target.proteinPercentage + target.carbsPercentage}%`,
-            }}
-            aria-label={`Fats: ${target.fatsPercentage}%`}
+            className="h-full bg-fats"
+            style={{ width: `${target.fatsPercentage}%` }}
           />
         </div>
 
-        <div className="space-y-6">
+        {/* Each macro's note sits on its own row, so the reason for a range
+            is read beside the slider that sets it. */}
+        <div className="divide-y divide-border [&>*]:py-5 [&>*:last-child]:pb-0">
           <MacroSlider
             name="Protein"
             value={target.proteinPercentage}
@@ -71,6 +83,8 @@ const MacroTarget = memo(
             isLocked={isLocked("protein")}
             onToggleLock={() => toggleLock("protein")}
             disabled={isSliderDisabled("protein")}
+            note={NOTES.protein}
+            grams={grams("protein", target.proteinPercentage)}
           />
           <MacroSlider
             name="Carbs"
@@ -80,6 +94,8 @@ const MacroTarget = memo(
             isLocked={isLocked("carbs")}
             onToggleLock={() => toggleLock("carbs")}
             disabled={isSliderDisabled("carbs")}
+            note={NOTES.carbs}
+            grams={grams("carbs", target.carbsPercentage)}
           />
           <MacroSlider
             name="Fats"
@@ -89,6 +105,8 @@ const MacroTarget = memo(
             isLocked={isLocked("fats")}
             onToggleLock={() => toggleLock("fats")}
             disabled={isSliderDisabled("fats")}
+            note={NOTES.fats}
+            grams={grams("fats", target.fatsPercentage)}
           />
         </div>
       </div>

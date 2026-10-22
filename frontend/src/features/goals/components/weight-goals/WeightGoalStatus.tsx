@@ -160,7 +160,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-card border border-border bg-surface max-md:rounded-none max-md:border-0 max-md:bg-transparent md:overflow-hidden"
+      className="rounded-card border border-border bg-surface max-md:rounded-none max-md:border-0 max-md:bg-transparent md:flex md:h-full md:flex-col md:overflow-hidden"
     >
       <div className="flex items-start justify-between gap-3 md:p-6 md:pb-0">
         <div className="flex min-w-0 items-center gap-3">
@@ -282,7 +282,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         </Stat>
       </dl>
 
-      <div className="mt-6 md:px-6 md:pb-6">
+      {/* Pinned to the foot, so it lines up with the panel beside it. */}
+      <div className="mt-6 md:mt-auto md:px-6 md:pt-6 md:pb-6">
         <Button
           variant="primary"
           onClick={onLogWeight}

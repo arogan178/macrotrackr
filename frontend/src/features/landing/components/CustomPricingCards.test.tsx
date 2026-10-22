@@ -63,7 +63,7 @@ describe("CustomPricingCards", () => {
     render(<CustomPricingCards showUpgradeButtons={false} />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /create free account/i }),
+      screen.getByRole("button", { name: /create a free account/i }),
     );
 
     expect(mocks.capture).toHaveBeenCalledWith({

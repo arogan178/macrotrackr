@@ -2,11 +2,11 @@ import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { billingApi } from "@/api/billing";
-import CardContainer from "@/components/form/CardContainer";
 import AppHeader from "@/components/layout/AppHeader";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import Accordion from "@/components/ui/Accordion";
+import Heading from "@/components/ui/Heading";
 import { playProductIdFor } from "@/config/runtime";
 import { useCanPurchaseHere } from "@/features/billing/hooks/useCanPurchaseHere";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
@@ -189,7 +189,7 @@ const PricingPage: React.FC = () => {
       <DashboardPageContainer>
         <FeaturePage
           title="Pricing"
-          subtitle="Upgrade to Pro for advanced insights, unlimited tracking, and premium tools."
+          subtitle="Logging and targets are free. Pro adds your full history and 30 and 90 day trends."
         >
           <div className="space-y-12">
             {/* Card-based pricing — matches landing page */}
@@ -199,18 +199,21 @@ const PricingPage: React.FC = () => {
               canPurchase={canPurchase}
             />
 
-            {/* FAQ Section */}
-            <CardContainer className="p-6 sm:p-8">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Frequently Asked Questions
-                </h2>
-                <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
-                  Everything you need to know about our plans
+            {/* Heading beside the questions, so the block spans the page like
+                the plans above it instead of a narrow column on one side. */}
+            <section
+              className="grid grid-cols-1 gap-4 border-t border-border pt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-10"
+              aria-labelledby="pricing-questions"
+            >
+              <div>
+                <Heading level="panel" id="pricing-questions">
+                  Questions
+                </Heading>
+                <p className="mt-1 text-sm text-muted">
+                  About plans, payment and cancelling.
                 </p>
               </div>
               <Accordion
-                className="mx-auto max-w-3xl"
                 defaultOpenFirst
                 items={faqs.map((faq) => ({
                   id: faq.question,
@@ -218,7 +221,7 @@ const PricingPage: React.FC = () => {
                   answer: faq.answer,
                 }))}
               />
-            </CardContainer>
+            </section>
           </div>
         </FeaturePage>
       </DashboardPageContainer>

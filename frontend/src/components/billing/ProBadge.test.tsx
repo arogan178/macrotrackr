@@ -8,7 +8,7 @@ describe("ProBadge", () => {
     const { container } = render(<ProBadge />);
     expect(container).toBeTruthy();
 
-    const badge = screen.getByText("PRO");
+    const badge = screen.getByText("Pro");
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute("aria-label", "Pro feature");
   });

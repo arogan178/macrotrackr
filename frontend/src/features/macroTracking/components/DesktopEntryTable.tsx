@@ -9,19 +9,24 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros/MacroComponents";
 import {
   ChevronDownIcon,
   CopyIcon,
   IconButton,
-  IconButtonGroup,
+  MoreVerticalIcon,
+  StarIcon,
+  TrashIcon,
 } from "@/components/ui";
+import Value from "@/components/ui/Value";
+import { DURATIONS } from "@/components/utils/UiConstants";
+import { cn } from "@/lib/classnameUtilities";
+import type { MacroEntry } from "@/types/macro";
 
+import { EntryActionsSheet } from "./EntryActionsSheet";
 import { useEntryHistoryController } from "./EntryHistoryContext";
-import type {
-  GroupedEntry,
-} from "./EntryHistoryShared";
+import { DESKTOP_ROW_GRID, type GroupedEntry } from "./EntryHistoryShared";
 import { IngredientsList } from "./IngredientsList";
+import { MacroSplitBar } from "./MacroSplitBar";
 import { PendingSyncMarker } from "./PendingSyncMarker";
 
 interface DesktopEntryTableProps {
@@ -35,9 +40,14 @@ type TableRowData = GroupedEntry & {
 
 const columnHelper = createColumnHelper<TableRowData>();
 
-// Actions fit five buttons; the meal column keeps names on one line.
-const columnWidth = (columnId: string) =>
-  columnId === "actions" ? "24%" : columnId === "entries" ? "18%" : "11.6%";
+const cellAlign = (columnId: string) =>
+  columnId === "entries" || columnId === "split" ? "min-w-0" : "flex justify-end";
+
+const MACRO_COLUMNS = [
+  { key: "protein", label: "Protein", dot: "bg-protein" },
+  { key: "carbs", label: "Carbs", dot: "bg-carbs" },
+  { key: "fats", label: "Fats", dot: "bg-fats" },
+] as const;
 
 const DesktopEntryTable = memo(
   ({ groupedEntries }: DesktopEntryTableProps) => {
@@ -66,6 +76,7 @@ const DesktopEntryTable = memo(
     } = controller;
 
     const tableContainerReference = useRef<HTMLDivElement>(null);
+    const [openEntry, setOpenEntry] = useState<MacroEntry | null>(null);
     const [expandedEntries, setExpandedEntries] = useState<Set<string>>(
       new Set(),
     );
@@ -104,142 +115,115 @@ const DesktopEntryTable = memo(
 
     const columns = useMemo(
       () => [
-        columnHelper.accessor("date", {
-          header: "Time",
+        columnHelper.accessor("entries", {
+          header: "Food",
           cell: ({ row }) => {
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-foreground">
-                  <motion.div
+                <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap text-foreground">
+                  <motion.span
                     key={`chevron-${data.date}`}
                     initial={false}
-                    animate={{
-                      rotate: isDateCollapsed(data.date) ? -90 : 0,
-                    }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    animate={{ rotate: isDateCollapsed(data.date) ? -90 : 0 }}
+                    transition={{ duration: DURATIONS.instant }}
+                    className="text-muted"
                   >
-                    <ChevronDownIcon className="h-4 w-4 " />
-                  </motion.div>
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </motion.span>
                   {formatDate(data.date)}
                 </div>
               );
-            } else {
-              const entry = data.entries[0];
-              const hasIngredients = Boolean(
-                entry.ingredients && entry.ingredients.length > 1,
-              );
-
-              return (
-                <div className="flex items-center gap-2 pl-6 text-sm whitespace-nowrap text-foreground">
-                  {isSelectionMode && (
-                    <input
-                      type="checkbox"
-                      className="mr-2 h-4 w-4 rounded-control border-border accent-primary"
-                      checked={isEntrySelected(entry.clientId)}
-                      onChange={(event_) => {
-                        event_.stopPropagation();
-                        onToggleEntrySelection?.(entry.clientId);
-                      }}
-                    />
-                  )}
-                  {hasIngredients && (
-                    <button
-                      type="button"
-                      className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
-                      onClick={(event_) => toggleEntryExpand(entry.clientId, event_)}
-                      aria-label="Toggle ingredients"
-                    >
-                      <motion.div
-                        initial={false}
-                        animate={{
-                          rotate: expandedEntries.has(entry.clientId) ? -180 : 0,
-                        }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <ChevronDownIcon className="h-4 w-4" />
-                      </motion.div>
-                    </button>
-                  )}
-                  {formatTimeFromEntry(entry)}
-                </div>
-              );
             }
-          },
-        }),
-        columnHelper.accessor("entries", {
-          header: "Meal",
-          cell: ({ row }) => {
-            const data = row.original;
-            if (data.isGroup) return;
 
             const entry = data.entries[0];
+            const name = entry.foodName ?? entry.mealName;
+            const mealType = entry.mealType ? capitalizeFirstLetter(entry.mealType) : "";
+            const hasIngredients = Boolean(
+              entry.ingredients && entry.ingredients.length > 1,
+            );
 
             return (
-              <div className="flex flex-col items-center text-center text-sm text-foreground">
-                <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-muted">
-                  {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
-                </span>
-                {(entry.foodName ?? entry.mealName) && (
-                  <span className="mt-1 block text-xs font-medium text-foreground">
-                    {entry.foodName ?? entry.mealName}
-                  </span>
+              <div className="flex min-w-0 items-center gap-2 pl-6">
+                {isSelectionMode && (
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${name ?? mealType}`}
+                    className="h-4 w-4 shrink-0 rounded-control border-border accent-primary"
+                    checked={isEntrySelected(entry.clientId)}
+                    onClick={(event_) => event_.stopPropagation()}
+                    onChange={() => onToggleEntrySelection?.(entry.clientId)}
+                  />
                 )}
-                <PendingSyncMarker entry={entry} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-foreground">{name ?? mealType}</p>
+                  <p className="flex items-center gap-2 text-xs text-muted">
+                    <span className="tabular-nums">{formatTimeFromEntry(entry)}</span>
+                    {name ? <span>{mealType}</span> : null}
+                    {isMealSaved(entry.clientId) && (
+                      <StarIcon
+                        aria-label="Saved meal"
+                        className="h-3 w-3 fill-current text-primary"
+                      />
+                    )}
+                    <PendingSyncMarker entry={entry} />
+                  </p>
+                </div>
+                {hasIngredients && (
+                  <button
+                    type="button"
+                    className="ml-auto shrink-0 cursor-pointer rounded-control p-1 text-muted hover:bg-surface-3 hover:text-foreground"
+                    onClick={(event_) => toggleEntryExpand(entry.clientId, event_)}
+                    aria-expanded={expandedEntries.has(entry.clientId)}
+                    aria-label="Show ingredients"
+                  >
+                    <motion.span
+                      className="block"
+                      initial={false}
+                      animate={{
+                        rotate: expandedEntries.has(entry.clientId) ? -180 : 0,
+                      }}
+                      transition={{ duration: DURATIONS.instant }}
+                    >
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </motion.span>
+                  </button>
+                )}
               </div>
             );
           },
         }),
-        columnHelper.accessor("totals.protein", {
-          header: () => (
-            <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-protein" />
-              Protein
-            </div>
-          ),
+        columnHelper.display({
+          id: "split",
+          header: () => <span className="sr-only">Calorie split</span>,
           cell: ({ row }) => {
-            const data = row.original;
-            const value = data.isGroup
-              ? data.totals.protein
-              : data.entries[0].protein;
+            const { protein, carbs, fats } = row.original.isGroup
+              ? row.original.totals
+              : row.original.entries[0];
 
-            return <MacroCell value={value} suffix="g" color="text-protein" />;
+            return <MacroSplitBar protein={protein} carbs={carbs} fats={fats} />;
           },
         }),
-        columnHelper.accessor("totals.carbs", {
-          header: () => (
-            <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-carbs" />
-              Carbs
-            </div>
-          ),
-          cell: ({ row }) => {
-            const data = row.original;
-            const value = data.isGroup
-              ? data.totals.carbs
-              : data.entries[0].carbs;
+        ...MACRO_COLUMNS.map((macro) =>
+          columnHelper.accessor(`totals.${macro.key}`, {
+            header: () => (
+              <span className="flex items-center justify-end gap-1.5">
+                <span className={cn("h-1.5 w-1.5 rounded-full", macro.dot)} />
+                {macro.label}
+              </span>
+            ),
+            cell: ({ row }) => {
+              const data = row.original;
+              const value = data.isGroup
+                ? data.totals[macro.key]
+                : data.entries[0][macro.key];
 
-            return <MacroCell value={value} suffix="g" color="text-carbs" />;
-          },
-        }),
-        columnHelper.accessor("totals.fats", {
-          header: () => (
-            <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-fats" />
-              Fats
-            </div>
-          ),
-          cell: ({ row }) => {
-            const data = row.original;
-            const value = data.isGroup
-              ? data.totals.fats
-              : data.entries[0].fats;
-
-            return <MacroCell value={value} suffix="g" color="text-fats" />;
-          },
-        }),
+              return <Value value={value} unit="g" />;
+            },
+          }),
+        ),
         columnHelper.accessor("totals.calories", {
-          header: "Calories",
+          header: () => <span className="block text-right">Calories</span>,
           cell: ({ row }) => {
             const data = row.original;
             const value = data.isGroup
@@ -250,19 +234,17 @@ const DesktopEntryTable = memo(
                   data.entries[0].fats,
                 );
 
-            return (
-              <MacroCell value={value} suffix=" kcal" color="text-foreground" />
-            );
+            return <Value value={value} unit="kcal" />;
           },
         }),
         columnHelper.display({
           id: "actions",
-          header: "Actions",
+          header: () => <span className="sr-only">Actions</span>,
           cell: ({ row }) => {
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex w-full items-center justify-center gap-1">
+                <div className="flex items-center justify-end gap-1">
                   {canCopyDate(data.date) && (
                     <IconButton
                       variant="custom"
@@ -276,8 +258,10 @@ const DesktopEntryTable = memo(
                     />
                   )}
                   <IconButton
-                    variant="delete"
+                    variant="custom"
                     buttonSize="sm"
+                    className="text-muted hover:text-error"
+                    icon={<TrashIcon className="h-4 w-4" />}
                     onClick={(event: React.MouseEvent) =>
                       handleDeleteDate(data.date, event)
                     }
@@ -285,36 +269,25 @@ const DesktopEntryTable = memo(
                   />
                 </div>
               );
-            } else {
-              const entry = data.entries[0];
-
-              return (
-                <div className="flex items-center justify-center gap-1">
-                  {onCopyOrMove && (
-                    <IconButton
-                      variant="custom"
-                      buttonSize="sm"
-                      className="text-muted hover:text-foreground"
-                      icon={<CopyIcon className="h-4 w-4" />}
-                      onClick={() => onCopyOrMove(entry)}
-                      ariaLabel="Copy or move entry"
-                    />
-                  )}
-                  <IconButtonGroup
-                    onEdit={() => onEdit(entry)}
-                    onDelete={() => deleteEntry(entry.clientId)}
-                    isDeleting={isDeleting(entry.clientId)}
-                    onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
-                    onUnsaveMeal={
-                      onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
-                    }
-                    isMealSaved={isMealSaved(entry.clientId)}
-                    onLogAgain={onLogAgain ? () => onLogAgain(entry) : undefined}
-                    buttonSize="sm"
-                  />
-                </div>
-              );
             }
+
+            const entry = data.entries[0];
+
+            return (
+              <div className="flex justify-end">
+                <IconButton
+                  variant="custom"
+                  buttonSize="sm"
+                  className="text-muted hover:text-foreground"
+                  icon={<MoreVerticalIcon className="h-4 w-4" />}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    setOpenEntry(entry);
+                  }}
+                  ariaLabel={`Actions for ${entry.foodName ?? entry.mealName ?? "entry"}`}
+                />
+              </div>
+            );
           },
         }),
       ],
@@ -328,13 +301,6 @@ const DesktopEntryTable = memo(
         handleDeleteDate,
         canCopyDate,
         handleCopyDate,
-        onEdit,
-        deleteEntry,
-        isDeleting,
-        onSaveMeal,
-        onUnsaveMeal,
-        onLogAgain,
-        onCopyOrMove,
         isMealSaved,
         isSelectionMode,
         isEntrySelected,
@@ -405,13 +371,20 @@ const DesktopEntryTable = memo(
         ? `group-${data.date}`
         : `entry-${entryKey}-${parentDate}`;
 
+      // The row is the control, as on a phone: a day opens or closes, an
+      // entry opens its actions. One icon stays in reach for the pointer.
+      const entry = data.entries[0];
       const commonProps = {
-        className: `flex w-full flex-col overflow-hidden ${
-          isGroup
-            ? "group cursor-pointer border-y border-border bg-surface-2 transition-colors hover:bg-surface-2"
-            : "relative border-b border-border transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2 hover:after:bg-primary/50"
-        }`,
-        onClick: isGroup ? () => toggleDateCollapse(data.date) : undefined,
+        className: cn(
+          "flex w-full cursor-pointer flex-col overflow-hidden border-b border-border transition-colors duration-200 hover:bg-surface-2",
+          !isGroup && isDeleting(entry.clientId) && "opacity-50",
+        ),
+        onClick: isGroup
+          ? () => toggleDateCollapse(data.date)
+          : () =>
+              isSelectionMode
+                ? onToggleEntrySelection?.(entry.clientId)
+                : setOpenEntry(entry),
       };
 
       const motionProps = isVirtualized
@@ -443,21 +416,15 @@ const DesktopEntryTable = memo(
 
       return (
         <motion.div key={animationKey} {...commonProps} {...motionProps}>
-          <div className="flex w-full items-center">
+          <div className={cn(DESKTOP_ROW_GRID, "min-h-14 py-2")}>
             {row?.getVisibleCells().map((cell) => (
-              <div
-                key={cell.id}
-                className="flex min-h-12 items-center justify-center px-4 py-2.5 text-center"
-                style={{ width: columnWidth(cell.column.id) }}
-              >
-                <div className="w-full">
-                  {
-                    flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext(),
-                    ) as React.ReactNode
-                  }
-                </div>
+              <div key={cell.id} className={cellAlign(cell.column.id)}>
+                {
+                  flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext(),
+                  ) as React.ReactNode
+                }
               </div>
             ))}
           </div>
@@ -520,21 +487,21 @@ const DesktopEntryTable = memo(
       <div className="hidden md:block">
         <div
           ref={tableContainerReference}
-          className={`overflow-hidden rounded-control border border-border bg-surface shadow-xs ${shouldVirtualize ? "max-h-150 overflow-auto" : ""}`}
+          className={shouldVirtualize ? "max-h-150 overflow-auto" : undefined}
         >
           <div className="flex w-full flex-col">
             <div
-              className={`flex w-full border-b border-border bg-surface-2 ${
-                shouldVirtualize ? "sticky top-0 z-10" : ""
-              }`}
+              className={cn(
+                "border-b border-border bg-surface",
+                shouldVirtualize && "sticky top-0 z-10",
+              )}
             >
               {table.getHeaderGroups().map((headerGroup) => (
-                <div key={headerGroup.id} className="flex w-full">
+                <div key={headerGroup.id} className={cn(DESKTOP_ROW_GRID, "py-2.5")}>
                   {headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
-                      className="flex items-center justify-center px-4 py-3 text-center text-[10px] font-medium text-muted"
-                      style={{ width: columnWidth(header.column.id) }}
+                      className={cn("text-xs text-muted", cellAlign(header.column.id))}
                     >
                       {header.isPlaceholder
                         ? undefined
@@ -552,6 +519,17 @@ const DesktopEntryTable = memo(
               : renderNonVirtualizedBody()}
           </div>
         </div>
+        <EntryActionsSheet
+          entry={openEntry}
+          isMealSaved={openEntry ? isMealSaved(openEntry.clientId) : false}
+          onClose={() => setOpenEntry(null)}
+          onEdit={onEdit}
+          onDelete={deleteEntry}
+          onLogAgain={onLogAgain}
+          onCopyOrMove={onCopyOrMove}
+          onSaveMeal={onSaveMeal}
+          onUnsaveMeal={onUnsaveMeal}
+        />
       </div>
     );
   },

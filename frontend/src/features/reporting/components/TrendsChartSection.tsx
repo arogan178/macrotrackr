@@ -66,14 +66,17 @@ export default function TrendsChartSection({
         />
       }
     >
-      <LineChartComponent
-        data={dailySeries}
-        lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
-        showLegend={activeTab !== "calories"}
-        isLoading={isHistoryLoading || !isHistoryReady}
-        showNoDataMessage={chartShowNoDataMessage}
-        height={320}
-      />
+      {/* Fills whatever height the card is given, so beside the summary the
+          axis sits on the panel's foot rather than above an empty band. */}
+      <div className="absolute inset-0">
+        <LineChartComponent
+          data={dailySeries}
+          lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
+          showLegend={activeTab !== "calories"}
+          isLoading={isHistoryLoading || !isHistoryReady}
+          showNoDataMessage={chartShowNoDataMessage}
+        />
+      </div>
     </ChartCard>
   );
 }

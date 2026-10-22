@@ -1,6 +1,6 @@
 import { ProFeature } from "@/components/billing/ProFeature";
 import CardContainer from "@/components/form/CardContainer";
-import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
+import { Button, CheckCircleIcon, Heading, PlusIcon } from "@/components/ui";
 import StateCard from "@/components/ui/StateCard";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { HabitGoal } from "@/types/habit";
@@ -38,9 +38,9 @@ function HabitTracker({
       <div className="p-5 max-md:p-0">
         {/* Header with title and add button */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold tracking-tight text-foreground">
+          <Heading level="panel" as="h3">
             Habits
-          </h3>
+          </Heading>
 
           {/* Only show Add button in header if NOT showing empty state */}
           {onAddHabit && habits.length > 0 && (
@@ -110,7 +110,7 @@ function HabitTracker({
             className="rounded-card border border-border bg-surface-2"
           />
         ) : (
-          <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:gap-4 md:divide-y-0 lg:grid-cols-3">
+          <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:gap-x-8 md:divide-y-0 lg:grid-cols-3">
             {habits.map((habit) => (
               <HabitCard
                 key={habit.id}

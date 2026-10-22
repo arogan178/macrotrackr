@@ -1,37 +1,24 @@
 import React from "react";
 
 import Reveal from "@/components/animation/Reveal";
-import type { IconProps } from "@/components/ui/Icons";
+import Heading from "@/components/ui/Heading";
 
 import { FEATURES } from "../utils/landingPageConstants";
 
-interface FeatureCardProps {
+interface FeatureItemProps {
   name: string;
   description: string;
-  icon: React.ComponentType<IconProps>;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  name,
-  description,
-  icon: Icon,
-}) => (
-  <div className="group relative rounded-card border border-border bg-surface p-6 transition-colors duration-200 ease-in-out hover:border-border-2">
-    <div className="relative z-10">
-      <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-control border border-border bg-surface-2 transition-colors duration-200 group-hover:border-primary/30 group-hover:bg-primary/10">
-        <Icon
-          className="h-5 w-5 text-muted transition-colors duration-200 group-hover:text-primary"
-          aria-hidden="true"
-        />
-      </div>
-      <h3 className="mb-2 text-lg font-medium tracking-tight text-foreground transition-colors duration-200">
-        {name}
-      </h3>
-      <p className="text-sm leading-relaxed text-balance text-muted transition-colors duration-200 group-hover:text-foreground/80">
-        {description}
-      </p>
-    </div>
-  </div>
+// A ruled list, as the app's own rows are: each feature is a line and a
+// sentence, not a card that lights up on hover as if it led somewhere.
+const FeatureItem: React.FC<FeatureItemProps> = ({ name, description }) => (
+  <li className="border-t border-border pt-5">
+    <Heading level="panel" as="h3">
+      {name}
+    </Heading>
+    <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">{description}</p>
+  </li>
 );
 
 const FeaturesSection: React.FC = () => (
@@ -49,22 +36,20 @@ const FeaturesSection: React.FC = () => (
         </p>
       </Reveal>
 
-      {/* A static grid: the cards are meant to be read, and a marquee that
+      {/* Static: the features are meant to be read, and a marquee that
           pauses only on hover is unreadable on touch. */}
-      <div
-        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-        role="list"
+      <ul
+        className="grid grid-cols-1 gap-x-10 gap-y-10 md:grid-cols-2 lg:grid-cols-3"
         aria-label="Features"
       >
         {FEATURES.map((feature) => (
-          <FeatureCard
+          <FeatureItem
             key={feature.name}
             name={feature.name}
             description={feature.description}
-            icon={feature.icon}
           />
         ))}
-      </div>
+      </ul>
     </div>
   </section>
 );

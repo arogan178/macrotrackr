@@ -3,9 +3,10 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useReducedMotion } from "motion/react";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { StateCard, TabBar } from "@/components/ui";
+import { Heading, StateCard, TabBar } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
+import BlogPostList from "@/features/landing/components/BlogPostList";
 import Footer from "@/features/landing/components/Footer";
 import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
 import { usePageMetadata } from "@/hooks";
@@ -72,9 +73,7 @@ const BlogIndexPage: React.FC = () => {
             The "Back to Home" pill it replaced existed nowhere else in the app,
             and the header logo already goes home. */}
         <section className="mb-12 text-center">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-            Writing
-          </h1>
+          <Heading level="display">Writing</Heading>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
             How to set a target, how to hit it, and what the numbers actually
             mean. No product announcements.
@@ -110,7 +109,7 @@ const BlogIndexPage: React.FC = () => {
             aligned. */}
         <section id="blog-posts" className="scroll-mt-32">
           <div className="flex items-baseline justify-between border-b border-border pb-3">
-            <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
+            <h2 className="text-sm font-semibold text-muted">
               {activeCategory === "all"
                 ? "All writing"
                 : (categories.find((c) => c.slug === activeCategory)?.name ??
@@ -131,38 +130,7 @@ const BlogIndexPage: React.FC = () => {
               />
             </div>
           ) : (
-            <ol>
-              {filteredPosts.map((post, index) => (
-                <li key={post.slug}>
-                  <Link
-                    to="/blog/$slug"
-                    params={{ slug: post.slug }}
-                    className="group flex flex-col gap-2 border-b border-border py-6 transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:flex-row sm:items-baseline sm:gap-8"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="hidden w-8 shrink-0 text-sm text-muted tabular-nums sm:block"
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-lg font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                        {post.title}
-                      </span>
-                      <span className="mt-1 block text-sm leading-relaxed text-muted">
-                        {post.excerpt}
-                      </span>
-                    </span>
-
-                    <span className="flex shrink-0 items-baseline gap-4 text-xs text-muted sm:w-44 sm:justify-end">
-                      <span>{post.category}</span>
-                      <span className="tabular-nums">{post.readingTime} read</span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ol>
+            <BlogPostList posts={filteredPosts} />
           )}
         </section>
 

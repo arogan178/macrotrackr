@@ -72,18 +72,22 @@ export default function BmrVsTdeePage() {
             <Heading level="panel" id="definitions-heading" className="mb-6 text-xl">
               The difference in one line each
             </Heading>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {content.definitions.map((item) => (
-                <Panel key={item.term} padding="compact">
-                  <Heading level="panel" as="h3">
-                    {item.term}
-                  </Heading>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">
-                    {item.body}
-                  </p>
-                </Panel>
-              ))}
-            </div>
+            {/* One panel split by a rule: two definitions of different
+                lengths in two boxes left one ending short. */}
+            <Panel padding="none">
+              <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+                {content.definitions.map((item) => (
+                  <div key={item.term} className="p-4">
+                    <Heading level="panel" as="h3">
+                      {item.term}
+                    </Heading>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">
+                      {item.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Panel>
           </section>
 
           <section className="mb-12" aria-labelledby="components-heading">

@@ -17,8 +17,6 @@ vi.mock("@/components/billing/UpgradeModal", () => ({
 
 const defaultProps = {
   currentRange: "week",
-  onExportClick: vi.fn(),
-  isExportDisabled: false,
 };
 
 describe("DateRangeSelector", () => {

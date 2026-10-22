@@ -4,9 +4,12 @@ import NumberField from "@/components/form/NumberField";
 import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TextField from "@/components/form/TextField";
 import TimeField from "@/components/form/TimeField";
+import Value from "@/components/ui/Value";
 import { MEAL_TYPE_OPTIONS } from "@/features/macroTracking/constants";
 import type { UnitType } from "@/features/macroTracking/utils/units";
 import type { MealType } from "@/types/macro";
+
+import { MacroSplitBar } from "../MacroSplitBar";
 
 interface MealDetailsSectionProps {
   mealName: string;
@@ -60,8 +63,8 @@ export default function MealDetailsSection({
   const calories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
   return (
-    // The sheet is the container; a bordered box inside it was a box in a box.
-    <section className="space-y-4 md:rounded-card md:border md:border-border md:bg-surface md:p-6">
+    // The dialog is the container; a bordered box inside it was a box in a box.
+    <section className="space-y-4">
       {isMultiIngredient && (
         <p className="text-xs text-muted">Totals update from the ingredients below.</p>
       )}
@@ -139,39 +142,16 @@ export default function MealDetailsSection({
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-4">
-        <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-medium text-muted">
-            Calories
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {calories}
-          </p>
+      {/* The entry's figures as the actions sheet shows them: one line and
+          its split, rather than four boxed tiles. */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <Value value={calories} unit="kcal" size="stat" />
+          <Value value={protein} unit="g" suffix="protein" className="text-protein" />
+          <Value value={carbs} unit="g" suffix="carbs" className="text-carbs" />
+          <Value value={fats} unit="g" suffix="fat" className="text-fats" />
         </div>
-        <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-medium text-protein">
-            Protein
-          </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">
-            {protein.toFixed(1)}g
-          </p>
-        </div>
-        <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-medium text-carbs">
-            Carbs
-          </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">
-            {carbs.toFixed(1)}g
-          </p>
-        </div>
-        <div className="rounded-card border border-border bg-surface-2 p-4">
-          <p className="text-[11px] font-medium text-fats">
-            Fats
-          </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">
-            {fats.toFixed(1)}g
-          </p>
-        </div>
+        <MacroSplitBar protein={protein} carbs={carbs} fats={fats} />
       </div>
 
       {!isMultiIngredient && onAddIngredient && (
@@ -194,7 +174,7 @@ export default function MealDetailsSection({
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Add Ingredient (Convert to Multi-Ingredient Meal)
+            Add ingredients
           </button>
         </div>
       )}

@@ -1,12 +1,25 @@
 // src/components/macros/MacroSlider.tsx
 
-import { useMemo, useState } from "react";
-
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { IconButton, LockIcon, RangeSlider, UnlockIcon } from "@/components/ui";
+import Value from "@/components/ui/Value";
+import { cn } from "@/lib/classnameUtilities";
 import type { MacroType } from "@/types/macro";
 
-import { COLOR_MAP, PROGRESS_BAR_COLORS } from "../utils";
+/** The share of calories most people do well on; drawn as a band on the track. */
+const USUAL_RANGE: Record<MacroType, { min: number; max: number }> = {
+  protein: { min: 20, max: 35 },
+  carbs: { min: 45, max: 65 },
+  fats: { min: 20, max: 35 },
+};
+
+const MACRO_CLASS: Record<
+  MacroType,
+  { dot: string; band: string; icon: string }
+> = {
+  protein: { dot: "bg-protein", band: "bg-protein/30", icon: "text-protein" },
+  carbs: { dot: "bg-carbs", band: "bg-carbs/30", icon: "text-carbs" },
+  fats: { dot: "bg-fats", band: "bg-fats/30", icon: "text-fats" },
+};
 
 interface MacroSliderProps {
   name: string;
@@ -18,8 +31,17 @@ interface MacroSliderProps {
   disabled?: boolean;
   min?: number;
   max?: number;
+  /** What the macro is for, in one short line under its name. */
+  note?: string;
+  /** Grams a day at the current calorie target, beside the percentage. */
+  grams?: number;
 }
 
+/**
+ * One macro: its name and purpose, a slider whose usual range is shaded on the
+ * track, and the share it sets with the grams that share means. In a narrow
+ * panel the three stack; in a wide one they read across as one row.
+ */
 export default function MacroSlider({
   name,
   value,
@@ -30,46 +52,60 @@ export default function MacroSlider({
   disabled = false,
   min = 5,
   max = 70,
+  note,
+  grams,
 }: MacroSliderProps) {
-  const macro = useMemo<MacroType>(
-    () =>
-      (["protein", "carbs", "fats"] as readonly MacroType[]).includes(
-        name.toLowerCase() as MacroType,
-      )
-        ? (name.toLowerCase() as MacroType)
-        : color,
-    [name, color],
-  );
-
-  const [recommendationText, setRecommendationText] = useState(
-    getRecommendation(macro, value),
-  );
-
-  const colorProps = useMemo(() => {
-    const properties = COLOR_MAP[color] ?? COLOR_MAP.protein;
-    // Avoid noisy logs in production; keep a single dev hint
-    const shouldWarn = !COLOR_MAP[color] && import.meta.env?.DEV;
-    if (shouldWarn) {
-      console.warn(
-        `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
-      );
-    }
-
-    return properties;
-  }, [color]);
-
-  const { iconColor, dot } = colorProps;
-
-  const isEffectivelyDisabled = disabled || (isLocked && !disabled);
+  const range = USUAL_RANGE[color];
+  const classes = MACRO_CLASS[color];
+  // States the range and lets the band show where the thumb sits: phrased as
+  // "below", it flagged the app's own default split as a problem.
+  const rangeText = `Usual ${range.min} to ${range.max}%`;
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${dot}`} />
-          <span className="text-sm text-muted">{name}</span>
+    // Sized by its panel, not the screen: the calculator sets it in a narrow
+    // card on a wide page.
+    <div className="@container">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 @3xl:grid-cols-[14rem_minmax(0,1fr)_9rem] @3xl:gap-x-10">
+        <div className="col-start-1 row-start-1 flex items-center gap-2">
+          <span className={cn("h-2 w-2 rounded-full", classes.dot)} />
+          <span className="text-sm font-medium text-foreground">{name}</span>
         </div>
-        <div className="flex items-center gap-2">
+
+        {note ? (
+          <p className="col-span-2 row-start-2 text-xs leading-relaxed text-muted @3xl:col-span-1 @3xl:col-start-1">
+            {note}
+          </p>
+        ) : null}
+
+        <div className="col-span-2 row-start-3 @3xl:col-span-1 @3xl:col-start-2 @3xl:row-span-2 @3xl:row-start-1">
+          <RangeSlider
+            value={value}
+            onChange={onChange}
+            min={min}
+            max={max}
+            step={1}
+            disabled={disabled || isLocked}
+            band={range}
+            bandClassName={classes.band}
+            ariaLabel={`${name} share of calories`}
+            unit="percent"
+          />
+          <div className="mt-1.5 flex justify-between gap-3 text-xs text-muted">
+            <span>{min}%</span>
+            <span className="text-center">{rangeText}</span>
+            <span>{max}%</span>
+          </div>
+        </div>
+
+        <div className="col-start-2 row-start-1 flex items-center justify-end gap-2 @3xl:col-start-3 @3xl:row-span-2 @3xl:row-start-1">
+          <div className="text-right">
+            <Value value={value} unit="%" size="stat" />
+            {grams === undefined ? null : (
+              <p className="text-xs text-muted">
+                <Value value={grams} unit="g" /> a day
+              </p>
+            )}
+          </div>
           {onToggleLock && (
             <IconButton
               variant="custom"
@@ -77,7 +113,7 @@ export default function MacroSlider({
               ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               icon={
                 isLocked ? (
-                  <LockIcon className={`h-3.5 w-3.5 ${iconColor}`} />
+                  <LockIcon className={cn("h-3.5 w-3.5", classes.icon)} />
                 ) : (
                   <UnlockIcon className="h-3.5 w-3.5 text-muted" />
                 )
@@ -87,87 +123,7 @@ export default function MacroSlider({
               disabled={disabled}
             />
           )}
-          <AnimatedNumber
-            value={value}
-            className="w-8 text-right text-sm font-medium text-muted"
-            suffix="%"
-          />
         </div>
-      </div>
-
-      <RangeSlider
-        value={value}
-        onChange={(newValue) => {
-          onChange(newValue);
-          setRecommendationText(getRecommendation(macro, newValue));
-        }}
-        min={min}
-        max={max}
-        step={1}
-        disabled={isEffectivelyDisabled}
-        showFillTrack
-        trackColorClass={PROGRESS_BAR_COLORS[color]}
-      />
-
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted">{min}%</span>
-        <span className="h-4 max-w-45 text-center text-xs text-muted">
-          {recommendationText}
-        </span>
-        <span className="text-xs text-muted">{max}%</span>
-      </div>
-    </div>
-  );
-}
-
-function getRecommendation(macro: MacroType, value: number): string {
-  if (macro === "protein") {
-    if (value < 15) return "Consider increasing for muscle maintenance";
-    if (value > 35) return "High protein intake";
-
-    return "Ideal range for most people";
-  }
-  if (macro === "carbs") {
-    if (value < 40) return "Low carb approach";
-    if (value > 65) return "High carb approach";
-
-    return "Balanced carb intake";
-  }
-  // fats
-  if (value < 20) return "Consider increasing for hormone health";
-  if (value > 40) return "Higher fat approach";
-
-  return "Healthy fat intake";
-}
-
-interface MacroBadgeProps {
-  name: string;
-  value: number;
-  color: MacroType;
-  isLocked?: boolean;
-}
-
-export function MacroBadge({
-  name,
-  value,
-  color,
-  isLocked = false,
-}: MacroBadgeProps) {
-  const {
-    border,
-    iconColor,
-    dot: badgeDot,
-  } = useMemo(() => COLOR_MAP[color], [color]);
-
-  return (
-    <div className={`rounded-control border bg-surface-2 p-3 ${border}`}>
-      <div className="flex items-center gap-1.5">
-        <div className={`h-2 w-2 rounded-full ${badgeDot}`} />
-        <span className="text-xs text-foreground">{name}</span>
-        {isLocked && <LockIcon className={`h-3 w-3 ${iconColor}`} />}
-      </div>
-      <div className="mt-1 w-12 text-lg font-semibold text-foreground">
-        <AnimatedNumber value={value} suffix="%" />
       </div>
     </div>
   );

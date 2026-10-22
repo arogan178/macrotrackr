@@ -90,7 +90,7 @@ export default function MigrationGuidePage() {
           </nav>
 
           <header>
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+            <p className="text-xs font-semibold text-primary">
               Switch from {guide.sourceName}
             </p>
             <Heading level="display" className="mt-3">
@@ -167,7 +167,7 @@ export default function MigrationGuidePage() {
               they are the best place to link from, and someone who has just
               imported their history needs a target to track against. */}
           <section className="mt-12 border-t border-border pt-8">
-            <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
+            <h2 className="text-sm font-semibold text-muted">
               Now set your targets
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
@@ -197,7 +197,7 @@ export default function MigrationGuidePage() {
           </section>
 
           <section className="mt-12 border-t border-border pt-8">
-            <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
+            <h2 className="text-sm font-semibold text-muted">
               Moving from another app?
             </h2>
             <div className="mt-4 flex flex-wrap gap-3">

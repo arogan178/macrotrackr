@@ -24,7 +24,7 @@ test.describe('Goals E2E Tests', () => {
     test('should display page content', async ({ page }: { page: Page }) => {
       await page.goto('/goals')
 
-      await expect(page.getByRole('heading', { name: 'Habit Goals' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Habits', exact: true })).toBeVisible()
     })
 
     test('should have interactive elements', async ({ page }: { page: Page }) => {

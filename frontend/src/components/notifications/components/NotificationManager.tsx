@@ -19,21 +19,16 @@ function NotificationManager() {
     <div
       // z-110: above AppHeader and MobileTabBar (both z-70) and Modal (z-100)
       // so notifications/toasts appear above modal backdrop and dialogs.
+      // At the foot, newest nearest the edge, as Android's snackbars sit.
       className="pointer-events-none fixed left-1/2 z-110 -translate-x-1/2"
-      style={{
-        top: "var(--floating-notification-top, 80px)",
-      }}
+      style={{ bottom: "var(--toast-bottom)" }}
     >
-      <div className="flex w-screen max-w-md flex-col gap-3 px-4">
+      <div className="flex w-screen max-w-md flex-col gap-2 px-4">
         {notifications.map((notification, index) => (
           <div
             key={notification.id}
             className="pointer-events-auto"
-            style={{
-              zIndex: 9999 - index,
-              // Add slight stagger to entrance animations
-              animationDelay: `${index * 50}ms`,
-            }}
+            style={{ zIndex: 9999 - index }}
           >
             <FloatingNotification
               message={notification.message}

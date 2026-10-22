@@ -28,7 +28,6 @@ function ResetPasswordRoute() {
           ? "Whoever runs this server can reset it for you."
           : "Our support team can reset it for you."
       }
-      showBackToHome={!isLocalAuthMode}
     >
       <div className="space-y-4 text-sm text-muted">
         {isLocalAuthMode ? (

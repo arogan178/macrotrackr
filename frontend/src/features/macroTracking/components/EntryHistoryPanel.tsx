@@ -3,13 +3,11 @@ import { createPortal } from "react-dom";
 import { format, subDays } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
 import Dropdown from "@/components/form/Dropdown";
 import {
   Button,
   ChevronDownIcon,
-  ExportIcon,
   IconButton,
   LoadingSpinner,
   LockIcon,
@@ -396,7 +394,7 @@ const EntryHistoryComponent = function EntryHistory({
   // are the only motion here that carries information.
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-4 md:hidden">
+      <div className="mb-3 flex items-center justify-between gap-4 md:mb-4">
         <Heading level="panel">History</Heading>
         <div className="flex items-center gap-1">
           {history.length > 0 && (
@@ -415,41 +413,6 @@ const EntryHistoryComponent = function EntryHistory({
                 onClick={onExportCsv}
                 disabled={isExportingCsv}
                 className="mr-1"
-              />
-            </ProFeature>
-          )}
-        </div>
-      </div>
-
-      <div className="mb-6 hidden flex-row items-center justify-between gap-4 md:flex">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground">
-            Entry History
-          </h2>{" "}
-          <p className="mt-1 text-sm text-muted">
-            <AnimatedNumber value={history.length} />{" "}
-            {history.length === 1 ? "entry" : "entries"} across{" "}
-            <AnimatedNumber value={totalEntries.length} />{" "}
-            {totalEntries.length === 1 ? "day" : "days"}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {history.length > 0 && (
-            <Button
-              variant="secondary"
-              onClick={toggleSelectionMode}
-              text={isSelectionMode ? "Cancel selection" : "Group meals"}
-              buttonSize="sm"
-            />
-          )}
-          {history.length > 0 && (
-            <ProFeature>
-              <Button
-                leftIcon={<ExportIcon />}
-                onClick={onExportCsv}
-                text={isExportingCsv ? "Exporting..." : "Export CSV"}
-                buttonSize="sm"
-                isLoading={isExportingCsv}
               />
             </ProFeature>
           )}
@@ -480,9 +443,9 @@ const EntryHistoryComponent = function EntryHistory({
           }}
         />
       ) : (
-        // On a phone the days run edge to edge of the panel: a bordered box
-        // here was a third level of nesting, and cost each entry 34px.
-        <div className="-mx-4 overflow-clip border-y border-border sm:-mx-6 md:mx-0 md:rounded-control md:border">
+        // The days run edge to edge of the panel: a bordered box here was a
+        // third level of nesting, and cost each phone entry 34px.
+        <div className="-mx-4 overflow-clip border-y border-border sm:-mx-6">
 
           <EntryHistoryContext.Provider value={controller}>
             <div className="hidden md:block">

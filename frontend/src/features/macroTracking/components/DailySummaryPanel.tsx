@@ -1,12 +1,12 @@
 import { memo, type ReactNode, useMemo, useState } from "react";
 import { parseISO } from "date-fns";
 
-import Heading from "@/components/ui/Heading";
 import IconButton from "@/components/ui/IconButton";
 import Panel from "@/components/ui/Panel";
 import Value from "@/components/ui/Value";
+import CalorieGauge from "@/features/macroTracking/components/CalorieGauge";
 import MacroSnapshotModal from "@/features/macroTracking/components/MacroSnapshotModal";
-import TargetRow, { CHIP, FILL_IN } from "@/features/macroTracking/components/TargetRow";
+import TargetRow, { CHIP } from "@/features/macroTracking/components/TargetRow";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
 import { cn } from "@/lib/classnameUtilities";
 import { formatGrouped } from "@/lib/formatNumber";
@@ -42,51 +42,6 @@ function calculatePercent(actual: number, targetValue: number): number {
   return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
 }
 
-
-interface CalorieGaugeProps {
-  protein: number;
-  carbs: number;
-  fats: number;
-  target: number;
-}
-
-/**
- * The day as one bar: what has been eaten, split by where it came from, against
- * a notch at the target. Past the notch the bar turns orange, so "over" reads
- * without a word.
- */
-function CalorieGauge({ protein, carbs, fats, target }: CalorieGaugeProps) {
-  const total = protein + carbs + fats;
-  const scale = Math.max(target, total) || 1;
-  const share = (value: number) => `${(value / scale) * 100}%`;
-  const notch = target > 0 ? (target / scale) * 100 : undefined;
-  const isOver = notch !== undefined && total > target;
-
-  return (
-    <div className="relative mt-5 h-3" aria-hidden>
-      <div className="absolute inset-0 overflow-hidden rounded-full bg-foreground/8">
-        <div className={`flex h-full ${FILL_IN}`}>
-          <div className="h-full bg-protein" style={{ width: share(protein) }} />
-          <div className="h-full bg-carbs" style={{ width: share(carbs) }} />
-          <div className="h-full bg-fats" style={{ width: share(fats) }} />
-        </div>
-        {isOver && (
-          <div
-            className="absolute inset-y-0 right-0 bg-warning"
-            style={{ left: `${notch}%` }}
-          />
-        )}
-      </div>
-      {notch !== undefined && (
-        <div
-          className="absolute -top-1 -bottom-1 w-0.5 -translate-x-1/2 rounded-full bg-foreground"
-          style={{ left: `${Math.min(notch, 99.5)}%` }}
-        />
-      )}
-    </div>
-  );
-}
-
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
   macroTarget?: MacroTargetSettings;
@@ -95,6 +50,8 @@ interface DailySummaryProps {
   date?: string;
   /** A control for the day, shown beside the target figure. */
   dayAction?: ReactNode;
+  /** The day split by meal, where there is room for it beside the log form. */
+  breakdown?: ReactNode;
 }
 
 function DailySummaryInner({
@@ -103,6 +60,7 @@ function DailySummaryInner({
   calorieTarget,
   date,
   dayAction,
+  breakdown,
 }: DailySummaryProps) {
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
@@ -258,80 +216,97 @@ function DailySummaryInner({
 
   const remaining = dailyCalorieTarget - macroCalories.total;
   const isOver = dailyCalorieTarget > 0 && remaining < 0;
-  const dayLabel = date ? getDisplayDate(parseISO(date)) : "Today";
 
   return (
     // On a phone the page is the panel: no box, the day sits on the background.
-    <Panel
-      padding="none"
-      flatOnPhone
-      className="flex flex-col"
-    >
-      <div className="md:p-6">
-        <div className="mb-3 hidden items-center justify-between md:flex">
-          <Heading level="panel">{dayLabel}</Heading>
-        </div>
-
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            {/* The one animated number on the page: what is left to eat. */}
-            {dailyCalorieTarget > 0 ? (
-              <>
-                <Value
-                  size="hero"
-                  unit="kcal"
-                  animate
-                  value={Math.abs(remaining)}
-                  className={isOver ? "text-warning" : undefined}
-                />
-                <p className="mt-1 flex items-center gap-2 text-sm text-muted">
-                  {isOver ? "over" : "left of"} {formatGrouped(dailyCalorieTarget)}
-                  {targetStatus(macroCalories.total, dailyCalorieTarget) === "hit" && (
-                    <span className={cn(CHIP, "bg-primary/12 text-primary")}>On target</span>
-                  )}
-                </p>
-              </>
-            ) : (
-              <>
-                <Value size="hero" unit="kcal" animate value={macroCalories.total} />
-                <p className="mt-1 text-sm text-muted">eaten, no target set</p>
-              </>
-            )}
+    <Panel padding="none" flatOnPhone className="flex flex-col md:h-full">
+      {/* A column, so beside a taller log form the meal rows take the extra
+          height rather than leaving it under the panel's content. */}
+      <div className="flex h-full flex-col">
+        <div className="md:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              {/* The one animated number on the page: what is left to eat. */}
+              {dailyCalorieTarget > 0 ? (
+                <>
+                  <Value
+                    size="hero"
+                    unit="kcal"
+                    animate
+                    value={Math.abs(remaining)}
+                    className={isOver ? "text-warning" : undefined}
+                  />
+                  <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+                    {isOver ? "over" : "left of"}{" "}
+                    {formatGrouped(dailyCalorieTarget)}
+                    {targetStatus(macroCalories.total, dailyCalorieTarget) ===
+                      "hit" && (
+                      <span className={cn(CHIP, "bg-primary/12 text-primary")}>
+                        On target
+                      </span>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Value
+                    size="hero"
+                    unit="kcal"
+                    animate
+                    value={macroCalories.total}
+                  />
+                  <p className="mt-1 text-sm text-muted">
+                    eaten, no target set
+                  </p>
+                </>
+              )}
+            </div>
+            <IconButton
+              variant="share"
+              buttonSize="sm"
+              iconSize="sm"
+              ariaLabel="Share snapshot"
+              onClick={() => setIsSnapshotOpen(true)}
+            />
           </div>
-          <IconButton
-            variant="share"
-            buttonSize="sm"
-            iconSize="sm"
-            ariaLabel="Share snapshot"
-            onClick={() => setIsSnapshotOpen(true)}
+
+          <CalorieGauge
+            protein={macroCalories.protein}
+            carbs={macroCalories.carbs}
+            fats={macroCalories.fats}
+            target={dailyCalorieTarget}
           />
+
+          <div className="mt-2 flex min-h-11 items-center justify-between gap-3">
+            <Value
+              value={macroCalories.total}
+              unit="kcal"
+              suffix="eaten"
+              className="text-sm"
+            />
+            {dayAction}
+          </div>
         </div>
 
-        <CalorieGauge
-          protein={macroCalories.protein}
-          carbs={macroCalories.carbs}
-          fats={macroCalories.fats}
-          target={dailyCalorieTarget}
-        />
+        <ul className="mt-6 space-y-5 md:mt-0 md:space-y-4 md:border-t md:border-border md:p-6">
+          {macroData.map((macro) => (
+            <TargetRow
+              key={macro.name}
+              name={macro.name}
+              value={macro.grams}
+              target={macro.targetGrams}
+              unit="g"
+              colorClass={macro.color}
+            />
+          ))}
+        </ul>
 
-        <div className="mt-2 flex min-h-11 items-center justify-between gap-3">
-          <Value value={macroCalories.total} unit="kcal" suffix="eaten" className="text-sm" />
-          {dayAction}
-        </div>
+        {breakdown && (
+          <div className="hidden flex-1 flex-col border-t border-border px-6 py-3 md:flex">
+            {breakdown}
+          </div>
+        )}
       </div>
-
-      <ul className="mt-6 space-y-5 md:mt-0 md:border-t md:border-border md:p-6">
-        {macroData.map((macro) => (
-          <TargetRow
-            key={macro.name}
-            name={macro.name}
-            value={macro.grams}
-            target={macro.targetGrams}
-            unit="g"
-            colorClass={macro.color}
-          />
-        ))}
-      </ul>
 
       <MacroSnapshotModal
         isOpen={isSnapshotOpen}

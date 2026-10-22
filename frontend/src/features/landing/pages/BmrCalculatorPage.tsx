@@ -9,8 +9,6 @@ import BodyStatsForm from "../tools/BodyStatsForm";
 import CalculatorLayout from "../tools/CalculatorLayout";
 import {
   calculatorCardClass,
-  calculatorResultCardClass,
-  calculatorResultColumnClass,
   calculatorSectionDescriptionClass,
   calculatorSectionTitleClass,
 } from "../tools/calculatorStyles";
@@ -39,9 +37,11 @@ export default function BmrCalculatorPage() {
           : undefined
       }
     >
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+      {/* One panel, inputs and answer split by a rule: the answer runs longer
+          than the inputs here, and two boxes left the inputs ending short. */}
+      <div className={`grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-0 ${calculatorCardClass}`}>
         {/* Form Inputs */}
-        <div className={`md:col-span-7 ${calculatorCardClass}`}>
+        <div className="md:col-span-7 md:pr-8">
           <h2 className={calculatorSectionTitleClass}>Your Body Stats</h2>
           <p className={`${calculatorSectionDescriptionClass} mb-5`}>
             We use the Mifflin-St Jeor equation for this estimate.
@@ -50,9 +50,7 @@ export default function BmrCalculatorPage() {
         </div>
 
         {/* BMR Output Card */}
-        <div
-          className={`${calculatorResultColumnClass} ${calculatorResultCardClass}`}
-        >
+        <div className="border-t border-border pt-8 md:col-span-5 md:border-t-0 md:border-l md:pt-0 md:pl-8">
           <ResultHeadline
             label="Your Resting Burn"
             value={bmr}
@@ -67,22 +65,20 @@ export default function BmrCalculatorPage() {
           ) : null}
 
           <div className="mt-8 border-t border-border pt-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Estimated Burn by Activity
+            <h3 className="text-xs font-semibold text-foreground">
+              Estimated burn by activity
             </h3>
             <p className="mt-1 mb-3 text-xs leading-relaxed text-muted">
               Layer daily movement on top to approximate a full day of burn.
             </p>
-            <ul className="space-y-2">
+            <ul className="divide-y divide-border">
               {Object.values(ACTIVITY_LEVELS).map((level) => (
                 <li
                   key={level.value}
-                  className="flex items-center justify-between gap-3 rounded-control border border-border bg-surface-2 px-3 py-2.5 text-xs"
+                  className="flex items-center justify-between gap-3 py-2.5 text-xs"
                 >
-                  <span className="truncate font-medium text-muted">
-                    {level.label}
-                  </span>
-                  <span className="whitespace-nowrap rounded-control border border-border bg-surface px-2 py-1 font-semibold text-foreground tabular-nums">
+                  <span className="truncate text-muted">{level.label}</span>
+                  <span className="whitespace-nowrap font-semibold text-foreground tabular-nums">
                     {formatGrouped(bmr * level.multiplier)} kcal
                   </span>
                 </li>

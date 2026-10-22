@@ -387,11 +387,12 @@ describe("EntryHistoryPanel re-logging", () => {
       </QueryClientProvider>,
     );
 
-  it("logs an entry again from its row", () => {
+  it("logs an entry again from its actions", () => {
     const onLogAgain = vi.fn();
     renderPanel([todayEntry], { onLogAgain });
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Log again" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: /^Actions for / }));
+    fireEvent.click(screen.getByRole("button", { name: "Log again" }));
 
     expect(onLogAgain).toHaveBeenCalledWith(todayEntry);
   });

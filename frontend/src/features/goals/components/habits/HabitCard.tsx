@@ -1,5 +1,3 @@
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import CardContainer from "@/components/form/CardContainer";
 import { TargetIcon } from "@/components/ui";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { CHIP } from "@/features/macroTracking/components/TargetRow";
@@ -45,27 +43,6 @@ interface HabitCardPropsShared {
   variant?: Variant;
   show?: HabitCardShowToggles;
   actions?: HabitCardActions;
-}
-
-function getGradientClass(color: string | undefined) {
-  const gradients = {
-    indigo: "from-indigo-500/20 to-indigo-500/5",
-    blue: "from-blue-500/20 to-blue-500/5",
-    cyan: "from-cyan-500/20 to-cyan-500/5",
-    teal: "from-teal-500/20 to-teal-500/5",
-    green: "from-green-500/20 to-green-500/5",
-    lime: "from-lime-500/20 to-lime-500/5",
-    yellow: "from-yellow-500/20 to-yellow-500/5",
-    orange: "from-orange-500/20 to-orange-500/5",
-    red: "from-red-500/20 to-red-500/5",
-    pink: "from-pink-500/20 to-pink-500/5",
-    purple: "from-purple-500/20 to-purple-500/5",
-    "primary": "from-primary/20 to-primary/5",
-    accent: "from-primary/20 to-primary/5",
-  } as const;
-  const key = (color as keyof typeof gradients) ?? "indigo";
-
-  return gradients[key] ?? gradients.indigo;
 }
 
 function getAccentClass(color: string | undefined) {
@@ -163,26 +140,13 @@ export default function HabitCard({
   const IconComponent =
     HABIT_ICONS[iconName as keyof typeof HABIT_ICONS] ?? TargetIcon;
 
-  // Size styles
   const numberClass = variant === "sm" ? "text-lg" : "text-xl";
-  const paddingClass = variant === "sm" ? "p-3" : "p-4";
   const iconWrapperPadding = variant === "sm" ? "p-1.5" : "p-2";
 
   return (
-    // On a phone a habit is a row in a list, not a tinted card: the icon and
-    // the bar carry its colour.
-    <CardContainer
-      variant="interactive"
-      className="overflow-hidden bg-surface-2 p-0 max-md:rounded-none max-md:border-0 max-md:bg-transparent"
-    >
-      <div
-        className={cn(
-          "h-full bg-gradient-to-r max-md:bg-none",
-          getGradientClass(accentColor),
-          paddingClass,
-          "max-md:px-0"
-        )}
-      >
+    // A habit is a row in a list, not a tinted card: the icon and the bar
+    // carry its colour.
+    <div className={variant === "sm" ? "py-3" : "py-4"}>
         {/* The actions wrap onto their own row when the title would not fit beside them */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <div className="flex min-w-0 flex-auto items-center">
@@ -230,32 +194,19 @@ export default function HabitCard({
             <div className="flex items-baseline gap-1">
               {resolvedShow.numbers && (
                 <span className={cn(numberClass, "font-bold text-foreground")}>
-                  {variant === "sm" ? (
-                    <span>{current}</span>
-                  ) : (
-                    <AnimatedNumber value={current} />
-                  )}
+                  {current}
                 </span>
               )}
               {resolvedShow.numbers && (
                 <span className="text-sm text-muted">
-                  /{" "}
-                  {variant === "sm" ? (
-                    target
-                  ) : (
-                    <AnimatedNumber value={target} />
-                  )}
+                  / {target}
                   {frequency === "weekly" && " this week"}
                 </span>
               )}
             </div>
             {!isComplete && resolvedShow.percentage && (
               <span className="text-sm text-muted">
-                {variant === "sm" ? (
-                  `${progress}%`
-                ) : (
-                  <AnimatedNumber value={progress} suffix="%" />
-                )}
+                {progress}%
               </span>
             )}
             {resolvedShow.completionBadge && isComplete && (
@@ -273,7 +224,6 @@ export default function HabitCard({
             showPercentage={false}
           />
         )}
-      </div>
-    </CardContainer>
+    </div>
   );
 }

@@ -1,49 +1,34 @@
-import {
-  BarChartIcon,
-  NutrientIcon,
-  SearchIcon,
-  TargetIcon,
-  TrendingUpIcon,
-  WeightIcon,
-} from "@/components/ui";
-
 /**
  * Features shown on the landing page. Each one names something the app
  * actually does — claims here are load-bearing.
  */
 export const FEATURES = [
   {
-    name: "Macro Tracking",
+    name: "Macro tracking",
     description:
       "Log protein, carbs and fats. Calories are calculated for you.",
-    icon: NutrientIcon,
   },
   {
-    name: "Food Search",
+    name: "Food search",
     description: "Search a food database and pull in its macros per serving.",
-    icon: SearchIcon,
   },
   {
-    name: "Goal Setting",
+    name: "Goal setting",
     description:
       "Set a target weight and get the daily calorie target that reaches it.",
-    icon: TargetIcon,
   },
   {
-    name: "Custom Macro Targets",
+    name: "Custom macro targets",
     description: "Set your own protein, carb and fat split.",
-    icon: BarChartIcon,
   },
   {
-    name: "Weight & Habits",
+    name: "Weight and habits",
     description: "Log your weight and daily habits, and keep a streak going.",
-    icon: WeightIcon,
   },
   {
-    name: "Progress Insights",
+    name: "Progress insights",
     description:
       "See your averages, trends and tracked days over any date range.",
-    icon: TrendingUpIcon,
   },
 ];
 

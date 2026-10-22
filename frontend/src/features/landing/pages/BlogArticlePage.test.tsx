@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import BlogArticlePage from "./BlogArticlePage";
@@ -25,7 +25,9 @@ describe("BlogArticlePage", () => {
     expect(
       screen.getAllByRole("heading", { level: 1 }).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByText(/back to the blog/i)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("navigation", { name: "Breadcrumb" })).getByRole("link", { name: "Blog" }),
+    ).toBeInTheDocument();
   });
 
   it("retains the article during exit transition when route params detach", () => {

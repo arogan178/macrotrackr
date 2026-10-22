@@ -1,9 +1,7 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 
-import { getButtonClasses } from "@/components/ui/Button";
 import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
-import { useProductAnalytics } from "@/lib/productAnalytics";
 
 import CustomPricingCards from "./CustomPricingCards";
 
@@ -14,8 +12,6 @@ import CustomPricingCards from "./CustomPricingCards";
  * price was fine had to scroll back up to act on it. The action belongs here.
  */
 const PricingSection: React.FC = () => {
-  const productAnalytics = useProductAnalytics();
-
   return (
     <section
       id="pricing"
@@ -33,36 +29,22 @@ const PricingSection: React.FC = () => {
           </p>
         </div>
 
-        <CustomPricingCards showUpgradeButtons={false} />
-
-        <div className="mt-12 flex flex-col items-center gap-3">
-          <Link
-            to="/register"
-            search={{ returnTo: undefined }}
-            onClick={() =>
-              productAnalytics.capture({
-                event: "landing_cta_clicked",
-                properties: {
-                  destination: "register",
-                  source: "pricing_section",
-                },
-              })
-            }
-            className={getButtonClasses("primary", "lg", false, "px-8")}
-          >
-            Start on the free plan
-          </Link>
-          <p className="text-sm text-muted">
-            No card needed.{" "}
-            <Link
-              to={TOOLS_HUB_PATH}
-              className="underline decoration-border underline-offset-4 transition-colors hover:text-foreground"
-            >
-              Or try a calculator first
-            </Link>
-            .
-          </p>
+        <div className="mx-auto max-w-5xl">
+          <CustomPricingCards showUpgradeButtons={false} />
         </div>
+
+        {/* The Free plan's own button is the call to action; a second one
+            under it said the same thing. */}
+        <p className="mt-8 text-center text-sm text-muted">
+          Not ready to sign up?{" "}
+          <Link
+            to={TOOLS_HUB_PATH}
+            className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+          >
+            Try a calculator first
+          </Link>
+          .
+        </p>
       </div>
     </section>
   );

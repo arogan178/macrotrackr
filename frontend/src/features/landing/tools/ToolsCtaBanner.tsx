@@ -31,7 +31,7 @@ function ToolsCtaBanner({ heading, body, result }: ToolsCtaBannerProps) {
     <section className="mt-12 overflow-hidden rounded-card border border-border bg-surface text-center">
       {result ? (
         <div className="border-b border-border bg-surface-2 px-6 py-4">
-          <p className="text-[11px] font-medium tracking-wider text-muted uppercase">
+          <p className="text-[11px] font-medium text-muted">
             {result.label}
           </p>
           <p className="mt-1 text-3xl font-semibold tracking-tight text-primary tabular-nums">

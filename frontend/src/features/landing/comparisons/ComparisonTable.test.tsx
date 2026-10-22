@@ -66,10 +66,10 @@ describe("ComparisonTable", () => {
     expect(screen.getByText("—")).toBeInTheDocument();
   });
 
-  it("sets the product column apart by colour, not weight", () => {
+  it("sets the product column apart by tone, not brand colour", () => {
     render(<ComparisonTable caption="Features" columns={columns} rows={rows} />);
 
-    expect(screen.getByText("Free").className).toContain("text-primary");
-    expect(screen.getByText("Free").className).not.toContain("font-bold");
+    expect(screen.getByText("Free").className).toContain("bg-surface-2");
+    expect(screen.getByText("Free").className).not.toMatch(/text-primary|font-bold/);
   });
 });

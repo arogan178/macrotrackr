@@ -27,8 +27,6 @@ describe("MacroSummaryStats difference colours", () => {
     );
 
     expect(container.innerHTML).not.toMatch(/text-(success|error)/);
-    expect(
-      container.querySelectorAll("span.text-foreground").length,
-    ).toBeGreaterThan(0);
+    expect(container.textContent).toMatch(/ (over|under)/);
   });
 });

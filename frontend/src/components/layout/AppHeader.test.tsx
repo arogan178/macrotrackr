@@ -110,12 +110,7 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: "Open menu" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Back to home")).toBeInTheDocument();
-  });
-
-  it("hides the minimal action when asked", () => {
-    render(<AppHeader mode="minimal" showBackToHome={false} />);
-
     expect(screen.queryByText("Back to home")).not.toBeInTheDocument();
   });
+
 });

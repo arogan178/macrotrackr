@@ -1,7 +1,7 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { QueryErrorBoundary } from "@/components/errors/QueryErrorBoundary";
-import { isClerkAuthMode, isLocalAuthMode } from "@/config/runtime";
+import { isClerkAuthMode } from "@/config/runtime";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ClerkSignInForm } from "@/features/auth/components/ClerkSignInForm";
 import { LocalSignInForm } from "@/features/auth/components/LocalSignInForm";
@@ -22,7 +22,6 @@ export default function SignInPage() {
       <AuthPageShell
         title="Welcome back"
         description="Sign in to pick up your tracking, saved meals, and goals right where you left them."
-        showBackToHome={!isLocalAuthMode}
       >
         {isClerkAuthMode ? (
           <ClerkSignInForm

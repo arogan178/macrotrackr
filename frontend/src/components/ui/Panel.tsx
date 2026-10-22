@@ -107,7 +107,7 @@ const Panel: React.FC<PanelProps> = ({
       )}
 
       {children ? (
-        <div className={cn(PADDING[padding], flatOnPhone && FLAT_INSET)}>{children}</div>
+        <div className={cn("flex-1", PADDING[padding], flatOnPhone && FLAT_INSET)}>{children}</div>
       ) : null}
 
       {footer ? (

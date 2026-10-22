@@ -180,7 +180,7 @@ describe("Free Calculators", () => {
 
       expect(
         screen.getByRole("heading", {
-          name: /free nutrition & macro calculators/i,
+          name: /free nutrition and macro calculators/i,
         }),
       ).toBeInTheDocument();
       expect(screen.getAllByText(/tdee calculator/i).length).toBeGreaterThan(0);

@@ -96,6 +96,7 @@ export default function ExpenditureCard({
       description="What you burn in a day, from your own log and weight trend."
       footer={footer}
       flatOnPhone
+      className="flex h-full flex-col"
     >
       <div className="grid grid-cols-2 gap-4">
         {measured && (

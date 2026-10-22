@@ -157,9 +157,9 @@ async function openPaywallAndCheckout(page: Page): Promise<void> {
   await page.goto("/reporting");
   await page.getByRole("tab", { name: /30 Days/u }).click();
   await expect(
-    page.getByRole("heading", { name: "Unlock Pro Features" }),
+    page.getByRole("heading", { name: "Upgrade to Pro" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Upgrade to Pro" }).click();
+  await page.getByRole("button", { name: "See plans" }).click();
   await expect(page).toHaveURL(/\/pricing/u);
 
   const checkoutRequest = page.waitForResponse(

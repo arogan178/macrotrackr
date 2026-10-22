@@ -1,18 +1,10 @@
 import { motion } from "motion/react";
 
-import {
-  BalanceIcon,
-  ClipboardIcon,
-  Heading,
-  NutrientIcon,
-  ProteinIcon,
-} from "@/components/ui";
+import { Heading, Panel } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { formatWeight, type UnitSystem } from "@/utils/unitConversion";
 
 import type { InsightsData, NutritionAverage } from "../types/insightsTypes";
-
-import ActionCard from "./ActionCard";
 
 interface RecommendationsSectionProps {
   insights: InsightsData;
@@ -67,34 +59,21 @@ export default function RecommendationsSection({
   const suggestions = [
     macroBalance.currentRatio !== "0/0/0" && {
       title: "Macro split",
-      bgColor: "bg-surface-2 text-foreground",
       message: macroBalance.recommendations,
-      icon: <BalanceIcon className="h-5 w-5" />,
     },
     averages.calories > 0 && {
       title: "Protein share",
-      bgColor: "bg-surface-2 text-foreground",
       message: macroDensity.message,
-      icon: <NutrientIcon className="h-5 w-5" />,
     },
     protein && {
       title: "Protein intake",
-      bgColor: "bg-surface-2 text-foreground",
       message: protein,
-      icon: <ProteinIcon className="h-5 w-5" />,
     },
     tracking && {
       title: "Tracking gaps",
-      bgColor: "bg-surface-2 text-foreground",
       message: tracking,
-      icon: <ClipboardIcon className="h-5 w-5" />,
     },
-  ].filter(Boolean) as {
-    title: string;
-    bgColor: string;
-    message: string;
-    icon: React.ReactNode;
-  }[];
+  ].filter(Boolean) as { title: string; message: string }[];
 
   if (suggestions.length === 0) return null;
 
@@ -109,17 +88,17 @@ export default function RecommendationsSection({
         Suggestions
       </Heading>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {suggestions.map((suggestion) => (
-          <ActionCard
-            key={suggestion.title}
-            title={suggestion.title}
-            bgColor={suggestion.bgColor}
-            message={suggestion.message}
-            icon={suggestion.icon}
-          />
-        ))}
-      </div>
+      {/* One list of short notes: a title and the sentence that backs it. */}
+      <Panel flatOnPhone>
+        <ul className="grid grid-cols-1 gap-x-10 gap-y-5 md:grid-cols-2">
+          {suggestions.map((suggestion) => (
+            <li key={suggestion.title}>
+              <p className="text-sm font-medium text-foreground">{suggestion.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{suggestion.message}</p>
+            </li>
+          ))}
+        </ul>
+      </Panel>
     </motion.div>
   );
 }

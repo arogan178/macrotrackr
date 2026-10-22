@@ -15,11 +15,11 @@ import { type TargetStatus, targetStatus } from "../utils/targetStatus";
 
 const DAYS = 7;
 
-const DOT_CLASS: Record<TargetStatus, string> = {
-  hit: "h-1.5 w-1.5 bg-primary",
-  over: "h-1.5 w-1.5 bg-warning",
-  under: "h-1.5 w-1.5 border border-muted",
-  empty: "h-1 w-1 bg-border-2",
+const FILL_CLASS: Record<TargetStatus, string> = {
+  hit: "bg-primary",
+  over: "bg-warning",
+  under: "bg-foreground/40",
+  empty: "",
 };
 
 const STATUS_LABEL: Record<TargetStatus, string> = {
@@ -65,9 +65,9 @@ function caloriesByDay(entries: MacroEntry[]): Map<string, number> {
 }
 
 /**
- * Seven days, each with a dot that answers "how did that day go" before a word
- * is read: filled green on target, orange over, a ring still under, a speck
- * for nothing logged. Tapping a day opens it.
+ * Seven days, each with a bar that fills to its calorie target: green on
+ * target, orange over, grey still short, empty for nothing logged. How far a
+ * day got reads before a word does. Tapping a day opens it.
  */
 function WeekStrip({
   date,
@@ -94,14 +94,16 @@ function WeekStrip({
 
   const days = Array.from({ length: DAYS }, (_, index) => {
     const day = addDaysISO(start, index);
-    const status = targetStatus(calories.get(day) ?? 0, calorieTarget);
+    const eaten = calories.get(day) ?? 0;
+    const status = targetStatus(eaten, calorieTarget);
+    const fill = calorieTarget > 0 ? Math.min(100, (eaten / calorieTarget) * 100) : 0;
 
-    return { day, status };
+    return { day, status, fill };
   });
 
   return (
     <div className="grid grid-cols-7 gap-1" role="group" aria-label="Last 7 days">
-      {days.map(({ day, status }) => {
+      {days.map(({ day, status, fill }) => {
         const parsed = parseISO(day);
         const isSelected = day === date;
         const isLocked = oldestDate !== undefined && day < oldestDate;
@@ -129,7 +131,12 @@ function WeekStrip({
             >
               {format(parsed, "d")}
             </span>
-            <span aria-hidden className={cn("rounded-full", DOT_CLASS[status])} />
+            <span aria-hidden className="h-1 w-6 overflow-hidden rounded-full bg-foreground/8">
+              <span
+                className={cn("block h-full rounded-full", FILL_CLASS[status])}
+                style={{ width: `${fill}%` }}
+              />
+            </span>
           </button>
         );
       })}

@@ -31,7 +31,6 @@ describe("landing page features", () => {
     for (const feature of FEATURES) {
       expect(feature.name.trim()).not.toBe("");
       expect(feature.description.trim()).not.toBe("");
-      expect(feature.icon).toBeTruthy();
     }
   });
 

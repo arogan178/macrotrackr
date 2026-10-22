@@ -15,8 +15,6 @@ import BodyStatsForm from "../tools/BodyStatsForm";
 import CalculatorLayout from "../tools/CalculatorLayout";
 import {
   calculatorCardClass,
-  calculatorResultCardClass,
-  calculatorResultColumnClass,
   calculatorSectionDescriptionClass,
   calculatorSectionTitleClass,
   calculatorStatLabelClass,
@@ -42,7 +40,7 @@ export default function TdeeCalculatorPage() {
   const goalCards = [
     {
       key: "lose",
-      label: "Fat Loss",
+      label: "Fat loss",
       accentClass: "text-primary",
       delta: "-500 kcal/day",
       calories: Math.max(1200, tdee - 500),
@@ -57,7 +55,7 @@ export default function TdeeCalculatorPage() {
     },
     {
       key: "gain",
-      label: "Muscle Gain",
+      label: "Muscle gain",
       accentClass: "text-success",
       delta: "+300 kcal/day",
       calories: tdee + 300,
@@ -87,9 +85,11 @@ export default function TdeeCalculatorPage() {
           : undefined
       }
     >
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+      {/* One panel, inputs and answer split by a rule: the answer runs longer
+          than the inputs here, and two boxes left the inputs ending short. */}
+      <div className={`grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-0 ${calculatorCardClass}`}>
         {/* Form Inputs */}
-        <div className={`md:col-span-7 ${calculatorCardClass}`}>
+        <div className="md:col-span-7 md:pr-8">
           <h2 className={calculatorSectionTitleClass}>
             Your Body Stats & Activity
           </h2>
@@ -100,11 +100,9 @@ export default function TdeeCalculatorPage() {
         </div>
 
         {/* TDEE Summary Card */}
-        <div
-          className={`${calculatorResultColumnClass} ${calculatorResultCardClass}`}
-        >
+        <div className="border-t border-border pt-8 md:col-span-5 md:border-t-0 md:border-l md:pt-0 md:pl-8">
           <ResultHeadline
-            label="Maintenance Calories (TDEE)"
+            label="Maintenance calories (TDEE)"
             value={tdee}
             unit="kcal / day"
             ready={statsReady}
@@ -124,8 +122,8 @@ export default function TdeeCalculatorPage() {
           ) : null}
 
           <div className="mt-8 border-t border-border pt-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Activity Breakdown
+            <h3 className="text-xs font-semibold text-foreground">
+              Activity breakdown
             </h3>
             <p className="mt-1 mb-3 text-xs leading-relaxed text-muted">
               Tap a level to see how it changes your maintenance calories.
@@ -179,7 +177,7 @@ export default function TdeeCalculatorPage() {
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span
-                  className={`text-xs font-bold uppercase tracking-wider ${goal.accentClass}`}
+                  className={`text-xs font-semibold ${goal.accentClass}`}
                 >
                   {goal.label}
                 </span>
@@ -194,7 +192,7 @@ export default function TdeeCalculatorPage() {
               <dl className="space-y-2 border-t border-border pt-4 text-xs">
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Protein · {GOAL_SPLIT.protein}%
+                    Protein {GOAL_SPLIT.protein}%
                   </dt>
                   <dd className={calculatorStatValueClass}>
                     {goal.macros.proteinTarget}g
@@ -202,7 +200,7 @@ export default function TdeeCalculatorPage() {
                 </div>
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Carbs · {GOAL_SPLIT.carbs}%
+                    Carbs {GOAL_SPLIT.carbs}%
                   </dt>
                   <dd className={calculatorStatValueClass}>
                     {goal.macros.carbsTarget}g
@@ -210,7 +208,7 @@ export default function TdeeCalculatorPage() {
                 </div>
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Fats · {GOAL_SPLIT.fats}%
+                    Fats {GOAL_SPLIT.fats}%
                   </dt>
                   <dd className={calculatorStatValueClass}>
                     {goal.macros.fatsTarget}g

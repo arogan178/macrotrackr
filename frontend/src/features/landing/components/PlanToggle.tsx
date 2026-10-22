@@ -38,7 +38,7 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
       className={`relative font-medium transition-colors ${selectedPlan === "yearly" ? "" : "hover:bg-surface-3"}`}
     >
       Yearly
-      <span className="absolute -top-2.5 -right-3 rounded-control bg-success px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-background uppercase">
+      <span className="absolute -top-2.5 -right-3 rounded-control bg-success px-1.5 py-0.5 text-[10px] font-semibold text-background">
         Save {yearlyDiscount}%
       </span>
     </Button>
