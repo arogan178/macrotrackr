@@ -2,10 +2,13 @@ import { Preferences } from "@capacitor/preferences";
 
 import { isNativePlatform } from "@/services/native/platform";
 import type { MealType } from "@/types/macro";
+import { todayISO } from "@/utils/dateUtilities";
 
 import {
+  type MealReminder,
   nextReminderMeal,
   type PlannedReminder,
+  REMINDER_MEALS,
   type ReminderMeal,
   type ReminderSettings,
 } from "./reminderPlan";
@@ -21,6 +24,25 @@ let settings: ReminderSettings = {};
 let settingsLoaded = false;
 const settingsListeners = new Set<() => void>();
 
+const isMealReminder = (value: unknown): value is MealReminder =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as MealReminder).time === "string" &&
+  typeof (value as MealReminder).since === "string";
+
+/** Anything stored in another shape is dropped, not trusted: the planner would throw on it. */
+function parseSettings(value: string | null): ReminderSettings {
+  try {
+    const stored = JSON.parse(value ?? "{}") as Record<string, unknown>;
+
+    return Object.fromEntries(
+      REMINDER_MEALS.filter((meal) => isMealReminder(stored[meal])).map((meal) => [meal, stored[meal]]),
+    ) as ReminderSettings;
+  } catch {
+    return {};
+  }
+}
+
 export function getReminderSettings(): ReminderSettings {
   return settings;
 }
@@ -34,7 +56,7 @@ export function subscribeReminderSettings(listener: () => void): () => void {
 export async function loadReminderSettings(): Promise<ReminderSettings> {
   if (settingsLoaded) return settings;
   const { value } = await Preferences.get({ key: SETTINGS_KEY });
-  settings = value ? (JSON.parse(value) as ReminderSettings) : {};
+  settings = parseSettings(value);
   settingsLoaded = true;
   for (const listener of settingsListeners) listener();
 
@@ -47,6 +69,9 @@ export async function saveReminderSettings(next: ReminderSettings): Promise<void
   for (const listener of settingsListeners) listener();
   await Preferences.set({ key: SETTINGS_KEY, value: JSON.stringify(next) });
 }
+
+/** A new reminder follows when the meal is usually logged, from today. */
+export const newMealReminder = (): MealReminder => ({ time: "auto", since: todayISO() });
 
 /* ── The one-time offer, made after a meal is logged ────────────────────── */
 
@@ -129,16 +154,16 @@ export async function applyReminderPlan(plan: PlannedReminder[]): Promise<void> 
     importance: 3,
   });
   await notifications.schedule({
-    notifications: plan.map(({ id, meal, at }) => ({
+    notifications: plan.map(({ id, meal, at, kind, title, body }) => ({
       id,
       channelId: CHANNEL_ID,
-      title: `Log ${meal}`,
-      body: "Tap to add it while you remember.",
+      title,
+      body,
       // Inexact: a meal reminder a few minutes late is fine, and an exact alarm
       // would send the user to Android's "Alarms & reminders" settings first.
       schedule: { at, allowWhileIdle: true },
       isExactNotification: false,
-      extra: { kind: REMINDER_KIND, meal },
+      extra: { kind: REMINDER_KIND, meal, reminder: kind },
     })),
   });
 }
