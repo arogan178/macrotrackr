@@ -26,7 +26,11 @@ export function useUser(options?: { enabled?: boolean }) {
       } catch (error) {
         // If user is not authenticated, return null instead of throwing.
         // TanStack Query does not allow undefined query data.
-        if (error instanceof Error && hasStatus(error) && error.status === 401) {
+        if (
+          error instanceof Error &&
+          hasStatus(error) &&
+          error.status === 401
+        ) {
           return null;
         }
         if (
@@ -55,7 +59,9 @@ export function useLogout() {
   const logLogoutError = createMutationErrorLogger("Logout failed");
 
   return useMutation({
-    mutationFn: async (): Promise<void> => {
+    // toSignIn lands on the sign-in page in the same navigation, rather than a
+    // second navigate() that would interrupt the page transition.
+    mutationFn: async (_options?: { toSignIn?: boolean }): Promise<void> => {
       // Remove token from storage
       removeToken();
       apiClient.setAuthToken(null);
@@ -65,19 +71,23 @@ export function useLogout() {
       // Sign out from Clerk to clear session cookies
       await signOut();
     },
-    onSuccess: () => {
+    onSuccess: (_data, options) => {
       // Clear all cached data
       queryClient.clear();
       // Loaded on demand so the offline store stays off the first page load.
-      void import("@/hooks/queries/macro/entryStore").then(({ clearSignedOutAccount }) =>
-        clearSignedOutAccount(),
+      void import("@/hooks/queries/macro/entryStore").then(
+        ({ clearSignedOutAccount }) => clearSignedOutAccount(),
       );
 
       // Also specifically invalidate auth queries to ensure they're cleared
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
 
       // Navigate to landing page
-      navigate({ to: "/" });
+      if (options?.toSignIn) {
+        navigate({ to: "/login", search: { returnTo: undefined } });
+      } else {
+        navigate({ to: "/" });
+      }
     },
     onError: logLogoutError,
   });
@@ -85,7 +95,9 @@ export function useLogout() {
 
 export function useChangePassword() {
   const { user } = useClerkUser();
-  const logChangePasswordError = createMutationErrorLogger("Change password failed");
+  const logChangePasswordError = createMutationErrorLogger(
+    "Change password failed",
+  );
 
   return useMutation({
     mutationFn: async (data: ChangePasswordData): Promise<void> => {

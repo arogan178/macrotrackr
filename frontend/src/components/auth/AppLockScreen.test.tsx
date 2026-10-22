@@ -4,14 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { AppLockScreen } from "./AppLockScreen";
 
-const { mutate, navigate } = vi.hoisted(() => ({
-  mutate: vi.fn(),
-  navigate: vi.fn(),
-}));
+const { mutate } = vi.hoisted(() => ({ mutate: vi.fn() }));
 vi.mock("@/hooks/auth/useAuthQueries", () => ({
   useLogout: () => ({ mutate }),
 }));
-vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
 vi.mock("@/features/auth/components/AuthPageShell", () => ({
   default: ({ title, children }: { title: string; children: ReactNode }) => (
     <section>
@@ -57,16 +53,11 @@ describe("AppLockScreen", () => {
     expect(onUnlock).toHaveBeenCalled();
   });
 
-  it("signs out and opens the sign-in page for another way in", () => {
-    mutate.mockImplementation((_variables, options) => options.onSuccess());
+  it("signs out straight to the sign-in page for another way in", () => {
     renderScreen();
 
     screen.getByRole("button", { name: "Sign in another way" }).click();
 
-    expect(mutate).toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith({
-      to: "/login",
-      search: { returnTo: undefined },
-    });
+    expect(mutate).toHaveBeenCalledWith({ toSignIn: true });
   });
 });

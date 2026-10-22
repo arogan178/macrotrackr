@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "@tanstack/react-router";
 import { FingerprintPattern, ScanFace } from "lucide-react";
 
 import Button from "@/components/ui/Button";
@@ -25,7 +24,6 @@ export function AppLockScreen({
   onUnlock,
 }: AppLockScreenProps) {
   const logout = useLogout();
-  const navigate = useNavigate();
   const screenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,12 +67,7 @@ export function AppLockScreen({
               type="button"
               variant="ghost"
               fullWidth
-              onClick={() =>
-                logout.mutate(undefined, {
-                  onSuccess: () =>
-                    navigate({ to: "/login", search: { returnTo: undefined } }),
-                })
-              }
+              onClick={() => logout.mutate({ toSignIn: true })}
             >
               Sign in another way
             </Button>
