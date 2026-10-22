@@ -13,9 +13,6 @@ import { useLogout } from "./useAuthQueries.local";
 const navigate = vi.hoisted(() => vi.fn());
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
 vi.mock("@/api/auth", () => ({ authApi: { logout: vi.fn() } }));
-vi.mock("@/services/biometrics", () => ({
-  clearAppLock: vi.fn(),
-}));
 vi.mock("@/utils/tokenStorage", () => ({ removeToken: vi.fn() }));
 
 function renderLogout() {

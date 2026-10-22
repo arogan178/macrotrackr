@@ -65,7 +65,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useUser({ enabled: shouldFetchUser });
   const isAuthenticated =
     isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
-  const appLock = useAppLock(isLoaded && isSignedIn);
+  const appLock = useAppLock({ isLoaded, isSignedIn });
 
   return (
     <div

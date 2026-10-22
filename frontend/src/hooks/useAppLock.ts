@@ -23,8 +23,9 @@ const loadBiometrics = () =>
  * the lock is on, the app starts locked and locks again after it has been in
  * the background for LOCK_AFTER_BACKGROUND_MS.
  */
-export function useAppLock(isSignedIn: boolean) {
+export function useAppLock(auth: { isLoaded: boolean; isSignedIn: boolean }) {
   const isNative = Capacitor.isNativePlatform();
+  const isSignedIn = auth.isLoaded && auth.isSignedIn;
   // Native starts "checking" so signed-in content never paints before the
   // setting has been read.
   const [state, setState] = useState<LockState>(
@@ -33,11 +34,16 @@ export function useAppLock(isSignedIn: boolean) {
   const isPrompting = useRef(false);
   const [label, setBiometricLabel] = useState("face or fingerprint");
 
-  // Signing out clears the setting, so the next sign-in reads it afresh.
+  // A sign-in made in this run was just verified, so it starts unlocked. Only
+  // a session restored at launch, with no signed-out state before it, locks.
+  const [hasSeenSignedOut, setHasSeenSignedOut] = useState(false);
+  if (auth.isLoaded && !auth.isSignedIn && !hasSeenSignedOut) {
+    setHasSeenSignedOut(true);
+  }
   const [wasSignedIn, setWasSignedIn] = useState(isSignedIn);
   if (wasSignedIn !== isSignedIn) {
     setWasSignedIn(isSignedIn);
-    if (isNative && !isSignedIn) setState("checking");
+    if (isNative && isSignedIn && hasSeenSignedOut) setState("unlocked");
   }
 
   const prompt = useCallback(

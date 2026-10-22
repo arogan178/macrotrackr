@@ -160,22 +160,3 @@ export async function removeLegacyBiometricCredentials(): Promise<void> {
     logger.error("Failed to delete legacy biometric credentials:", error);
   }
 }
-
-/**
- * Turns the app lock off, re-arms the offer and removes any legacy password.
- * Runs on sign-out so the next account on this device starts unlocked; never throws, so it cannot
- * block the sign-out itself.
- */
-export async function clearAppLock(): Promise<void> {
-  if (!Capacitor.isNativePlatform()) {
-    return;
-  }
-
-  try {
-    await setAppLockEnabled(false);
-    await Preferences.remove({ key: APP_LOCK_OFFERED_KEY });
-  } catch (error) {
-    logger.error("Failed to turn off the app lock:", error);
-  }
-  await removeLegacyBiometricCredentials();
-}

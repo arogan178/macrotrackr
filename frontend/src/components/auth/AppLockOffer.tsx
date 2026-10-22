@@ -9,8 +9,8 @@ import { useStore } from "@/store/store";
 const loadBiometrics = () => import("@/services/biometrics");
 
 /**
- * Offers biometric sign-in once after signing in, when the device has a
- * biometric and it is off. Sign-out re-arms the offer.
+ * Offers biometric sign-in once per device, after signing in, when the device
+ * has a biometric and it is off. Declining or turning it off later is final.
  */
 export function AppLockOffer() {
   const { showNotification } = useStore();
