@@ -10,6 +10,8 @@ interface AppLockScreenProps {
   isChecking: boolean;
   biometricLabel: string;
   onUnlock: () => void;
+  /** Android only: the PIN gets its own prompt there. */
+  onUnlockWithDeviceCredential?: () => void;
 }
 
 /**
@@ -22,6 +24,7 @@ export function AppLockScreen({
   isChecking,
   biometricLabel,
   onUnlock,
+  onUnlockWithDeviceCredential,
 }: AppLockScreenProps) {
   const logout = useLogout();
   const screenRef = useRef<HTMLDivElement>(null);
@@ -63,6 +66,16 @@ export function AppLockScreen({
                 <span>Sign in with {biometricLabel}</span>
               </span>
             </Button>
+            {onUnlockWithDeviceCredential && (
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={onUnlockWithDeviceCredential}
+              >
+                Use PIN or pattern
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"

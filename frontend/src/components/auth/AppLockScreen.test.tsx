@@ -53,6 +53,26 @@ describe("AppLockScreen", () => {
     expect(onUnlock).toHaveBeenCalled();
   });
 
+  it("offers the device PIN only when a handler is given", () => {
+    const onPin = vi.fn();
+    const { rerender } = renderScreen();
+    expect(
+      screen.queryByRole("button", { name: "Use PIN or pattern" }),
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <AppLockScreen
+        isChecking={false}
+        biometricLabel="fingerprint"
+        onUnlock={vi.fn()}
+        onUnlockWithDeviceCredential={onPin}
+      />,
+    );
+    screen.getByRole("button", { name: "Use PIN or pattern" }).click();
+
+    expect(onPin).toHaveBeenCalled();
+  });
+
   it("signs out straight to the sign-in page for another way in", () => {
     renderScreen();
 

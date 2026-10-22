@@ -40,18 +40,26 @@ export function useAppLock(isSignedIn: boolean) {
     if (isNative && !isSignedIn) setState("checking");
   }
 
-  const unlock = useCallback(async () => {
-    if (isPrompting.current) return;
-    isPrompting.current = true;
-    try {
-      const { verifyBiometricIdentity } = await loadBiometrics();
-      if (await verifyBiometricIdentity(UNLOCK_REASON)) {
-        setState("unlocked");
+  const prompt = useCallback(
+    async (method: "verifyBiometricIdentity" | "verifyDeviceCredential") => {
+      if (isPrompting.current) return;
+      isPrompting.current = true;
+      try {
+        const biometrics = await loadBiometrics();
+        if (await biometrics[method](UNLOCK_REASON)) {
+          setState("unlocked");
+        }
+      } finally {
+        isPrompting.current = false;
       }
-    } finally {
-      isPrompting.current = false;
-    }
-  }, []);
+    },
+    [],
+  );
+  const unlock = useCallback(() => prompt("verifyBiometricIdentity"), [prompt]);
+  const unlockWithDeviceCredential = useCallback(
+    () => prompt("verifyDeviceCredential"),
+    [prompt],
+  );
 
   useEffect(() => {
     if (!isNative) return;
@@ -125,5 +133,10 @@ export function useAppLock(isSignedIn: boolean) {
     isChecking: state === "checking",
     biometricLabel: label,
     unlock,
+    // Android has no passcode fallback inside the biometric prompt.
+    unlockWithDeviceCredential:
+      Capacitor.getPlatform() === "android"
+        ? unlockWithDeviceCredential
+        : undefined,
   };
 }

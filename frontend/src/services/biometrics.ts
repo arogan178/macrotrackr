@@ -56,32 +56,58 @@ export async function checkBiometricAvailability(): Promise<BiometricAvailabilit
 }
 
 /**
- * Shows the system biometric prompt, with the device PIN as a fallback.
+ * Shows the system biometric prompt. On iOS it falls back to the passcode
+ * itself; Android shows Cancel instead, and the lock screen offers
+ * verifyDeviceCredential as a separate step.
  * Resolves false when the user cancels or the check fails.
  */
 export async function verifyBiometricIdentity(
   reason: string,
+): Promise<boolean> {
+  return verify("Biometric verification cancelled or failed:", {
+    reason,
+    title: "Unlock MacroTrackr",
+    useFallback: true,
+    allowedBiometryTypes: [
+      BiometryType.FINGERPRINT,
+      BiometryType.FACE_AUTHENTICATION,
+    ],
+  });
+}
+
+/**
+ * Asks for the device PIN, pattern or password on its own. Some Android builds
+ * drop the PIN from a combined biometric-or-PIN prompt, so it gets its own.
+ */
+export async function verifyDeviceCredential(reason: string): Promise<boolean> {
+  // A PIN-only prompt needs Android 11; older versions get the combined one.
+  const androidVersion = Number(/Android (\d+)/.exec(navigator.userAgent)?.[1]);
+  const allowedBiometryTypes =
+    androidVersion >= 11
+      ? [BiometryType.DEVICE_CREDENTIAL]
+      : [BiometryType.FACE_AUTHENTICATION, BiometryType.DEVICE_CREDENTIAL];
+
+  return verify("Device credential verification cancelled or failed:", {
+    reason,
+    title: "Unlock MacroTrackr",
+    allowedBiometryTypes,
+  });
+}
+
+async function verify(
+  failureMessage: string,
+  options: Parameters<typeof NativeBiometric.verifyIdentity>[0],
 ): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
     return false;
   }
 
   try {
-    await NativeBiometric.verifyIdentity({
-      reason,
-      title: "Unlock MacroTrackr",
-      // iOS reads useFallback; Android offers the PIN only when listed here.
-      useFallback: true,
-      allowedBiometryTypes: [
-        BiometryType.FINGERPRINT,
-        BiometryType.FACE_AUTHENTICATION,
-        BiometryType.DEVICE_CREDENTIAL,
-      ],
-    });
+    await NativeBiometric.verifyIdentity(options);
 
     return true;
   } catch (error) {
-    logger.warn("Biometric verification cancelled or failed:", error);
+    logger.warn(failureMessage, error);
 
     return false;
   }

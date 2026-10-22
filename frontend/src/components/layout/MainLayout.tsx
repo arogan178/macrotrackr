@@ -118,6 +118,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
           isChecking={appLock.isChecking}
           biometricLabel={appLock.biometricLabel}
           onUnlock={() => void appLock.unlock()}
+          onUnlockWithDeviceCredential={appLock.unlockWithDeviceCredential}
         />
       )}
     </div>

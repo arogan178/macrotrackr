@@ -3,11 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LOCK_AFTER_BACKGROUND_MS, useAppLock } from "./useAppLock";
 
-const { native, biometrics, appState } = vi.hoisted(() => ({
+const { native, platform, biometrics, appState } = vi.hoisted(() => ({
   native: { value: true },
+  platform: { value: "android" },
   biometrics: {
     isAppLockEnabled: vi.fn(),
     verifyBiometricIdentity: vi.fn(),
+    verifyDeviceCredential: vi.fn(),
     removeLegacyBiometricCredentials: vi.fn(),
     checkBiometricAvailability: vi.fn(async () => ({
       isAvailable: true,
@@ -20,7 +22,10 @@ const { native, biometrics, appState } = vi.hoisted(() => ({
 }));
 
 vi.mock("@capacitor/core", () => ({
-  Capacitor: { isNativePlatform: () => native.value },
+  Capacitor: {
+    isNativePlatform: () => native.value,
+    getPlatform: () => platform.value,
+  },
 }));
 vi.mock("@/services/biometrics", () => biometrics);
 vi.mock("@capacitor/app", () => ({
@@ -43,6 +48,7 @@ async function goToBackgroundFor(ms: number) {
 describe("useAppLock", () => {
   beforeEach(() => {
     native.value = true;
+    platform.value = "android";
     appState.listener = undefined;
     biometrics.isAppLockEnabled.mockResolvedValue(true);
     biometrics.verifyBiometricIdentity.mockResolvedValue(false);
@@ -77,6 +83,27 @@ describe("useAppLock", () => {
     const { result } = renderHook(() => useAppLock(true));
 
     await waitFor(() => expect(result.current.isLocked).toBe(false));
+  });
+
+  it("unlocks with the device PIN on Android", async () => {
+    biometrics.verifyDeviceCredential.mockResolvedValue(true);
+    const { result } = renderHook(() => useAppLock(true));
+    await waitFor(() =>
+      expect(biometrics.verifyBiometricIdentity).toHaveBeenCalled(),
+    );
+
+    await act(async () => {
+      await result.current.unlockWithDeviceCredential?.();
+    });
+
+    expect(result.current.isLocked).toBe(false);
+  });
+
+  it("leaves the PIN to the system prompt on iOS", () => {
+    platform.value = "ios";
+    const { result } = renderHook(() => useAppLock(true));
+
+    expect(result.current.unlockWithDeviceCredential).toBeUndefined();
   });
 
   it("stays unlocked when the lock is off", async () => {
