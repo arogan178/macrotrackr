@@ -1,6 +1,3 @@
-import { memo } from "react";
-
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatGrouped } from "@/lib/formatNumber";
 import type { MacroTargetGrams } from "@/types/macro";
@@ -161,20 +158,3 @@ export function MacroIndicator({
     </div>
   );
 }
-
-interface MacroCellProps {
-  value: number;
-  suffix: string;
-  color: string;
-}
-
-/**
- * Displays a macro value with animated number and consistent styling
- */
-export const MacroCell = memo(({ value, suffix, color }: MacroCellProps) => (
-  <span className={`font-medium ${color}`}>
-    <AnimatedNumber value={Math.round(value) || 0} suffix={suffix} />
-  </span>
-));
-
-MacroCell.displayName = "MacroCell";

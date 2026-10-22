@@ -2,6 +2,16 @@ import type { MouseEvent } from "react";
 
 import type { MacroEntry } from "@/types/macro";
 
+/** Day rows and entry rows share these columns, so every split bar and figure
+ *  lines up down the list whatever the name, the total or the trailing control. */
+export const HISTORY_ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_3rem_5rem] items-center gap-3";
+
+/** The desktop history and its ingredient rows: food, split, three macros,
+ *  calories, actions. Figures right-align so their digits stack. */
+export const DESKTOP_ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_4rem_5rem_5rem_5rem_6rem_5rem] items-center gap-4 px-6";
+
 export interface GroupedEntry {
   date: string;
   entries: MacroEntry[];

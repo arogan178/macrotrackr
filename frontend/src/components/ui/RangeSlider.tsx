@@ -13,6 +13,7 @@ interface RangeSliderProps {
   showFillTrack?: boolean;
   // Marks a sub-range of the track, e.g. a recommended band
   band?: { min: number; max: number };
+  bandClassName?: string;
   // Accessibility props
   ariaLabel?: string;
   ariaLabelledBy?: string;
@@ -30,6 +31,7 @@ export default function RangeSlider({
   trackColorClass = "bg-foreground/10",
   showFillTrack = false,
   band,
+  bandClassName = "bg-primary/30",
   ariaLabel,
   ariaLabelledBy,
   unit,
@@ -51,7 +53,7 @@ export default function RangeSlider({
 
       {band && (
         <div
-          className="absolute z-0 h-2 rounded-control bg-primary/30"
+          className={`absolute z-0 h-2 rounded-control ${bandClassName}`}
           style={{
             left: `${toTrackPercent(band.min)}%`,
             width: `${toTrackPercent(band.max) - toTrackPercent(band.min)}%`,

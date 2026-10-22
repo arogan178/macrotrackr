@@ -10,30 +10,14 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 describe("AuthPageShell", () => {
-  it("shows back-to-home button by default", () => {
+  it("leaves the way home to the logo", () => {
     render(
-      <AuthPageShell
-        title="Welcome back"
-        description="Sign in to continue."
-      >
+      <AuthPageShell title="Welcome back" description="Sign in to continue.">
         <div>Form content</div>
       </AuthPageShell>,
     );
 
-    expect(screen.getByText("Back to home")).toBeInTheDocument();
-  });
-
-  it("hides back-to-home button when disabled", () => {
-    render(
-      <AuthPageShell
-        title="Welcome back"
-        description="Sign in to continue."
-        showBackToHome={false}
-      >
-        <div>Form content</div>
-      </AuthPageShell>,
-    );
-
+    expect(screen.getByText("Form content")).toBeInTheDocument();
     expect(screen.queryByText("Back to home")).not.toBeInTheDocument();
   });
 });

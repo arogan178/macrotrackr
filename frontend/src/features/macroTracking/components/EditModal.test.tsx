@@ -92,7 +92,7 @@ describe("EditModal", () => {
     // Single item convert button is rendered
     expect(
       screen.getByRole("button", {
-        name: /add ingredient \(convert to multi-ingredient meal\)/i,
+        name: "Add ingredients",
       }),
     ).toBeInTheDocument();
 
@@ -124,7 +124,7 @@ describe("EditModal", () => {
     expect(screen.getByDisplayValue("Rice")).toBeInTheDocument();
   });
 
-  it("converts single item to multi-ingredient meal when clicking Add Ingredient", () => {
+  it("converts single item to multi-ingredient meal when clicking Add ingredients", () => {
     render(
       <EditModal
         isOpen
@@ -136,7 +136,7 @@ describe("EditModal", () => {
     );
 
     const convertButton = screen.getByRole("button", {
-      name: /add ingredient \(convert to multi-ingredient meal\)/i,
+      name: "Add ingredients",
     });
     fireEvent.click(convertButton);
 

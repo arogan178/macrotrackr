@@ -1,115 +1,68 @@
 import React from "react";
 
-import { Button, CheckIcon } from "@/components/ui";
+import { CheckIcon } from "@/components/ui";
+import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
+import Panel from "@/components/ui/Panel";
 
 interface PricingCardProps {
   title: string;
-  price: React.ReactNode | string;
+  price: React.ReactNode;
   suffix?: string;
+  /** The yearly price per month, under the figure. */
   equivalent?: string;
+  description: string;
   features: string[];
-  isPopular?: boolean;
-  /** Omit to render the card with no call to action at all. */
-  buttonText?: string;
-  buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
-  buttonSize?: "sm" | "md" | "lg";
-  buttonClassName?: string;
-  buttonDisabled?: boolean;
-  onButtonClick?: () => void;
-  focusRingColor?: string;
-  featureIconColor?: string;
-  featureTextClass?: string;
-  cardClassName?: string;
-  children?: React.ReactNode;
+  /** One step up the surfaces, for the plan being offered. */
+  raised?: boolean;
+  /** Omit to render the plan with no call to action at all. */
+  action?: React.ReactNode;
 }
 
 /**
- * PricingCard renders a single pricing plan card for the pricing section.
+ * One plan, read top to bottom like the app's panels: name, price, what it is
+ * for, then what it includes. The action sits at the foot so two plans side by
+ * side end on the same line.
  */
 const PricingCard: React.FC<PricingCardProps> = ({
   title,
   price,
   suffix,
   equivalent,
+  description,
   features,
-  isPopular = false,
-  buttonText,
-  buttonVariant = "primary",
-  buttonSize = "lg",
-  buttonClassName = "",
-  buttonDisabled = false,
-  onButtonClick,
-  focusRingColor = "focus-visible:outline-primary/50",
-  featureIconColor = "text-primary",
-  featureTextClass = "text-foreground font-medium",
-  cardClassName = "",
-  children,
+  raised = false,
+  action,
 }) => (
-  <div
+  <Panel
+    padding="none"
+    raised={raised}
+    className="flex h-full flex-col"
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`group relative flex h-full flex-col rounded-card border p-8 transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
   >
-    {isPopular && (
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-        <span className="rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-semibold tracking-wide text-foreground uppercase">
-          Most Popular
-        </span>
-      </div>
-    )}
-    <div className="mt-4 mb-8 text-center">
-      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
+    <div className="flex h-full flex-col p-6 sm:p-8">
+      <Heading level="panel" as="h3">
         {title}
-      </h3>
-      <div className="mb-2 flex min-h-14 items-center justify-center text-4xl font-bold tracking-tight text-foreground">
-        {price}
-        {suffix && (
-          <span className="ml-1 text-lg font-normal tracking-normal text-muted">
-            {suffix}
-          </span>
-        )}
-      </div>
-      <div className="min-h-6">
-        {equivalent && (
-          <p className="text-sm font-medium tracking-wide text-muted">
-            {equivalent}
-          </p>
-        )}
-      </div>
-      {children}
-    </div>
-    <ul className="mb-10 space-y-4">
-      {features.map((feature, index) => (
-        <li key={index} className="flex items-center gap-4">
-          <div
-            className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 ${isPopular ? "border border-border-2 bg-surface-3" : "border border-border"}`}
-          >
-            <CheckIcon
-              className={`h-3.5 w-3.5 ${featureIconColor} shrink-0`}
-              aria-hidden="true"
-            />
-          </div>
-          <span
-            className={`leading-relaxed tracking-tight ${featureTextClass}`}
-          >
+      </Heading>
+      <p className="mt-4 flex items-baseline gap-1.5">
+        <span className={`${TYPE_SCALE.display} tabular-nums`}>{price}</span>
+        {suffix ? <span className="text-sm text-muted">{suffix}</span> : null}
+      </p>
+      <p className="mt-1 min-h-5 text-sm text-muted">{equivalent}</p>
+      <p className="mt-4 text-sm leading-relaxed text-muted">{description}</p>
+
+      <ul className="mt-6 space-y-3 border-t border-border pt-6">
+        {features.map((feature) => (
+          <li key={feature} className="flex gap-3 text-sm text-foreground">
+            <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
             {feature}
-          </span>
-        </li>
-      ))}
-    </ul>
-    {buttonText ? (
-      <div className="mt-auto">
-        <Button
-          text={buttonText}
-          variant={buttonVariant}
-          buttonSize={buttonSize}
-          className={buttonClassName}
-          onClick={onButtonClick}
-          disabled={buttonDisabled}
-        />
-      </div>
-    ) : null}
-  </div>
+          </li>
+        ))}
+      </ul>
+
+      {action ? <div className="mt-auto pt-8">{action}</div> : null}
+    </div>
+  </Panel>
 );
 
 export default PricingCard;

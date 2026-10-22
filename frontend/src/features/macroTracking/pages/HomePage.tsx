@@ -5,7 +5,6 @@ import { format, parseISO } from "date-fns";
 import { macrosApi } from "@/api/macros";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
@@ -19,6 +18,7 @@ import {
   DailySummaryLoadingSkeleton,
   HistoryLoadingSkeleton,
 } from "@/features/macroTracking/components/HomePageSkeletons";
+import MealBreakdown from "@/features/macroTracking/components/MealBreakdown";
 import PartialDayControls from "@/features/macroTracking/components/PartialDayControls";
 import WeekStrip from "@/features/macroTracking/components/WeekStrip";
 import { useAddEntry } from "@/features/macroTracking/hooks/useAddEntry";
@@ -440,42 +440,52 @@ export default function HomePage() {
     date,
   );
 
+  // Both widths name the day being shown; the greeting only fills the page
+  // before the first entry.
+  const dayTitle =
+    history.length > 0 || isLoading
+      ? isToday
+        ? "Today"
+        : getDisplayDate(parseISO(date))
+      : headerTitle;
+
+  const weekStrip = (
+    <WeekStrip
+      date={date}
+      today={today}
+      oldestDate={oldestDate}
+      calorieTarget={effectiveCalorieTarget ?? 0}
+      onChange={handleDateChange}
+    />
+  );
+
   return (
     <DashboardPageContainer>
       <FeaturePage
-        title={headerTitle}
-        subtitle={headerSubtitle}
+        title={dayTitle}
+        subtitle={isToday ? headerSubtitle : undefined}
         headerChildren={
-          <DayNavigator
-            date={date}
-            today={today}
-            oldestDate={oldestDate}
-            onChange={handleDateChange}
-          />
-        }
-        mobileHeader={
-          <div className="space-y-3 pb-4">
-            <Heading level="page">
-              {history.length > 0 || isLoading
-                ? isToday
-                  ? "Today"
-                  : getDisplayDate(parseISO(date))
-                : headerTitle}
-            </Heading>
-            <WeekStrip
+          <div className="flex items-center gap-3">
+            <div className="w-md">{weekStrip}</div>
+            <DayNavigator
               date={date}
               today={today}
               oldestDate={oldestDate}
-              calorieTarget={effectiveCalorieTarget ?? 0}
               onChange={handleDateChange}
             />
+          </div>
+        }
+        mobileHeader={
+          <div className="space-y-3 pb-4">
+            <Heading level="page">{dayTitle}</Heading>
+            {weekStrip}
           </div>
         }
       >
         <div className="space-y-3.5 sm:space-y-6">
           {/* The day comes first. On a phone the summary is what the user
               opened the app to see; the form used to push it below the fold. */}
-          <div className="grid grid-cols-1 gap-3.5 sm:gap-5 md:grid-cols-6 md:items-start">
+          <div className="grid grid-cols-1 gap-3.5 sm:gap-5 md:grid-cols-6">
             <div className="flex flex-col space-y-3.5 md:order-2 md:col-span-2 md:space-y-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
@@ -493,20 +503,10 @@ export default function HomePage() {
                         onEstimate={handleAddEntry}
                       />
                     }
+                    breakdown={<MealBreakdown date={date} />}
                   />
                 )
               )}
-
-              {/* BMR and TDEE are reference figures, not the day's work. On a
-                  phone they live on Goals, beside the maintenance figure. */}
-              <div className="hidden md:block">
-              <UserMetricsPanel
-                bmr={nutritionProfile?.bmr ?? 0}
-                tdee={nutritionProfile?.tdee ?? 0}
-                tdeeIsOverride={nutritionProfile?.tdeeIsOverride ?? false}
-                isLoading={isLoading}
-              />
-              </div>
             </div>
 
             {/* Below md the form lives in the Log sheet, reached from the tab

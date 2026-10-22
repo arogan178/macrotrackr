@@ -1,8 +1,8 @@
 import { Link, useParams } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { Accordion, BackIcon, ContentImage } from "@/components/ui";
-import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
+import { Accordion, BackIcon } from "@/components/ui";
+import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
@@ -10,11 +10,13 @@ import { usePageMetadata } from "@/hooks";
 import { getPageMetadata } from "@/lib/pageMetadata";
 import { APP_NAME, APP_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
+import ComparisonList from "../comparisons/ComparisonList";
 import {
   COMPARISONS,
   getComparisonBySlug,
 } from "../comparisons/comparisonsCatalog";
 import ComparisonTable from "../comparisons/ComparisonTable";
+import { LOG_SCENE_STEPS, LogScene, WeekScene } from "../components/ProductPreview";
 import { getMigrationGuide } from "../migrations/migrationGuidesCatalog";
 import ToolsCtaBanner from "../tools/ToolsCtaBanner";
 
@@ -190,12 +192,9 @@ export default function ComparisonArticlePage() {
             </p>
           </div>
 
-          {/* Subtitle / Overview */}
-          <Panel raised className="mb-10" title="Overview">
-            <p className="text-sm leading-relaxed text-muted">
-              {comparison.subtitle}
-            </p>
-          </Panel>
+          <p className="mb-10 max-w-prose text-sm leading-relaxed text-muted">
+            {comparison.subtitle}
+          </p>
 
           <ComparisonTable
             caption="Feature comparison"
@@ -221,29 +220,21 @@ export default function ComparisonArticlePage() {
             <Heading level="panel" id="preview-heading" className="mb-4 text-xl">
               What {APP_NAME} looks like
             </Heading>
-            <figure>
-              <ContentImage
-                src="/screens/product-preview.webp"
-                width={1792}
-                height={664}
-                containerClassName="rounded-card border border-border"
-                className="w-full"
-                alt={`A day logged in ${APP_NAME}: four meals totalling 1,494 of 2,200 calories, with protein, carbs and fats against their targets. No advertisements anywhere on the screen.`}
-              />
+            {/* The real panels, not screenshots: a screenshot of an earlier
+                version had gone stale while the app moved on. */}
+            <figure aria-label={`A day logged in ${APP_NAME}: four meals against a 2,200 calorie target, with no advertisements.`}>
+              <div aria-hidden="true" className="pointer-events-none select-none">
+                <LogScene step={LOG_SCENE_STEPS} />
+              </div>
               <figcaption className="mt-3 text-sm text-muted">
                 Four meals, about twenty seconds of typing, and no banner ads
                 on any plan.
               </figcaption>
             </figure>
-            <figure className="mt-8">
-              <ContentImage
-                src="/screens/week-view.webp"
-                width={1788}
-                height={452}
-                containerClassName="rounded-card border border-border"
-                className="w-full"
-                alt={`A week of calories in ${APP_NAME} plotted against a 2,200 calorie target, showing days above and below the line.`}
-              />
+            <figure className="mt-8" aria-label={`A week in ${APP_NAME}: each day against its target.`}>
+              <div aria-hidden="true" className="pointer-events-none select-none">
+                <WeekScene />
+              </div>
               <figcaption className="mt-3 text-sm text-muted">
                 The week against your target, which is the view that actually
                 tells you whether the plan is working.
@@ -260,18 +251,20 @@ export default function ComparisonArticlePage() {
             >
               Where {APP_NAME} differs
             </Heading>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* A ruled list, like the landing page's features: four boxes
+                for four sentences was a box per line of copy. */}
+            <ul className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
               {comparison.keyDifferentiators.map((diff) => (
-                <Panel key={diff.title} padding="compact">
+                <li key={diff.title} className="border-t border-border pt-5">
                   <Heading level="panel" as="h3">
                     {diff.title}
                   </Heading>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
                     {diff.description}
                   </p>
-                </Panel>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
 
           {/* FAQ Section */}
@@ -326,26 +319,10 @@ export default function ComparisonArticlePage() {
           {/* Other Comparisons Navigation */}
           {otherComparisons.length > 0 && (
             <div className="mt-12 border-t border-border pt-8">
-              <p className={`${TYPE_SCALE.micro} text-muted`}>
+              <Heading level="panel" as="h2">
                 Other comparisons
-              </p>
-              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                {otherComparisons.map((other) => (
-                  <Link
-                    key={other.slug}
-                    to="/compare/$slug"
-                    params={{ slug: other.slug }}
-                    className="group rounded-card border border-border bg-surface p-4 transition-colors hover:border-border-2 hover:bg-surface-2"
-                  >
-                    <div className="text-xs font-semibold text-primary">
-                      {other.shortTitle}
-                    </div>
-                    <div className="mt-1 text-xs text-muted group-hover:text-foreground">
-                      {other.tagline}
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              </Heading>
+              <ComparisonList comparisons={otherComparisons} className="mt-4" />
             </div>
           )}
         </div>

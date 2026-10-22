@@ -44,29 +44,34 @@ describe("FloatingNotification", () => {
     expect(screen.getByText("Test notification")).toBeInTheDocument();
   });
 
-  it("has correct role and aria attributes", () => {
-    renderWithQueryClient(<FloatingNotification {...defaultProps} />);
+  it("announces politely, and interrupts only for an error", () => {
+    const { rerender } = renderWithQueryClient(
+      <FloatingNotification {...defaultProps} />,
+    );
 
-    const notification = screen.getByRole("alert");
-    expect(notification).toBeInTheDocument();
-    expect(notification).toHaveAttribute("aria-live", "assertive");
-    expect(notification).toHaveAttribute("aria-atomic", "true");
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
+
+    rerender(<FloatingNotification {...defaultProps} type="error" />);
+    expect(screen.getByRole("alert")).toHaveAttribute("aria-live", "assertive");
   });
 
-  it("applies custom topOffset when provided", () => {
-    renderWithQueryClient(
-      <FloatingNotification {...defaultProps} topOffset={20} />,
-    );
-    const notification = screen.getByRole("alert");
-    expect(notification.style.marginTop).toBe("20px");
-  });
+  it("waits while the pointer is on it", () => {
+    renderWithQueryClient(<FloatingNotification {...defaultProps} duration={1000} />);
+    act(() => {
+      vi.advanceTimersByTime(20);
+    });
 
-  it("accepts string topOffset", () => {
-    renderWithQueryClient(
-      <FloatingNotification {...defaultProps} topOffset="2rem" />,
-    );
-    const notification = screen.getByRole("alert");
-    expect(notification.style.marginTop).toBe("2rem");
+    fireEvent.mouseEnter(screen.getByRole("status"));
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(mockOnClose).not.toHaveBeenCalled();
+
+    fireEvent.mouseLeave(screen.getByRole("status"));
+    act(() => {
+      vi.advanceTimersByTime(1300);
+    });
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   it("uses default duration of 5000ms", () => {

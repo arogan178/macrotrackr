@@ -7,14 +7,15 @@ import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { BackIcon, CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
+import { CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
-import { TYPE_SCALE } from "@/components/ui/Heading";
+import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import author from "@/data/author.json";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
+import BlogPostList from "@/features/landing/components/BlogPostList";
 import Footer from "@/features/landing/components/Footer";
 import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
 import { usePageMetadata } from "@/hooks";
@@ -46,7 +47,7 @@ interface LazyCodeHighlighterProps {
 }
 
 const interactiveChipClasses =
-  "inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 py-2 text-xs font-medium tracking-[0.14em] text-muted uppercase transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 py-2 text-xs font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const codeBlockClassName =
   "overflow-x-auto p-5 font-mono text-sm leading-7 text-white";
@@ -131,7 +132,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   return (
     <div className="group relative my-6 overflow-hidden rounded-control border border-border-2 bg-surface-2">
       <div className="flex items-center justify-between border-b border-border bg-black/30 px-4 py-2">
-        <span className="text-xs font-medium text-white/60 uppercase">
+        <span className="text-xs font-medium text-white/60">
           {language || "text"}
         </span>
         <button
@@ -211,10 +212,24 @@ const markdownComponents = {
       {children}
     </li>
   ),
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+  a: ({
+    href,
+    children,
+    className,
+  }: {
+    href?: string;
+    children?: React.ReactNode;
+    className?: string;
+  }) => (
     <a
       href={href}
-      className="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
+      // A heading wrapped in its own anchor keeps the heading's colour: green
+      // and underlined, every section title read as a link to somewhere else.
+      className={
+        className === "heading-anchor"
+          ? "text-inherit no-underline"
+          : "text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
+      }
       target={href?.startsWith("http") ? "_blank" : undefined}
       rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
     >
@@ -378,82 +393,64 @@ const BlogArticlePage: React.FC = () => {
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="mb-16 flex items-start justify-end">
-            <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <Link
-                to="/blog"
-                search={{ category: undefined, tag: undefined, q: undefined }}
-                className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:border-primary/40 hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-              >
-                <BackIcon className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                Back to the blog
-              </Link>
-            </motion.div>
-          </div>
+          <nav aria-label="Breadcrumb" className="mx-auto mb-6 max-w-3xl">
+            <ol className="flex items-center gap-1.5 text-xs text-muted">
+              <li>
+                <Link
+                  to="/blog"
+                  search={{ category: undefined, tag: undefined, q: undefined }}
+                  className="transition-colors hover:text-foreground"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="font-medium text-foreground" aria-current="page">
+                {post.category}
+              </li>
+            </ol>
+          </nav>
 
           <motion.header
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.45 }}
             className="mx-auto max-w-3xl"
           >
             {/* Left aligned and ruled, like the index it came from. The centred
                 version used a fifth page-title scale (larger than anything else
                 in the app) and a tracking value that existed only here. */}
-            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              {post.title}
-            </h1>
+            <Heading level="display">{post.title}</Heading>
             <p className="mt-4 text-lg leading-relaxed text-muted">
               {post.excerpt}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-y border-border py-3 text-xs text-muted">
-              <span className="text-foreground">{post.category}</span>
-              <span className="tabular-nums">{formatDate(post.date)}</span>
-              <span className="tabular-nums">{post.readingTime} read</span>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted">
-              <span>By {post.author}</span>
-              <span>·</span>
+            {/* One ruled line of facts, then the one thing to do with them. */}
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-y border-border py-2 text-xs text-muted">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="text-foreground">{post.author}</span>
+                <span className="tabular-nums">{formatDate(post.date)}</span>
+                <span className="tabular-nums">{post.readingTime} read</span>
+              </div>
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="inline-flex min-h-11 items-center gap-2 rounded-control border border-border px-3 py-2 transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                className="inline-flex min-h-11 items-center gap-2 rounded-control transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
               >
                 {copiedLink ? (
                   <CheckIcon className="h-4 w-4 text-success" />
                 ) : (
                   <Link2Icon className="h-4 w-4" />
                 )}
-                {copiedLink ? "Link copied" : "Copy article link"}
+                {copiedLink ? "Link copied" : "Copy link"}
               </button>
-            </div>
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {post.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  to="/blog"
-                  search={{
-                    category: undefined,
-                    q: undefined,
-                    tag: normalizeBlogFilter(tag),
-                  }}
-                  className={interactiveChipClasses}
-                >
-                  {tag}
-                </Link>
-              ))}
             </div>
           </motion.header>
 
           {post.image && (
             <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.45, delay: 0.05 }}
               className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface"
             >
@@ -467,8 +464,8 @@ const BlogArticlePage: React.FC = () => {
           )}
 
           <motion.article
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.45, delay: 0.1 }}
             className="mt-12"
           >
@@ -477,12 +474,34 @@ const BlogArticlePage: React.FC = () => {
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
                   rehypeSlug,
-                  [rehypeAutolinkHeadings, { behavior: "wrap" }],
+                  [
+                    rehypeAutolinkHeadings,
+                    { behavior: "wrap", properties: { className: ["heading-anchor"] } },
+                  ],
                 ]}
                 components={markdownComponents}
               >
                 {post.content ?? ""}
               </ReactMarkdown>
+
+              {post.tags.length > 0 && (
+                <div className="mt-10 flex flex-wrap gap-2 border-t border-border pt-6">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to="/blog"
+                      search={{
+                        category: undefined,
+                        q: undefined,
+                        tag: normalizeBlogFilter(tag),
+                      }}
+                      className={interactiveChipClasses}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {post.slug === "v2-launch-complete-ui-overhaul" && (
@@ -553,9 +572,7 @@ const BlogArticlePage: React.FC = () => {
           {relatedPosts.length > 0 && (
             <section className="mt-14">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                  Keep reading
-                </h2>
+                <Heading level="panel">Keep reading</Heading>
                 <Link
                   to="/blog"
                   search={{
@@ -568,39 +585,7 @@ const BlogArticlePage: React.FC = () => {
                   View all posts
                 </Link>
               </div>
-              <div className="grid gap-5 md:grid-cols-3">
-                {relatedPosts.map((relatedPost) => (
-                  <Link
-                    key={relatedPost.slug}
-                    to="/blog/$slug"
-                    params={{ slug: relatedPost.slug }}
-                    className="group overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-                  >
-                    {relatedPost.image && (
-                      <div className="relative aspect-16/10 overflow-hidden">
-                        <ContentImage
-                          src={relatedPost.image}
-                          alt={relatedPost.title}
-                          className="transition-opacity duration-200 group-hover:opacity-90"
-                        />
-                      </div>
-                    )}
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 text-[11px] font-semibold text-muted">
-                        <span>{relatedPost.category}</span>
-                        <span>·</span>
-                        <span>{relatedPost.readingTime} read</span>
-                      </div>
-                      <h3 className="mt-3 text-xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                        {relatedPost.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-muted">
-                        {relatedPost.excerpt}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <BlogPostList posts={relatedPosts} />
             </section>
           )}
         </div>

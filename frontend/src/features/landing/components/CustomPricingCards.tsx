@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { ExternalLinkIcon, GithubIcon } from "@/components/ui";
-import { getButtonClasses } from "@/components/ui/Button";
+import { ExternalLinkIcon, GithubIcon, Heading, Panel } from "@/components/ui";
+import Button, { getButtonClasses } from "@/components/ui/Button";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -12,7 +12,6 @@ import { GITHUB_REPO_URL, SETUP_DOCS_URL } from "@/utils/appConstants";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
-import TrustIndicators from "./TrustIndicators";
 
 interface CustomPricingCardsProps {
   onUpgrade?: (plan: "monthly" | "yearly") => void;
@@ -71,191 +70,129 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
 
   const proPrice =
     selectedPlan === "monthly" ? PRICING.monthly : PRICING.yearly;
-  const proSuffix = selectedPlan === "monthly" ? "/month" : "/year";
+  const proSuffix = selectedPlan === "monthly" ? "a month" : "a year";
   const proEquivalent =
     selectedPlan === "yearly"
-      ? `($${(PRICING.yearly / 12).toFixed(2)}/month)`
+      ? `$${(PRICING.yearly / 12).toFixed(2)} a month`
       : "";
 
+  const freeAction = (
+    <Button
+      text={isProUser ? "Free plan" : isAuthenticated ? "Current plan" : "Create a free account"}
+      variant="secondary"
+      buttonSize="lg"
+      fullWidth
+      disabled={isAuthenticated}
+      onClick={
+        isAuthenticated
+          ? undefined
+          : () => {
+              productAnalytics.capture({
+                event: "landing_cta_clicked",
+                properties: { destination: "register", source: "pricing_free" },
+              });
+              navigate({ to: "/register", search: { returnTo: undefined } });
+            }
+      }
+    />
+  );
+
+  const proAction =
+    !isProUser && !canPurchase ? undefined : (
+      <Button
+        text={isProUser ? "Current plan" : showUpgradeButtons ? "Upgrade to Pro" : "Unlock Pro"}
+        variant="primary"
+        buttonSize="lg"
+        fullWidth
+        disabled={isProUser}
+        onClick={
+          isProUser
+            ? undefined
+            : showUpgradeButtons
+              ? () => onUpgrade?.(selectedPlan)
+              : handleGetPro
+        }
+      />
+    );
+
   return (
-    <div className="mx-auto w-full max-w-6xl">
-      {/* Plan Toggle */}
-      <div className="mb-12 flex justify-center">
+    <div className="w-full">
+      <div className="mb-8 flex justify-center">
         <PlanToggle selectedPlan={selectedPlan} onSelect={setSelectedPlan} />
       </div>
 
-      {/* Pricing Cards */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-        {/* Free Plan */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <PricingCard
           title={PRICING_PLANS.free.name}
           price={PRICING_PLANS.free.price}
-          suffix={PRICING_PLANS.free.suffix}
+          suffix="for good"
+          description="Log meals, set targets and see your last seven days. No card needed."
           features={features.free}
-          buttonText={
-            isProUser
-              ? "Free Plan"
-              : isAuthenticated
-                ? "Current Plan"
-                : "Create Free Account"
-          }
-          buttonVariant="ghost"
-          buttonSize="lg"
-          buttonClassName="w-full rounded-full border border-border bg-surface-2 transition-colors duration-200 hover:border-border-2 hover:bg-surface-3 hover:text-foreground"
-          featureIconColor="text-primary/70"
-          featureTextClass="text-muted"
-          cardClassName="border-border bg-surface hover:border-border-2"
-          buttonDisabled={isAuthenticated}
-          onButtonClick={
-            isAuthenticated
-              ? undefined
-              : () => {
-                  productAnalytics.capture({
-                    event: "landing_cta_clicked",
-                    properties: {
-                      destination: "register",
-                      source: "pricing_free",
-                    },
-                  });
-                  navigate({
-                    to: "/register",
-                    search: { returnTo: undefined },
-                  });
-                }
-          }
-        >
-          <p className="mt-2 text-balance text-muted">
-            Everything you need to start tracking and build lasting healthy
-            habits.
-          </p>
-        </PricingCard>
-
-        {/* Pro Plan */}
+          action={freeAction}
+        />
         <PricingCard
           title={PRICING_PLANS.pro.name}
           price={
-            <AnimatedNumber
-              value={proPrice}
-              toFixedValue={2}
-              prefix="$"
-              suffix={proSuffix}
-            />
+            <AnimatedNumber value={proPrice} toFixedValue={2} prefix="$" />
           }
-          suffix=""
+          suffix={proSuffix}
           equivalent={proEquivalent}
+          description="Your full history, 30 and 90 day trends, and no limits on saved meals or habits."
           features={features.pro}
-          isPopular
-          buttonText={
-            isProUser ? "Current Plan"
-            : !canPurchase ? undefined
-            : showUpgradeButtons ? "Upgrade to Pro"
-            : "Unlock Pro"
-          }
-          buttonVariant="primary"
-          buttonSize="lg"
-          buttonClassName="w-full rounded-full font-semibold transition-colors duration-200 hover:bg-primary/90"
-          featureIconColor="text-primary"
-          featureTextClass="text-foreground font-medium"
-          cardClassName="border-border-2 bg-surface-2 hover:border-primary/50"
-          buttonDisabled={isProUser}
-          onButtonClick={
-            isProUser || !canPurchase ? undefined
-            : showUpgradeButtons ? () => onUpgrade?.(selectedPlan)
-            : handleGetPro
-          }
-        >
-          <p className="mt-2 text-balance text-muted">
-            Unlock advanced analytics, custom insights, and tools to accelerate
-            your results.
-          </p>
-        </PricingCard>
+          raised
+          action={proAction}
+        />
       </div>
 
-      <section
-        id="self-hosted"
-        className="mt-10 rounded-card border border-border bg-surface p-6 sm:p-8"
-      >
+      {/* Self-hosting is the third way to pay nothing, so it sits under the
+          plans as its own panel rather than as a third card. */}
+      <Panel id="self-hosted" className="mt-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="mb-2 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-wide text-primary uppercase">
-              Self-Hosted Option
+            <Heading level="panel" as="h3">
+              Run it on your own server, free
+            </Heading>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              Deploy the open source edition with Docker Compose. Your data
+              stays on your machine, sign-in is local, and you can move to the
+              hosted plans later.
             </p>
-            <h3 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Run MacroTrackr on your own infrastructure for free
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
-              Deploy with Docker Compose, keep full control of your data, and
-              use the open source edition at no cost.
-            </p>
-            <ul className="mt-4 space-y-2 text-sm text-muted">
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Free self-hosted runtime with local authentication
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Full source code and deployment files on GitHub
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Upgrade to cloud plans when you want managed operations
-              </li>
-            </ul>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:w-auto">
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
             <a
               href={GITHUB_REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className={getButtonClasses(
-                "outline",
-                "md",
-                true,
-                "min-w-[220px] rounded-full border-border bg-surface text-foreground hover:bg-surface-2",
-              )}
+              className={getButtonClasses("secondary", "md", false, "gap-2")}
               onClick={() =>
                 productAnalytics.capture({
                   event: "landing_cta_clicked",
-                  properties: {
-                    destination: "github",
-                    source: "self_hosted_github",
-                  },
+                  properties: { destination: "github", source: "self_hosted_github" },
                 })
               }
             >
               <GithubIcon className="h-4 w-4" aria-hidden="true" />
-              <span>View GitHub Repo</span>
+              View on GitHub
             </a>
             <a
               href={SETUP_DOCS_URL}
               target="_blank"
               rel="noreferrer"
-              className={getButtonClasses(
-                "ghost",
-                "md",
-                true,
-                "min-w-[220px] rounded-full border border-border bg-surface-2 text-foreground hover:bg-surface-3",
-              )}
+              className={getButtonClasses("ghost", "md", false, "gap-2")}
               onClick={() =>
                 productAnalytics.capture({
                   event: "landing_cta_clicked",
-                  properties: {
-                    destination: "docs",
-                    source: "self_hosted_docs",
-                  },
+                  properties: { destination: "docs", source: "self_hosted_docs" },
                 })
               }
             >
               <ExternalLinkIcon className="h-4 w-4" aria-hidden="true" />
-              <span>Read Setup Docs</span>
+              Read the setup guide
             </a>
           </div>
         </div>
-      </section>
-
-      {/* Enhanced Trust Indicators */}
-      <TrustIndicators />
+      </Panel>
     </div>
   );
 };

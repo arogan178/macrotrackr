@@ -1,6 +1,8 @@
 import React, { memo, useEffect } from "react";
 
-import { AwardIcon, CheckCircleIcon, Modal } from "@/components/ui";
+import { CheckIcon, Modal } from "@/components/ui";
+import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { formatGrouped } from "@/lib/formatNumber";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 
 interface UpgradeModalProps {
@@ -16,7 +18,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
   onClose,
   onUpgrade,
   featureName = "Pro",
-  description = "Upgrade to Pro to unlock these powerful features:",
+  description = "Free keeps your last seven days. Pro opens the rest.",
 }) => {
   const productAnalytics = useProductAnalytics();
 
@@ -34,40 +36,33 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
   if (!open) return;
 
-  const proFeatures = [
-    "Advanced, filterable reporting",
-    "Unlimited habit tracking",
-    "Specific macronutrient targets",
-    "Ad-free experience",
-  ];
-
+  // The same list the pricing page prints, so the two can never promise
+  // different things. This one used to offer an "ad-free experience" on an
+  // app with no ads on any plan.
   return (
     <Modal
       isOpen={open}
       onClose={onClose}
-      title={`Unlock ${featureName} Features`}
+      title="Upgrade to Pro"
       variant="confirmation"
       message={description}
       onConfirm={onUpgrade}
-      confirmLabel="Upgrade to Pro"
-      cancelLabel="Maybe later"
+      confirmLabel="See plans"
+      cancelLabel="Not now"
       size="md"
-      hideCancelButton
     >
       <div className="text-left">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">
-          <AwardIcon className="h-6 w-6 text-black" />
-        </div>
-        <p className="mb-4 text-foreground">{description}</p>
-
-        <ul className="space-y-2">
-          {proFeatures.map((feature) => (
-            <li key={feature} className="flex items-center">
-              <CheckCircleIcon className="mr-2  flex-shrink-0 text-success" />
-              <span className="text-foreground">{feature}</span>
+        <ul className="space-y-3 border-t border-border pt-4">
+          {PRICING_PLANS.pro.features.map((feature) => (
+            <li key={feature} className="flex gap-3 text-sm text-foreground">
+              <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              {feature}
             </li>
           ))}
         </ul>
+        <p className="mt-4 text-sm text-muted">
+          ${PRICING.monthly} a month, or ${formatGrouped(PRICING.yearly, 2)} a year.
+        </p>
       </div>
     </Modal>
   );

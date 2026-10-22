@@ -1,11 +1,7 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import CardContainer from "@/components/form/CardContainer";
 import TargetRow from "@/features/macroTracking/components/TargetRow";
-import type { MacroType } from "@/types/macro";
-import { MACRO_COLORS } from "@/utils/constants/macro";
 
 interface MacroSummaryStatsProps {
   data: {
@@ -102,116 +98,6 @@ function calculateAverageMacros(
   };
 }
 
-const MacroSummaryItem = React.memo(function MacroSummaryItem({
-  type,
-  avgPercentage,
-  avgGrams,
-  targetPercentage,
-  targetGrams,
-}: {
-  type: MacroType;
-  avgPercentage: number;
-  avgGrams: number;
-  targetPercentage: number;
-  targetGrams: number;
-}) {
-  const percentageDelta = avgPercentage - targetPercentage;
-  const gramDelta = avgGrams - targetGrams;
-
-  return (
-    <div className="flex h-full flex-1 flex-col justify-between text-xs">
-      {/* Header: Macro Name + Deviation Indicator (now based on grams) */}
-      <div className="mb-2 flex items-center justify-between">
-        <span
-          className="text-lg font-semibold"
-          style={{ color: MACRO_COLORS[type].base }}
-        >
-          {type.charAt(0).toUpperCase() + type.slice(1)}
-        </span>
-      </div>
-      {/* Average Intake vs Target */}
-      <div className="mb-2 space-y-1">
-        {/* Average Intake Display */}
-        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-          <span className="mr-1 text-xs text-muted shrink-0">
-            Average Intake:
-          </span>
-          <div className="ml-auto text-right min-w-0">
-            <span className="text-lg leading-none font-bold text-foreground">
-              <AnimatedNumber
-                value={avgGrams}
-                toFixedValue={1}
-                suffix="g"
-                duration={0.8}
-              />
-            </span>
-            <span className="ml-1 text-xs text-muted whitespace-nowrap">
-              (
-              <AnimatedNumber
-                value={avgPercentage}
-                toFixedValue={0}
-                suffix="%"
-                duration={0.6}
-              />
-              )
-            </span>
-          </div>
-        </div>
-        {/* Your Target Display */}
-        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-          <span className="mr-1 text-xs text-muted shrink-0">Your Target:</span>
-          <div className="ml-auto text-right min-w-0">
-            <span className="text-sm font-medium text-foreground">
-              <AnimatedNumber
-                value={targetGrams}
-                toFixedValue={1}
-                suffix="g"
-                duration={0.8}
-              />
-            </span>
-            <span className="ml-1 text-xs text-muted whitespace-nowrap">
-              (
-              <AnimatedNumber
-                value={targetPercentage}
-                toFixedValue={0}
-                suffix="%"
-                duration={0.6}
-              />
-              )
-            </span>
-          </div>
-        </div>
-      </div>
-      {/* Difference from Target */}
-      <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 border-t border-border pt-1">
-        <span className="mr-1.5 text-xs text-muted shrink-0">Difference:</span>
-        <div className="ml-auto text-right whitespace-nowrap">
-          <span className="text-sm font-semibold text-foreground">
-            <AnimatedNumber
-              value={gramDelta}
-              toFixedValue={1}
-              suffix="g"
-              prefix={gramDelta >= 0 ? "+" : ""}
-              duration={0.8}
-            />
-          </span>
-          <span className="ml-1.5 text-xs text-muted">
-            (
-            <AnimatedNumber
-              value={Math.round(percentageDelta)}
-              toFixedValue={0}
-              suffix="%"
-              prefix={percentageDelta >= 0 ? "+" : ""}
-              duration={0.6}
-            />
-            )
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-});
-MacroSummaryItem.displayName = "MacroSummaryItem";
 
 export default function MacroSummaryStats({
   data,
@@ -264,19 +150,10 @@ export default function MacroSummaryStats({
 
   if (!macroAvg) return null;
 
-  const cardClasses =
-    "p-3.5 sm:p-4 border border-border bg-surface transition-colors duration-200 hover:border-border-2";
-
-  const trackedSubtext =
-    trackedDays !== undefined
-      ? `Avg over ${trackedDays} tracked ${trackedDays === 1 ? "day" : "days"}`
-      : null;
-
+  // Four rows of one list, each average against its target with a bar per day,
+  // so the summary reads top to bottom at any width.
   return (
-    <>
-    {/* On a phone the four cards become four rows of one list, each figure
-        against its target band, so the summary reads top to bottom. */}
-    <div className="md:hidden">
+    <div>
       <p className="mb-4 text-xs text-muted">
         Daily average{trackedDays === undefined ? "" : ` over ${trackedDays} tracked ${trackedDays === 1 ? "day" : "days"}`}
       </p>
@@ -324,98 +201,5 @@ export default function MacroSummaryStats({
         />
       </ul>
     </div>
-    <div className="mb-6 hidden grid-cols-2 gap-3 sm:gap-4 md:grid md:grid-cols-4">
-      {/* Calories Card */}
-      <CardContainer variant="interactive" className={cardClasses}>
-        <div className="flex flex-1 flex-col justify-between">
-          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-1">
-            <span className="text-sm font-semibold text-foreground">
-              Calories
-            </span>
-            {trackedSubtext && (
-              <span className="text-[10px] text-muted shrink-0">
-                {trackedSubtext}
-              </span>
-            )}
-          </div>
-          <div className="mb-2 space-y-1">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-              <span className="mr-1 text-xs text-muted shrink-0">
-                Average Intake:
-              </span>
-              <span className="ml-auto text-lg leading-none font-bold whitespace-nowrap text-foreground">
-                <AnimatedNumber
-                  value={avgCalories}
-                  toFixedValue={0}
-                  suffix=" kcal"
-                  duration={0.8}
-                />
-              </span>
-            </div>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-              <span className="mr-1 text-xs text-muted shrink-0">
-                Your Target:
-              </span>
-              <span className="ml-auto text-sm font-medium whitespace-nowrap text-foreground">
-                <AnimatedNumber
-                  value={effectiveCalorieTarget}
-                  toFixedValue={0}
-                  suffix=" kcal"
-                  duration={0.8}
-                />
-              </span>
-            </div>
-          </div>
-          <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-2 border-t border-border pt-1">
-            <span className="mr-1.5 text-xs text-muted shrink-0">
-              Difference:
-            </span>
-            <span className="ml-auto text-sm font-semibold whitespace-nowrap text-foreground">
-              <AnimatedNumber
-                value={avgCalories - effectiveCalorieTarget}
-                toFixedValue={0}
-                suffix=" kcal"
-                prefix={avgCalories - effectiveCalorieTarget >= 0 ? "+" : ""}
-                duration={0.8}
-              />
-            </span>
-          </div>
-        </div>
-      </CardContainer>
-
-      {/* Protein Card */}
-      <CardContainer variant="interactive" className={cardClasses}>
-        <MacroSummaryItem
-          type="protein"
-          avgPercentage={macroAvg.protein}
-          avgGrams={macroAvg.gProtein}
-          targetPercentage={TARGET_MACROS.proteinPercentage}
-          targetGrams={targetGrams.protein}
-        />
-      </CardContainer>
-
-      {/* Carbs Card */}
-      <CardContainer variant="interactive" className={cardClasses}>
-        <MacroSummaryItem
-          type="carbs"
-          avgPercentage={macroAvg.carbs}
-          avgGrams={macroAvg.gCarbs}
-          targetPercentage={TARGET_MACROS.carbsPercentage}
-          targetGrams={targetGrams.carbs}
-        />
-      </CardContainer>
-
-      {/* Fats Card */}
-      <CardContainer variant="interactive" className={cardClasses}>
-        <MacroSummaryItem
-          type="fats"
-          avgPercentage={macroAvg.fats}
-          avgGrams={macroAvg.gFats}
-          targetPercentage={TARGET_MACROS.fatsPercentage}
-          targetGrams={targetGrams.fats}
-        />
-      </CardContainer>
-    </div>
-    </>
   );
 }

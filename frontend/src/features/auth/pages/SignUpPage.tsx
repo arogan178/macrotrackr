@@ -1,7 +1,7 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { QueryErrorBoundary } from "@/components/errors/QueryErrorBoundary";
-import { isClerkAuthMode, isLocalAuthMode } from "@/config/runtime";
+import { isClerkAuthMode } from "@/config/runtime";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ClerkSignUpForm } from "@/features/auth/components/ClerkSignUpForm";
 import { LocalSignUpForm } from "@/features/auth/components/LocalSignUpForm";
@@ -22,7 +22,6 @@ export default function SignUpPage() {
       <AuthPageShell
         title="Create your account"
         description="Set up your MacroTrackr account and start building your meals, history, and goals."
-        showBackToHome={!isLocalAuthMode}
       >
         {isClerkAuthMode ? (
           <ClerkSignUpForm

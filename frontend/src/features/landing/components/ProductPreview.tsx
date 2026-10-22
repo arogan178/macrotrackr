@@ -7,6 +7,11 @@ import React, {
 } from "react";
 
 import Panel from "@/components/ui/Panel";
+import Value from "@/components/ui/Value";
+import CalorieGauge from "@/features/macroTracking/components/CalorieGauge";
+import { HISTORY_ROW_GRID } from "@/features/macroTracking/components/EntryHistoryShared";
+import { MacroSplitBar } from "@/features/macroTracking/components/MacroSplitBar";
+import TargetRow from "@/features/macroTracking/components/TargetRow";
 import { cn } from "@/lib/classnameUtilities";
 import { formatGrouped } from "@/lib/formatNumber";
 
@@ -27,12 +32,9 @@ import { formatGrouped } from "@/lib/formatNumber";
  * and still rather than cycling.
  */
 
-/** Recharts is ~114 KB gzipped, so the two chart scenes are their own chunk.
- *  Scene one needs no chart and plays for about four seconds, which is the
- *  window this fetch has to land in. */
-const WeekChart = lazy(() =>
-  import("./ProductPreviewCharts").then((m) => ({ default: m.WeekChart })),
-);
+/** Recharts is ~114 KB gzipped, so the weight chart is its own chunk. The
+ *  first two scenes need no chart and play for about nine seconds, which is
+ *  the window this fetch has to land in. */
 const GoalChart = lazy(() =>
   import("./ProductPreviewCharts").then((m) => ({ default: m.GoalChart })),
 );
@@ -58,6 +60,9 @@ const ENTRIES = [
 ];
 
 
+/** Steps in the logging scene; at this step the day is fully logged. */
+export const LOG_SCENE_STEPS = ENTRIES.length;
+
 const MACROS = [
   { key: "protein", label: "Protein", token: "bg-protein" },
   { key: "carbs", label: "Carbs", token: "bg-carbs" },
@@ -66,7 +71,9 @@ const MACROS = [
 
 /* ── Scene 1: a day being logged ─────────────────────────────────────────── */
 
-function LogScene({ step }: { step: number }) {
+// The same rows, gauge and target bars Home draws, so the page shows the app
+// rather than a sketch of it.
+export function LogScene({ step }: { step: number }) {
   const shown = Math.min(step, ENTRIES.length);
   const totals = ENTRIES.slice(0, shown).reduce(
     (sum, entry) => ({
@@ -96,7 +103,8 @@ function LogScene({ step }: { step: number }) {
               key={entry.name}
               aria-hidden={index >= shown}
               className={cn(
-                "flex items-center justify-between gap-3 px-4 transition-all duration-500 ease-out",
+                HISTORY_ROW_GRID,
+                "px-4 transition-all duration-500 ease-out",
                 index < shown
                   ? "max-h-20 border-b border-border py-3 opacity-100"
                   : "max-h-0 overflow-hidden py-0 opacity-0",
@@ -105,12 +113,15 @@ function LogScene({ step }: { step: number }) {
               <div className="min-w-0">
                 <p className="truncate text-sm">{entry.name}</p>
                 <p className="text-xs text-muted">
-                  {entry.meal}, {entry.time}
+                  <span className="tabular-nums">{entry.time}</span> {entry.meal}
                 </p>
               </div>
-              <p className="shrink-0 text-xs text-muted tabular-nums">
-                {entry.protein} / {entry.carbs} / {entry.fats}
-              </p>
+              <MacroSplitBar protein={entry.protein} carbs={entry.carbs} fats={entry.fats} />
+              <Value
+                value={entry.protein * KCAL.protein + entry.carbs * KCAL.carbs + entry.fats * KCAL.fats}
+                unit="kcal"
+                className="justify-self-end"
+              />
             </div>
           ))}
         </div>
@@ -122,56 +133,85 @@ function LogScene({ step }: { step: number }) {
       </Panel>
 
       <Panel padding="none" className="overflow-hidden">
-        <div className="px-4 py-4">
-          <p className="text-xs font-medium tracking-wider text-muted uppercase">
-            Calories
+        <div className="px-4 pt-4 pb-3">
+          <Value size="hero" unit="kcal" value={TARGET.calories - calories} />
+          <p className="mt-1 text-sm text-muted">
+            left of {formatGrouped(TARGET.calories)}
           </p>
-          <p className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-4xl font-light tracking-tight tabular-nums">
-              {formatGrouped(calories)}
-            </span>
-            <span className="text-sm text-muted">
-              of {formatGrouped(TARGET.calories)}
-            </span>
-          </p>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-3">
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
-              style={{
-                width: `${Math.min(100, (calories / TARGET.calories) * 100)}%`,
-              }}
-            />
-          </div>
+          <CalorieGauge
+            protein={totals.protein * KCAL.protein}
+            carbs={totals.carbs * KCAL.carbs}
+            fats={totals.fats * KCAL.fats}
+            target={TARGET.calories}
+          />
+          <Value value={calories} unit="kcal" suffix="eaten" className="mt-3 text-sm" />
         </div>
-        <div className="grid gap-3 border-t border-border px-4 py-4">
+        <ul className="space-y-5 border-t border-border px-4 py-4">
           {MACROS.map((macro) => (
-            <div key={macro.key}>
-              <div className="mb-1.5 flex items-baseline justify-between">
-                <span className="flex items-center gap-2 text-xs">
-                  <span className={cn("h-1.5 w-1.5 rounded-full", macro.token)} />
-                  {macro.label}
-                </span>
-                <span className="text-xs text-muted tabular-nums">
-                  <span className="text-foreground">{totals[macro.key]}</span> /{" "}
-                  {TARGET[macro.key]} g
-                </span>
-              </div>
-              <div className="h-1 overflow-hidden rounded-full bg-surface-3">
-                <div
-                  className={cn(
-                    "h-full rounded-full transition-[width] duration-500 ease-out",
-                    macro.token,
-                  )}
-                  style={{
-                    width: `${Math.min(100, (totals[macro.key] / TARGET[macro.key]) * 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
+            <TargetRow
+              key={macro.key}
+              name={macro.label}
+              value={totals[macro.key]}
+              target={TARGET[macro.key]}
+              unit="g"
+              colorClass={macro.token}
+            />
           ))}
-        </div>
+        </ul>
       </Panel>
     </div>
+  );
+}
+
+/* ── Scene 2: the week that day lands in ───────────────────────────────── */
+
+const WEEK = [
+  { day: "M", calories: 1980, protein: 150, carbs: 205, fats: 64 },
+  { day: "T", calories: 2240, protein: 168, carbs: 228, fats: 74 },
+  { day: "W", calories: 2105, protein: 171, carbs: 196, fats: 70 },
+  { day: "T", calories: 1870, protein: 132, carbs: 190, fats: 64 },
+  { day: "F", calories: 2390, protein: 160, carbs: 262, fats: 78 },
+  { day: "S", calories: 2510, protein: 141, carbs: 290, fats: 86 },
+  { day: "S", calories: 1940, protein: 166, carbs: 180, fats: 63 },
+];
+
+const average = (key: keyof Omit<(typeof WEEK)[number], "day">) =>
+  Math.round(WEEK.reduce((sum, day) => sum + day[key], 0) / WEEK.length);
+
+// Analytics' summary: each average against its target, with the days under it,
+// because a good average over a bad week is a lie told by omission.
+export function WeekScene() {
+  return (
+    <Panel padding="none" className="overflow-hidden">
+      <div className="flex items-baseline justify-between px-4 py-3">
+        <span className="text-sm font-semibold">This week</span>
+        <span className="text-xs text-muted">Daily average over 7 days</span>
+      </div>
+      <ul className="grid gap-x-8 gap-y-5 border-t border-border px-4 py-4 md:grid-cols-2">
+        <TargetRow
+          name="Calories"
+          value={average("calories")}
+          target={TARGET.calories}
+          unit="kcal"
+          colorClass="bg-primary"
+          shortfallLabel="under"
+          days={WEEK.map((day) => day.calories)}
+        />
+        {MACROS.map((macro, index) => (
+          <TargetRow
+            key={macro.key}
+            name={macro.label}
+            value={average(macro.key)}
+            target={TARGET[macro.key]}
+            unit="g"
+            colorClass={macro.token}
+            shortfallLabel="under"
+            days={WEEK.map((day) => day[macro.key])}
+            dayLabels={index === MACROS.length - 1 ? WEEK.map((day) => day.day) : undefined}
+          />
+        ))}
+      </ul>
+    </Panel>
   );
 }
 
@@ -189,7 +229,7 @@ function LogScene({ step }: { step: number }) {
  */
 const SCENES = [
   { key: "log", label: "Log a day", steps: ENTRIES.length, hold: 2600, render: LogScene },
-  { key: "week", label: "See the week", steps: 1, hold: 4400, render: WeekChart },
+  { key: "week", label: "See the week", steps: 1, hold: 4400, render: WeekScene },
   { key: "goal", label: "Hit the goal", steps: 1, hold: 4400, render: GoalChart },
 ] as const;
 

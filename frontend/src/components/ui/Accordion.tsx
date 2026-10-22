@@ -64,11 +64,11 @@ function AccordionRow({
         // handler; keep both flags in step when they do.
         if (event.currentTarget.open && !expanded) setExpanded(true);
       }}
-      className="group rounded-control border border-border bg-surface-2 transition-colors hover:border-border-2"
+      className="group"
     >
       <summary
         onClick={toggle}
-        className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-semibold text-foreground select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-medium text-foreground select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
       >
         <span>{item.question}</span>
         <ChevronDownIcon
@@ -88,7 +88,7 @@ function AccordionRow({
         }}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-border px-4 pt-3 pb-4 text-sm leading-relaxed text-muted">
+          <div className="max-w-prose pb-4 text-sm leading-relaxed text-muted">
             {item.answer}
           </div>
         </div>
@@ -103,7 +103,9 @@ function Accordion({
   className,
 }: AccordionProps) {
   return (
-    <div className={cn("space-y-2", className)}>
+    // Rows divided by hairlines, as the app's lists are: a box per question
+    // inside the panel that holds them was a box in a box.
+    <div className={cn("divide-y divide-border border-y border-border", className)}>
       {items.map((item, index) => (
         <AccordionRow
           key={item.id}

@@ -11,6 +11,7 @@ import NumberField from "@/components/form/NumberField";
 import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TimeField from "@/components/form/TimeField";
 import { Button, PlusIcon, StarIcon, TrashIcon } from "@/components/ui";
+import Heading from "@/components/ui/Heading";
 import Value from "@/components/ui/Value";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
@@ -59,8 +60,8 @@ function FormShell({
   if (inSheet) return children;
 
   return (
-    <CardContainer variant="interactive" className="relative overflow-hidden">
-      <div className="relative z-10 p-3.5 sm:p-5">{children}</div>
+    <CardContainer variant="interactive" className="relative h-full overflow-hidden">
+      <div className="relative z-10 flex h-full flex-col p-3.5 sm:p-5">{children}</div>
     </CardContainer>
   );
 }
@@ -528,9 +529,7 @@ function AddEntry({
     <FormShell inSheet={inSheet}>
         {!inSheet && (
           <div className="mb-4 sm:mb-5">
-            <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
-              Log a Meal
-            </h2>
+            <Heading level="panel">Log a meal</Heading>
           </div>
         )}
 
@@ -543,6 +542,7 @@ function AddEntry({
         </div>
 
         <form
+          className="flex flex-1 flex-col"
           onSubmit={(event) => {
             event.preventDefault();
             void form.handleSubmit();
@@ -734,18 +734,23 @@ function AddEntry({
             />
           </div>
 
-          {/* What the food is made of, live as the grams are typed. */}
-          <MacroSplitBar
-            protein={Number(protein) || 0}
-            carbs={Number(carbs) || 0}
-            fats={Number(fats) || 0}
-            className="mt-3"
-          />
+          {/* What the food is made of, live as the grams are typed. Empty,
+              its track read as a second rule above the footer's. */}
+          {(Number(protein) || Number(carbs) || Number(fats)) > 0 && (
+            <MacroSplitBar
+              protein={Number(protein) || 0}
+              carbs={Number(carbs) || 0}
+              fats={Number(fats) || 0}
+              className="mt-3"
+            />
+          )}
 
-          {/* In the sheet the total and Add stay pinned under the thumb while the fields scroll. */}
+          {/* Beside the summary the total and Add sit at the panel's foot, level
+              with its last row; in the sheet they stay under the thumb. */}
+          <div className="min-h-4 flex-1 sm:min-h-5" />
           <div
             className={cn(
-              "mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4",
+              "flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4",
               inSheet && "sticky bottom-0 z-10 -mx-6 -mb-5 bg-surface px-6 pb-5",
             )}
           >

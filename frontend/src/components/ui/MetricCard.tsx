@@ -84,6 +84,9 @@ function MetricCardInner({
         flatOnPhone
         className={cn("flex h-full flex-col", isCompact && "p-3")}
       >
+        {/* The panel's body is a block; this column lets the content fill a
+            stretched card, so its foot lines up with the card beside it. */}
+        <div className="flex h-full flex-col">
         <div
           className={cn(
             "flex items-start justify-between gap-2",
@@ -177,6 +180,7 @@ function MetricCardInner({
         {children ? (
           <div className="flex flex-1 flex-col justify-between">{children}</div>
         ) : null}
+        </div>
       </Panel>
     </motion.div>
   );

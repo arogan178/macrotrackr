@@ -106,7 +106,7 @@ vi.mock("@/components/layout/DashboardPageContainer", () => ({
 vi.mock("@/components/layout/FeaturePage", () => ({
   default: ({ children }: { children: React.ReactNode }) => children,
 }));
-vi.mock("@/components/metrics/UserMetricsPanel", () => ({
+vi.mock("@/features/macroTracking/components/WeekStrip", () => ({
   default: () => null,
 }));
 vi.mock("@/features/macroTracking/components/DailySummaryPanel", () => ({
@@ -170,11 +170,9 @@ async function openCopyOrMove() {
       <HomePage />
     </QueryClientProvider>,
   );
-  // The desktop table and the phone cards both render; CSS picks one.
-  const [button] = await screen.findAllByRole("button", {
-    name: "Copy or move entry",
-  });
-  fireEvent.click(button);
+  // Both layouts open the same actions sheet; the desktop row has the button.
+  fireEvent.click(await screen.findByRole("button", { name: /^Actions for / }));
+  fireEvent.click(screen.getByRole("button", { name: "Copy or move" }));
 
   return screen.getByRole("dialog", { name: "Copy or move entry" });
 }

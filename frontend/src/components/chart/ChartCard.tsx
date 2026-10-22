@@ -53,7 +53,7 @@ function ChartCard({
         )}
 
         {/* Content */}
-        <div className="flex-1" style={{ minHeight: `${minHeight}px` }}>
+        <div className="relative flex-1" style={{ minHeight: `${minHeight}px` }}>
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-foreground">Loading...</div>

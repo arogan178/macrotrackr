@@ -72,7 +72,6 @@ export default function GoalsPage() {
     <DashboardPageContainer>
       <FeaturePage
         title="Your goals"
-        subtitle="Track your progress and stay motivated on your health journey"
         headerChildren={
           <TabBar
             items={[
@@ -151,6 +150,9 @@ export default function GoalsPage() {
                 <PageTransition key="goals">
                   {/* Sections are told apart by space on a phone, not boxes. */}
                   <div className="space-y-10 md:space-y-6">
+                    {/* The plan and the maintenance figure it is built on,
+                        read side by side once there is room. */}
+                    <div className="space-y-10 md:space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
                     {data.safeUserSettings && (
                       <WeightGoalDashboard
                         user={data.safeUserSettings}
@@ -184,6 +186,7 @@ export default function GoalsPage() {
                         }
                       />
                     )}
+                    </div>
                     <WeightProgressTabs unitSystem={unitSystem} />
                     <HabitTracker
                       habits={habits || []}
@@ -205,6 +208,9 @@ export default function GoalsPage() {
                     <MacroTargetForm
                       key={macroTarget ? "loaded" : "loading"}
                       macroTarget={macroTarget ?? null}
+                      calorieTarget={
+                        normalizedWeightGoals?.calorieTarget ?? nutritionProfile?.tdee
+                      }
                     />
                   </div>
                 </PageTransition>

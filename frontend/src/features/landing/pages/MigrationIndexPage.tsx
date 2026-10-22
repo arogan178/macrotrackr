@@ -26,7 +26,7 @@ export default function MigrationIndexPage() {
       <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4">
           <header className="mx-auto mb-10 max-w-3xl text-center">
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+            <p className="text-xs font-semibold text-primary">
               Keep your history
             </p>
             <Heading level="display" className="mt-3">
@@ -47,7 +47,7 @@ export default function MigrationIndexPage() {
                   className={`group flex h-full min-h-48 flex-col justify-between ${calculatorCardClass} transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none`}
                 >
                   <div>
-                    <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+                    <p className="text-xs font-semibold text-primary">
                       From {guide.sourceName}
                     </p>
                     <Heading level="panel" className="mt-2 text-xl">

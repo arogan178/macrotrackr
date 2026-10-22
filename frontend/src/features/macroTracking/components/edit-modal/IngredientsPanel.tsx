@@ -33,7 +33,7 @@ export default function IngredientsPanel({
   onAddIngredient,
 }: IngredientsPanelProps) {
   return (
-    <section className="rounded-card border border-border bg-surface p-5 md:p-6">
+    <section className="border-t border-border pt-5">
       <button
         type="button"
         onClick={onToggle}
@@ -214,7 +214,7 @@ export default function IngredientsPanel({
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                Add Ingredient
+                Add ingredient
               </button>
             </div>
           </motion.div>

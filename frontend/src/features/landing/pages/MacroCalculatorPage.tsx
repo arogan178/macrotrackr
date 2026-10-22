@@ -225,6 +225,7 @@ export default function MacroCalculatorPage() {
                 onChange={(val) => handleSliderChange("protein", val)}
                 isLocked={lockedMacros.includes("protein")}
                 onToggleLock={() => toggleLock("protein")}
+                grams={macroGrams.proteinTarget}
               />
               <MacroSlider
                 name="Carbs"
@@ -233,6 +234,7 @@ export default function MacroCalculatorPage() {
                 onChange={(val) => handleSliderChange("carbs", val)}
                 isLocked={lockedMacros.includes("carbs")}
                 onToggleLock={() => toggleLock("carbs")}
+                grams={macroGrams.carbsTarget}
               />
               <MacroSlider
                 name="Fats"
@@ -241,6 +243,7 @@ export default function MacroCalculatorPage() {
                 onChange={(val) => handleSliderChange("fats", val)}
                 isLocked={lockedMacros.includes("fats")}
                 onToggleLock={() => toggleLock("fats")}
+                grams={macroGrams.fatsTarget}
               />
             </div>
           </div>
@@ -272,7 +275,7 @@ export default function MacroCalculatorPage() {
                     {row.label}
                   </span>
                   <span className="text-muted tabular-nums">
-                    {row.percentage}% · {formatGrouped(row.calories)} kcal
+                    {row.percentage}%, {formatGrouped(row.calories)} kcal
                   </span>
                 </div>
                 <div className="text-xl font-extrabold text-foreground tabular-nums">

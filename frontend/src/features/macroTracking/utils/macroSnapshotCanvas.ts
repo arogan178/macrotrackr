@@ -147,7 +147,7 @@ function dot(
   context.fill();
 }
 
-/** Eyebrow: micro step — condensed, uppercase, wide tracking, muted. */
+/** Eyebrow: micro step, condensed and muted, in sentence case. */
 function eyebrow(
   context: CanvasRenderingContext2D,
   palette: SnapshotPalette,
@@ -159,7 +159,7 @@ function eyebrow(
   setFont(context, 600, 20, true);
   context.fillStyle = palette.muted;
   context.textAlign = align;
-  context.fillText(text.toUpperCase(), x, y);
+  context.fillText(text, x, y);
   context.textAlign = "left";
 }
 
@@ -284,7 +284,7 @@ function drawHeader(
 
   // Badge, right-aligned on the same baseline.
   setFont(context, 600, 20, true);
-  const label = model.badge.toUpperCase();
+  const label = model.badge;
   const badgeW = context.measureText(label).width + 36;
   const badgeH = 40;
   const badgeX = CONTENT_X + CONTENT_W - badgeW;
@@ -413,7 +413,7 @@ function drawMacros(
     dot(context, innerX + 6, top + 34, colour);
     setFont(context, 600, 20, true);
     context.fillStyle = colour;
-    context.fillText(row.label.toUpperCase(), innerX + 22, top + 41);
+    context.fillText(row.label, innerX + 22, top + 41);
 
     setFont(context, 700, 54, true);
     context.fillStyle = palette.foreground;

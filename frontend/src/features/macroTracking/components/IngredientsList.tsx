@@ -1,7 +1,11 @@
 import { motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros/MacroComponents";
+import Value from "@/components/ui/Value";
+import { cn } from "@/lib/classnameUtilities";
 import type { Ingredient } from "@/types/macro";
+
+import { DESKTOP_ROW_GRID } from "./EntryHistoryShared";
+import { MacroSplitBar } from "./MacroSplitBar";
 
 interface IngredientRowProps {
   ingredient: Ingredient;
@@ -13,34 +17,25 @@ export function IngredientRow({
   calculateCalories,
 }: IngredientRowProps) {
   return (
-    <div className="flex items-center text-xs text-muted">
-      <div className="flex-1 font-medium text-foreground">
-        {ingredient.name}{" "}
-        {ingredient.quantity
-          ? `(${ingredient.quantity}${ingredient.unit ?? ""})`
-          : ""}
+    <div className={cn(DESKTOP_ROW_GRID, "text-xs text-muted")}>
+      <div className="min-w-0 truncate pl-6 text-foreground">
+        {ingredient.name}
+        {ingredient.quantity ? ` (${ingredient.quantity}${ingredient.unit ?? ""})` : ""}
       </div>
-      <div className="w-[14%] text-center">
-        <MacroCell value={ingredient.protein} suffix="g" color="text-protein" />
-      </div>
-      <div className="w-[14%] text-center">
-        <MacroCell value={ingredient.carbs} suffix="g" color="text-carbs" />
-      </div>
-      <div className="w-[14%] text-center">
-        <MacroCell value={ingredient.fats} suffix="g" color="text-fats" />
-      </div>
-      <div className="w-[14%] text-center">
-        <MacroCell
-          value={calculateCalories(
-            ingredient.protein,
-            ingredient.carbs,
-            ingredient.fats,
-          )}
-          suffix=" kcal"
-          color="text-foreground"
-        />
-      </div>
-      <div className="w-[14%]" />
+      <MacroSplitBar
+        protein={ingredient.protein}
+        carbs={ingredient.carbs}
+        fats={ingredient.fats}
+      />
+      <Value value={ingredient.protein} unit="g" className="justify-self-end text-muted" />
+      <Value value={ingredient.carbs} unit="g" className="justify-self-end text-muted" />
+      <Value value={ingredient.fats} unit="g" className="justify-self-end text-muted" />
+      <Value
+        value={calculateCalories(ingredient.protein, ingredient.carbs, ingredient.fats)}
+        unit="kcal"
+        className="justify-self-end text-muted"
+      />
+      <span />
     </div>
   );
 }
@@ -65,9 +60,9 @@ export function IngredientsList({
         height: { duration: 0.3, ease: "easeInOut" },
         opacity: { duration: 0.2 },
       }}
-      className="w-full overflow-hidden border-t border-border bg-surface-2"
+      className="w-full overflow-hidden"
     >
-      <div className="flex flex-col gap-2 px-[10%] py-3">
+      <div className="flex flex-col gap-2 pb-3">
         {ingredients.map((ing, index) => (
           <IngredientRow
             key={index}

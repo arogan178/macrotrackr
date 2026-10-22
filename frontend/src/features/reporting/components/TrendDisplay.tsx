@@ -1,7 +1,7 @@
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { TrendIcon } from "@/components/ui";
+import Value from "@/components/ui/Value";
 
 import type { TrendDisplayProps } from "../types/insightsTypes";
 import { TREND_AVG_DAYS } from "../utils/insightsCalculations";
@@ -12,7 +12,6 @@ export default function TrendDisplay({
   data,
   dataKey,
   icon,
-  iconBgColor = "bg-primary/10",
   unit = "g",
 }: TrendDisplayProps) {
   // `--text-muted` does not exist — the token is `--color-muted` — so "stable"
@@ -33,37 +32,21 @@ export default function TrendDisplay({
     typeof trend.firstAvg === "number";
 
   return (
-    <div className="flex flex-col justify-between rounded-control bg-surface-2 p-3.5 border border-border transition-colors hover:border-border max-md:rounded-none max-md:border-x-0 max-md:border-t-0 max-md:bg-transparent max-md:px-0">
-      {/* Header: Icon + Title & Direction Badge */}
+    <div className="flex flex-col justify-between border-b border-border py-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          {icon && (
-            <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-control ${iconBgColor}`}
-            >
-              {icon}
-            </div>
-          )}
-          <span className="text-sm font-semibold tracking-tight text-foreground truncate">
-            {label}
-          </span>
+        <div className="flex min-w-0 items-center gap-2">
+          {icon}
+          <span className="truncate text-sm text-foreground">{label}</span>
         </div>
 
-        <div className="flex items-center gap-1 rounded-control border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium shrink-0 whitespace-nowrap">
+        <div className="flex shrink-0 items-center gap-1 text-xs whitespace-nowrap text-muted">
           <TrendIcon direction={trend.direction} />
-          <span className="text-foreground whitespace-nowrap">
-            {trend.direction === "stable" ? (
-              "Stable"
-            ) : trend.direction === "insufficient" ? (
-              "N/A"
-            ) : (
-              <AnimatedNumber
-                value={trend.percentage}
-                toFixedValue={0}
-                suffix="%"
-                duration={0.5}
-              />
-            )}
+          <span className="whitespace-nowrap text-foreground">
+            {trend.direction === "stable"
+              ? "Stable"
+              : trend.direction === "insufficient"
+                ? "N/A"
+                : `${Math.round(trend.percentage)}%`}
           </span>
         </div>
       </div>
@@ -73,13 +56,7 @@ export default function TrendDisplay({
         <div className="min-w-0">
           {hasStats ? (
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-bold tracking-tight text-foreground">
-                <AnimatedNumber
-                  value={trend.lastAvg!}
-                  toFixedValue={0}
-                  duration={0.5}
-                />
-              </span>
+              <Value value={trend.lastAvg!} size="stat" />
               {/* A recent-days average, so it differs from the period average above. */}
               <span className="text-xs font-medium text-muted">
                 {trend.unit ?? unit}/d, last {TREND_AVG_DAYS} days

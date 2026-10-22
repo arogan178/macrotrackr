@@ -31,7 +31,7 @@ export const TYPE_SCALE = {
   small: "text-xs",
   /** Eyebrows, axis labels. */
   micro:
-    "font-stretch-condensed text-[11px] font-semibold tracking-wider uppercase",
+    "font-stretch-condensed text-[11px] font-semibold",
 } as const;
 
 export type TypeStep = keyof typeof TYPE_SCALE;

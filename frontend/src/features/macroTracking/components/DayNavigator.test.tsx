@@ -56,6 +56,6 @@ describe("DayNavigator", () => {
     fireEvent.click(screen.getByRole("button", { name: "Previous day" }));
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByText("Unlock Pro Features")).toBeInTheDocument();
+    expect(screen.getByText("Upgrade to Pro")).toBeInTheDocument();
   });
 });

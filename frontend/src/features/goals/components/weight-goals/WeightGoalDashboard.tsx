@@ -8,6 +8,7 @@ import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { getTrendChange } from "@/features/goals/utils/weightLogUtilities";
 import { useFeatureLoading } from "@/hooks";
 import { useWeightLog } from "@/hooks/queries/useGoals";
+import { cn } from "@/lib/classnameUtilities";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -98,7 +99,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
 
   // Status View (when weightGoals exist)
   return (
-    <div className={className}>
+    <div className={cn("h-full", className)}>
       <WeightGoalStatus
         startingWeight={user.weight ?? 0}
         targetWeight={weightGoals.targetWeight}

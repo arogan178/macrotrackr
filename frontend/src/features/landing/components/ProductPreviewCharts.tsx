@@ -3,29 +3,17 @@ import { ReferenceLine } from "recharts";
 import type { ChartDataPoint, LineConfig } from "@/components/chart/ChartTypes";
 import LineChartComponent from "@/components/chart/LineChartComponent";
 import Panel from "@/components/ui/Panel";
-import { formatGrouped } from "@/lib/formatNumber";
+import Value from "@/components/ui/Value";
 
 /**
- * The two scenes that are genuinely charts, drawn with the same Recharts
- * component Analytics uses rather than a CSS imitation of one.
+ * The scene that is genuinely a chart, drawn with the same Recharts component
+ * Goals uses rather than a CSS imitation of one.
  *
  * Split into its own chunk on purpose. `vendor-charts` is ~114 KB gzipped and
  * has no business on the critical path of a marketing page, so this is lazily
  * imported by ProductPreview and lands while the first scene, which needs no
  * chart, is still playing.
  */
-
-const WEEK_TARGET = 2200;
-
-export const WEEK_DATA: ChartDataPoint[] = [
-  { name: "Mon", calories: 1980 },
-  { name: "Tue", calories: 2240 },
-  { name: "Wed", calories: 2105 },
-  { name: "Thu", calories: 1870 },
-  { name: "Fri", calories: 2390 },
-  { name: "Sat", calories: 2510 },
-  { name: "Sun", calories: 1940 },
-];
 
 export const WEIGHT_DATA: ChartDataPoint[] = [
   { name: "Wk 1", weight: 86 },
@@ -40,24 +28,14 @@ export const WEIGHT_DATA: ChartDataPoint[] = [
 // Explicitly animated, unlike the in-app charts: here the drawing of the line
 // is the point. 1400ms is long enough to read as a line being drawn rather than
 // a state change, and sits inside the scene's 4400ms hold.
-const CALORIE_LINE: LineConfig[] = [
-  {
-    dataKey: "calories",
-    name: "Calories",
-    color: "var(--color-primary)",
-    isArea: true,
-    type: "monotone",
-    isAnimationActive: true,
-    animationDuration: 1400,
-  },
-];
-
 const WEIGHT_LINE: LineConfig[] = [
   {
     dataKey: "weight",
     name: "Weight (kg)",
     color: "var(--color-primary)",
-    isArea: true,
+    // A line, as the Goals progress chart draws weight; a filled area read
+    // as a quantity under the curve, which weight is not.
+    isArea: false,
     type: "monotone",
     isAnimationActive: true,
     animationDuration: 1400,
@@ -70,51 +48,6 @@ const WEIGHT_LINE: LineConfig[] = [
  * it nothing to animate from, and the line simply appeared. Feeding it a point
  * at a time was worse, restarting the animation on every tick.
  */
-export function WeekChart({ step }: { step: number }) {
-  const started = step > 0;
-  const average = Math.round(
-    WEEK_DATA.reduce((sum, day) => sum + (day.calories as number), 0) /
-      WEEK_DATA.length,
-  );
-
-  return (
-    <Panel padding="none" className="overflow-hidden">
-      <div className="flex items-baseline justify-between px-4 py-3">
-        <span className="text-sm font-semibold">This week</span>
-        <span className="text-xs text-muted tabular-nums">
-          {average ? `${formatGrouped(average)} kcal average` : " "}
-        </span>
-      </div>
-      <div className="border-t border-border px-2 pt-4 pb-2">
-        {started ? (
-        <LineChartComponent
-          data={WEEK_DATA}
-          lines={CALORIE_LINE}
-          isLoading={false}
-          height={200}
-          showNoDataMessage={false}
-          yAxisProps={{ domain: [1600, 2700], width: 40 }}
-          chartElements={
-            <ReferenceLine
-              y={WEEK_TARGET}
-              stroke="var(--color-border-2)"
-              strokeDasharray="4 4"
-            />
-          }
-        />
-        ) : (
-          <div className="h-[200px]" />
-        )}
-      </div>
-      <p className="border-t border-border px-4 py-3 text-xs text-muted">
-        {started
-          ? "Two days over the line, five under. The dashed line is your target."
-          : "Drawing the week"}
-      </p>
-    </Panel>
-  );
-}
-
 export function GoalChart({ step }: { step: number }) {
   const started = step > 0;
   const current = (WEIGHT_DATA.at(-1)?.weight as number) ?? 86;
@@ -127,10 +60,7 @@ export function GoalChart({ step }: { step: number }) {
       </div>
       <div className="px-4 pt-3">
         <p className="flex items-baseline gap-2">
-          <span className="text-3xl font-light tracking-tight tabular-nums">
-            {current.toFixed(1)}
-          </span>
-          <span className="text-sm text-muted">kg</span>
+          <Value size="hero" unit="kg" value={current} />
           <span className="ml-1 text-sm text-primary tabular-nums">
             {(current - 86).toFixed(1)}
           </span>

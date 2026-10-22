@@ -396,7 +396,7 @@ export function ProfileCreationForm() {
             {(field) => (
               <div>
                 <DateField
-                  label="Date of Birth"
+                  label="Date of birth"
                   value={field.state.value}
                   onChange={field.handleChange}
                   required

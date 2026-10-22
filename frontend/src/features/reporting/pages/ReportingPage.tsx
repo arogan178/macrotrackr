@@ -7,7 +7,7 @@ import ProFeature from "@/components/billing/ProFeature";
 import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { Heading, IconButton, StateCard } from "@/components/ui";
+import { Heading, IconButton, Panel, StateCard } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 import { MacroSnapshotModal } from "@/features/macroTracking/components";
 import type { MacroSnapshotData } from "@/features/macroTracking/utils/macroSnapshotCanvas";
@@ -217,30 +217,32 @@ export default function ReportingPage() {
   ]);
 
   const headerTitle = "Analytics";
-  const headerSubtitle = "Deep dive into your nutrition patterns and progress";
+  const headerActions = (
+    <div className="flex items-center gap-1">
+      <IconButton
+        variant="share"
+        ariaLabel="Share macro snapshot"
+        onClick={() => setIsSnapshotOpen(true)}
+        disabled={aggregatedData.length === 0 || isHistoryLoading}
+      />
+      <IconButton
+        variant="export"
+        ariaLabel="Export data as CSV file"
+        onClick={handleDownloadCSV}
+        disabled={aggregatedData.length === 0 || isHistoryLoading}
+      />
+    </div>
+  );
 
   return (
     <DashboardPageContainer>
       <FeaturePage
         title={headerTitle}
-        subtitle={headerSubtitle}
+        headerChildren={headerActions}
         mobileHeader={
           <div className="flex items-center justify-between gap-3">
             <Heading level="page">{headerTitle}</Heading>
-            <div className="flex items-center gap-1">
-              <IconButton
-                variant="share"
-                ariaLabel="Share macro snapshot"
-                onClick={() => setIsSnapshotOpen(true)}
-                disabled={aggregatedData.length === 0 || isHistoryLoading}
-              />
-              <IconButton
-                variant="export"
-                ariaLabel="Export data as CSV file"
-                onClick={handleDownloadCSV}
-                disabled={aggregatedData.length === 0 || isHistoryLoading}
-              />
-            </div>
+            {headerActions}
           </div>
         }
       >
@@ -251,9 +253,6 @@ export default function ReportingPage() {
             <DateRangeSelector
               currentRange={dateRange}
               onRangeChange={handleRangeChange}
-              onExportClick={handleDownloadCSV}
-              onShareClick={() => setIsSnapshotOpen(true)}
-              isExportDisabled={aggregatedData.length === 0 || isHistoryLoading}
               disabledRanges={hasProAccess ? [] : ["month", "3months"]}
               isPro={hasProAccess}
             />
@@ -268,31 +267,33 @@ export default function ReportingPage() {
               </div>
             ) : (
               <>
-                {(() => {
-                  const calorieTarget = weightGoals?.calorieTarget ?? 2000;
-
-                  return (
+                {/* The averages beside the line they come from: what the
+                    period added up to, and how it moved day to day. */}
+                <div className="grid grid-cols-1 gap-10 md:grid-cols-5 md:gap-6">
+                  <Panel flatOnPhone className="md:col-span-2">
                     <MacroSummaryStats
                       data={aggregatedData}
-                      calorieTarget={calorieTarget}
+                      calorieTarget={weightGoals?.calorieTarget ?? 2000}
                       macroTarget={macroTarget ?? undefined}
                       trackedDays={trackedDays}
                       totalDays={totalDays}
                       averages={averages}
                       dailySeries={dailySeries}
                     />
-                  );
-                })()}
+                  </Panel>
 
-                <ProFeature>
-                  <TrendsChartSection
-                    dailySeries={dailySeries}
-                    isHistoryLoading={isHistoryLoading}
-                    isHistoryReady={isHistoryReady}
-                    calorieChartLines={calorieChartLines}
-                    macroChartLines={macroChartLines}
-                  />
-                </ProFeature>
+                  <div className="min-w-0 md:col-span-3">
+                    <ProFeature>
+                      <TrendsChartSection
+                        dailySeries={dailySeries}
+                        isHistoryLoading={isHistoryLoading}
+                        isHistoryReady={isHistoryReady}
+                        calorieChartLines={calorieChartLines}
+                        macroChartLines={macroChartLines}
+                      />
+                    </ProFeature>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 gap-3.5 sm:gap-6 md:grid-cols-2">
                   <div className="flex w-full min-w-0">

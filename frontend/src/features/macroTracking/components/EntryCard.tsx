@@ -4,8 +4,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDownIcon, StarIcon } from "@/components/ui";
 import Value from "@/components/ui/Value";
 import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
+import { cn } from "@/lib/classnameUtilities";
 import type { MacroEntry } from "@/types/macro";
 
+import { HISTORY_ROW_GRID } from "./EntryHistoryShared";
 import { MacroSplitBar } from "./MacroSplitBar";
 import { PendingSyncMarker } from "./PendingSyncMarker";
 
@@ -50,68 +52,65 @@ export const EntryCard = memo(
     // of controls; the actions now live in the sheet the row opens.
     return (
       <div className={isDeleting ? "opacity-50" : undefined}>
-        <div className="flex items-stretch gap-1 px-4">
+        <div className="flex items-stretch pl-4">
           {isSelectionMode && (
             <input
               type="checkbox"
               aria-label={`Select ${name ?? mealType}`}
-              className="h-5 w-5 self-center rounded-control border-border accent-primary"
+              className="mr-3 h-5 w-5 self-center rounded-control border-border accent-primary"
               checked={isSelected}
               onChange={() => onToggleSelection?.(entry.clientId)}
             />
           )}
           <button
             type="button"
-            className="flex min-w-0 flex-1 flex-col gap-1.5 py-3 text-left"
+            className={cn(HISTORY_ROW_GRID, "min-w-0 flex-1 py-3 text-left")}
             onClick={() =>
               isSelectionMode ? onToggleSelection?.(entry.clientId) : onOpen(entry)
             }
           >
-            <span className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 truncate text-sm text-foreground">
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="truncate text-sm text-foreground">
                 {name ?? mealType}
               </span>
-              <Value
-                value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-                unit="kcal"
-                className="shrink-0"
-              />
+              <span className="flex items-center gap-2 text-xs text-muted">
+                <span className="tabular-nums">{formatTimeFromEntry(entry)}</span>
+                {name ? <span className="truncate">{mealType}</span> : null}
+                {isMealSaved && (
+                  <StarIcon
+                    aria-label="Saved meal"
+                    className="h-3 w-3 shrink-0 fill-current text-primary"
+                  />
+                )}
+                <PendingSyncMarker entry={entry} />
+              </span>
             </span>
-            <span className="flex items-center gap-2 text-xs text-muted">
-              <MacroSplitBar
-                protein={entry.protein}
-                carbs={entry.carbs}
-                fats={entry.fats}
-                className="order-last ml-auto w-12"
-              />
-              <span className="tabular-nums">{formatTimeFromEntry(entry)}</span>
-              {name ? <span>{mealType}</span> : null}
-              {isMealSaved && (
-                <StarIcon
-                  aria-label="Saved meal"
-                  className="h-3 w-3 fill-current text-primary"
-                />
-              )}
-              <PendingSyncMarker entry={entry} />
-            </span>
+            <MacroSplitBar protein={entry.protein} carbs={entry.carbs} fats={entry.fats} />
+            <Value
+              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+              unit="kcal"
+              className="justify-self-end"
+            />
           </button>
-          {hasIngredients && (
-            <button
-              type="button"
-              className="flex w-11 shrink-0 items-center justify-center text-muted hover:text-foreground"
-              onClick={() => setIsExpanded(!isExpanded)}
-              aria-expanded={isExpanded}
-              aria-label="Show ingredients"
-            >
-              <motion.span
-                initial={false}
-                animate={{ rotate: isExpanded ? -180 : 0 }}
-                transition={{ duration: DURATIONS.instant }}
+          <span className="flex w-11 shrink-0 items-center justify-center">
+            {hasIngredients && (
+              <button
+                type="button"
+                className="flex h-full w-full items-center justify-center text-muted hover:text-foreground"
+                onClick={() => setIsExpanded(!isExpanded)}
+                aria-expanded={isExpanded}
+                aria-label="Show ingredients"
               >
-                <ChevronDownIcon className="h-4 w-4" />
-              </motion.span>
-            </button>
-          )}
+                <motion.span
+                  initial={false}
+                  animate={{ rotate: isExpanded ? -180 : 0 }}
+                  transition={{ duration: DURATIONS.instant }}
+                >
+                  <ChevronDownIcon className="h-4 w-4" />
+                </motion.span>
+              </button>
+            )}
+          </span>
         </div>
 
         <AnimatePresence>

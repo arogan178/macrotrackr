@@ -21,32 +21,20 @@ function TopLoadingBar() {
 
   if (!visible) return null;
 
+  // Indeterminate: a segment sweeps from off the left edge to off the right,
+  // one way, so it crosses the whole width. translateX in percent moves by the
+  // segment's own width, which is why the old bar stopped near the middle.
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed top-0 right-0 left-0 z-9999"
+      className="pointer-events-none fixed top-0 right-0 left-0 z-9999 h-0.5 overflow-hidden"
     >
-      <div className="h-1 bg-transparent">
-        <div
-          className={cn(
-            "h-full bg-primary",
-            !prefersReducedMotion && "animate-[loadingbar_1.2s_ease-in-out_infinite]"
-          )}
-          style={{
-            width: prefersReducedMotion ? "100%" : "30%",
-            backgroundImage:
-              "linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1))",
-            mixBlendMode: "overlay",
-          }}
-        />
-      </div>
-      <style>
-        {`@keyframes loadingbar {
-            0% { transform: translateX(0%); width: 15%; }
-            50% { transform: translateX(120%); width: 35%; }
-            100% { transform: translateX(0%); width: 15%; }
-        }`}
-      </style>
+      <div
+        className={cn(
+          "h-full bg-primary",
+          prefersReducedMotion ? "w-full" : "w-1/3 animate-[loading-sweep_1.1s_ease-in-out_infinite]",
+        )}
+      />
     </div>
   );
 }

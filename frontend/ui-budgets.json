@@ -9,17 +9,17 @@
     "motionDurations": 20,
     "motionEasings": 4,
     "motionCallSites": 27,
-    "layoutProjection": 12,
-    "motionFiles": 43,
+    "layoutProjection": 11,
+    "motionFiles": 41,
     "legacyViewportHeight": 30,
-    "smOverrides": 270,
+    "smOverrides": 172,
     "backdropBlur": 3,
     "shadows": 0,
     "hexLiterals": 21,
     "emoji": 0,
     "adHocNumberFormat": 0,
     "rawCalorieFigures": 0,
-    "boldOutsideScale": 63
+    "boldOutsideScale": 31
   },
   "history": {
     "beforeThePlan": {

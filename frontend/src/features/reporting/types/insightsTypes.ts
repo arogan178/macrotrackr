@@ -78,19 +78,11 @@ export interface DailyAverageItem {
   color: string;
 }
 
-export interface ActionCardProps {
-  title: string;
-  icon: React.ReactNode;
-  message: string;
-  bgColor: string;
-}
-
 export interface TrendDisplayProps {
   label: string;
   trend: TrendResult;
   data?: AggregatedDataPoint[];
   dataKey?: string;
   icon?: React.ReactNode;
-  iconBgColor?: string;
   unit?: string;
 }

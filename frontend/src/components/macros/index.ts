@@ -1,5 +1,4 @@
 export {
-	MacroCell,
 	MacroDistributionBar,
 	MacroDistributionStrip,
 	MacroIndicator,

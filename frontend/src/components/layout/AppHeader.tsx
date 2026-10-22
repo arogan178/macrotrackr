@@ -4,7 +4,6 @@ import { motion, useReducedMotion } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 import {
-  BackIcon,
   ChevronDownIcon,
   CloseIcon,
   ExternalLinkIcon,
@@ -207,7 +206,7 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
       >
         <p
           id="tools-popover-heading"
-          className="px-3 pt-1 pb-2 text-xs font-semibold tracking-wider text-muted uppercase"
+          className="px-3 pt-1 pb-2 text-xs font-semibold text-muted"
         >
           Free calculators
         </p>
@@ -451,9 +450,9 @@ const PublicModeHeader: React.FC = () => {
   );
 };
 
-const MinimalModeHeader: React.FC<{ showBackToHome: boolean }> = ({
-  showBackToHome,
-}) => {
+// The logo is the way back: a "Back to home" beside it repeated the link, and
+// in the native app it led to the marketing page.
+const MinimalModeHeader: React.FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -461,31 +460,12 @@ const MinimalModeHeader: React.FC<{ showBackToHome: boolean }> = ({
       label="Site navigation"
       logoLabel="MacroTrackr home"
       onLogoClick={() => navigate({ to: "/" })}
-      trailing={
-        showBackToHome ? (
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/" })}
-            className={getButtonClasses(
-              "ghost",
-              "sm",
-              false,
-              "gap-2 rounded-full font-medium text-foreground",
-            )}
-          >
-            <BackIcon />
-            <span>Back to home</span>
-          </button>
-        ) : null
-      }
     />
   );
 };
 
 interface AppHeaderProps {
   mode: AppHeaderMode;
-  /** `minimal` only: hides the single trailing action. */
-  showBackToHome?: boolean;
 }
 
 /**
@@ -494,14 +474,11 @@ interface AppHeaderProps {
  * one set of chrome, one height and one safe-area offset, so the page offset
  * stays a single number that `PageShell` positions against.
  */
-const AppHeader: React.FC<AppHeaderProps> = ({
-  mode,
-  showBackToHome = true,
-}) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ mode }) => {
   if (mode === "app") return <AppModeHeader />;
   if (mode === "public") return <PublicModeHeader />;
 
-  return <MinimalModeHeader showBackToHome={showBackToHome} />;
+  return <MinimalModeHeader />;
 };
 
 export default AppHeader;

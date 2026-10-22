@@ -167,7 +167,6 @@ export default function SettingsPage() {
     <DashboardPageContainer>
       <FeaturePage
         title="Settings"
-        subtitle="Manage your account preferences and profile details"
         mobileHeader={
           isPhoneSectionOpen ? (
             <div className="pb-4">

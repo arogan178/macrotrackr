@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  Button,
   CheckIcon,
   CloseIcon,
   IconButton,
   InfoIcon,
   WarningIcon,
 } from "@/components/ui";
+import { cn } from "@/lib/classnameUtilities";
 
 import type { NotificationAction, NotificationType } from "../NotificationTypes";
 
@@ -20,14 +20,23 @@ export interface FloatingNotificationProps {
   duration?: number;
   autoClose?: boolean;
   action?: NotificationAction;
-  /**
-   * Optional top offset for per-instance vertical positioning.
-   * Accepts number (px) or any valid CSS length string.
-   * If not provided, NotificationManager's container uses CSS var fallback.
-   */
-  topOffset?: number | string;
 }
 
+// One raised surface for every toast; the status is carried by the icon and
+// the timer line in its token colour, not by a gradient fill per type.
+const STATUS = {
+  success: { Icon: CheckIcon, icon: "text-success", bar: "bg-success" },
+  error: { Icon: WarningIcon, icon: "text-error", bar: "bg-error" },
+  warning: { Icon: WarningIcon, icon: "text-warning", bar: "bg-warning" },
+  info: { Icon: InfoIcon, icon: "text-primary", bar: "bg-primary" },
+} as const;
+
+const LEAVE_MS = 200;
+
+/**
+ * A snackbar: one line, an optional action, and a timer that waits while the
+ * pointer or keyboard is on it, so there is always time to reach Undo.
+ */
 function FloatingNotification({
   message,
   type = "info",
@@ -35,194 +44,89 @@ function FloatingNotification({
   duration = 5000,
   autoClose = true,
   action,
-  topOffset,
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const progressReference = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const remainingReference = useRef(duration);
   const timerReference = useRef<TimerHandle | undefined>(undefined);
-  const animationStartedReference = useRef(false);
+  const isTimed = autoClose && duration > 0;
+  const status = STATUS[type];
 
-  // Memoize handleClose to prevent unnecessary effect re-runs
   const handleClose = useCallback(() => {
-    // Prevent multiple close calls
     if (isLeaving) return;
-
-    // Clear any pending timers to avoid duplicate closes
-    if (timerReference.current) {
-      clearTimeout(timerReference.current);
-      timerReference.current = undefined;
-    }
-
+    clearTimeout(timerReference.current);
     setIsLeaving(true);
-
-    // Only trigger the actual onClose after fade-out animation completes
-    setTimeout(() => {
-      onClose();
-    }, 300); // Reduced animation duration for snappier feel
+    setTimeout(onClose, LEAVE_MS);
   }, [onClose, isLeaving]);
 
-  // Handle mount animation
   useEffect(() => {
-    // Small delay to ensure mount animation works
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 10);
+    const timer = setTimeout(() => setIsVisible(true), 10);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Apply CSS animation to the progress bar and synchronize with auto-close
+  // Counts down only while running; a pause banks what is left.
   useEffect(() => {
-    // Only proceed if the notification is visible, has a duration, and animation hasn't started
-    if (
-      !isVisible ||
-      duration <= 0 ||
-      !progressReference.current ||
-      animationStartedReference.current ||
-      !autoClose ||
-      isLeaving
-    )
-      return;
-
-    animationStartedReference.current = true;
-    const progressElement = progressReference.current;
-
-    // Set up the animation programmatically for better control
-    progressElement.style.transition = `width ${duration}ms linear`;
-    progressElement.style.width = "100%";
-
-    // Force a reflow to make sure the initial state is rendered
-    void progressElement.offsetWidth;
-
-    // Start the progress animation
-    requestAnimationFrame(() => {
-      progressElement.style.width = "0%";
-
-      // Set up the auto-close timer to match exactly with animation end
-      timerReference.current = globalThis.setTimeout(() => {
-        handleClose();
-      }, duration);
-    });
+    if (!isTimed || isPaused || isLeaving) return;
+    const startedAt = Date.now();
+    timerReference.current = globalThis.setTimeout(handleClose, remainingReference.current);
 
     return () => {
-      if (timerReference.current) {
-        clearTimeout(timerReference.current);
-      }
+      clearTimeout(timerReference.current);
+      remainingReference.current -= Date.now() - startedAt;
     };
-  }, [isVisible, duration, isLeaving, handleClose, autoClose]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timerReference.current) {
-        clearTimeout(timerReference.current);
-      }
-    };
-  }, []);
-
-  // Style mappings for notification types
-  const styles = {
-    success: {
-      bg: "bg-gradient-to-r from-green-900/95 to-green-800/95",
-      border: "border-success/40",
-      icon: "text-success",
-      progress: "bg-success",
-      component: <CheckIcon className="" />,
-    },
-    error: {
-      bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
-      border: "border-error/40",
-      icon: "text-error",
-      progress: "bg-primary",
-      component: <CloseIcon className="" />,
-    },
-    warning: {
-      bg: "bg-gradient-to-r from-amber-800/95 to-yellow-700/95",
-      border: "border-amber-500/40",
-      icon: "text-amber-300",
-      progress: "bg-amber-400",
-      component: <WarningIcon className="" />,
-    },
-    info: {
-      bg: "bg-gradient-to-r from-primary/95 to-primary/95",
-      border: "border-primary/40",
-      icon: "text-primary",
-      progress: "bg-primary",
-      component: <InfoIcon className="" />,
-    },
-  };
-
-  const { bg, border, icon, progress, component } = styles[type];
-
-  // Resolve per-instance top offset if provided (used when this component is not inside the global manager or when overriding)
-  const resolvedTop =
-    typeof topOffset === "number" ? `${topOffset}px` : topOffset; // leave undefined if not provided
+  }, [isTimed, isPaused, isLeaving, handleClose]);
 
   return (
     <div
-      className={`relative mx-auto w-full max-w-md
-                 transform transition-[opacity,transform] duration-300 ease-out
-                 ${
-                   isVisible && !isLeaving
-                     ? "translate-y-0 scale-100 opacity-100"
-                     : "-translate-y-4 scale-95 opacity-0"
-                 }`}
-      role="alert"
-      aria-live="assertive"
+      role={type === "error" ? "alert" : "status"}
+      aria-live={type === "error" ? "assertive" : "polite"}
       aria-atomic="true"
-      style={resolvedTop ? { marginTop: resolvedTop } : undefined}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
+      }}
+      className={cn(
+        "transition-opacity duration-200 ease-out",
+        isVisible && !isLeaving ? "opacity-100" : "opacity-0",
+      )}
     >
-      <div
-        className={`flex items-center rounded-control shadow-modal 
-                     ${bg} border ${border}
-                     overflow-hidden`}
-      >
-        {/* Icon section */}
-        <div
-          className={`${icon} flex flex-shrink-0 items-center justify-center p-4`}
-        >
-          {component}
-        </div>
-
-        {/* Content area */}
-        <div className="min-w-0 flex-1 px-4 py-3">
-          <p className="text-sm leading-relaxed font-medium break-words text-foreground">
-            {message}
-          </p>
-        </div>
+      <div className="relative flex items-center gap-3 overflow-hidden rounded-card border border-border-2 bg-surface-3 py-1.5 pr-1.5 pl-4 shadow-modal">
+        <status.Icon className={cn("h-5 w-5 shrink-0", status.icon)} aria-hidden="true" />
+        <p className="min-w-0 flex-1 py-2 text-sm break-words text-foreground">{message}</p>
 
         {action && (
-          <div className="flex-shrink-0">
-            <Button
-              variant="outline"
-              buttonSize="sm"
-              text={action.label}
-              onClick={() => {
-                action.onClick();
-                handleClose();
-              }}
-            />
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              action.onClick();
+              handleClose();
+            }}
+            className="min-h-11 shrink-0 rounded-control px-3 text-sm font-semibold text-primary transition-colors duration-200 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          >
+            {action.label}
+          </button>
         )}
 
-        {/* Close button */}
-        <div className="flex-shrink-0 p-2">
-          <IconButton
-            variant="close"
-            onClick={handleClose}
-            ariaLabel="Close notification"
-            className="bg-transparent text-foreground/60 hover:bg-surface hover:text-foreground"
-          />
-        </div>
+        <IconButton
+          variant="custom"
+          onClick={handleClose}
+          ariaLabel="Close notification"
+          icon={<CloseIcon className="h-4 w-4" />}
+          className="shrink-0 text-muted hover:text-foreground"
+        />
 
-        {/* Progress timer bar */}
-        {duration > 0 && autoClose && (
-          <div className="absolute right-0 bottom-0 left-0 h-1 overflow-hidden bg-black/30">
+        {isTimed && (
+          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-foreground/8">
             <div
-              ref={progressReference}
-              className={`h-full ${progress} transition-[width] ease-linear`}
-              style={{ width: "100%" }}
+              className={cn("h-full origin-left", status.bar)}
+              style={{
+                animation: `toast-timer ${duration}ms linear forwards`,
+                animationPlayState: isPaused ? "paused" : "running",
+              }}
             />
           </div>
         )}

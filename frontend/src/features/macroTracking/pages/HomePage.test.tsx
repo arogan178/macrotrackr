@@ -107,7 +107,7 @@ vi.mock("@/components/layout/FeaturePage", () => ({
     </div>
   ),
 }));
-vi.mock("@/components/metrics/UserMetricsPanel", () => ({ default: () => null }));
+vi.mock("@/features/macroTracking/components/WeekStrip", () => ({ default: () => null }));
 vi.mock("@/features/macroTracking/components/DailySummaryPanel", () => ({
   default: (properties: { date?: string }) => {
     captured.summary = properties;

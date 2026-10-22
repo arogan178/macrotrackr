@@ -24,11 +24,11 @@ const FeaturesSection = React.lazy(
 );
 const PricingSection = React.lazy(() => import("../components/PricingSection"));
 
+// Opacity only: travel would reflow the text under each section as it arrives.
 const sectionRevealVariants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: { duration: DURATIONS.base, ease: EASINGS.out },
   },
 } as const;

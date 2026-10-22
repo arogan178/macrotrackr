@@ -52,7 +52,7 @@ const AnimatedUserFlow: React.FC<AnimatedUserFlowProps> = ({
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-black">
               {currentStep + 1}
             </span>
-            <span className="text-xs font-medium tracking-wider text-muted uppercase">
+            <span className="text-xs font-medium text-muted">
               Step {currentStep + 1} of {steps.length}
             </span>
           </div>

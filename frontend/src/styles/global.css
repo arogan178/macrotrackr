@@ -134,6 +134,26 @@
   }
 }
 
+/* A toast's remaining time, as a line emptying towards its start. */
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* The top loading bar: one segment crossing the full width, left to right. */
+@keyframes loading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100vw);
+  }
+}
+
 /* Home's one moment on load: the day's gauge and macro strips fill from zero. */
 @keyframes fill-in {
   from {
@@ -164,13 +184,8 @@
   --header-height: 3.5rem;
   --header-offset: calc(1rem + var(--sat) + var(--header-height) + 1.5rem);
 
-  /* Toasts clear the header rather than sharing its band. This was
-     `calc(16px + var(--sat))` — the header's own top inset — so every
-     notification rendered behind the bar it was aligned with. Declared after
-     --header-height because it reads it. */
-  --floating-notification-top: calc(
-    1rem + var(--sat) + var(--header-height) + 0.75rem
-  );
+  /* Toasts sit at the foot of the screen, clear of the home indicator. */
+  --toast-bottom: calc(1.5rem + var(--sab));
 
   /* PageShell bottom padding: on public pages, reserves safe area at the bottom. */
   --page-shell-pb: calc(3rem + var(--sab));
@@ -182,8 +197,8 @@
 @media (width < 48rem) {
   .app-shell-headerless {
     --header-offset: calc(1rem + var(--sat));
-    /* Toasts cleared a bar that is no longer there. */
-    --floating-notification-top: calc(1rem + var(--sat));
+    /* Above MobileTabBar, level with the history's selection bar. */
+    --toast-bottom: calc(5.5rem + var(--sab));
     /* MainLayout <main> already pads for MobileTabBar and --sab. Avoid double-padding. */
     --page-shell-pb: 1.5rem;
   }

@@ -72,7 +72,7 @@ function ComparisonTable({
                     "px-4 py-3.5",
                     index === 0 && "pl-5",
                     index === columns.length - 1 && "pr-5",
-                    column.isOwn ? "text-primary" : "text-muted",
+                    column.isOwn ? "bg-surface-3 text-foreground" : "text-muted",
                   )}
                 >
                   {column.label}
@@ -101,8 +101,10 @@ function ComparisonTable({
                     className={cn(
                       "px-4 py-3",
                       index === columns.length - 2 && "pr-5",
+                      // Ours is set apart by tone, not by colour: green on our
+                      // own column read as a tick we had awarded ourselves.
                       column.isOwn
-                        ? "font-semibold text-primary"
+                        ? "bg-surface-2 font-medium text-foreground"
                         : "text-muted",
                     )}
                   >

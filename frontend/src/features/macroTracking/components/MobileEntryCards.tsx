@@ -5,14 +5,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { Button, ChevronDownIcon, CopyIcon, IconButton, TrashIcon } from "@/components/ui";
 import Value from "@/components/ui/Value";
 import { DURATIONS } from "@/components/utils/UiConstants";
+import { cn } from "@/lib/classnameUtilities";
 import type { MacroEntry } from "@/types/macro";
 
 import { EntryActionsSheet } from "./EntryActionsSheet";
 import { EntryCard } from "./EntryCard";
 import { useEntryHistoryController } from "./EntryHistoryContext";
-import type {
-  GroupedEntry,
-} from "./EntryHistoryShared";
+import { type GroupedEntry, HISTORY_ROW_GRID } from "./EntryHistoryShared";
 import { MacroSplitBar } from "./MacroSplitBar";
 
 interface MobileEntryCardsProps {
@@ -82,8 +81,8 @@ const MobileEntryCards = memo(
         const item = virtualItems[index];
         if (item.type === "header") return 60;
 
-        // Time and actions, name and actions, then one line of values.
-        return 132;
+        // Name over time and meal, beside the bar and figure.
+        return 64;
       },
       overscan: 5,
     });
@@ -92,33 +91,33 @@ const MobileEntryCards = memo(
     // under it, and its split bar says what kind of day it was. It pins below
     // the status bar while its entries scroll, so a long day keeps its name.
     const renderDateHeader = (group: GroupedEntry) => (
-      <div className="sticky top-(--sat) z-10 flex min-h-12 items-center justify-between gap-3 border-b border-border bg-background pr-1 pl-4">
-        <button
-          type="button"
-          aria-expanded={!isDateCollapsed(group.date)}
-          onClick={() => toggleDateCollapse(group.date)}
-          className="flex min-h-12 min-w-0 flex-1 items-center gap-2 text-left"
-        >
-          <motion.span
-            animate={{ rotate: isDateCollapsed(group.date) ? -90 : 0 }}
-            transition={{ duration: DURATIONS.instant }}
-            className="shrink-0 text-muted"
+      <div className="sticky top-(--sat) z-10 flex min-h-12 items-center border-b border-border bg-background pl-4">
+        <div className={cn(HISTORY_ROW_GRID, "min-w-0 flex-1")}>
+          <button
+            type="button"
+            aria-expanded={!isDateCollapsed(group.date)}
+            onClick={() => toggleDateCollapse(group.date)}
+            className="flex min-h-12 min-w-0 items-center gap-2 text-left"
           >
-            <ChevronDownIcon className="h-4 w-4" />
-          </motion.span>
-          <h3 className="truncate text-sm font-medium text-foreground">
-            {formatDate(group.date)}
-          </h3>
-        </button>
-
-        <div className="flex shrink-0 items-center gap-3">
+            <motion.span
+              animate={{ rotate: isDateCollapsed(group.date) ? -90 : 0 }}
+              transition={{ duration: DURATIONS.instant }}
+              className="shrink-0 text-muted"
+            >
+              <ChevronDownIcon className="h-4 w-4" />
+            </motion.span>
+            <h3 className="truncate text-sm font-medium text-foreground">
+              {formatDate(group.date)}
+            </h3>
+          </button>
           <MacroSplitBar
             protein={group.totals.protein}
             carbs={group.totals.carbs}
             fats={group.totals.fats}
-            className="w-12"
           />
-          <Value value={group.totals.calories} unit="kcal" />
+          <Value value={group.totals.calories} unit="kcal" className="justify-self-end" />
+        </div>
+        <span className="flex w-11 shrink-0 items-center justify-center">
           <IconButton
             variant="custom"
             className="text-muted hover:text-error"
@@ -126,7 +125,7 @@ const MobileEntryCards = memo(
             onClick={(event) => handleDeleteDate(group.date, event)}
             ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
           />
-        </div>
+        </span>
       </div>
     );
 
