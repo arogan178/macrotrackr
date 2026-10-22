@@ -99,6 +99,21 @@ export type ProductEvent =
       properties: { distinctDays: 3 };
     }
   | {
+      event: "app_opened";
+      properties: {
+        platform: "android" | "ios" | "web";
+        trigger: "launch" | "resume";
+      };
+    }
+  | {
+      event: "reminder_prompt_answered";
+      properties: {
+        accepted: boolean;
+        meal: "breakfast" | "dinner" | "lunch";
+        permissionGranted: boolean;
+      };
+    }
+  | {
       event: "import_previewed" | "import_completed";
       properties: {
         importSource: ImportFormat;
@@ -200,6 +215,14 @@ export function serializeProductProperties(
       return productEvent.properties;
     case "third_tracked_day":
       return { distinct_days: productEvent.properties.distinctDays };
+    case "app_opened":
+      return productEvent.properties;
+    case "reminder_prompt_answered":
+      return {
+        accepted: productEvent.properties.accepted,
+        meal: productEvent.properties.meal,
+        permission_granted: productEvent.properties.permissionGranted,
+      };
     case "import_previewed":
     case "import_completed":
       return {

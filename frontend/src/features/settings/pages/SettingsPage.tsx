@@ -8,6 +8,7 @@ import FeaturePage from "@/components/layout/FeaturePage";
 import {
   AwardIcon,
   BackIcon,
+  BellIcon,
   Button,
   ChevronRightIcon,
   Heading,
@@ -20,6 +21,7 @@ import {
   UserIcon,
 } from "@/components/ui";
 import { isClerkAuthMode, isManagedBillingMode } from "@/config/runtime";
+import ReminderSettings from "@/features/reminders/ReminderSettings";
 import {
   BillingForm,
   ChangePasswordForm,
@@ -36,11 +38,14 @@ import { countUnsentEntries } from "@/hooks/queries/macro/entryStore";
 import { useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { cn } from "@/lib/classnameUtilities";
+import { isNativePlatform } from "@/services/native/platform";
 
-type TabType = "profile" | "data" | "billing" | "accounts" | "security";
+type TabType = "profile" | "reminders" | "data" | "billing" | "accounts" | "security";
 
 const BILLING_TAB_ENABLED = isManagedBillingMode;
 const ACCOUNTS_TAB_ENABLED = isClerkAuthMode;
+// Reminders are scheduled on the phone, so they only exist in the app.
+const REMINDERS_TAB_ENABLED = isNativePlatform();
 
 interface Section {
   key: TabType;
@@ -52,6 +57,9 @@ interface Section {
 // One list feeds the desktop tab bar and the phone's rows.
 const SECTIONS: Section[] = [
   { key: "profile", label: "Profile", hint: "Body stats and units", Icon: UserIcon },
+  ...(REMINDERS_TAB_ENABLED
+    ? [{ key: "reminders", label: "Reminders", hint: "Meal notifications", Icon: BellIcon } satisfies Section]
+    : []),
   { key: "data", label: "Data", hint: "Import and export", Icon: UploadIcon },
   ...(BILLING_TAB_ENABLED
     ? [{ key: "billing", label: "Billing", hint: "Plan and payments", Icon: AwardIcon } satisfies Section]
@@ -65,6 +73,7 @@ const SECTIONS: Section[] = [
 // Valid tab values for validation
 const VALID_TABS = new Set<TabType>([
   "profile",
+  ...(REMINDERS_TAB_ENABLED ? (["reminders"] as TabType[]) : []),
   "data",
   ...(BILLING_TAB_ENABLED ? (["billing"] as TabType[]) : []),
   ...(ACCOUNTS_TAB_ENABLED ? (["accounts"] as TabType[]) : []),
@@ -265,6 +274,11 @@ export default function SettingsPage() {
               {ACCOUNTS_TAB_ENABLED && activeTab === "accounts" && (
                 <PageTransition key="accounts">
                   <ConnectedAccountsForm />
+                </PageTransition>
+              )}
+              {REMINDERS_TAB_ENABLED && activeTab === "reminders" && (
+                <PageTransition key="reminders">
+                  <ReminderSettings />
                 </PageTransition>
               )}
               {activeTab === "security" && (

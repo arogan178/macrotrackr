@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { useMutationErrorHandler } from "@/hooks";
 import { useEntryStore } from "@/hooks/queries/useMacroQueries";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
+import { isNativePlatform } from "@/services/native/platform";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 
@@ -78,6 +79,11 @@ export function useAddEntry() {
         throw error;
       } finally {
         setIsSaving(false);
+      }
+      if (isNativePlatform()) {
+        void import("@/features/reminders/mealReminders").then(({ offerReminderAfterLogging }) =>
+          offerReminderAfterLogging(entry.mealType),
+        );
       }
       if (entry.saveAsMeal) {
         await saveAsMeal({

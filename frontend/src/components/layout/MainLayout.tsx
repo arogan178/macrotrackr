@@ -1,11 +1,13 @@
-import React, { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import LogSheet from "@/features/macroTracking/components/LogSheet";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
+import { useAppOpenedEvent } from "@/hooks/useAppOpenedEvent";
 import { openLogSheet } from "@/lib/logSheet";
+import { isNativePlatform } from "@/services/native/platform";
 
 import AppHeader from "./AppHeader";
 import InstallPrompt from "./InstallPrompt";
@@ -40,6 +42,9 @@ export const isPublicPathname = (pathname: string): boolean =>
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
+// Reminders only exist in the app; the web never downloads the plugin.
+const MealReminders = React.lazy(() => import("@/features/reminders/MealReminders"));
+
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const { isLoaded, isSignedIn } = useAppAuthState();
@@ -62,6 +67,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useUser({ enabled: shouldFetchUser });
   const isAuthenticated =
     isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
+  useAppOpenedEvent(isAuthenticated);
 
   return (
     <div
@@ -104,6 +110,11 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       )}
       {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
       {isAuthenticated && <LogSheet />}
+      {isAuthenticated && isNativePlatform() && (
+        <Suspense fallback={null}>
+          <MealReminders />
+        </Suspense>
+      )}
       <OfflineBar />
       <InstallPrompt clearsTabBar={isAuthenticated} />
       <UpdatePrompt />
