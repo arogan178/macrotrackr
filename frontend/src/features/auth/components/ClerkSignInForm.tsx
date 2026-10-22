@@ -6,8 +6,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
-import { BiometricOptInCheckbox } from "@/features/auth/components/BiometricOptInCheckbox";
-import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import { ClerkPasswordReset } from "@/features/auth/components/ClerkPasswordReset";
 import { LegalConsentNotice } from "@/features/auth/components/LegalConsentNotice";
 import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
@@ -31,7 +29,6 @@ import {
 } from "@/features/auth/utils/secondFactor";
 import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
-import { saveBiometricCredentials } from "@/services/biometrics";
 import {
   signInWithNativeGoogle,
 } from "@/services/native/googleAuth";
@@ -109,7 +106,6 @@ export function ClerkSignInForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [enableBiometrics, setEnableBiometrics] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [isEmailMode, setIsEmailMode] = useState(false);
@@ -135,8 +131,8 @@ export function ClerkSignInForm({
 
   /**
    * Shared completion path. Reached either straight from a password sign-in or
-   * after a second factor clears, so both routes save biometrics and land on
-   * /auth-ready identically.
+   * after a second factor clears, so both routes land on /auth-ready
+   * identically.
    */
   const completeSignIn = async (createdSessionId: string | null) => {
     if (!createdSessionId) {
@@ -156,10 +152,6 @@ export function ClerkSignInForm({
     }
 
     await setActive({ session: createdSessionId });
-    // Only store the password when the user explicitly opted in
-    if (enableBiometrics && password) {
-      await saveBiometricCredentials(email.trim().toLowerCase(), password);
-    }
     showNotification("Signed in successfully!", "success");
     navigate({
       to: "/auth-ready",
@@ -695,11 +687,6 @@ export function ClerkSignInForm({
                       autoComplete="current-password"
                     />
 
-                    <BiometricOptInCheckbox
-                      checked={enableBiometrics}
-                      onChange={setEnableBiometrics}
-                    />
-
                     <div className="flex justify-end">
                       <button
                         type="button"
@@ -731,8 +718,6 @@ export function ClerkSignInForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <BiometricSignInButton redirectTo={redirectTo} />
-
             <SocialAuthOptions
               onProviderSelect={handleSocialSignIn}
               onContinueWithEmail={() => setIsEmailMode(true)}

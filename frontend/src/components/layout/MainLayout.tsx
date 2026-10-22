@@ -1,10 +1,12 @@
 import React, { useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
+import { AppLockScreen } from "@/components/auth/AppLockScreen";
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import LogSheet from "@/features/macroTracking/components/LogSheet";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
+import { useAppLock } from "@/hooks/useAppLock";
 import { openLogSheet } from "@/lib/logSheet";
 
 import AppHeader from "./AppHeader";
@@ -62,9 +64,11 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useUser({ enabled: shouldFetchUser });
   const isAuthenticated =
     isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
+  const appLock = useAppLock(isLoaded && isSignedIn);
 
   return (
     <div
+      inert={appLock.isLocked}
       className={`min-h-dvh bg-background text-foreground ${
         isAuthenticated ? "app-shell-headerless" : ""
       }`}
@@ -108,6 +112,12 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <InstallPrompt clearsTabBar={isAuthenticated} />
       <UpdatePrompt />
       <NotificationManager />
+      {appLock.isLocked && (
+        <AppLockScreen
+          isChecking={appLock.isChecking}
+          onUnlock={() => void appLock.unlock()}
+        />
+      )}
     </div>
   );
 };

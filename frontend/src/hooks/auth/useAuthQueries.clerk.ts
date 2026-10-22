@@ -7,7 +7,7 @@ import { userApi, type UserDetailsResponse } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { clearBiometricCredentials } from "@/services/biometrics";
+import { clearAppLock } from "@/services/biometrics";
 import { removeToken } from "@/utils/tokenStorage";
 
 export interface ChangePasswordData {
@@ -59,8 +59,8 @@ export function useLogout() {
       // Remove token from storage
       removeToken();
       apiClient.setAuthToken(null);
-      // Drop any opt-in biometric credentials from the KeyStore/Keychain
-      await clearBiometricCredentials();
+      // Turn off the app lock so the next account on this device starts unlocked
+      await clearAppLock();
 
       // Sign out from Clerk to clear session cookies
       await signOut();

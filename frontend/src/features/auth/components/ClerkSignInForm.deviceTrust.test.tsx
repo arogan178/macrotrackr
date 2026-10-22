@@ -13,7 +13,6 @@ const {
   setActive,
   navigate,
   showNotification,
-  saveBiometricCredentials,
 } = vi.hoisted(() => ({
   signInCreate: vi.fn(),
   prepareSecondFactor: vi.fn(),
@@ -21,7 +20,6 @@ const {
   setActive: vi.fn(),
   navigate: vi.fn(),
   showNotification: vi.fn(),
-  saveBiometricCredentials: vi.fn(),
 }));
 
 // AnimatePresence mode="wait" defers mounting the next child until the exit
@@ -86,20 +84,12 @@ vi.mock("@/store/store", () => ({
   useStore: () => ({ showNotification }),
 }));
 
-vi.mock("@/services/biometrics", () => ({
-  saveBiometricCredentials,
-}));
-
 vi.mock("@/services/native/googleAuth", () => ({
   signInWithNativeGoogle: vi.fn(),
 }));
 
 vi.mock("@/services/native/platform", () => ({
   isNativePlatform: () => false,
-}));
-
-vi.mock("@/features/auth/components/BiometricSignInButton", () => ({
-  BiometricSignInButton: () => null,
 }));
 
 vi.mock("@/features/auth/components/SocialAuthOptions", () => ({
