@@ -75,6 +75,14 @@ describe("useAppLock", () => {
     expect(biometrics.verifyBiometricIdentity).not.toHaveBeenCalled();
   });
 
+  it("stays locked when the setting cannot be read", async () => {
+    biometrics.isAppLockEnabled.mockRejectedValue(new Error("unavailable"));
+    const { result } = renderHook(() => useAppLock(true));
+
+    await waitFor(() => expect(result.current.isChecking).toBe(false));
+    expect(result.current.isLocked).toBe(true);
+  });
+
   it("never locks on the web", () => {
     native.value = false;
     const { result } = renderHook(() => useAppLock(true));

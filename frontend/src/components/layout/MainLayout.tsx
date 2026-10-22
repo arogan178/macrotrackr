@@ -68,7 +68,6 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div
-      inert={appLock.isLocked}
       className={`min-h-dvh bg-background text-foreground ${
         isAuthenticated ? "app-shell-headerless" : ""
       }`}

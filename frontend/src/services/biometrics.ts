@@ -69,7 +69,13 @@ export async function verifyBiometricIdentity(
     await NativeBiometric.verifyIdentity({
       reason,
       title: "Unlock MacroTrackr",
+      // iOS reads useFallback; Android offers the PIN only when listed here.
       useFallback: true,
+      allowedBiometryTypes: [
+        BiometryType.FINGERPRINT,
+        BiometryType.FACE_AUTHENTICATION,
+        BiometryType.DEVICE_CREDENTIAL,
+      ],
     });
 
     return true;
@@ -104,13 +110,13 @@ export async function removeLegacyBiometricCredentials(): Promise<void> {
     return;
   }
 
-  const { value } = await Preferences.get({ key: LEGACY_STORED_KEY });
-  if (value !== "true") {
-    return;
-  }
-
   try {
-    await NativeBiometric.deleteCredentials({ server: LEGACY_SERVER_ID });
+    const { isSaved } = await NativeBiometric.isCredentialsSaved({
+      server: LEGACY_SERVER_ID,
+    });
+    if (isSaved) {
+      await NativeBiometric.deleteCredentials({ server: LEGACY_SERVER_ID });
+    }
     await Preferences.remove({ key: LEGACY_STORED_KEY });
   } catch (error) {
     logger.error("Failed to delete legacy biometric credentials:", error);
@@ -119,13 +125,18 @@ export async function removeLegacyBiometricCredentials(): Promise<void> {
 
 /**
  * Turns the app lock off and removes any legacy password. Runs on sign-out so
- * the next account on this device starts unlocked.
+ * the next account on this device starts unlocked; never throws, so it cannot
+ * block the sign-out itself.
  */
 export async function clearAppLock(): Promise<void> {
   if (!Capacitor.isNativePlatform()) {
     return;
   }
 
-  await setAppLockEnabled(false);
+  try {
+    await setAppLockEnabled(false);
+  } catch (error) {
+    logger.error("Failed to turn off the app lock:", error);
+  }
   await removeLegacyBiometricCredentials();
 }

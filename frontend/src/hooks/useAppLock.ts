@@ -64,6 +64,10 @@ export function useAppLock(isSignedIn: boolean) {
       .then(({ isAppLockEnabled }) => isAppLockEnabled())
       .then((enabled) => {
         if (!cancelled) setState(enabled ? "locked" : "unlocked");
+      })
+      // Fail closed: the lock screen still offers Unlock and Sign out.
+      .catch(() => {
+        if (!cancelled) setState("locked");
       });
 
     return () => {
@@ -87,12 +91,8 @@ export function useAppLock(isSignedIn: boolean) {
         const awayFor =
           backgroundedAt === null ? 0 : Date.now() - backgroundedAt;
         backgroundedAt = null;
-        if (awayFor < LOCK_AFTER_BACKGROUND_MS) return;
-        void loadBiometrics()
-          .then(({ isAppLockEnabled }) => isAppLockEnabled())
-          .then((enabled) => {
-            if (enabled) setState("locked");
-          });
+        // Covers the app at once, then re-reads the setting like a cold start.
+        if (awayFor >= LOCK_AFTER_BACKGROUND_MS) setState("checking");
       });
       if (disposed) {
         void handle.remove();
