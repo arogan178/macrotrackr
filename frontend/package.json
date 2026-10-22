@@ -42,7 +42,6 @@
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/screen-orientation": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
-    "@capacitor/status-bar": "^8.0.3",
     "@capgo/capacitor-native-biometric": "^8.6.2",
     "@clerk/react": "^6.14.1",
     "@codetrix-studio/capacitor-google-auth": "3.4.0-rc.4",

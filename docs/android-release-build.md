@@ -16,18 +16,19 @@ cd frontend && bun run cap:sync:prod
 The guard only covers the webview origin. It cannot tell you whether the JS
 bundle points at the right API, so check `VITE_API_URL` too.
 
-## Enabling R8 (not yet on)
+## R8
 
-`minifyEnabled` and `shrinkResources` are both `false`. The keep rules in
-`android/app/proguard-rules.pro` are already written, so enabling it is a
-two-line change in `android/app/build.gradle`.
+Release builds are minified (`minifyEnabled true`); Play flags an app whose
+code is not obfuscated. `shrinkResources` stays off, because the notification
+icon and splash are looked up by name from `capacitor.config.json`.
 
-It is off because it cannot be verified from a build alone. Capacitor resolves
-plugins and their methods reflectively, so when R8 strips one the build still
-succeeds and the failure only appears at runtime as a feature that quietly does
-nothing. Before shipping a minified build, install it on a device and confirm:
+A clean build proves little. Capacitor resolves plugins and their methods
+reflectively, so when R8 strips one the build still succeeds and the failure
+only appears at runtime as a feature that quietly does nothing. Before
+shipping a release build, install it on a device and confirm:
 
-- Google sign-in completes (`GoogleAuth`, reflectively registered)
+- `Capacitor.PluginHeaders` lists every plugin, including `PlayBilling`
+- Google sign-in completes (`GoogleAuth`)
 - The Pro purchase sheet opens and a purchase reconciles (`PlayBillingPlugin`)
 - The barcode scanner opens the camera
 - Deep links into `/sso-callback` still resolve
