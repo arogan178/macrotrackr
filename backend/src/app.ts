@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
+import { openapi } from "@elysiajs/openapi";
 import type { Database } from "bun:sqlite";
 import { config } from "./config";
 import { clerkAuthMiddleware } from "./middleware/clerk-auth";
@@ -109,7 +109,7 @@ function recordRequestTiming(context: unknown): void {
 
 function swaggerDocs(app: Elysia) {
   app.use(
-    swagger({
+    openapi({
       path: "/api/docs",
       documentation: {
         info: {
