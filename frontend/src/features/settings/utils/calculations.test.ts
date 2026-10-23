@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { todayISO } from "@/utils/dateUtilities";
+
 import { calculateAge, calculateMacros } from "./calculations";
 
 describe("settings calculations", () => {
@@ -24,7 +26,7 @@ describe("settings calculations", () => {
     it("calculates age correctly", () => {
       const date = new Date();
       date.setFullYear(date.getFullYear() - 25);
-      const age = calculateAge(date.toISOString().split("T")[0]);
+      const age = calculateAge(todayISO(date));
       expect(age).toBe(25);
     });
 

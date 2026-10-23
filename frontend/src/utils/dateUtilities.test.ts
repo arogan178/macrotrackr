@@ -19,7 +19,7 @@ import {
 describe("dateUtilities", () => {
   describe("formatISODate", () => {
     it("formats date as YYYY-MM-DD", () => {
-      const date = new Date("2025-06-15T12:00:00Z");
+      const date = new Date(2025, 5, 15, 12);
       expect(formatISODate(date)).toBe("2025-06-15");
     });
 
@@ -154,7 +154,7 @@ describe("dateUtilities", () => {
 
   describe("getDateRangeData", () => {
     it("returns correct date range for week", () => {
-      const referenceDate = new Date("2025-01-10");
+      const referenceDate = new Date(2025, 0, 10);
       const result = getDateRangeData("week", referenceDate);
       expect(result.days).toBe(7);
       expect(result.startDate).toBe("2025-01-04");
