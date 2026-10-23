@@ -37,10 +37,11 @@ product IDs must match what you put in the environment variables later.
 
 | Product ID | Base plan | Price |
 | :--- | :--- | :--- |
-| `pro_monthly` | monthly, auto-renewing | €3.99 |
-| `pro_yearly` | yearly, auto-renewing | €29.99 |
+| `pro_monthly` | `monthly`, auto-renewing | $3.99 |
+| `pro_yearly` | `yearly`, auto-renewing | $29.99 |
 
-Prices come from `shared/pricing.ts`. Keep them in step with Stripe, or the same
+Prices come from `shared/pricing.ts` and are in USD, like Stripe. Set the US
+price and let Play convert the rest. Keep them in step with Stripe, or the same
 Pro plan costs different amounts depending on where someone taps Upgrade.
 
 Each subscription needs at least one **active base plan**. A product with no
@@ -62,9 +63,12 @@ with access to your Play account.
    account's email. Grant, at the account level:
    - **View app information and download bulk reports**
    - **View financial data, orders, and cancellation survey responses**
+   - **Manage orders and subscriptions**
 
    Financial data is the one people miss. Without it every purchase lookup
-   returns 401 and nothing can be verified.
+   returns 401 and nothing can be verified. Managing orders is what lets the
+   server acknowledge a purchase, and Play refunds any purchase left
+   unacknowledged for three days.
 4. **Play Console → Monetise → Monetisation setup**, confirm the linked Google
    Cloud project is the one holding the service account.
 
