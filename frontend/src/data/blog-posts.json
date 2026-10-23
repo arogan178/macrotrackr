@@ -1,5 +1,19 @@
 [
   {
+    "slug": "v3-7-0",
+    "title": "MacroTrackr 3.7.0: A Phone Redesign, the Android App, and Meal Reminders",
+    "excerpt": "Version 3.7 redesigns every screen to read at a glance on a phone, then brings the desktop and public pages onto the same design. The Android app is in closed testing on Google Play, with native Google sign-in, live sync, the barcode scanner, meal reminders that learn when you eat, and Pro through Google Play. New users now land on their first log, or on the importer if they are switching apps.",
+    "date": "2026-10-23",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "2 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v3-6-0",
     "title": "MacroTrackr 3.6.0: Measured Expenditure, Trend Weight, and Targets That Show Their Maths",
     "excerpt": "Version 3.6 works out what you actually burn from your own food log and weight trend, and shows the sum on screen. Your weight chart gains a smoothed trend line, goals are set as a percent of body weight a week, and each week the app can suggest a new calorie target that you accept, edit or skip. Logging gets a way to estimate a day you missed and to copy or move a single entry, and Analytics no longer colours over and under target as good and bad.",

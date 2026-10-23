@@ -1,5 +1,24 @@
 [
   {
+    "version": "3.7.0",
+    "date": "2026-10-23",
+    "title": "A Phone Redesign, the Android App, and Meal Reminders",
+    "type": "release",
+    "summary": "Version 3.7 redesigns every screen to read at a glance on a phone, then brings the desktop and public pages onto the same design. The Android app is in closed testing on Google Play, with native Google sign-in, live sync, the barcode scanner, meal reminders that learn when you eat, and Pro through Google Play. New users now land on their first log, or on the importer if they are switching apps.",
+    "highlights": [
+      "Home on a phone: calories left is the one big figure, over a single bar split by macro. A week strip marks each day as on target, over, under or nothing logged, and each macro is a row against its target",
+      "Entries are single rows. Tapping one opens a sheet with Edit, Log again, Copy or move, Save as meal and Delete",
+      "Goals shows your weight plan as a line from start to target with you on it, and the maintenance working folds under \"How this is worked out\". Analytics shows its averages as rows against target",
+      "Desktop and the public pages follow the same design: rows instead of card grids, toasts as snackbars that pause while you hover, and an upgrade dialog that lists the same Pro features as the pricing page",
+      "New users land on Home with the log sheet open, or on the importer if they are switching from MyFitnessPal, Cronometer, MacroFactor or Lose It!",
+      "Android app, in closed testing: Google sign-in through the phone's account picker, live sync, a working barcode scanner, and the app opens on sign-in or Home instead of the marketing page",
+      "Meal reminders on Android: offered after you log a meal, they move to just before your usual time, back off if you ignore them, and can be set per meal in Settings. They stay on your phone and are cleared when you sign out",
+      "Pro on Android through Google Play. It is the same Pro as on the web, so it follows your account to every device",
+      "Fixes: a failed Google sign-in stays in the app and says why, Google sign-ups wait for sign-in to finish loading, phone screens no longer overflow, and tap areas are at least 48 pixels",
+      "Self-hosting: no new database migrations. The API docs move to @elysiajs/openapi at the same /api/docs path, still off in production"
+    ]
+  },
+  {
     "version": "3.6.0",
     "date": "2026-10-12",
     "title": "Measured Expenditure, Trend Weight, and Targets That Show Their Maths",
