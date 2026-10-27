@@ -261,6 +261,53 @@ describe("auth routes", () => {
       });
     });
 
+    describe("with ENABLE_SIGNUPS=0", () => {
+      beforeEach(() => {
+        process.env.ENABLE_SIGNUPS = "0";
+        resetConfigCache();
+      });
+
+      afterEach(() => {
+        delete process.env.ENABLE_SIGNUPS;
+        resetConfigCache();
+      });
+
+      it("returns 403 once an account exists", async () => {
+        safeQueryMock.mockReturnValue({ id: 1 });
+
+        const app = createAuthTestApp(fakeDb);
+        const response = await postJson(app, "/api/auth/register", {
+          email: "new@example.com",
+          password: "secure-password",
+          firstName: "New",
+          lastName: "Person",
+        });
+
+        expect(response.status).toBe(403);
+        await expect(response.json()).resolves.toMatchObject({
+          message: "Sign-ups are disabled on this server.",
+        });
+        expect(withTransactionMock).not.toHaveBeenCalled();
+      });
+
+      it("still lets the first account register", async () => {
+        safeQueryMock.mockReturnValue(null);
+        safeExecuteMock
+          .mockReturnValueOnce({ lastInsertRowid: 1 })
+          .mockReturnValue({ lastInsertRowid: 0 });
+
+        const app = createAuthTestApp(fakeDb);
+        const response = await postJson(app, "/api/auth/register", {
+          email: "owner@example.com",
+          password: "secure-password",
+          firstName: "Owner",
+          lastName: "Person",
+        });
+
+        expect(response.status).toBe(200);
+      });
+    });
+
     it("returns 404 outside local auth mode", async () => {
       authMode = "clerk";
       process.env.APP_MODE = "managed";

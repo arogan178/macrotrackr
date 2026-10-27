@@ -14,6 +14,7 @@ services:
       AUTH_MODE: ${AUTH_MODE:-local}
       BILLING_MODE: ${BILLING_MODE:-disabled}
       ANALYTICS_MODE: ${ANALYTICS_MODE:-disabled}
+      ENABLE_SIGNUPS: ${ENABLE_SIGNUPS:-1}
       APP_URL: ${APP_URL:-http://localhost:5173}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       # The bundled nginx overwrites X-Real-IP, so per-client rate limiting can

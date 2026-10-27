@@ -39,6 +39,7 @@ Backend canonical variables:
 - `ANALYTICS_MODE`
 - `APP_URL`, `SUPPORT_EMAIL`
 - `ENABLE_METRICS`
+- `ENABLE_SIGNUPS` (set `0` to close registration after the first account)
 
 Frontend optional branding/public link variables:
 

@@ -10,6 +10,7 @@ import {
 import {
   AccountLinkRequiredError,
   AuthenticationError,
+  AuthorizationError,
   ConflictError,
   BadRequestError,
   NotFoundError,
@@ -205,6 +206,13 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
           if (getConfig().AUTH_MODE !== "local") {
             context.set.status = 404;
             throw new NotFoundError("Not found");
+          }
+
+          if (
+            !getConfig().ENABLE_SIGNUPS &&
+            safeQuery<{ id: number }>(db, "SELECT id FROM users LIMIT 1")
+          ) {
+            throw new AuthorizationError("Sign-ups are disabled on this server.");
           }
 
           const email = body.email.trim().toLowerCase();
