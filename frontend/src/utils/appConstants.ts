@@ -24,7 +24,7 @@ const rawGitHubRepoUrl = resolveExternalUrl(
 );
 const rawDocumentationUrl = resolveExternalUrl(
   import.meta.env.VITE_DOCS_URL,
-  `${rawGitHubRepoUrl}/tree/main/docs`,
+  `${rawGitHubRepoUrl}/tree/master/docs`,
 );
 
 export const APP_URL = trimTrailingSlash(rawAppUrl);
