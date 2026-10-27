@@ -2,8 +2,6 @@ import { useMemo } from "react";
 
 import { formatMealType,MEAL_TYPES } from "@/utils/nutritionVisualizations";
 
-import { getDayString } from "../utils";
-
 // Re-export MealType from shared utilities
 type MealType = (typeof MEAL_TYPES)[number];
 
@@ -122,17 +120,14 @@ export function useMealTimeBreakdown(
   // Filter history by date range
   const filteredHistory = useMemo(() => {
     if (!history.length) return [];
-    // Use shared getDayString for normalization, but direct start/end for filtering
     const start = new Date(startDate + "T00:00:00");
     const end = new Date(endDate + "T23:59:59");
 
     return history.filter((entry) => {
       const dateString = entry.entryDate ?? entry.createdAt.split("T")[0];
       if (!dateString) return false;
-      // Use shared getDayString for normalization
-      const entryDate = new Date(
-        getDayString(new Date(dateString)) + "T12:00:00",
-      );
+      // Local noon: a bare "YYYY-MM-DD" parses as UTC and lands a day early west of UTC.
+      const entryDate = new Date(`${dateString.slice(0, 10)}T12:00:00`);
 
       return entryDate >= start && entryDate <= end;
     });

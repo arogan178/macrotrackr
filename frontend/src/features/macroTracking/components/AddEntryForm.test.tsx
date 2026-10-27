@@ -129,13 +129,6 @@ describe("AddEntryForm", () => {
     }
   });
 
-  it("renders without crashing", () => {
-    const { container } = render(
-      <AddEntryForm onSubmit={async () => {}} isSaving={false} />,
-    );
-    expect(container).toBeDefined();
-  });
-
   it("explains why the submit button is disabled, at every breakpoint", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 

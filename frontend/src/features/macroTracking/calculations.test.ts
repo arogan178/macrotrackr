@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { todayISO } from "@/utils/dateUtilities";
+
 import { getTodayEntries } from "./calculations";
 
 describe("macroTracking calculations", () => {
   describe("getTodayEntries", () => {
     it("filters entries for today", () => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = todayISO();
       const entries = [
         { entryDate: today, protein: 10 },
         { entryDate: "2020-01-01", protein: 20 },

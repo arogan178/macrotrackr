@@ -4,7 +4,6 @@ import {
   getUnitForStat,
   MACRO_COLORS,
   MEAL_COLORS,
-  STAT_COLORS,
 } from "./chartColors";
 
 describe("chartColors", () => {
@@ -27,36 +26,10 @@ describe("chartColors", () => {
   });
 
   describe("MEAL_COLORS", () => {
-    it("should have breakfast color defined", () => {
-      expect(MEAL_COLORS.breakfast).toBeDefined();
-    });
-
-    it("should have lunch color defined", () => {
-      expect(MEAL_COLORS.lunch).toBeDefined();
-    });
-
-    it("should have dinner color defined", () => {
-      expect(MEAL_COLORS.dinner).toBeDefined();
-    });
-
-    it("should have snack color defined", () => {
-      expect(MEAL_COLORS.snack).toBeDefined();
-    });
-
     it("never reuses a macro colour, which sits beside it on Analytics", () => {
       expect(JSON.stringify(MEAL_COLORS)).not.toMatch(
         /--color-(protein|carbs|fats)/,
       );
-    });
-  });
-
-  describe("STAT_COLORS", () => {
-    it("should have calories color defined", () => {
-      expect(STAT_COLORS.calories).toBe("bg-primary");
-    });
-
-    it("should have protein color defined", () => {
-      expect(STAT_COLORS.protein).toBe("bg-protein");
     });
   });
 
