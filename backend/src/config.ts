@@ -41,6 +41,13 @@ const BaseEnvSchema = z.object({
     .transform((value) => value === true || value === "true")
     .default(false),
 
+  // Local auth only. The first account can always register, so a fresh
+  // instance with sign-ups off can still create its owner.
+  ENABLE_SIGNUPS: z
+    .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+    .transform((value) => value === true || value === "true" || value === "1")
+    .default(true),
+
   // Only enable when the app sits behind a reverse proxy that overwrites
   // X-Forwarded-For. When false, rate limiting keys on the socket address so
   // clients cannot spoof their identity with a forged header.

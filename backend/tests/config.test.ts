@@ -43,6 +43,7 @@ const managedKeys = [
   "APP_URL",
   "SUPPORT_EMAIL",
   "ENABLE_METRICS",
+  "ENABLE_SIGNUPS",
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
   "STRIPE_PRICE_ID_MONTHLY",
@@ -122,7 +123,19 @@ describe("config", () => {
     expect(config.APP_URL).toBe("http://localhost:5173");
     expect(config.SUPPORT_EMAIL).toBe("support@local.invalid");
     expect(config.ENABLE_METRICS).toBe(false);
+    expect(config.ENABLE_SIGNUPS).toBe(true);
     expect(config.CORS_ORIGIN).toBe("http://localhost:5173");
+  });
+
+  it.each([
+    ["0", false],
+    ["false", false],
+    ["1", true],
+    ["true", true],
+  ])("reads ENABLE_SIGNUPS=%s as %s", async (value, expected) => {
+    const { config } = await loadConfigModule({ ENABLE_SIGNUPS: value });
+
+    expect(config.ENABLE_SIGNUPS).toBe(expected);
   });
 
   it("transforms CSV CORS origins and resolves relative database paths", async () => {

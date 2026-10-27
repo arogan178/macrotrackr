@@ -108,6 +108,7 @@ docker compose up -d
 | `AUTH_MODE` | `local` | Use `local` for built-in database auth |
 | `BILLING_MODE` | `disabled` | Set to `disabled` for self-hosted instances |
 | `ANALYTICS_MODE`| `disabled` | Set to `disabled` for zero telemetry |
+| `ENABLE_SIGNUPS` | `1` | Set to `0` to stop new accounts registering. The first account on an empty database can still register |
 | `ENABLE_METRICS`| `false` | Enable Prometheus `/metrics` endpoint |
 | `METRICS_API_KEY` | *(optional)* | Shared secret for securing `/metrics` endpoint |
 
