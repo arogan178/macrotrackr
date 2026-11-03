@@ -29,7 +29,6 @@ export default function WeightField({
   maxKg,
   ...rest
 }: WeightFieldProps) {
-  const isImperial = unitSystem === "imperial";
   const { min, max } = weightLimits(minKg, maxKg, unitSystem);
 
   return (
@@ -49,8 +48,8 @@ export default function WeightField({
       max={max}
       step={0.1}
       unit={weightUnit(unitSystem)}
-      // A typical lb weight, 165.5, is already four digits.
-      maxDigits={isImperial ? 4 : 3}
+      // One decimal place: 100.5 kg and 165.5 lb are both four digits.
+      maxDigits={4}
     />
   );
 }

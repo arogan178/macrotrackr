@@ -62,6 +62,20 @@ describe("LogWeightModal", () => {
     expect(addWeightLog.mock.calls[0][0].weight).toBe(75.07);
   });
 
+  it("takes a three-figure kg weight with a decimal", async () => {
+    const user = userEvent.setup();
+    render(<LogWeightModal isOpen onClose={vi.fn()} />);
+
+    const input = screen.getByLabelText("Weight");
+    await user.type(input, "100.5");
+    expect(input).toHaveValue(100.5);
+
+    await user.click(screen.getByRole("button", { name: "Log weight" }));
+
+    await waitFor(() => expect(addWeightLog).toHaveBeenCalledTimes(1));
+    expect(addWeightLog.mock.calls[0][0].weight).toBe(100.5);
+  });
+
   it("shows a stored kg weight in lb", () => {
     render(
       <LogWeightModal
