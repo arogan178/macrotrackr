@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { todayISO } from "./dateUtilities";
 import { isOldEnough } from "./validation";
 
 describe("validation", () => {
@@ -8,7 +9,7 @@ describe("validation", () => {
       // Someone born 20 years ago
       const date20YearsAgo = new Date();
       date20YearsAgo.setFullYear(date20YearsAgo.getFullYear() - 20);
-      const dateString = date20YearsAgo.toISOString().split("T")[0];
+      const dateString = todayISO(date20YearsAgo);
       
       expect(isOldEnough(dateString)).toBe(true);
     });
@@ -17,7 +18,7 @@ describe("validation", () => {
       // Someone born 17 years ago
       const date17YearsAgo = new Date();
       date17YearsAgo.setFullYear(date17YearsAgo.getFullYear() - 17);
-      const dateString = date17YearsAgo.toISOString().split("T")[0];
+      const dateString = todayISO(date17YearsAgo);
       
       expect(isOldEnough(dateString)).toBe(false);
     });
@@ -26,7 +27,7 @@ describe("validation", () => {
       // Someone born exactly 18 years ago
       const date18YearsAgo = new Date();
       date18YearsAgo.setFullYear(date18YearsAgo.getFullYear() - 18);
-      const dateString = date18YearsAgo.toISOString().split("T")[0];
+      const dateString = todayISO(date18YearsAgo);
       
       expect(isOldEnough(dateString)).toBe(true);
     });

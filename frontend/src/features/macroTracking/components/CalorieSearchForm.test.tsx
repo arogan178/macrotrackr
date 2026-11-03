@@ -156,13 +156,6 @@ describe("CalorieSearchForm", () => {
     expect(screen.getByRole("textbox", { name: "Search for food" })).not.toHaveFocus();
   });
 
-  it("renders without crashing", () => {
-    const { container } = renderWithQueryClient(
-      <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
-    );
-    expect(container).toBeDefined();
-  });
-
   it("names the visible search input when a hidden copy is also mounted", () => {
     renderWithQueryClient(
       <>

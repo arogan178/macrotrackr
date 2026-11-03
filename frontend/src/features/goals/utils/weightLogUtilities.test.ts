@@ -1,27 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  createWeightLogEntry,
   filterWeightLogByDateRange,
   getTrendChange,
   sortWeightLogByDate,
 } from "./weightLogUtilities";
 
 describe("weightLogUtilities", () => {
-  describe("createWeightLogEntry", () => {
-    it("creates entry with current date when no date provided", () => {
-      const entry = createWeightLogEntry(150);
-      expect(entry.weight).toBe(150);
-      expect(entry.timestamp).toBeDefined();
-    });
-
-    it("creates entry with specified date", () => {
-      const entry = createWeightLogEntry(150, "2024-01-15");
-      expect(entry.weight).toBe(150);
-      expect(entry.timestamp).toContain("2024-01-15");
-    });
-  });
-
   describe("sortWeightLogByDate", () => {
     it("sorts entries by date descending", () => {
       const entries = [

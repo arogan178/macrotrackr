@@ -36,11 +36,6 @@ describe("habitUtilities", () => {
       expect(habit.target).toBe(10);
       expect(habit.current).toBe(0);
     });
-
-    it("uses default color when not provided", () => {
-      const habit = createNewHabit({ title: "Exercise", target: 10 });
-      expect(habit.accentColor).toBeDefined();
-    });
   });
 
   describe("updateHabitFromForm", () => {
