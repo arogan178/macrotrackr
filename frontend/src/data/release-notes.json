@@ -1,5 +1,18 @@
 [
   {
+    "version": "3.7.1",
+    "date": "2026-11-13",
+    "title": "Meal Breakdown on Phones and Fixes",
+    "type": "release",
+    "summary": "Version 3.7.1 brings the per-meal breakdown back to Home on phones, fixes weights of 100 kg and over, and lets self-hosted instances close sign-ups.",
+    "highlights": [
+      "Home on a phone shows calories per meal again, under the macro rows, as it does on desktop",
+      "Weight takes four digits in kg, so 100.5 kg no longer loses its last digit",
+      "The Docs link in the header opens the documentation instead of a missing page",
+      "Self-hosting: ENABLE_SIGNUPS=0 closes registration after the first account. No new database migrations"
+    ]
+  },
+  {
     "version": "3.7.0",
     "date": "2026-10-23",
     "title": "A Phone Redesign, the Android App, and Meal Reminders",
