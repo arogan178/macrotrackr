@@ -50,7 +50,7 @@ interface DailySummaryProps {
   date?: string;
   /** A control for the day, shown beside the target figure. */
   dayAction?: ReactNode;
-  /** The day split by meal, where there is room for it beside the log form. */
+  /** The day split by meal. */
   breakdown?: ReactNode;
 }
 
@@ -302,7 +302,7 @@ function DailySummaryInner({
         </ul>
 
         {breakdown && (
-          <div className="hidden flex-1 flex-col border-t border-border px-6 py-3 md:flex">
+          <div className="mt-6 flex flex-1 flex-col border-t border-border pt-3 md:mt-0 md:px-6 md:py-3">
             {breakdown}
           </div>
         )}
