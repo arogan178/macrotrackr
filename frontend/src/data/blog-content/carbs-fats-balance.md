@@ -320,6 +320,4 @@ Your body will tell you what it needs. You just have to listen.
 
 *This article summarises published research for general fitness planning. It is not medical advice.*
 
-The MacroTrackr Team
-
 *Need help setting your targets? Email us at support@macrotrackr.com.*

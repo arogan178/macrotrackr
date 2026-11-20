@@ -137,7 +137,7 @@ Weigh and assemble containers:
 - Most cooked meals: 2-3 months
 - Label with date and contents
 
-**The 4-day rule:** If you won't eat it within 4 days, freeze it.
+**The rule of thumb:** if you won't eat something within the time listed above, freeze it on the day you cook it.
 
 ### Reheating
 

@@ -33,8 +33,8 @@
     "h1": "TDEE Calculator"
   },
   "/tools/bmr-calculator": {
-    "title": "Free BMR Calculator (Mifflin-St Jeor) — MacroTrackr",
-    "description": "Calculate your Basal Metabolic Rate with the Mifflin-St Jeor equation and see the calories your body burns at complete rest.",
+    "title": "BMR Calculator: Mifflin-St Jeor & Harris-Benedict | MacroTrackr",
+    "description": "Calculate your basal metabolic rate in kg or lb with the Mifflin-St Jeor and revised Harris-Benedict equations, then see your daily burn at each activity level.",
     "h1": "BMR Calculator"
   },
   "/tools/macro-calculator": {

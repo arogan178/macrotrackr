@@ -163,6 +163,27 @@ export function calculateBMR(
   return Math.round(calculateBMRValue(weight, height, age, gender === "male"));
 }
 
+/** Revised Harris-Benedict (Roza and Shizgal, 1984), shown next to Mifflin-St Jeor for comparison. */
+export function calculateHarrisBenedictBMR(
+  weight: number,
+  height: number,
+  age: number,
+  gender: Gender,
+): number {
+  if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
+    return 0;
+  }
+  const safeWeight = Math.max(30, Math.min(300, weight));
+  const safeHeight = Math.max(100, Math.min(250, height));
+  const safeAge = Math.min(120, Math.max(1, age));
+  const bmr =
+    gender === "male"
+      ? 88.362 + 13.397 * safeWeight + 4.799 * safeHeight - 5.677 * safeAge
+      : 447.593 + 9.247 * safeWeight + 3.098 * safeHeight - 4.33 * safeAge;
+
+  return Math.round(Math.max(500, bmr));
+}
+
 function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
   if (!bmr) return 0;
 

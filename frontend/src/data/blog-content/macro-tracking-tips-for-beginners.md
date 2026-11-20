@@ -137,9 +137,9 @@ You hit 179g protein instead of 180g. You stress about it.
 
 ## Building Long-Term Habits
 
-### The 21-Day Rule
+### Expect It to Take a Couple of Months
 
-Research shows it takes 18-254 days to form a habit (average: 66 days). Give yourself at least three weeks before tracking feels automatic.
+In a study that followed people building a new daily habit, it took a median of 66 days for the behaviour to feel automatic, with a range of 18 to 254 days ([Lally et al., 2010](https://doi.org/10.1002/ejsp.674)). Expect tracking to take deliberate effort for the first two months or so, and don't read a slow start as failure.
 
 ### Track Something, Even on Bad Days
 
@@ -202,7 +202,5 @@ You don't need to wait for Monday. You don't need to finish reading every nutrit
 That's it. Start simple. Stay consistent. The results will come.
 
 [Start your free MacroTrackr account](/register) and make today Day 1.
-
-The MacroTrackr Team
 
 *Questions about getting started? Email us at support@macrotrackr.com. We read every message.*

@@ -38,8 +38,23 @@ export function buildToolSchema({
     description,
   };
 
+  const breadcrumbSchema = {
+    "@context": SCHEMA_ORG_CONTEXT,
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: APP_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Free calculators",
+        item: `${APP_URL}/tools`,
+      },
+      { "@type": "ListItem", position: 3, name, item: url },
+    ],
+  };
+
   if (!faqs.length) {
-    return JSON.stringify(webAppSchema);
+    return JSON.stringify([webAppSchema, breadcrumbSchema]);
   }
 
   const faqSchema = {
@@ -55,5 +70,5 @@ export function buildToolSchema({
     })),
   };
 
-  return JSON.stringify([webAppSchema, faqSchema]);
+  return JSON.stringify([webAppSchema, breadcrumbSchema, faqSchema]);
 }

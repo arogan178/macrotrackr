@@ -8,6 +8,7 @@ import {
   calculateDailyTotals,
   calculateFatsCalories,
   calculateGoalRate,
+  calculateHarrisBenedictBMR,
   calculateMacroTarget,
   calculateProteinCalories,
   calculateTDEE,
@@ -170,6 +171,22 @@ describe("nutritionCalculations", () => {
       const maleBMR = calculateBMR(80, 180, 30, "male");
       const femaleBMR = calculateBMR(80, 180, 30, "female");
       expect(maleBMR).toBeGreaterThan(femaleBMR);
+    });
+  });
+
+  describe("calculateHarrisBenedictBMR", () => {
+    it("uses the revised male equation", () => {
+      // 88.362 + 13.397*80 + 4.799*180 - 5.677*30 = 1853.6
+      expect(calculateHarrisBenedictBMR(80, 180, 30, "male")).toBe(1854);
+    });
+
+    it("uses the revised female equation", () => {
+      // 447.593 + 9.247*65 + 3.098*165 - 4.330*25 = 1451.6
+      expect(calculateHarrisBenedictBMR(65, 165, 25, "female")).toBe(1452);
+    });
+
+    it("returns 0 for a missing stat", () => {
+      expect(calculateHarrisBenedictBMR(80, 180, 0, "male")).toBe(0);
     });
   });
 
