@@ -130,7 +130,7 @@ Weigh and assemble containers:
 - Cooked chicken: 3-4 days
 - Cooked beef/pork: 3-4 days
 - Cooked fish: 1-2 days
-- Cooked rice: 4-6 days
+- Cooked rice: 1 day. Cool it within an hour and freeze any portions for later in the week ([Food Standards Agency](https://www.food.gov.uk/safety-hygiene/student-guide-to-food-safety-and-hygiene))
 - Cooked vegetables: 3-5 days
 
 **Freezer (0°F/-18°C):**
@@ -259,7 +259,7 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 - Mixed nuts in 1-oz portions
 
 **Meals assembled:**
-- 5 lunches: Chicken, rice, roasted vegetables (refrigerate Monday to Wednesday's, freeze Thursday's and Friday's and move each to the fridge the night before)
+- 5 lunches: Chicken, rice, roasted vegetables (refrigerate Monday's, freeze the rest and move each to the fridge the night before)
 - 5 snacks: Greek yogurt with berries
 - Breakfast ingredients prepped: Eggs ready to cook or overnight oats ready to grab
 
