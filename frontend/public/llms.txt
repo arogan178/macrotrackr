@@ -22,7 +22,8 @@ with or without JavaScript.
   Energy Expenditure from bodyweight, height, age, sex and activity level.
   Derives BMR via Mifflin-St Jeor, then applies an activity multiplier.
 - [BMR Calculator](https://macrotrackr.com/tools/bmr-calculator): Basal
-  Metabolic Rate using the Mifflin-St Jeor equation.
+  Metabolic Rate using the Mifflin-St Jeor equation, with the revised
+  Harris-Benedict result for comparison and the burn at each activity level.
 - [Macro Calculator](https://macrotrackr.com/tools/macro-calculator): converts a
   calorie target into daily grams of protein, carbohydrate and fat, with
   adjustable percentage splits.

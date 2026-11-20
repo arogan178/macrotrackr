@@ -60,6 +60,7 @@ export default function CalculatorLayout({
     description: meta.description,
     url: canonicalUrl,
     faqs,
+    parent: { name: "Free calculators", url: buildCanonicalUrl(TOOLS_HUB_PATH) },
   });
 
   return (

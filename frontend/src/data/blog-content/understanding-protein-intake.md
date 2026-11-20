@@ -267,6 +267,4 @@ Don't overcomplicate it. Hit your daily target consistently, train hard, and the
 
 *This article summarises published research for general fitness planning. It is not medical advice.*
 
-The MacroTrackr Team
-
 *Track your protein intake effortlessly with MacroTrackr's free tier. [Sign up here](/register).*

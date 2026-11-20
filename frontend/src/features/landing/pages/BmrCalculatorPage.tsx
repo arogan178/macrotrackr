@@ -2,7 +2,10 @@ import { Link } from "@tanstack/react-router";
 
 import { ArrowRightIcon } from "@/components/ui";
 import { formatGrouped } from "@/lib/formatNumber";
-import { calculateBMR } from "@/utils/nutritionCalculations";
+import {
+  calculateBMR,
+  calculateHarrisBenedictBMR,
+} from "@/utils/nutritionCalculations";
 import { ACTIVITY_LEVELS } from "@/utils/userConstants";
 
 import BodyStatsForm from "../tools/BodyStatsForm";
@@ -21,6 +24,9 @@ export default function BmrCalculatorPage() {
   const statsReady = stats.ready;
 
   const bmr = statsReady ? calculateBMR(weightKg, heightCm, age, gender) : 0;
+  const harrisBenedict = statsReady
+    ? calculateHarrisBenedictBMR(weightKg, heightCm, age, gender)
+    : 0;
 
   return (
     <CalculatorLayout
@@ -44,7 +50,8 @@ export default function BmrCalculatorPage() {
         <div className="md:col-span-7 md:pr-8">
           <h2 className={calculatorSectionTitleClass}>Your Body Stats</h2>
           <p className={`${calculatorSectionDescriptionClass} mb-5`}>
-            We use the Mifflin-St Jeor equation for this estimate.
+            The headline figure uses the Mifflin-St Jeor equation, with the
+            revised Harris-Benedict result alongside for comparison.
           </p>
           <BodyStatsForm stats={stats} />
         </div>
@@ -62,6 +69,28 @@ export default function BmrCalculatorPage() {
               This is the energy your body uses for essential functions before
               movement, exercise, and digestion.
             </p>
+          ) : null}
+
+          {statsReady ? (
+            <div className="mt-6">
+              <h3 className="text-xs font-semibold text-foreground">
+                BMR by equation
+              </h3>
+              <ul className="mt-2 divide-y divide-border">
+                <li className="flex items-center justify-between gap-3 py-2.5 text-xs">
+                  <span className="text-muted">Mifflin-St Jeor</span>
+                  <span className="whitespace-nowrap font-semibold text-foreground tabular-nums">
+                    {formatGrouped(bmr)} kcal
+                  </span>
+                </li>
+                <li className="flex items-center justify-between gap-3 py-2.5 text-xs">
+                  <span className="text-muted">Harris-Benedict (revised)</span>
+                  <span className="whitespace-nowrap font-semibold text-foreground tabular-nums">
+                    {formatGrouped(harrisBenedict)} kcal
+                  </span>
+                </li>
+              </ul>
+            </div>
           ) : null}
 
           <div className="mt-8 border-t border-border pt-6">

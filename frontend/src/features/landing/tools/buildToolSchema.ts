@@ -10,6 +10,8 @@ export interface SchemaToolOptions {
   description: string;
   url: string;
   faqs?: FaqItem[];
+  /** The page above this one in the visible breadcrumb. */
+  parent?: { name: string; url: string };
 }
 
 export function buildToolSchema({
@@ -17,6 +19,7 @@ export function buildToolSchema({
   description,
   url,
   faqs = [],
+  parent,
 }: SchemaToolOptions): string {
   const webAppSchema = {
     "@context": SCHEMA_ORG_CONTEXT,
@@ -38,8 +41,21 @@ export function buildToolSchema({
     description,
   };
 
+  const schemas: object[] = [webAppSchema];
+
+  if (parent) {
+    schemas.push({
+      "@context": SCHEMA_ORG_CONTEXT,
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: parent.name, item: parent.url },
+        { "@type": "ListItem", position: 2, name, item: url },
+      ],
+    });
+  }
+
   if (!faqs.length) {
-    return JSON.stringify(webAppSchema);
+    return JSON.stringify(schemas.length === 1 ? webAppSchema : schemas);
   }
 
   const faqSchema = {
@@ -55,5 +71,5 @@ export function buildToolSchema({
     })),
   };
 
-  return JSON.stringify([webAppSchema, faqSchema]);
+  return JSON.stringify([...schemas, faqSchema]);
 }
