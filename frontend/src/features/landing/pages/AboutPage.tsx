@@ -68,8 +68,8 @@ export default function AboutPage() {
               How the nutrition content is checked
             </Heading>
             <p className="text-sm leading-relaxed text-muted">
-              Claims about nutrition and the body link to the research they come
-              from, usually a position stand, a systematic review or a trial.
+              The articles link to the research behind their nutrition claims,
+              usually a position stand, a systematic review or a trial.
               Every calculator states its formula under &ldquo;How this is
               calculated&rdquo;, so you can check the working. None of it is
               medical advice. If you are pregnant, managing a health condition or

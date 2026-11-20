@@ -97,7 +97,7 @@
   },
   "/migrate/lose-it": {
     "title": "How to Export Your Lose It! Data: Step-by-Step Guide",
-    "description": "Lose It! only exports from its website, as one full-account download with no date range. The steps, how to spot your food-log CSV, and where to take it.",
+    "description": "Lose It!'s full data download only runs from its website, with no date range. The steps, how to spot your food-log CSV, and where to take it.",
     "h1": "How to Export Your Lose It! Data: Step-by-Step Guide"
   },
   "/open-source": {

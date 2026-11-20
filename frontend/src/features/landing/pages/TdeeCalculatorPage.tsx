@@ -73,7 +73,11 @@ export default function TdeeCalculatorPage() {
       fats * CALORIES_PER_GRAM.fats;
     const carbs = Math.max(0, Math.round(carbCalories / CALORIES_PER_GRAM.carbs));
 
-    return { ...goal, macros: { protein, carbs, fats } };
+    return {
+      ...goal,
+      macros: { protein, carbs, fats },
+      overBudget: carbCalories < 0,
+    };
   });
 
   return (
@@ -221,6 +225,12 @@ export default function TdeeCalculatorPage() {
                   </dd>
                 </div>
               </dl>
+              {goal.overBudget ? (
+                <p className="mt-3 text-xs leading-relaxed text-muted">
+                  Protein and fat alone go over this calorie target. At a
+                  higher bodyweight, base protein on your goal weight instead.
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

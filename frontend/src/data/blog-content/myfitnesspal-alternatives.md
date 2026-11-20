@@ -6,7 +6,7 @@ Prices differ by country and change often, so I have left most of them out. Chec
 
 ## Cronometer: if you care about micronutrients
 
-Cronometer tracks vitamins and minerals in detail, not just calories and macros, and its food entries lean on curated nutrition databases rather than whatever users typed in. If you want to know whether you are short on iron or vitamin D, it is the strongest option here.
+Cronometer tracks vitamins and minerals in detail, not just calories and macros, and its food entries lean on curated nutrition databases rather than whatever users typed in. If you want to compare how much iron or vitamin D you log against a daily target, it is the strongest option here. (Logged intake is not the same as your blood levels; only a test tells you that.)
 
 - **Free plan:** barcode scanning and custom macro targets, with ads.
 - **Paid plan (Gold):** removes ads and adds more analysis.
@@ -14,22 +14,22 @@ Cronometer tracks vitamins and minerals in detail, not just calories and macros,
 
 ## MacroFactor: if you want the app to set your targets
 
-MacroFactor estimates your energy expenditure from what you log and how your weight trends, then adjusts your calorie and macro targets each week. Plenty of people like handing that decision over.
+MacroFactor estimates your energy expenditure from what you log and how your weight trends. In its Coached mode it adjusts your calorie and macro targets each week; in Manual mode you set them yourself and keep the tracking and analytics ([MacroFactor](https://help.macrofactorapp.com/macro_program/program_styles)).
 
 - **Pricing:** subscription only, after a 7-day trial. At the time of writing the US App Store lists $71.99 a year.
-- **Trade-off:** there is no free plan, and the targets are coached for you. If you prefer to set your own, you are paying for a feature you will not use.
+- **Trade-off:** there is no free plan. If you would use Manual mode, you are paying mostly for its expenditure estimate and food logging.
 
 ## Lose It!: if you mainly count calories
 
-Lose It! is built around a simple daily calorie budget and is quick to log in. The barcode scanner is free.
+Lose It! is built around a simple daily calorie budget and is quick to log in. Its barcode scanner is moving to Premium, and Lose It! says some free accounts keep it during the transition while others do not ([Lose It!](https://loseit.zendesk.com/hc/en-us/articles/47773984823700-Unlocking-the-Barcode-Scanner-Scan-It)).
 
-- **Free plan:** calorie tracking and barcode scanning, with ads.
-- **Paid plan (Premium):** adds custom macro goals and more detailed reports.
+- **Free plan:** calorie tracking, with ads.
+- **Paid plan (Premium):** adds custom macro goals, more detailed reports and, on most accounts, the barcode scanner.
 - **Trade-off:** if your targets are in grams of protein rather than total calories, the parts you need are behind Premium.
 
 ## FatSecret: if you want the most for free
 
-FatSecret keeps calorie and macro tracking and the barcode scanner on its free plan.
+At the time of writing, FatSecret keeps calorie and macro tracking and the barcode scanner on its free plan.
 
 - **Free plan:** food diary, barcode scanning and macros, with ads.
 - **Paid plan (Premium):** removes ads and adds extra features.

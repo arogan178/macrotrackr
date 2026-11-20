@@ -104,6 +104,21 @@ describe("Free Calculators", () => {
       expect(screen.getByText("165g")).toBeInTheDocument();
     });
 
+    it("says so when protein and fat alone exceed the fat-loss target", () => {
+      render(<TdeeCalculatorPage />);
+      expect(screen.queryByText(/protein and fat alone/i)).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText(/gender/i), {
+        target: { value: "female" },
+      });
+      fireEvent.change(screen.getByLabelText(/^age$/i), { target: { value: "70" } });
+      fireEvent.change(screen.getByLabelText(/weight/i), { target: { value: "100" } });
+      fireEvent.change(screen.getByLabelText(/height/i), { target: { value: "150" } });
+      fireEvent.click(screen.getByRole("button", { name: /sedentary/i }));
+
+      expect(screen.getByText(/protein and fat alone/i)).toBeInTheDocument();
+    });
+
     it("lets the activity breakdown rows set the activity level", () => {
       render(<TdeeCalculatorPage />);
 

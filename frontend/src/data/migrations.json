@@ -48,10 +48,10 @@
     "slug": "lose-it",
     "sourceName": "Lose It!",
     "title": "How to Export Your Lose It! Data: Step-by-Step Guide",
-    "description": "Lose It! only exports from its website, as one full-account download with no date range. The steps, how to spot your food-log CSV, and where to take it.",
+    "description": "Lose It!'s full data download only runs from its website, with no date range. The steps, how to spot your food-log CSV, and where to take it.",
     "summary": "Bring your existing logs into an ad-free tracker with custom macro targets and optional self-hosting.",
     "exportSteps": [
-      "Sign in to my.loseit.com in a web browser. The export is only on the website, not in the phone app.",
+      "Sign in to my.loseit.com in a web browser. The full download is only on the website; the iOS app can email daily or weekly reports, which are not a complete history.",
       "Open loseit.com/export/data to start the full account download.",
       "Extract the download and keep the CSV containing your food log."
     ],

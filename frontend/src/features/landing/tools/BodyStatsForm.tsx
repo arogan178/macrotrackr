@@ -133,7 +133,7 @@ export default function BodyStatsForm({
               label="Height (ft)"
               value={feet || ""}
               onChange={(v) =>
-                setHeightCm(ftInToCm(toNumericInput(v, 8), inches))
+                setHeightCm(Math.min(250, ftInToCm(toNumericInput(v, 8), inches)))
               }
               min={3}
               max={8}
@@ -143,7 +143,7 @@ export default function BodyStatsForm({
               label="Height (in)"
               value={inches || ""}
               onChange={(v) =>
-                setHeightCm(ftInToCm(feet, toNumericInput(v, 11)))
+                setHeightCm(Math.min(250, ftInToCm(feet, toNumericInput(v, 11))))
               }
               min={0}
               max={11}
