@@ -33,7 +33,7 @@ export default function ToolsHubPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       {schemaScript && (
         <script
           type="application/ld+json"
@@ -43,7 +43,7 @@ export default function ToolsHubPage() {
 
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:mb-12">
             <Heading level="display">Free nutrition and macro calculators</Heading>
@@ -61,11 +61,16 @@ export default function ToolsHubPage() {
                     title={tool.title}
                     description={tool.description}
                     badge={
-                      tool.featured ? (
-                        <span className="rounded-full bg-primary/12 px-2 py-0.5 text-xs font-medium text-primary">
-                          Start here
+                      <span className="inline-flex items-center gap-2">
+                        {tool.featured && (
+                          <span className="rounded-full bg-primary/12 px-2 py-0.5 text-xs font-medium text-primary">
+                            Start here
+                          </span>
+                        )}
+                        <span className="rounded-control border border-border px-2 py-0.5 font-mono text-[11px] text-muted tabular-nums">
+                          {tool.outputLabel}
                         </span>
-                      ) : null
+                      </span>
                     }
                   />
                 </Link>
@@ -74,14 +79,15 @@ export default function ToolsHubPage() {
           </ul>
 
           <p className="mt-6 text-sm leading-relaxed text-muted">
-            Not sure which number you need?{" "}
+            Not sure which number you need? Read{" "}
             <Link
               to={TOOLS_EXPLAINER.path}
               className="font-medium text-primary hover:underline"
             >
               {TOOLS_EXPLAINER.title}
-            </Link>{" "}
-            {TOOLS_EXPLAINER.tagline}
+            </Link>
+            : {TOOLS_EXPLAINER.tagline.charAt(0).toLowerCase()}
+            {TOOLS_EXPLAINER.tagline.slice(1)}
           </p>
 
           <ToolsCtaBanner
@@ -89,7 +95,7 @@ export default function ToolsHubPage() {
             body="Log a meal, set a target, and see where the week went."
           />
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

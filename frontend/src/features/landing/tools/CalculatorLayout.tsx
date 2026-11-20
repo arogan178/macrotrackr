@@ -64,7 +64,7 @@ export default function CalculatorLayout({
   });
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       {schemaScript && (
         <script
           type="application/ld+json"
@@ -77,7 +77,7 @@ export default function CalculatorLayout({
       {/* The result bar and, when shown, the install prompt are docked to the
           bottom of the viewport. Without room to scroll past them, whatever
           input lands in that strip cannot be reached. */}
-      <main className="relative z-10 pt-[var(--header-offset)] pb-[calc(9rem+var(--install-prompt-height,0px))] md:pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-[calc(9rem+var(--install-prompt-height,0px))] md:pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1 text-xs text-muted">
@@ -106,7 +106,7 @@ export default function CalculatorLayout({
                 {badge}
               </span>
             ) : null}
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
               {title}
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
@@ -143,8 +143,8 @@ export default function CalculatorLayout({
           {/* FAQ Section if present */}
           {faqs.length > 0 && (
             <div className={`mt-12 ${calculatorCardClass}`}>
-              <h2 className="mb-6 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                Frequently Asked Questions
+              <h2 className="mb-6 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                Questions
               </h2>
               <div className="space-y-3">
                 <Accordion
@@ -177,7 +177,7 @@ export default function CalculatorLayout({
           </p>
 
         </div>
-      </main>
+      </div>
 
       <CalculatorResultBar result={ctaResult} />
 

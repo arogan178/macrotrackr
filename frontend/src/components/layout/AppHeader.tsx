@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 import {
@@ -94,10 +94,7 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
   trailing,
   menu,
   children,
-}) => {
-  const shouldReduceMotion = useReducedMotion() ?? false;
-
-  return (
+}) => (
     <>
       <header
         className="fixed inset-x-0 z-70 px-4 sm:px-6 lg:px-8"
@@ -118,13 +115,12 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
           <div className="flex shrink-0 items-center gap-2">
             {trailing}
             {menu ? (
-              <motion.button
+              <button
                 type="button"
-                whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                 onClick={menu.onToggle}
                 aria-label={menu.isOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menu.isOpen}
-                className={`${iconButtonClasses} md:hidden ${
+                className={`${iconButtonClasses} active:scale-[0.98] md:hidden ${
                   menu.isOpen ? "bg-surface-2 text-foreground" : ""
                 }`}
               >
@@ -133,7 +129,7 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
                 ) : (
                   <MenuIcon className="h-5 w-5" />
                 )}
-              </motion.button>
+              </button>
             ) : null}
           </div>
         </nav>
@@ -142,7 +138,6 @@ const HeaderFrame: React.FC<HeaderFrameProps> = ({
       {children}
     </>
   );
-};
 
 const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
   isActive,
@@ -190,6 +185,8 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
       <button
         type="button"
         popoverTarget="tools-popover"
+        aria-expanded={open}
+        aria-haspopup="menu"
         className={`${linkClasses} [anchor-name:--tools-trigger] ${isActive ? activeLinkClasses : ""}`}
       >
         Tools
@@ -243,7 +240,7 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
 };
 
 const AppModeHeader: React.FC = () => {
-  const { navigate, isActiveRoute, goTo } = useHeaderNavigation();
+  const { navigate, isActiveRoute } = useHeaderNavigation();
 
   return (
     <HeaderFrame
@@ -258,10 +255,9 @@ const AppModeHeader: React.FC = () => {
             const isActive = isActiveRoute(path);
 
             return (
-              <button
+              <Link
                 key={path}
-                type="button"
-                onClick={() => goTo(path)}
+                to={path}
                 aria-current={isActive ? "page" : undefined}
                 className={`${linkClasses} ${isActive ? activeLinkClasses : ""}`}
               >
@@ -269,7 +265,7 @@ const AppModeHeader: React.FC = () => {
                   className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted"}`}
                 />
                 <span>{label}</span>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -336,7 +332,7 @@ const PublicModeHeader: React.FC = () => {
 
   const actions = useMemo<MobileNavAction[]>(
     () => [
-      { key: "login", label: "Log in", onSelect: () => goTo("/login") },
+      { key: "login", label: "Sign in", onSelect: () => goTo("/login") },
       {
         key: "register",
         label: "Start free",
@@ -408,7 +404,7 @@ const PublicModeHeader: React.FC = () => {
             search={{ returnTo: undefined }}
             className={linkClasses}
           >
-            Log in
+            Sign in
           </Link>
           <Link
             to="/register"

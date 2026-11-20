@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Bar,
   BarChart,
@@ -13,7 +14,6 @@ import {
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import type { ContentType } from "recharts/types/component/Tooltip";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ChartCard from "@/components/chart/ChartCard";
 import { StackedBarPercentageTooltip } from "@/components/chart/ChartTooltip";
 import { MACRO_COLORS } from "@/utils/chartColors";
@@ -58,12 +58,12 @@ const PercentageLabel = (properties: LabelProps) => {
     >
       <div className="flex h-full w-full items-center justify-center overflow-visible">
         <span
-          className="rounded-control bg-black/60 px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-white sm:px-1.5 sm:text-[13px]"
+          className="rounded-control bg-black/60 px-1 py-0.5 text-[10px] font-semibold whitespace-nowrap text-white sm:px-1.5 sm:text-[13px]"
           style={{
             textShadow: "0 1px 2px rgba(0,0,0,0.8)",
           }}
         >
-          <AnimatedNumber value={value * 100} toFixedValue={0} suffix="%" />
+          {Math.round(value * 100)}%
         </span>
       </div>
     </foreignObject>
@@ -145,7 +145,7 @@ const MacroDensityBreakdown = ({
                   />
                 )) as unknown as ContentType<ValueType, NameType>
               }
-              cursor={{ fill: "rgba(110,118,145,0.1)" }}
+              cursor={{ fill: "var(--color-surface-3)", fillOpacity: 0.35 }}
               wrapperStyle={{ outline: "none" }}
             />
             <Legend
@@ -190,4 +190,4 @@ const MacroDensityBreakdown = ({
   );
 };
 
-export default MacroDensityBreakdown;
+export default memo(MacroDensityBreakdown);

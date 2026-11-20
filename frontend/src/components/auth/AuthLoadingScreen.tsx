@@ -52,14 +52,14 @@ export function AuthLoadingScreen() {
 
   if (!hasGivenUp) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface">
+    <div className="flex min-h-dvh items-center justify-center bg-background">
       {isOffline ? (
         <StateCard
           tone="offline"
@@ -71,7 +71,7 @@ export function AuthLoadingScreen() {
         <StateCard
           tone="error"
           title="Couldn't confirm your session"
-          message="We can't reach the sign-in service right now. Nothing has been lost — your data is still there."
+          message="We can't reach the sign-in service right now. Nothing has been lost, and your data is still safe."
           action={{ label: "Try again", onClick: () => globalThis.location.reload() }}
         />
       )}

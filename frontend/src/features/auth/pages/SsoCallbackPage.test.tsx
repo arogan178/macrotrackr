@@ -252,7 +252,7 @@ describe("SSOCallbackPage", () => {
     render(<SSOCallbackPage />);
 
     expect(
-      await screen.findByRole("heading", { name: "Sign-in Failed" }),
+      await screen.findByRole("heading", { name: "Sign-in failed" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Provider refused")).toBeInTheDocument();
     expect(navigate).not.toHaveBeenCalled();

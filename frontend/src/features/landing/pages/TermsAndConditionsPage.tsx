@@ -18,13 +18,13 @@ const TermsAndConditionsPage: React.FC = () => {
   });
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
+    <div className="relative min-h-dvh overflow-hidden text-foreground selection:bg-primary/30">
       <AppHeader mode="minimal" />
 
       <PageShell width="prose">
         <div>
           <div className="rounded-card border border-border bg-background p-8 lg:p-12">
-            <h1 className="mb-8 text-4xl font-bold text-foreground">
+            <h1 className="mb-8 text-4xl font-semibold text-foreground">
               Terms and Conditions
             </h1>
 
@@ -50,7 +50,7 @@ const TermsAndConditionsPage: React.FC = () => {
                 </h2>
                 <p className="mb-4 leading-relaxed text-muted">
                   MacroTrackr is a nutrition and macro tracking application that
-                  includes free and premium features.
+                  includes free and Pro features.
                 </p>
               </section>
 
@@ -72,7 +72,7 @@ const TermsAndConditionsPage: React.FC = () => {
                 </p>
                 <ul className="mb-4 list-inside list-disc space-y-2 text-muted">
                   <li>Maintain credential confidentiality</li>
-                  <li>All activities under your account</li>
+                  <li>Take responsibility for all activity under your account</li>
                   <li>Provide accurate and up-to-date information</li>
                   <li>Notify us immediately of unauthorized use</li>
                 </ul>

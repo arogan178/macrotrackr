@@ -49,6 +49,37 @@ describe("DateRangeSelector", () => {
     expect(screen.getByTestId("upgrade-modal")).toBeInTheDocument();
   });
 
+  it("moves keyboard focus across locked ranges without opening the upgrade modal until activated", async () => {
+    const onRangeChange = vi.fn();
+    render(
+      <DateRangeSelector
+        {...defaultProps}
+        onRangeChange={onRangeChange}
+        disabledRanges={["month", "3months"]}
+      />,
+    );
+
+    const weekTab = screen.getByRole("tab", { name: /7 Days/ });
+    const monthTab = screen.getByRole("tab", { name: /30 Days/ });
+    const ninetyTab = screen.getByRole("tab", { name: /90 Days/ });
+
+    weekTab.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    expect(monthTab).toHaveFocus();
+    expect(monthTab).toHaveAttribute("tabindex", "0");
+    expect(weekTab).toHaveAttribute("tabindex", "-1");
+    expect(screen.queryByTestId("upgrade-modal")).not.toBeInTheDocument();
+
+    await userEvent.keyboard("{ArrowRight}");
+    expect(ninetyTab).toHaveFocus();
+    expect(ninetyTab).toHaveAttribute("tabindex", "0");
+    expect(monthTab).toHaveAttribute("tabindex", "-1");
+    expect(screen.queryByTestId("upgrade-modal")).not.toBeInTheDocument();
+
+    await userEvent.keyboard("{Enter}");
+    expect(screen.getByTestId("upgrade-modal")).toBeInTheDocument();
+  });
+
   it("says which ranges are Pro rather than leaving them unexplained", () => {
     render(
       <DateRangeSelector
@@ -58,6 +89,6 @@ describe("DateRangeSelector", () => {
       />,
     );
 
-    expect(screen.getByText("30 and 90 day views are Pro")).toBeInTheDocument();
+    expect(screen.getByText("30- and 90-day views are Pro")).toBeInTheDocument();
   });
 });

@@ -478,16 +478,14 @@ export default function EditModal({
           isOpen={showUnsavedWarning}
           onClose={cancelDiscard}
           title="Unsaved changes"
-          variant="form"
-          onSave={confirmDiscard}
-          saveLabel="Discard changes"
+          variant="confirmation"
+          message="You have unsaved changes. If you leave now, your changes will be lost."
+          onConfirm={confirmDiscard}
+          confirmLabel="Discard changes"
           cancelLabel="Keep editing"
+          isDanger
           size="sm"
-        >
-          <p className="text-sm text-foreground">
-            You have unsaved changes. If you leave now, your changes will be lost.
-          </p>
-        </Modal>
+        />
       )}
 
       <Modal

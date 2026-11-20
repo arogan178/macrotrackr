@@ -48,8 +48,10 @@ function HabitActions({
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const menuReference = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
+    if (!isMenuOpen) return;
+
     function handleClickOutside(event: MouseEvent) {
       if (
         menuReference.current &&
@@ -59,12 +61,20 @@ function HabitActions({
       }
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
+    globalThis.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      globalThis.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isMenuOpen]);
 
   const handleAction = async (
     action: () => Promise<void>,
@@ -111,12 +121,13 @@ function HabitActions({
 
   return (
     <div
-      className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+      className="relative flex items-center gap-1 opacity-75 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
       ref={menuReference}
     >
       {/* One action in reach; the rest wait behind the menu. */}
       {!isComplete && (
         <button
+          type="button"
           onClick={handleIncrement}
           disabled={isActionInProgress}
           className={`${HABIT_ACTION} text-foreground hover:bg-primary/10 hover:text-primary`}
@@ -127,6 +138,7 @@ function HabitActions({
         </button>
       )}
       <button
+        type="button"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={`${HABIT_ACTION} text-foreground hover:bg-surface-2 hover:text-foreground`}
         title="More actions"
@@ -138,30 +150,31 @@ function HabitActions({
       {isMenuOpen && (
         <div className="absolute top-full right-0 z-50 mt-1 w-48 rounded-control border border-border bg-surface py-1 text-sm">
           {!isComplete && (
-            <button onClick={handleComplete} disabled={isActionInProgress} className={MENU_ITEM}>
+            <button type="button" onClick={handleComplete} disabled={isActionInProgress} className={MENU_ITEM}>
               <CheckIcon size="sm" className="mr-2 text-success" />
               Mark complete
             </button>
           )}
           {handleDecrement && (
-            <button onClick={handleDecrement} disabled={isActionInProgress} className={MENU_ITEM}>
+            <button type="button" onClick={handleDecrement} disabled={isActionInProgress} className={MENU_ITEM}>
               <MinusCircleIcon size="sm" className="mr-2" />
               Remove progress
             </button>
           )}
           {onEdit && !isComplete && (
-            <button onClick={handleEdit} className={MENU_ITEM}>
+            <button type="button" onClick={handleEdit} className={MENU_ITEM}>
               <EditIcon size="sm" className="mr-2" />
               Edit
             </button>
           )}
           {handleReset && (
-            <button onClick={handleReset} disabled={isActionInProgress} className={MENU_ITEM}>
+            <button type="button" onClick={handleReset} disabled={isActionInProgress} className={MENU_ITEM}>
               <ResetIcon size="sm" className="mr-2" />
               {frequency === "weekly" ? "Reset this week" : "Reset today"}
             </button>
           )}
           <button
+            type="button"
             onClick={handleDelete}
             disabled={isActionInProgress}
             className={cn(MENU_ITEM, "text-error")}

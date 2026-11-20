@@ -137,7 +137,7 @@ export function LocalSignInForm({
           isLoading={isSubmitting}
           loadingText="Signing in..."
         >
-          Sign In
+          Sign in
         </Button>
       </form>
 

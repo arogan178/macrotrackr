@@ -24,7 +24,7 @@ import { useProductAnalytics } from "@/lib/productAnalytics";
 import { useStore } from "@/store/store";
 
 const FORMAT_OPTIONS = [
-  { value: "auto", label: "Auto-Detect Format" },
+  { value: "auto", label: "Auto-detect format" },
   { value: "myfitnesspal", label: "MyFitnessPal (CSV)" },
   { value: "cronometer", label: "Cronometer (CSV)" },
   { value: "macrofactor", label: "MacroFactor (CSV / JSON)" },
@@ -229,7 +229,7 @@ export default function DataImporter() {
                 <CheckCircleIcon className="h-8 w-8" />
               </div>
               <Heading level="panel" className="text-foreground">
-                Import Successful!
+                Import complete
               </Heading>
               <p className="mt-2 max-w-md text-sm text-muted">
                 Successfully imported{" "}
@@ -369,7 +369,7 @@ export default function DataImporter() {
                 </div>
                 <div className="rounded-card border border-border bg-surface-2 p-3">
                   <span className="text-xs text-muted">
-                    Daily Macros (P/C/F)
+                    Daily macros (P/C/F)
                   </span>
                   <div className="mt-1 text-sm font-semibold text-foreground">
                     <span className="text-protein">
@@ -411,7 +411,7 @@ export default function DataImporter() {
                         <th className="px-3 py-2">Name</th>
                         <th className="px-3 py-2 text-right">Protein</th>
                         <th className="px-3 py-2 text-right">Carbs</th>
-                        <th className="px-3 py-2 text-right">Fat</th>
+                        <th className="px-3 py-2 text-right">Fats</th>
                         <th className="px-3 py-2 text-right">Calories</th>
                       </tr>
                     </thead>
@@ -432,7 +432,7 @@ export default function DataImporter() {
                               </span>
                             </td>
                             <td className="max-w-[150px] truncate px-3 py-2 font-medium text-foreground">
-                              {entry.mealName || "—"}
+                              {entry.mealName || "-"}
                             </td>
                             <td className="px-3 py-2 text-right font-medium text-protein">
                               {entry.protein}g
@@ -468,7 +468,19 @@ export default function DataImporter() {
                   onClick={handleExecuteImport}
                   isLoading={importMutation.isPending}
                   leftIcon={<UploadIcon className="h-4 w-4" />}
-                  text={`Import ${parsedData.summary.totalMeals} Entries`}
+                  text={
+                    parsedData.summary.totalMeals > 0
+                      ? `Import ${parsedData.summary.totalMeals} ${
+                          parsedData.summary.totalMeals === 1
+                            ? "entry"
+                            : "entries"
+                        }`
+                      : `Import ${parsedData.summary.totalWeightLogs} weight ${
+                          parsedData.summary.totalWeightLogs === 1
+                            ? "log"
+                            : "logs"
+                        }`
+                  }
                 />
               </div>
             </div>
@@ -487,22 +499,24 @@ export default function DataImporter() {
             </Heading>
             <ul className="mt-2 space-y-1.5 text-xs text-muted">
               <li>
-                <strong className="text-foreground">MyFitnessPal:</strong> Go to
-                Settings → Export Information → Export Data (generates CSV
-                files).
+                <strong className="text-foreground">MyFitnessPal:</strong> Open
+                Nutrition or Reports on the web, choose Export, select a date
+                range, and upload the CSV from the ZIP.
               </li>
               <li>
-                <strong className="text-foreground">Cronometer:</strong> Go to
-                Settings → Account → Export Data → Export Servings / Daily
-                Summary (CSV).
+                <strong className="text-foreground">Cronometer:</strong> Open
+                Account Settings → Account Data → Export Data, then export
+                servings or daily summary as CSV.
               </li>
               <li>
-                <strong className="text-foreground">MacroFactor:</strong> Go to
-                Settings → Data Management → Export Data (CSV or JSON).
+                <strong className="text-foreground">MacroFactor:</strong> Open
+                More → Data Management → Data Export, then choose Granular
+                Export (CSV or JSON).
               </li>
               <li>
-                <strong className="text-foreground">Lose It!:</strong> Account
-                Settings → Data Export → Export to Spreadsheet (CSV).
+                <strong className="text-foreground">Lose It!:</strong> Download
+                your full export from loseit.com in Account Settings and upload
+                the food-log CSV.
               </li>
             </ul>
           </div>

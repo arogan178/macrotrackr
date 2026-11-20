@@ -40,18 +40,18 @@ class QueryErrorBoundaryInner extends Component<
 
       return (
         <div className="flex min-h-50 items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-control border border-border bg-surface p-6">
+          <div className="w-full max-w-md rounded-card border border-border bg-surface p-6">
             <div className="mb-4 text-error">
               <WarningIcon className="mx-auto mb-3 h-8 w-8" />
               <h3 className="mb-2 text-center text-lg font-semibold text-foreground">
-                Data Loading Error
+                Couldn't load data
               </h3>
-              <p className="mb-4 text-center text-sm text-foreground">
+              <p className="mb-4 text-center text-sm text-muted">
                 {getErrorMessage(this.state.error)}
               </p>
             </div>
 
-            <div className="flex justify-center space-x-3">
+            <div className="flex justify-center gap-3">
               <Button
                 onClick={() => {
                   this.setState({ hasError: false, error: undefined });
@@ -59,17 +59,15 @@ class QueryErrorBoundaryInner extends Component<
                 }}
                 ariaLabel="Try again"
                 variant="primary"
-                className="rounded-control bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
               >
-                Try Again
+                Try again
               </Button>
               <Button
                 onClick={() => globalThis.location.reload()}
                 ariaLabel="Reload page"
                 variant="secondary"
-                className="rounded-control bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
               >
-                Reload Page
+                Reload page
               </Button>
             </div>
           </div>

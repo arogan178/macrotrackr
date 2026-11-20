@@ -133,6 +133,7 @@ export function useRealtimeSync(isAuthenticated: boolean) {
 
     let eventSource: EventSource | null = null;
     let isCancelled = false;
+    let shouldInvalidateOnOpen = false;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let retryCount = 0;
 
@@ -148,13 +149,17 @@ export function useRealtimeSync(isAuthenticated: boolean) {
     }
 
     async function connectSSE() {
-      if (
-        isCancelled ||
-        (typeof navigator !== "undefined" && !navigator.onLine)
-      ) {
+      if (isCancelled) {
+        return;
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        shouldInvalidateOnOpen = true;
+
         return;
       }
       if (typeof document !== "undefined" && document.hidden) {
+        shouldInvalidateOnOpen = true;
+
         return;
       }
 
@@ -174,6 +179,13 @@ export function useRealtimeSync(isAuthenticated: boolean) {
 
       eventSource.onopen = () => {
         retryCount = 0;
+        if (shouldInvalidateOnOpen) {
+          shouldInvalidateOnOpen = false;
+          // A tab that mounted hidden, went offline, or lost its stream may
+          // have missed billing or profile sync events while disconnected.
+          void queryClient.invalidateQueries({ queryKey: ["auth"] });
+          void queryClient.invalidateQueries({ queryKey: ["settings"] });
+        }
       };
 
       eventSource.onmessage = (event) => {
@@ -189,6 +201,7 @@ export function useRealtimeSync(isAuthenticated: boolean) {
       };
 
       eventSource.onerror = () => {
+        shouldInvalidateOnOpen = true;
         cleanupSSE();
 
         if (
@@ -206,12 +219,14 @@ export function useRealtimeSync(isAuthenticated: boolean) {
     }
 
     function handleOnline() {
+      shouldInvalidateOnOpen = true;
       retryCount = 0;
       void connectSSE();
     }
 
     function handleVisibilityChange() {
       if (document.hidden) {
+        shouldInvalidateOnOpen = true;
         cleanupSSE();
       } else {
         retryCount = 0;

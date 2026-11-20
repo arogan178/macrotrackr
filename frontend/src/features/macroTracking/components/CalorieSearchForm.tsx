@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 
 import type { FoodSearchResult } from "@/api/macros";
 import type { SavedMeal } from "@/api/savedMeals";
@@ -14,10 +14,10 @@ import {
 } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import Value from "@/components/ui/Value";
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
 import { cn } from "@/lib/classnameUtilities";
-import { formatGrouped } from "@/lib/formatNumber";
 import { useProductAnalytics } from "@/lib/productAnalytics";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
@@ -368,17 +368,29 @@ const CalorieSearch = memo(function CalorieSearch({
           Search for food
         </label>
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="relative flex-1 min-w-0">
+          <div className="relative min-w-0 flex-1">
             <div className={formStyles.iconContainer}>
-              <SearchIcon className="text-foreground!" />
+              <SearchIcon />
             </div>
             <input
               ref={inputReference}
               id={searchInputId}
               type="text"
+              role="combobox"
+              aria-expanded={activePanel !== null}
+              aria-controls={`${searchInputId}-panel`}
+              aria-autocomplete="list"
               value={query}
               onChange={handleQueryChange}
-              onKeyDown={handleKeyDown}
+              onKeyDown={(event) => {
+                if (event.key === "Escape" && activePanel !== null) {
+                  event.stopPropagation();
+                  setActivePanel(null);
+
+                  return;
+                }
+                handleKeyDown(event);
+              }}
               onFocus={() => {
                 if (!isAutoFocusing.current) openSuggestions();
               }}
@@ -389,7 +401,6 @@ const CalorieSearch = memo(function CalorieSearch({
                 formStyles.input.base,
                 searchError ? formStyles.input.error : formStyles.input.normal,
                 formStyles.input.withIcon,
-                "h-[42px] py-0"
               )}
             />
           </div>
@@ -400,7 +411,7 @@ const CalorieSearch = memo(function CalorieSearch({
             buttonSize="md"
             variant="secondary"
             leftIcon={<BarcodeIcon className="h-4 w-4 shrink-0" />}
-            className="h-[42px] shrink-0 px-2.5 sm:px-3 font-semibold"
+            className="shrink-0 px-2.5 font-semibold sm:px-3"
           >
             <span className="hidden sm:inline">Scan</span>
           </Button>
@@ -413,7 +424,7 @@ const CalorieSearch = memo(function CalorieSearch({
             buttonSize="md"
             variant="primary"
             rightIcon={<ArrowRightIcon className="h-4 w-4 shrink-0" />}
-            className="h-[42px] shrink-0 px-3 sm:px-5 font-semibold"
+            className="shrink-0 px-3 font-semibold sm:px-5"
           >
             <span className="hidden sm:inline">Search</span>
           </Button>
@@ -422,12 +433,13 @@ const CalorieSearch = memo(function CalorieSearch({
 
       <AnimatePresence>
         {activePanel === "results" && displayResults.length > 0 && (
-          <motion.div
+          <m.div
+            id={`${searchInputId}-panel`}
             key="search-results-overlay"
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
+            transition={{ duration: DURATIONS.instant, ease: EASINGS.out }}
             className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-control border border-border bg-surface"
           >
             <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
@@ -438,21 +450,29 @@ const CalorieSearch = memo(function CalorieSearch({
                 return (
                   <button
                     key={resultData.id}
-                    className={
-                      "w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
-                    }
+                    className="w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
                     onClick={() => handleSelect(item)}
                     type="button"
                   >
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-foreground">
-                      {displayQuantity ? `${displayQuantity} | ` : ""}
-                      Calories: {formatGrouped(calories, 1)} kcal | Protein:{" "}
-                      {protein.toFixed(1)}g, Carbs: {carbs.toFixed(1)}
-                      g, Fats: {fats.toFixed(1)}g
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate font-medium text-foreground">
+                        {item.name}
+                      </span>
+                      <Value
+                        value={Math.round(calories)}
+                        unit="kcal"
+                        className="shrink-0 text-xs font-medium text-foreground"
+                      />
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted tabular-nums">
+                      {displayQuantity ? <span>{displayQuantity}</span> : null}
+                      <span>
+                        P {protein.toFixed(1)}g · C {carbs.toFixed(1)}g · F{" "}
+                        {fats.toFixed(1)}g
+                      </span>
                     </div>
                     {item.categories && (
-                      <div className="text-xs text-foreground">
+                      <div className="mt-0.5 truncate text-xs text-muted/80">
                         {item.categories}
                       </div>
                     )}
@@ -466,16 +486,17 @@ const CalorieSearch = memo(function CalorieSearch({
               height="40px"
               show={!isAtBottom}
             />
-          </motion.div>
+          </m.div>
         )}
 
         {activePanel === "savedMeals" && (
-          <motion.div
+          <m.div
+            id={`${searchInputId}-panel`}
             key="saved-meals-overlay"
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
+            transition={{ duration: DURATIONS.instant, ease: EASINGS.out }}
             className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-control border border-border bg-surface p-4"
           >
             <div className="mb-3">
@@ -487,13 +508,14 @@ const CalorieSearch = memo(function CalorieSearch({
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as ActiveTab)}
                 layoutId="calorie-search-tabbar"
+                ariaLabel="Food suggestions"
                 size="sm"
               />
             </div>
 
             <AnimatePresence mode="wait">
               {activeTab === "recents" && (
-                <motion.div
+                <m.div
                   key="tab-recents"
                   initial={{ opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -569,16 +591,16 @@ const CalorieSearch = memo(function CalorieSearch({
                       })}
                     </div>
                   )}
-                </motion.div>
+                </m.div>
               )}
 
               {activeTab === "savedMeals" && (
-                <motion.div
+                <m.div
                   key="tab-saved-meals"
                   initial={{ opacity: 0, x: 6 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -6 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  transition={{ duration: DURATIONS.instant, ease: EASINGS.out }}
                 >
                   <SavedMealsList
                     query={trimmedQuery}
@@ -590,10 +612,10 @@ const CalorieSearch = memo(function CalorieSearch({
                     }}
                     onEditMeal={setEditingMeal}
                   />
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 

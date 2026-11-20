@@ -41,7 +41,11 @@ vi.mock("@/components/chart/DateRangeSelector", () => ({
     currentRange: string;
     onRangeChange: (range: string) => void;
   }) => (
-    <button type="button" onClick={() => onRangeChange("month")}>
+    <button
+      type="button"
+      data-testid="date-range-selector"
+      onClick={() => onRangeChange("month")}
+    >
       {currentRange}
     </button>
   ),
@@ -69,7 +73,7 @@ describe("ReportingPage range", () => {
 
     render(<ReportingPage />);
 
-    expect(screen.getByRole("button").textContent).toBe("3months");
+    expect(screen.getByTestId("date-range-selector").textContent).toBe("3months");
   });
 
   it("keeps free users on the week view when a link asks for a Pro range", () => {
@@ -77,7 +81,7 @@ describe("ReportingPage range", () => {
 
     render(<ReportingPage />);
 
-    expect(screen.getByRole("button").textContent).toBe("week");
+    expect(screen.getByTestId("date-range-selector").textContent).toBe("week");
   });
 
   it("falls back to the week view for unknown or old-style params", () => {
@@ -86,14 +90,14 @@ describe("ReportingPage range", () => {
 
     render(<ReportingPage />);
 
-    expect(screen.getByRole("button").textContent).toBe("week");
+    expect(screen.getByTestId("date-range-selector").textContent).toBe("week");
   });
 
   it("writes the chosen range to the URL", () => {
     entitlements.hasProAccess = true;
 
     render(<ReportingPage />);
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByTestId("date-range-selector"));
 
     expect(navigate).toHaveBeenCalledWith({
       to: "/reporting",
@@ -104,7 +108,7 @@ describe("ReportingPage range", () => {
 
   it("does not write a Pro range to the URL for free users", () => {
     render(<ReportingPage />);
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByTestId("date-range-selector"));
 
     expect(navigate).not.toHaveBeenCalled();
   });

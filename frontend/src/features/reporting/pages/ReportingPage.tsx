@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
-import { macrosApi } from "@/api/macros";
 import ProFeature from "@/components/billing/ProFeature";
 import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
@@ -20,7 +18,7 @@ import {
 import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import { queryKeys } from "@/lib/queryKeys";
+import { openLogSheet } from "@/lib/logSheet";
 import {
   formatDateShort,
   getDateRangeData,
@@ -38,8 +36,6 @@ import {
 import { useReportingLogic } from "../hooks/useReportingLogic";
 
 export default function ReportingPage() {
-  const queryClient = useQueryClient();
-
   const { hasProAccess } = useEntitlements();
 
   const navigate = useNavigate();
@@ -59,42 +55,6 @@ export default function ReportingPage() {
     }
     navigate({ to: "/reporting", search: { range }, replace: true });
   };
-
-  // Prefetch other date ranges on mount for faster tab switching
-  useEffect(() => {
-    const { startDate: monthStart, endDate: monthEnd } =
-      getDateRangeData("month");
-    const { startDate: threeMonthsStart, endDate: threeMonthsEnd } =
-      getDateRangeData("3months");
-
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
-      queryFn: async () => {
-        const response = await macrosApi.getHistory({
-          limit: 10_000,
-          offset: 0,
-          startDate: monthStart,
-          endDate: monthEnd,
-        });
-
-        return (response as { entries: unknown[] }).entries;
-      },
-    });
-
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.macros.historyRange(threeMonthsStart, threeMonthsEnd),
-      queryFn: async () => {
-        const response = await macrosApi.getHistory({
-          limit: 10_000,
-          offset: 0,
-          startDate: threeMonthsStart,
-          endDate: threeMonthsEnd,
-        });
-
-        return (response as { entries: unknown[] }).entries;
-      },
-    });
-  }, [queryClient]);
 
   // Get user data from useUser hook
   const { data: _user } = useUser();
@@ -189,7 +149,7 @@ export default function ReportingPage() {
         ? "Weekly summary"
         : dateRange === "month"
           ? "Monthly summary"
-          : "90-Day Overview";
+          : "90-day overview";
 
     return {
       title: rangeLabel,
@@ -218,7 +178,7 @@ export default function ReportingPage() {
 
   const headerTitle = "Analytics";
   const headerActions = (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-3">
       <IconButton
         variant="share"
         ariaLabel="Share macro snapshot"
@@ -258,13 +218,14 @@ export default function ReportingPage() {
             />
 
             {showNoDataMessage ? (
-              <div className="rounded-card border border-border bg-surface">
+              <Panel>
                 <StateCard
                   title="No reporting data yet"
                   message="No meals logged in this range. Add a few and your trends and meal timing will appear here."
+                  action={{ label: "Log a meal", onClick: openLogSheet }}
                   size="md"
                 />
-              </div>
+              </Panel>
             ) : (
               <>
                 {/* The averages beside the line they come from: what the

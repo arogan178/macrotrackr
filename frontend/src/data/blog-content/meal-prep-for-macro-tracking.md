@@ -1,311 +1,55 @@
-Here's a truth most macro trackers eventually face: the days you hit your targets perfectly are usually the days you prepared your food in advance. The days you miss? Those are the days you were "winging it."
+The easiest days to hit your macros are the days you already know what you are eating. When you walk into the kitchen hungry at 7 pm with nothing planned, portions get guessed, oils go unmeasured, and protein usually comes up short.
 
-Meal prep is not just about convenience. It is about accuracy. When you weigh and portion food in advance, you remove the guesswork from your tracking.
+Meal prep does not mean eating identical dry chicken out of plastic tubs for five days straight. It means doing the weighing and cooking once so weekday logging takes seconds instead of guesswork.
 
-This guide will show you how to build a meal prep system that makes macro tracking automatic.
+## Start with 2 to 3 repeat meals
 
-## Why Meal Prep Improves Accuracy
+You rarely need to prep every bite for the entire week. Most people eat the same few breakfasts and lunches on workdays anyway. Prepping just those weekday anchors covers 60 to 70% of your weekly calories while leaving dinners and weekends flexible.
 
-### The Problem with Real-Time Tracking
+Pick two meals you already enjoy and know you will actually eat on Thursday. Good starting anchors:
 
-You stand in the kitchen after a long day. You're hungry. You throw together a meal, estimating portions:
+- **Breakfast:** overnight oats with Greek yogurt and whey, or baked egg-white and whole-egg muffins.
+- **Lunch:** a protein, grain, and roasted vegetable bowl, chili, curry, or pasta with lean meat sauce.
+- **Snacks:** pre-portioned Greek yogurt tubs, cottage cheese, fruit, or measured nuts.
 
-- "That looks like 6 oz of chicken..."
-- "Maybe a cup of rice?"
-- "A tablespoon of olive oil, probably..."
+## Build one template meal to fit your numbers
 
-**The result:** You're off by 300-500 calories and 20-30g of protein. Not because you're careless, but because estimating is inherently imprecise.
+Divide your daily targets by the number of meals you normally eat to get a rough per-meal budget. For someone targeting 2,000 kcal, 150 g protein, 200 g carbs, and 67 g fat across 4 meals, one lunch sits around **500 kcal, 38 g protein, 50 g carbs, and 16 g fat**.
 
-### The Meal Prep Advantage
+| Component (1 serving) | Amount | Calories | Protein | Carbs | Fats |
+| --- | --- | --- | --- | --- | --- |
+| Chicken breast (raw weight) | 150 g | 165 kcal | 31 g | 0 g | 3.6 g |
+| White rice (cooked weight) | 150 g | 195 kcal | 4 g | 43 g | 0.3 g |
+| Olive oil (for cooking/drizzle) | 1 tbsp (14 g) | 120 kcal | 0 g | 0 g | 14.0 g |
+| Mixed vegetables | 100 g | 30 kcal | 2 g | 5 g | 0.0 g |
+| **Per serving total** | | **510 kcal** | **37 g** | **48 g** | **17.9 g** |
 
-When you prep in advance:
-- You weigh everything on a digital scale
-- You portion into containers while you're not rushed
-- Your macros are calculated once, accurately
-- Logging becomes as simple as "tap to add saved meal"
+Save that combination once in MacroTrackr as a saved meal. On Tuesday, logging lunch is one tap instead of weighing four separate items.
 
-**The 80/20 Rule:** 80% of your results come from 20% of your meals. Prep those core meals, and the rest takes care of itself.
+## How to weigh batch cooking accurately
 
-## The Meal Prep System
+Batch cooking creates one common logging trap: raw weights change when cooked. A simple 3-step workflow keeps multi-serving pots (like chili, bolognese, or stir-fry) accurate without weighing every ingredient into separate containers:
 
-### Step 1: Identify Your Repeat Meals
+1. **Weigh raw ingredients as they go into the pot** and sum their total macros (or create a saved meal for the full batch).
+2. **Weigh the finished pot of cooked food** (tare the empty pot first, or note its weight). Say the cooked chili weighs 2,000 g.
+3. **Divide by your containers.** Four 500 g portions contain exactly one quarter of the batch's calories and macros each.
 
-Most people rotate through 5-7 meals regularly. List yours:
+> If you prefer component prep (a tray of cooked chicken, a pot of rice, a tray of vegetables), weigh each batch raw, note the cooked yield once, and split evenly into containers by cooked weight.
 
-**Common repeat meals:**
-- Breakfast: oatmeal, eggs, smoothie, yogurt bowl
-- Lunch: chicken and rice, salad with protein, leftovers
-- Dinner: stir-fry, pasta with meat sauce, tacos, salmon and vegetables
-- Snacks: protein shake, Greek yogurt, nuts, fruit
+## Component prep vs. full-meal prep
 
-**Your task:** Pick 2-3 meals you eat most often. These are your prep priorities.
+If eating the exact same dish four days in a row bores you, prep ingredients instead of finished meals. Cook two proteins (for example, chicken thighs and lean ground beef), two carbs (rice and roasted potatoes), and two vegetables on Sunday. During the week, mix them into bowls, wraps, or stir-fries with different sauces in five minutes.
 
-### Step 2: Calculate Your Macros Per Meal
+## Safe storage windows
 
-Divide your daily targets by your number of meals.
+Cooking once a week only works if the food still tastes good on day four. Keep containers in a fridge at or below 4 C (40 F), cool hot food before sealing lids, and keep sauces separate until reheating.
 
-**Example (180 lb person, moderate deficit):**
-- Daily targets: 2,000 calories, 150g protein, 200g carbs, 65g fat
-- 4 meals per day
-- Per meal targets: 500 calories, 38g protein, 50g carbs, 16g fat
+| Food | Fridge life | Freezer life | Reheating note |
+| --- | --- | --- | --- |
+| Cooked chicken, beef, pork | 3 to 4 days | 2 to 3 months | Add a splash of water or broth before covering |
+| Cooked fish and seafood | 1 to 2 days | 2 to 3 months | Better eaten Monday/Tuesday rather than Thursday |
+| Cooked rice, pasta, quinoa | 3 to 4 days | 1 to 2 months | Cool promptly and refrigerate within 2 hours |
+| Roasted vegetables | 3 to 4 days | 2 to 3 months | Reheat in an air fryer or pan to avoid sogginess |
+| Hard-boiled eggs | 5 to 7 days | Do not freeze | Keep unpeeled until eating |
 
-Now build meals that hit those targets.
-
-### Step 3: Build Your Meals
-
-Let's build a "chicken and rice" meal that hits our targets.
-
-**Target:** 500 calories, 38g protein, 50g carbs, 16g fat
-
-**Components:**
-- Chicken breast (150g raw): 165 cal, 31g protein, 0g carbs, 3.6g fat
-- White rice (150g cooked): 195 cal, 4g protein, 43g carbs, 0.3g fat
-- Olive oil (1 tbsp): 120 cal, 0g protein, 0g carbs, 14g fat
-- Mixed vegetables (100g): 30 cal, 2g protein, 5g carbs, 0g fat
-- Seasonings: negligible
-
-**Total:** 510 calories, 37g protein, 48g carbs, 18g fat
-
-**Close enough.** Adjust the oil down slightly if you want exact numbers.
-
-### Step 4: Scale and Shop
-
-If you're prepping 5 days of lunches:
-- Chicken: 150g × 5 = 750g raw
-- Rice: 150g × 5 = 750g cooked (about 250g dry)
-- Olive oil: 5 tbsp
-- Vegetables: 500g
-
-**Shopping list generated automatically.**
-
-## The Sunday Prep Routine
-
-### Total Time: 2-3 Hours
-
-**Phase 1: Batch Cooking (60-90 minutes)**
-
-Cook all proteins at once:
-- Chicken: Bake 3-4 lbs seasoned different ways (lemon pepper, BBQ, plain)
-- Ground meat: Brown 2-3 lbs with seasoning, drain fat
-- Eggs: Hard-boil a dozen
-
-Cook all carbs at once:
-- Rice: 2-3 cups dry (yields 6-9 cups cooked)
-- Potatoes: Roast 3-5 lbs with spray oil
-- Pasta: Cook 1-2 lbs, portion dry if preferred
-
-**Phase 2: Portioning (30-45 minutes)**
-
-Weigh and assemble containers:
-1. Tare your empty container
-2. Add protein (weigh it)
-3. Add carbs (weigh it)
-4. Add vegetables (weigh or volume measure)
-5. Add fats (measure oils, nuts, cheese)
-6. Seal and refrigerate
-
-**Phase 3: Extras (15-30 minutes)**
-
-- Wash and portion raw vegetables
-- Portion snacks into baggies or containers
-- Make overnight oats or chia pudding
-- Prepare protein shake ingredients
-
-## Storage and Safety
-
-### Container Guidelines
-
-**Best options:**
-- Glass containers: microwave and dishwasher safe, no staining
-- BPA-free plastic: lighter, good for cold meals
-- Divided containers: keep foods separate if preferred
-
-**Portion sizes:**
-- Single-compartment: 3-4 cup capacity
-- Divided: 2-3 cups main, 1 cup sides
-
-### Storage Times
-
-**Refrigerator (40°F/4°C or below):**
-- Cooked chicken: 3-4 days
-- Cooked beef/pork: 3-4 days
-- Cooked fish: 1-2 days
-- Cooked rice: 1 day. Cool it within an hour and freeze any portions for later in the week ([Food Standards Agency](https://www.gov.uk/government/publications/student-guide-to-food-safety-and-hygiene/student-guide-to-food-safety-and-hygiene))
-- Cooked vegetables: 3-5 days
-
-**Freezer (0°F/-18°C):**
-- Most cooked meals: 2-3 months
-- Label with date and contents
-
-**The rule of thumb:** a prepped meal keeps only as long as its shortest-lived ingredient. If you won't eat it within that refrigerator time, freeze it on the day you cook it.
-
-### Reheating
-
-**Microwave:**
-- Add 1-2 tablespoons water to prevent drying
-- Cover with vented lid
-- Heat in 60-second intervals, stirring between
-- Internal temperature should reach 165°F (74°C)
-
-**Oven:**
-- 350°F (175°C) for 15-20 minutes
-- Cover with foil to retain moisture
-- Best for restoring texture to roasted items
-
-## Macro-Specific Prep Strategies
-
-### High-Protein Prep
-
-**The protein problem:** Most people easily hit carbs and fats but struggle with protein.
-
-**Solutions:**
-1. **Protein-forward meal design:** Start with 40g protein, then add carbs and fats
-2. **Protein snacks:** Greek yogurt, cottage cheese, hard-boiled eggs, jerky
-3. **Protein powder:** Keep a tub at work for emergency top-ups
-
-**Sample high-protein day (prep-friendly):**
-- Breakfast: Overnight oats with protein powder and Greek yogurt (40g protein)
-- Lunch: Meal prepped chicken, rice, and vegetables (45g protein)
-- Snack: Cottage cheese and fruit (25g protein)
-- Dinner: Salmon, quinoa, and roasted vegetables (40g protein)
-
-**Total: 150g protein**
-
-### Low-Carb Prep
-
-**Low-carb substitutions:**
-- Cauliflower rice instead of regular rice
-- Zucchini noodles instead of pasta
-- Extra vegetables instead of grains
-- Healthy fats (avocado, nuts, olive oil) to maintain calories
-
-**Sample low-carb meal:**
-- Protein: 200g chicken thigh
-- Vegetables: 200g roasted broccoli and cauliflower
-- Fat: 1/2 avocado, 1 tbsp olive oil
-
-**Macros:** 450 calories, 40g protein, 15g carbs, 28g fat
-
-### Budget Prep
-
-**Cheapest protein sources (cost per 20g protein):**
-1. Eggs: ~$0.60
-2. Chicken thighs: ~$0.80
-3. Canned tuna: ~$0.90
-4. Chicken breast (on sale): ~$1.00
-5. Ground turkey: ~$1.20
-
-**Budget meal prep tips:**
-- Buy chicken thighs instead of breast
-- Use frozen vegetables (same nutrition, lower cost)
-- Buy grains and legumes in bulk
-- Shop sales and freeze extras
-- Canned fish is your friend (tuna, sardines, salmon)
-
-## Tracking Prepped Meals in MacroTrackr
-
-### Create Saved Meals
-
-Build each prepped meal once, save it, log it with one tap:
-
-1. Create a new entry
-2. Add all components with weighed amounts
-3. Save as "Meal Prep - Chicken & Rice"
-4. When logging, search "Meal Prep" and tap to add
-
-**Pro tip:** Name your saved meals with macros in the title for quick reference:
-- "Chicken Rice Bowl (500cal/40P/50C/16F)"
-
-### Adjusting Portions
-
-What if you're extra hungry and eat a larger portion?
-
-**Method 1:** Log the saved meal, then add extra components separately
-**Method 2:** Create multiple saved meal sizes (Small, Medium, Large)
-
-**Example:**
-- "Chicken Bowl - Regular" (150g chicken)
-- "Chicken Bowl - Large" (200g chicken)
-
-### Handling Flexibility
-
-You don't have to eat exactly what you prepped. Use the 80% rule:
-
-**80% prepped meals, 20% spontaneous eating.**
-
-This gives you structure without rigidity. If a friend invites you to lunch, go. If you crave something different for dinner, make it. Just track it.
-
-## Sample Weekly Prep
-
-### Sunday Prep Session
-
-**Proteins to cook:**
-- 3 lbs chicken breast (baked, divided into plain and seasoned)
-- 2 lbs ground turkey (browned with taco seasoning)
-- 1 dozen hard-boiled eggs
-
-**Carbs to cook:**
-- 2 cups dry rice (makes ~6 cups cooked)
-- 3 lbs potatoes (roasted with spray oil and seasoning)
-
-**Vegetables to prep:**
-- Wash and portion baby carrots
-- Wash and portion cherry tomatoes
-- Roast 2 lbs mixed vegetables
-
-**Snacks to portion:**
-- Greek yogurt cups
-- Protein shake servings (powder in containers)
-- Mixed nuts in 1-oz portions
-
-**Meals assembled:**
-- 5 lunches: Chicken, rice, roasted vegetables (refrigerate Monday's, freeze the rest and move each to the fridge the night before)
-- 5 snacks: Greek yogurt with berries
-- Breakfast ingredients prepped: Eggs ready to cook or overnight oats ready to grab
-
-**Total prep time:** 2.5 hours
-**Time saved during week:** 5+ hours
-**Accuracy gained:** Immeasurable
-
-## Troubleshooting Common Issues
-
-### "My food gets dry/boring."
-
-**Solutions:**
-- Add sauces when reheating, not when prepping
-- Keep a bottle of hot sauce, soy sauce, or dressing at work
-- Prep different seasonings on proteins
-- Cook meat and poultry to a safe internal temperature (165°F/74°C for poultry), but no further, so reheating does not dry it out
-
-### "I get tired of eating the same thing."
-
-**Solutions:**
-- Prep components, not full meals (protein, carbs, veg separately)
-- Mix and match throughout the week
-- Prep 2 different meal options
-- Use the 80% rule: allow 1-2 spontaneous meals per week
-
-### "I don't have 3 hours on Sunday."
-
-**Solutions:**
-- Split prep into two sessions (Sunday and Wednesday)
-- Focus on just lunches (highest impact)
-- Use a slow cooker or Instant Pot for hands-off cooking
-- Buy pre-cooked proteins (rotisserie chicken, pre-grilled strips)
-
-### "My family won't eat my prep."
-
-**Solutions:**
-- Prep components they can customize (taco bowls, grain bowls)
-- Keep family dinner separate, prep just your lunches
-- Double recipes and portion your own before serving
-
-## The Bottom Line
-
-Meal prep is not about being obsessive. It is about being prepared. When you have accurate, pre-portioned meals ready to go, hitting your macros becomes automatic.
-
-Start small. Prep just lunches for one week. See how much easier your tracking becomes. Build from there.
-
-[Start tracking your prepped meals in MacroTrackr](/register) with our free tier: unlimited daily entries and 5 saved meals included.
-
-*Questions about meal prep strategies? Email us at support@macrotrackr.com.*
+For a 5-day workweek, refrigerate Monday through Wednesday's meals and freeze Thursday and Friday's (moving them to the fridge on Tuesday night to thaw), or run a short 30-minute top-up cook on Wednesday evening.

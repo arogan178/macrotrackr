@@ -36,7 +36,7 @@ export default function ComparisonIndexPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaScript }}
@@ -44,7 +44,7 @@ export default function ComparisonIndexPage() {
 
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-10 text-center">
             <Heading level="display">Compare {APP_NAME}</Heading>
@@ -95,7 +95,7 @@ export default function ComparisonIndexPage() {
             body="Use the hosted app or run the same build on your own server."
           />
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

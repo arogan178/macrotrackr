@@ -63,7 +63,7 @@ describe("ComparisonTable", () => {
       />,
     );
 
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
   });
 
   it("sets the product column apart by tone, not brand colour", () => {

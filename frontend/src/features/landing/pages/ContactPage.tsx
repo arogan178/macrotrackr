@@ -49,7 +49,7 @@ export default function ContactPage() {
       />
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-3xl px-4">
           <header className="mb-10">
             <p className={`${TYPE_SCALE.micro} text-primary`}>Contact</p>
@@ -120,7 +120,7 @@ export default function ContactPage() {
             </Link>
           </section>
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

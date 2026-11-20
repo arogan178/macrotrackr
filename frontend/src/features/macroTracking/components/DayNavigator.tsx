@@ -28,7 +28,11 @@ function DayNavigator({ date, today, oldestDate, onChange }: DayNavigatorProps) 
 
   return (
     <div className="flex items-center gap-1">
-      {isAtFreeLimit ? <ProFeature>{previousButton}</ProFeature> : previousButton}
+      {isAtFreeLimit ? (
+        <ProFeature label="Previous day">{previousButton}</ProFeature>
+      ) : (
+        previousButton
+      )}
       <Button
         variant="secondary"
         buttonSize="sm"

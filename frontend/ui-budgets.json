@@ -6,20 +6,20 @@
     "surfaces": 4,
     "surfaceAlpha": 0,
     "hairlineAlpha": 0,
-    "motionDurations": 20,
-    "motionEasings": 4,
-    "motionCallSites": 27,
+    "motionDurations": 14,
+    "motionEasings": 3,
+    "motionCallSites": 25,
     "layoutProjection": 11,
     "motionFiles": 41,
-    "legacyViewportHeight": 30,
-    "smOverrides": 172,
-    "backdropBlur": 3,
+    "legacyViewportHeight": 0,
+    "smOverrides": 167,
+    "backdropBlur": 2,
     "shadows": 0,
     "hexLiterals": 21,
     "emoji": 0,
     "adHocNumberFormat": 0,
     "rawCalorieFigures": 0,
-    "boldOutsideScale": 31
+    "boldOutsideScale": 14
   },
   "history": {
     "beforeThePlan": {

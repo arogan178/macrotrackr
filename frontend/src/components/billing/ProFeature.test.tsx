@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ProFeature from "./ProFeature";
 
+const navigateMock = vi.fn();
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => navigateMock,
+  useRouter: () => ({ navigate: navigateMock }),
+}));
+
 let authMode: "clerk" | "local" = "clerk";
 
 vi.mock("@/config/runtime", () => ({

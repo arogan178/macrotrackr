@@ -27,16 +27,16 @@ export default function MigrationGuidePage() {
   usePageMetadata({
     ...(guide
       ? getPageMetadata(`/migrate/${guide.slug}`)
-      : { title: `Migration Guide — ${APP_NAME}`, description: "" }),
+      : { title: `Migration Guide | ${APP_NAME}`, description: "" }),
     canonical: canonicalUrl,
     noindex: !guide,
   });
 
   if (!guide) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-dvh bg-background text-foreground">
         <AppHeader mode="public" />
-        <main className="flex min-h-[60vh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
+        <div className="flex min-h-[60dvh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
           <Heading level="page">Migration guide not found</Heading>
           <Link
             to="/migrate"
@@ -45,7 +45,7 @@ export default function MigrationGuidePage() {
             <BackIcon className="h-4 w-4" />
             View all migration guides
           </Link>
-        </main>
+        </div>
         <Footer />
       </div>
     );
@@ -74,13 +74,13 @@ export default function MigrationGuidePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <AppHeader mode="public" />
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <article className="mx-auto max-w-3xl px-4">
           <nav aria-label="Breadcrumb" className="mb-6 text-xs text-muted">
             <Link to="/migrate" className="transition-colors hover:text-foreground">
@@ -216,7 +216,7 @@ export default function MigrationGuidePage() {
             </div>
           </section>
         </article>
-      </main>
+      </div>
       <Footer />
       <BackToTopButton label="Back to top" />
     </div>

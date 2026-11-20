@@ -185,7 +185,7 @@ export default function ProfileForm({
             {(field) => (
               <HeightField
                 label="Height"
-                value={field.state.value}
+                value={positiveOrUndefined(field.state.value)}
                 onChange={(value) =>
                   field.handleChange(positiveOrUndefined(value))
                 }
@@ -193,6 +193,7 @@ export default function ProfileForm({
                 unitSystem={unitSystem}
                 min={100}
                 max={250}
+                placeholder="175"
                 required
               />
             )}
@@ -202,7 +203,7 @@ export default function ProfileForm({
             {(field) => (
               <WeightField
                 label="Weight"
-                value={field.state.value}
+                value={positiveOrUndefined(field.state.value)}
                 onChange={(value) =>
                   field.handleChange(positiveOrUndefined(value))
                 }
@@ -210,6 +211,7 @@ export default function ProfileForm({
                 unitSystem={unitSystem}
                 minKg={30}
                 maxKg={300}
+                placeholder={unitSystem === "metric" ? "75" : "165"}
                 required
               />
             )}
@@ -255,7 +257,7 @@ export default function ProfileForm({
         {/* The unsaved indicator and the save action are the same object, and
             it stays reachable: on a phone the button used to be off-screen
             from the badge that told you there was something to save. */}
-        <div className="sticky bottom-0 z-20 flex items-center justify-between gap-3 border-t border-border bg-surface-2 px-4 py-3 pb-[calc(0.75rem+var(--sab))] sm:px-6">
+        <div className="sticky bottom-[calc(3.75rem+var(--sab))] z-20 flex items-center justify-between gap-3 border-t border-border bg-surface-2 px-4 py-3 sm:px-6 md:bottom-0">
           <span className="text-xs text-muted" aria-live="polite">
             {hasChanges ? "Unsaved changes" : "All changes saved"}
           </span>

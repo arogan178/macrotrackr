@@ -1,12 +1,14 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
+
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 
 const VISIBILITY_OFFSET = 480;
 const REMAINING_PAGE_THRESHOLD = 0.4;
 
 const buttonClasses =
-  "fixed right-6 bottom-36 z-40 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,box-shadow,transform] duration-200 hover:border-primary/40 hover:bg-surface hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:right-8 sm:bottom-32 sm:px-4";
+  "fixed right-6 bottom-36 z-40 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-border bg-surface px-3 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,box-shadow,transform] duration-200 hover:border-primary/40 hover:bg-surface hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:right-8 sm:bottom-32 sm:px-4";
 
 const buttonVariants = {
   hidden: { opacity: 0, y: 14, scale: 0.96 },
@@ -14,13 +16,13 @@ const buttonVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.18, ease: "easeOut" as const },
+    transition: { duration: DURATIONS.instant, ease: EASINGS.out },
   },
   exit: {
     opacity: 0,
     y: 10,
     scale: 0.96,
-    transition: { duration: 0.14, ease: "easeIn" as const },
+    transition: { duration: DURATIONS.instant, ease: EASINGS.out },
   },
 } as const;
 
@@ -45,7 +47,6 @@ const BackToTopButton = memo(function BackToTopButton({
   }, []);
 
   useEffect(() => {
-
     const updateVisibility = () => {
       frameReference.current = null;
       const maxScroll = Math.max(
@@ -101,7 +102,7 @@ const BackToTopButton = memo(function BackToTopButton({
   const button = (
     <AnimatePresence>
       {isVisible ? (
-        <motion.button
+        <m.button
           type="button"
           aria-label={label}
           onClick={scrollToTop}
@@ -128,7 +129,7 @@ const BackToTopButton = memo(function BackToTopButton({
             />
           </svg>
           <span className="hidden sm:inline">{label}</span>
-        </motion.button>
+        </m.button>
       ) : null}
     </AnimatePresence>
   );

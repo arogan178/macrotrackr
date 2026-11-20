@@ -42,6 +42,7 @@ interface IconButtonProps {
   className?: string; // Additional styling for custom variants
   tooltip?: string; // Future: tooltip support
   buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
+  "aria-pressed"?: boolean;
 }
 
 const getActionConfigs = () =>

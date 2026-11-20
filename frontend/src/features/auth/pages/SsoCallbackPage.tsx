@@ -370,7 +370,7 @@ function ClerkSsoCallbackPage() {
 
   if (shownError) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+      <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
         <div className="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
             <svg
@@ -387,15 +387,15 @@ function ClerkSsoCallbackPage() {
               />
             </svg>
           </div>
-          <h1 className="mb-2 text-xl font-bold text-foreground">
-            Sign-in Failed
+          <h1 className="mb-2 text-xl font-semibold text-foreground">
+            Sign-in failed
           </h1>
           <p className="mb-6 text-muted">{shownError}</p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <button
               type="button"
               onClick={primaryAction.onClick}
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2 font-semibold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
             >
               {primaryAction.label}
             </button>
@@ -413,7 +413,7 @@ function ClerkSsoCallbackPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background text-foreground">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background text-foreground">
       <div className="relative z-10 text-center">
         <div className="mx-auto mb-4">
           <LoadingSpinner size="lg" />

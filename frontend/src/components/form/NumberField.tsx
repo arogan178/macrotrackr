@@ -60,8 +60,12 @@ function NumberField({
       return;
     }
 
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
     if (
-      ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+      ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"].includes(
         event.key,
       )
     ) {
@@ -106,6 +110,7 @@ function NumberField({
           id={inputId}
           name={name}
           type="number"
+          inputMode="decimal"
           value={value === 0 ? "0" : (value ?? "")}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -129,7 +134,7 @@ function NumberField({
         </p>
       )}
       {error && (
-        <p id={errorId} className={formStyles.error}>
+        <p id={errorId} role="alert" className={formStyles.error}>
           {error}
         </p>
       )}

@@ -189,7 +189,7 @@ const PricingPage: React.FC = () => {
       <DashboardPageContainer>
         <FeaturePage
           title="Pricing"
-          subtitle="Logging and targets are free. Pro adds your full history and 30 and 90 day trends."
+          subtitle="Logging and targets are free. Pro adds your full history and 30- and 90-day trends."
         >
           <div className="space-y-12">
             {/* Card-based pricing — matches landing page */}

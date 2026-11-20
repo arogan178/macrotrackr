@@ -6,16 +6,15 @@ import Footer from "@/features/landing/components/Footer";
 
 export function BlogNotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+    <div className="relative flex min-h-dvh flex-col bg-background text-foreground">
       <AppHeader mode="public" />
-      <main className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         <div className="space-y-6 text-center">
           <h1 className="text-4xl font-semibold tracking-tight">
             Article not found
           </h1>
           <p className="text-lg text-muted">
-            The link is valid, but the article is no longer in the blog
-            archive.
+            We couldn't find that article. The link may be outdated or mistyped.
           </p>
           <Link
             to="/blog"
@@ -26,7 +25,7 @@ export function BlogNotFound() {
             Back to the blog
           </Link>
         </div>
-      </main>
+      </div>
       <Footer />
     </div>
   );

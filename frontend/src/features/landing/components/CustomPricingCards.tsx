@@ -137,7 +137,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           }
           suffix={proSuffix}
           equivalent={proEquivalent}
-          description="Your full history, 30 and 90 day trends, and no limits on saved meals or habits."
+          description="Your full history, 30- and 90-day trends, and no limits on saved meals or habits."
           features={features.pro}
           raised
           action={proAction}

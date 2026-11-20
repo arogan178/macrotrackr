@@ -43,7 +43,7 @@ export default function AboutPage() {
       />
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <article className="mx-auto max-w-3xl px-4">
           <header className="mb-10">
             <p className={`${TYPE_SCALE.micro} text-primary`}>About</p>
@@ -118,7 +118,7 @@ export default function AboutPage() {
             </p>
           </section>
         </article>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

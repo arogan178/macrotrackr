@@ -1,10 +1,11 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { format, subDays } from "date-fns";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 
 import { ProFeature } from "@/components/billing/ProFeature";
 import Dropdown from "@/components/form/Dropdown";
+import { formStyles } from "@/components/form/FormStyles";
 import {
   Button,
   ChevronDownIcon,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
 import { DURATIONS, EASINGS, TOUCH_TARGET } from "@/components/utils/UiConstants";
+import { cn } from "@/lib/classnameUtilities";
 import { openLogSheet } from "@/lib/logSheet";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -396,7 +398,7 @@ const EntryHistoryComponent = function EntryHistory({
     <div>
       <div className="mb-3 flex items-center justify-between gap-4 md:mb-4">
         <Heading level="panel">History</Heading>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
           {history.length > 0 && (
             <Button
               variant="secondary"
@@ -478,7 +480,7 @@ const EntryHistoryComponent = function EntryHistory({
                 <button
                   type="button"
                   onClick={showLessDates}
-                  className="flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
+                  className={`${TOUCH_TARGET} flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground`}
                 >
                   <span>Show less</span>
                   <ChevronDownIcon className="h-4 w-4 rotate-180" />
@@ -502,64 +504,52 @@ const EntryHistoryComponent = function EntryHistory({
       )}
 
       {/* Floating Action Bar for Meal Grouping - Portalled to body */}
-      {isSelectionMode &&
+      {typeof document !== "undefined" &&
         createPortal(
           <AnimatePresence>
-            <motion.div
-              // The one place travel is right: a fixed overlay sliding up from
-              // the edge it belongs to, on the same curve as the bottom sheet.
-              // It is position-fixed, so nothing reflows behind it. The scale
-              // that used to ride along was doing no work the slide wasn't.
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: DURATIONS.base, ease: EASINGS.modal }}
-              className="fixed bottom-[calc(5.5rem+var(--sab))] left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 md:bottom-6 md:gap-4 md:px-6 md:py-3.5"
-            >
-              <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
-                <span className="text-sm font-medium whitespace-nowrap text-foreground">
-                  {selectedEntryIds.size} selected
-                </span>
-                {selectedEntryIds.size < 2 && (
-                  <>
-                    <span className="hidden h-4 w-px bg-border md:block" />
-                    <span className="text-xs whitespace-nowrap text-muted">
-                      Select 2 or more to group them
-                    </span>
-                  </>
-                )}
-              </div>
+            {isSelectionMode && (
+              <m.div
+                // The one place travel is right: a fixed overlay sliding up from
+                // the edge it belongs to, on the same curve as the bottom sheet.
+                // It is position-fixed, so nothing reflows behind it.
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ duration: DURATIONS.base, ease: EASINGS.modal }}
+                className="fixed bottom-[calc(5.5rem+var(--sab))] left-1/2 z-100 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-2.5 md:bottom-6 md:gap-4 md:px-6 md:py-3.5"
+              >
+                <div className="flex min-w-0 flex-col gap-0.5 md:flex-row md:items-center md:gap-3">
+                  <span className="text-sm font-medium whitespace-nowrap text-foreground">
+                    {selectedEntryIds.size} selected
+                  </span>
+                  {selectedEntryIds.size < 2 && (
+                    <>
+                      <span className="hidden h-4 w-px bg-border md:block" />
+                      <span className="truncate text-xs text-muted">
+                        Select 2 or more to group
+                      </span>
+                    </>
+                  )}
+                </div>
 
-              <div className="ml-2 flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  onClick={handleCreateGroupMeal}
-                  text="Save group"
-                  disabled={selectedEntryIds.size < 2}
-                  buttonSize="sm"
-                  className="whitespace-nowrap"
-                />
-                <button
-                  onClick={toggleSelectionMode}
-                  className="rounded-full p-2 text-muted transition-colors hover:bg-surface-2 hover:text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                  aria-label="Cancel selection"
-                >
-                  <svg
-                    className="h-4 w-4 md:h-5 md:w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </motion.div>
+                <div className="ml-auto flex shrink-0 items-center gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={handleCreateGroupMeal}
+                    text="Save group"
+                    disabled={selectedEntryIds.size < 2}
+                    buttonSize="sm"
+                    className="whitespace-nowrap"
+                  />
+                  <IconButton
+                    variant="close"
+                    buttonSize="sm"
+                    ariaLabel="Cancel selection"
+                    onClick={toggleSelectionMode}
+                  />
+                </div>
+              </m.div>
+            )}
           </AnimatePresence>,
           document.body,
         )}
@@ -608,7 +598,15 @@ const EntryHistoryComponent = function EntryHistory({
         title="Save grouped meal"
         variant="form"
       >
-        <div className="space-y-4">
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (groupMealName.trim()) {
+              void confirmGroupMeals();
+            }
+          }}
+        >
           <p className="text-sm text-muted">
             Group {selectedEntryIds.size} selected entries into a single saved
             meal for easy logging later.
@@ -626,7 +624,7 @@ const EntryHistoryComponent = function EntryHistory({
               value={groupMealName}
               onChange={(event) => setGroupMealName(event.target.value)}
               placeholder="e.g., Chicken Salad Bowl"
-              className="w-full rounded-control border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
+              className={cn(formStyles.input.base, formStyles.input.normal)}
             />
           </div>
           <Dropdown
@@ -641,18 +639,19 @@ const EntryHistoryComponent = function EntryHistory({
           />
           <div className="mt-6 flex justify-end gap-3">
             <Button
+              type="button"
               variant="secondary"
               text="Cancel"
               onClick={() => setIsGroupModalOpen(false)}
             />
             <Button
+              type="submit"
               variant="primary"
               text="Save meal"
-              onClick={confirmGroupMeals}
               disabled={!groupMealName.trim()}
             />
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

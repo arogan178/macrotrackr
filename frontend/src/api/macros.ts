@@ -149,27 +149,68 @@ export const macrosApi = {
     options: { startDate?: string; endDate?: string; fullExport?: boolean } = {},
   ): Promise<{ entries: MacroEntry[]; limits?: unknown }> => {
     const pageSize = 100;
-    let offset = 0;
+    const maxOffset = 50_000;
+    const firstPage = await macrosApi.getHistory({
+      limit: pageSize,
+      offset: 0,
+      ...options,
+    });
+
+    const entries: MacroEntry[] = Array.isArray(firstPage.entries)
+      ? [...firstPage.entries]
+      : [];
+    let limits: unknown = firstPage.limits;
+
+    if (firstPage.hasMore !== true) {
+      return { entries, limits };
+    }
+
+    // Fetch remaining pages in parallel in small batches once page 1 tells us
+    // the total count, instead of waiting for every page serially.
+    const total =
+      typeof firstPage.total === "number" && firstPage.total > pageSize
+        ? Math.min(firstPage.total, maxOffset)
+        : 0;
+
+    if (total > pageSize) {
+      const offsets: number[] = [];
+      for (let offset = pageSize; offset < total; offset += pageSize) {
+        offsets.push(offset);
+      }
+
+      const CONCURRENCY = 4;
+      for (let index = 0; index < offsets.length; index += CONCURRENCY) {
+        const batch = offsets.slice(index, index + CONCURRENCY);
+        const pages = await Promise.all(
+          batch.map((offset) =>
+            macrosApi.getHistory({ limit: pageSize, offset, ...options }),
+          ),
+        );
+        for (const page of pages) {
+          if (Array.isArray(page.entries)) {
+            entries.push(...page.entries);
+          }
+          limits = page.limits ?? limits;
+        }
+      }
+
+      return { entries, limits };
+    }
+
+    let offset = pageSize;
     let hasMore = true;
-    const entries: MacroEntry[] = [];
-    let limits: unknown;
-
-    while (hasMore) {
-      const response = await macrosApi.getHistory(
-        { limit: pageSize, offset, ...options },
-      );
-
+    while (hasMore && offset <= maxOffset) {
+      const response = await macrosApi.getHistory({
+        limit: pageSize,
+        offset,
+        ...options,
+      });
       if (Array.isArray(response.entries)) {
         entries.push(...response.entries);
       }
-
       limits = response.limits ?? limits;
       hasMore = response.hasMore === true;
       offset += pageSize;
-
-      if (offset > 50_000) {
-        break;
-      }
     }
 
     return { entries, limits };

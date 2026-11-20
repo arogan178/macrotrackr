@@ -16,6 +16,7 @@ import {
   LockIcon,
   LogoutIcon,
   Modal,
+  StateCard,
   TabBar,
   UploadIcon,
   UserIcon,
@@ -34,7 +35,6 @@ import {
 import DeleteAccountForm from "@/features/settings/components/DeleteAccountForm";
 import { useBeforeUnload } from "@/hooks";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
-import { countUnsentEntries } from "@/hooks/queries/macro/entryStore";
 import { useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { cn } from "@/lib/classnameUtilities";
@@ -89,12 +89,16 @@ export default function SettingsPage() {
     data: settingsData,
     isLoading: isSettingsLoading,
     error: settingsQueryError,
+    refetch: refetchSettings,
   } = useSettings();
   const logoutMutation = useLogout();
   const [unsentEntryCount, setUnsentEntryCount] = useState(0);
 
   // Signing out clears this device, so entries that never synced would go with it.
   const handleLogout = useCallback(async () => {
+    const { countUnsentEntries } = await import(
+      "@/hooks/queries/macro/entryStore"
+    );
     const unsent = await countUnsentEntries();
     if (unsent > 0) {
       setUnsentEntryCount(unsent);
@@ -123,8 +127,8 @@ export default function SettingsPage() {
   const activeSection = SECTIONS.find((section) => section.key === activeTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
-  const [pendingTabChange, setPendingTabChange] = useState<
-    TabType | undefined
+  const [pendingAction, setPendingAction] = useState<
+    { type: "tab"; tab: TabType } | { type: "close-phone-section" } | undefined
   >();
 
   // Update tab when URL changes. Only on a change, so a tab picked after
@@ -148,7 +152,7 @@ export default function SettingsPage() {
   const handleTabChange = useCallback(
     (tab: TabType) => {
       if (hasSettingsChanges) {
-        setPendingTabChange(tab);
+        setPendingAction({ type: "tab", tab });
         setShowConfirmModal(true);
       } else {
         setActiveTab(tab);
@@ -157,18 +161,30 @@ export default function SettingsPage() {
     [hasSettingsChanges],
   );
 
+  const handlePhoneSectionBack = useCallback(() => {
+    if (hasSettingsChanges) {
+      setPendingAction({ type: "close-phone-section" });
+      setShowConfirmModal(true);
+    } else {
+      setIsPhoneSectionOpen(false);
+    }
+  }, [hasSettingsChanges]);
+
   const confirmTabChange = useCallback(() => {
-    if (pendingTabChange) {
-      // Leaving the tab unmounts the form, which drops its edits.
+    if (pendingAction) {
       setHasSettingsChanges(false);
-      setActiveTab(pendingTabChange);
-      setPendingTabChange(undefined);
+      if (pendingAction.type === "tab") {
+        setActiveTab(pendingAction.tab);
+      } else {
+        setIsPhoneSectionOpen(false);
+      }
+      setPendingAction(undefined);
     }
     setShowConfirmModal(false);
-  }, [pendingTabChange]);
+  }, [pendingAction]);
 
   const cancelTabChange = useCallback(() => {
-    setPendingTabChange(undefined);
+    setPendingAction(undefined);
     setShowConfirmModal(false);
   }, []);
 
@@ -181,7 +197,7 @@ export default function SettingsPage() {
             <div className="pb-4">
               <button
                 type="button"
-                onClick={() => setIsPhoneSectionOpen(false)}
+                onClick={handlePhoneSectionBack}
                 className="-ml-1 flex min-h-12 items-center gap-1 text-sm text-muted hover:text-foreground"
               >
                 <BackIcon className="h-4 w-4" />
@@ -243,13 +259,14 @@ export default function SettingsPage() {
           {isSettingsLoading ? (
             <SettingsLoadingSkeleton />
           ) : settingsQueryError ? (
-            <div className="p-6 text-center">
-              <p className="text-error">
-                Failed to load settings. Please try again.
-              </p>
-            </div>
+            <StateCard
+              tone="error"
+              title="Couldn't load settings"
+              message="Check your connection and try again."
+              action={{ label: "Try again", onClick: () => void refetchSettings() }}
+            />
           ) : settingsData ? (
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {activeTab === "profile" && (
                 <PageTransition key="profile">
                   <ProfileForm
@@ -297,7 +314,7 @@ export default function SettingsPage() {
 
         <div
           className={cn(
-            "mt-6 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:mt-8 sm:flex-row sm:items-center",
+            "mt-6 flex flex-col items-start justify-between gap-4 rounded-card border border-border bg-surface px-4 py-4 sm:flex-row sm:items-center sm:px-6",
             isPhoneSectionOpen && "max-md:hidden",
           )}
         >
@@ -315,7 +332,7 @@ export default function SettingsPage() {
             onClick={handleLogout}
             isLoading={logoutMutation.isPending}
             leftIcon={<LogoutIcon className="h-4 w-4" />}
-            text="Log out"
+            text="Sign out"
           />
         </div>
 

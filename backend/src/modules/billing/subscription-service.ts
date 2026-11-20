@@ -7,6 +7,7 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/data/database
 import { NotFoundError } from "../../lib/http/errors";
 import { generateId } from "../../utils/id-generator";
 import { handleServiceError } from "../../lib/http/error-handler";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import type { CacheService } from "../../services/cache-service";
 import type { BillingProvider } from "@shared/entitlements";
 
@@ -92,7 +93,7 @@ export class SubscriptionService {
     currentPeriodEnd: string
   ): Promise<SubscriptionRecord> {
     const db = getDb();
-    return withTransaction(db, () => {
+    const record = withTransaction(db, () => {
       try {
         const existing = safeQuery<SubscriptionRecord>(
           db,
@@ -170,6 +171,8 @@ export class SubscriptionService {
         );
       }
     });
+    publishUserSyncEvent(userId, "user");
+    return record;
   }
 
   /**
@@ -296,7 +299,7 @@ export class SubscriptionService {
     providerSubscriptionId: string
   ): Promise<void> {
     const db = getDb();
-    return withTransaction(db, () => {
+    withTransaction(db, () => {
       try {
         const result = safeExecute(
           db,
@@ -331,6 +334,7 @@ export class SubscriptionService {
         );
       }
     });
+    publishUserSyncEvent(userId, "user");
   }
 
   /**

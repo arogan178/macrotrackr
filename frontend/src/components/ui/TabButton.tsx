@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { motion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 import { BUTTON_SIZES } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
@@ -14,6 +14,8 @@ export interface TabButtonProps {
   className?: string;
   ariaLabel?: string;
   role?: string;
+  tabIndex?: number;
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
   "aria-selected"?: boolean;
 }
 
@@ -43,18 +45,13 @@ function TabButton({
   ...rest
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded ?? "rounded-control";
-  const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
+  const motionBg = activeBg ?? "bg-surface-3";
   const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
-
-  const canUseMatchMedia =
-    typeof globalThis !== "undefined" &&
-    typeof globalThis.matchMedia === "function";
-  const prefersReducedMotion =
-    canUseMatchMedia &&
-    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion = useReducedMotion() ?? false;
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       role={role ?? "tab"}
@@ -70,9 +67,11 @@ function TabButton({
         "after:content-none",
         baseRounded,
         fullWidth ? "w-full flex-1" : "",
-        active ? "text-foreground" : "text-muted hover:bg-surface-2 hover:text-foreground",
+        active
+          ? "text-foreground"
+          : "text-muted hover:bg-surface-2 hover:text-foreground",
         "disabled:hover:bg-transparent disabled:hover:text-muted",
-        className
+        className,
       )}
       {...rest}
     >
@@ -80,16 +79,24 @@ function TabButton({
         {children}
       </span>
       {active && (
-        <motion.div
+        <m.div
           layoutId={layoutId}
-          className={cn("absolute inset-0 z-0 border border-border", baseRounded, motionBg)}
+          className={cn(
+            "absolute inset-0 z-0 border border-border",
+            baseRounded,
+            motionBg,
+          )}
           initial={isMotion && !prefersReducedMotion ? false : { opacity: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 400,
-            damping: 30,
-            mass: 0.8,
-          }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : {
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.8,
+                }
+          }
         />
       )}
     </button>

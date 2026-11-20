@@ -48,7 +48,7 @@ function ClerkProfileSetupPage() {
   // Show loading while Clerk loads
   if (!isLoaded) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     );

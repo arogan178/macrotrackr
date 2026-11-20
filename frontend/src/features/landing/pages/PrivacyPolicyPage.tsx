@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
 import PageShell from "@/components/layout/PageShell";
@@ -18,13 +19,13 @@ const PrivacyPolicyPage: React.FC = () => {
   });
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
+    <div className="relative min-h-dvh overflow-hidden text-foreground selection:bg-primary/30">
       <AppHeader mode="minimal" />
 
       <PageShell width="prose">
         <div>
             <div className="rounded-card border border-border bg-background p-8 lg:p-10">
-              <h1 className="mb-6 text-4xl font-bold text-foreground">
+              <h1 className="mb-6 text-4xl font-semibold text-foreground">
                 Privacy Policy
               </h1>
 
@@ -93,12 +94,12 @@ const PrivacyPolicyPage: React.FC = () => {
                     <li>Access your personal data</li>
                     <li>Correct inaccurate data</li>
                     <li>
-                      <a
-                        href="/delete-account"
+                      <Link
+                        to="/delete-account"
                         className="text-primary underline underline-offset-4"
                       >
                         Delete your account and data
-                      </a>
+                      </Link>
                     </li>
                     <li>Export your data</li>
                   </ul>

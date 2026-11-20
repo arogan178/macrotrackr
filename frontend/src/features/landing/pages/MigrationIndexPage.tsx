@@ -21,9 +21,9 @@ export default function MigrationIndexPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       <AppHeader mode="public" />
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4">
           <header className="mx-auto mb-10 max-w-3xl text-center">
             <p className="text-xs font-semibold text-primary">
@@ -69,7 +69,7 @@ export default function MigrationIndexPage() {
             ))}
           </ul>
         </div>
-      </main>
+      </div>
       <Footer />
       <BackToTopButton label="Back to top" />
     </div>

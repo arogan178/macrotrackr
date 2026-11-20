@@ -24,7 +24,7 @@ const PricingSection: React.FC = () => {
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-balance text-muted">
             Logging, targets and your last seven days cost nothing, permanently.
-            Pro adds 30 and 90 day history, trends and unlimited habits. Prefer
+            Pro adds 30- and 90-day history, trends and unlimited habits. Prefer
             to run it yourself? It is open source.
           </p>
         </div>

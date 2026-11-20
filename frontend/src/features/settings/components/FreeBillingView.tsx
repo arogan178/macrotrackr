@@ -13,11 +13,11 @@ const FreeBillingView: React.FC<{
         <StarIcon className="h-8 w-8 text-warning" />
       </div>
       <h4 className="mb-2 text-xl font-semibold text-foreground">
-        Unlock Your Full Potential
+        Upgrade to Pro
       </h4>
       <p className="mx-auto max-w-md text-muted">
-        Upgrade to Pro to access exclusive features like advanced reporting,
-        unlimited habit tracking, and custom macro targets.
+        Get your full history, 30- and 90-day analytics, unlimited saved meals
+        and habits, and CSV export.
       </p>
     </CardContainer>
 
@@ -28,7 +28,7 @@ const FreeBillingView: React.FC<{
         loadingText="Redirecting..."
         fullWidth
         variant="primary"
-        className="bg-warning py-4 text-lg font-bold text-black hover:bg-warning/90"
+        className="bg-warning py-4 text-lg font-semibold text-black hover:bg-warning/90"
         leftIcon={<StarIcon className="" />}
         ariaLabel="Upgrade to Pro"
       >

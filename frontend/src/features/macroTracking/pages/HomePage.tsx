@@ -111,7 +111,9 @@ export default function HomePage() {
     return ids;
   }, [history, savedMeals]);
 
-  const { editingEntry, setEditingEntry, showNotification } = useStore();
+  const editingEntry = useStore((state) => state.editingEntry);
+  const setEditingEntry = useStore((state) => state.setEditingEntry);
+  const showNotification = useStore((state) => state.showNotification);
   const { handleMutationError } = useMutationErrorHandler({
     onError: (message) => showNotification(message, "error"),
   });

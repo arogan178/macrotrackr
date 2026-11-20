@@ -26,7 +26,7 @@ function ClerkAuthReadyPage() {
 
   if (error) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+      <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
         <div className="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
             <svg
@@ -42,8 +42,8 @@ function ClerkAuthReadyPage() {
               />
             </svg>
           </div>
-          <h1 className="mb-2 text-xl font-bold text-foreground">
-            Authentication Error
+          <h1 className="mb-2 text-xl font-semibold text-foreground">
+            Authentication error
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
@@ -51,9 +51,9 @@ function ClerkAuthReadyPage() {
             onClick={() =>
               navigate({ to: "/login", search: { returnTo: undefined } })
             }
-            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-semibold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
-            Back to Login
+            Back to sign in
           </button>
         </div>
       </div>
@@ -61,7 +61,7 @@ function ClerkAuthReadyPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background text-foreground">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-background text-foreground">
       <div className="relative z-10 text-center">
         <div className="mx-auto mb-4">
           <LoadingSpinner size="lg" />

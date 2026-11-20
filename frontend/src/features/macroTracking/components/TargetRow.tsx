@@ -44,8 +44,9 @@ export default function TargetRow({
   days,
   dayLabels,
 }: TargetRowProps) {
+  const hasTarget = target > 0;
   const status = targetStatus(value, target);
-  const fill = target > 0 ? Math.min(100, (value / target) * 100) : 0;
+  const fill = hasTarget ? Math.min(100, (value / target) * 100) : 0;
   // Day bars top out above the highest day, so an over day still shows how far.
   const dayScale = Math.max(target, ...(days ?? [])) * 1.1 || 1;
   const dayHeight = (amount: number) => (amount / dayScale) * 100;
@@ -57,9 +58,13 @@ export default function TargetRow({
           <span className={cn("h-2 w-2 shrink-0 self-center rounded-full", colorClass)} />
           <span className="text-sm">{name}</span>
           {valuePrefix ? <span className="text-xs text-muted">{valuePrefix}</span> : null}
-          <Value value={value} unit={unit} suffix={`of ${formatGrouped(Math.round(target))}`} />
+          <Value
+            value={value}
+            unit={unit}
+            suffix={hasTarget ? `of ${formatGrouped(Math.round(target))}` : undefined}
+          />
         </span>
-        {status === "hit" ? (
+        {!hasTarget ? null : status === "hit" ? (
           <span className={cn(CHIP, "bg-primary/12 text-primary")}>On target</span>
         ) : status === "over" ? (
           <span className={cn(CHIP, "bg-warning/12 text-warning tabular-nums")}>

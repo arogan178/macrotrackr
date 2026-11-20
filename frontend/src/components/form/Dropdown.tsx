@@ -28,6 +28,11 @@ function Dropdown({
 
   const autoId = useId();
   const resolvedId = id ?? name ?? autoId;
+  const errorId = `${resolvedId}-error`;
+  const describedBy =
+    [error && errorId, helperText && !error && `${resolvedId}-helper`]
+      .filter(Boolean)
+      .join(" ") || undefined;
   const normalizedValue = value ?? "";
   const normalizedOptions =
     placeholder && !options.some((option) => option.value === "")
@@ -50,7 +55,8 @@ function Dropdown({
           className={selectClasses}
           required={required}
           disabled={disabled}
-          aria-describedby={helperText ? `${resolvedId}-helper` : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
         >
           {normalizedOptions.map((option) => (
             <option
@@ -75,7 +81,11 @@ function Dropdown({
           {helperText}
         </p>
       ) : null}
-      {error && <p className={formStyles.error}>{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className={formStyles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -118,7 +118,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
+      className={`relative min-h-dvh bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       <script type="application/ld+json">{schemaScript}</script>
 
@@ -126,7 +126,7 @@ const LandingPage: React.FC = () => {
         <AppHeader mode="public" />
       </div>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <HeroSection />
 
         <m.section
@@ -153,7 +153,7 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </m.section>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

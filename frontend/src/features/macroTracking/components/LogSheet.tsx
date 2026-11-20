@@ -18,11 +18,23 @@ const LogSheetForm = lazy(() => import("./LogSheetForm"));
  * was in the middle of. Mounted by the layout instead, it opens over the
  * current page and closes back to it.
  */
-export default function LogSheet() {
-  const [isOpen, setOpen] = useLogSheet();
+interface LogSheetProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  openedByShortcut?: boolean;
+}
+
+export default function LogSheet({
+  isOpen: controlledOpen,
+  onOpenChange,
+  openedByShortcut: controlledShortcut,
+}: LogSheetProps = {}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useLogSheet();
+  const isOpen = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const productAnalytics = useProductAnalytics();
   // Only the shortcut URL (`?log=1`) can open the sheet on first render.
-  const openedByShortcut = useRef(isOpen);
+  const openedByShortcut = useRef(controlledShortcut ?? isOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -34,22 +46,22 @@ export default function LogSheet() {
     openedByShortcut.current = false;
   }, [isOpen, productAnalytics]);
 
-  if (!isOpen) return null;
-
   const onClose = () => setOpen(false);
 
   return (
     <Modal
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
       title="Log a meal"
       size="lg"
       variant="form"
       hideDefaultButtons
     >
-      <Suspense fallback={<LogSheetFormSkeleton />}>
-        <LogSheetForm onClose={onClose} />
-      </Suspense>
+      {isOpen && (
+        <Suspense fallback={<LogSheetFormSkeleton />}>
+          <LogSheetForm onClose={onClose} />
+        </Suspense>
+      )}
     </Modal>
   );
 }

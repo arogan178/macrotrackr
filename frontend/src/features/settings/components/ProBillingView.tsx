@@ -33,7 +33,7 @@ const ProBillingView: React.FC<{
 }> = ({ onManage, isLoading, billingDetails }) => {
   const [show, setShow] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
-  const { showNotification } = useStore();
+  const showNotification = useStore((state) => state.showNotification);
   const queryClient = useQueryClient();
   // If user is needed, get from loader: const { user } = useLoaderData({ from: '/' });
 
@@ -80,8 +80,8 @@ const ProBillingView: React.FC<{
             </span>
             <span>
               <span className="font-semibold">Payment issue:</span> Your
-              subscription is {status}. Please update your payment method to
-              restore access.
+              subscription is {statusLabel.toLowerCase()}. Please update your
+              payment method to restore access.
             </span>
           </p>
         </div>
@@ -199,7 +199,7 @@ const ProBillingView: React.FC<{
               variant="secondary"
               className="flex-1"
             >
-              Keep Subscription
+              Keep subscription
             </Button>
             <Button
               onClick={async () => {
@@ -218,7 +218,7 @@ const ProBillingView: React.FC<{
               variant="danger"
               className="flex-1"
             >
-              Confirm Cancel
+              Cancel subscription
             </Button>
           </div>
         </div>
@@ -270,8 +270,8 @@ const ProBillingView: React.FC<{
               <span className="mr-2 rounded-control bg-warning/20 p-1">
                 <WarningIcon className="h-3 w-3 text-warning" />
               </span>
-              This will open in a new tab. Your current session will remain
-              active.
+              You'll be redirected to Stripe to manage your billing, then
+              brought back here when you're done.
             </p>
           </div>
           <div className="flex gap-3 pt-2">
@@ -291,7 +291,7 @@ const ProBillingView: React.FC<{
               className="flex-1"
               leftIcon={<ExternalLinkIcon className="h-4 w-4" />}
             >
-              Continue to Portal
+              Continue to billing portal
             </Button>
           </div>
         </div>

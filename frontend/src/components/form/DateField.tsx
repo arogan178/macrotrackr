@@ -32,6 +32,11 @@ function DateField({
 
   const autoId = useId();
   const resolvedId = id ?? name ?? autoId;
+  const errorId = `${resolvedId}-error`;
+  const describedBy =
+    [error && errorId, helperText && !error && `${resolvedId}-helper`]
+      .filter(Boolean)
+      .join(" ") || undefined;
   const resolvedMaxDate = maxDate ?? todayISO();
 
   return (
@@ -53,7 +58,8 @@ function DateField({
           min={minDate}
           max={resolvedMaxDate}
           disabled={disabled}
-          aria-describedby={helperText ? `${resolvedId}-helper` : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
         />
       </div>
       {helperText && !error ? (
@@ -61,7 +67,11 @@ function DateField({
           {helperText}
         </p>
       ) : null}
-      {error && <p className={formStyles.error}>{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className={formStyles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

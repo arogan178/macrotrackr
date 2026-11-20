@@ -49,6 +49,7 @@ function isPlayBillingEnabled(): boolean {
 interface TimingContext {
   requestStartTime?: number;
   request: Request;
+  route?: string;
   set?: {
     status?: number;
     headers?: Record<string, string>;
@@ -98,10 +99,11 @@ function resolveStatusCode(status: unknown): number {
 
 function recordRequestTiming(context: unknown): void {
   const typedContext = context as TimingContext;
-  const { request, set } = typedContext;
+  const { request, set, route } = typedContext;
   const start = getRequestStartTime(typedContext);
   const duration = Date.now() - start;
-  const path = new URL(request.url).pathname;
+  const path =
+    typeof route === "string" && route.length > 0 ? route : "/__unmatched__";
   const statusCode = resolveStatusCode(set?.status);
 
   recordRequest(request.method, path, statusCode, duration);

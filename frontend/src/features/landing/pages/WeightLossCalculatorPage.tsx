@@ -130,7 +130,7 @@ export default function WeightLossCalculatorPage() {
           <div className={`${calculatorCardClass} space-y-4`}>
             <h2 className={calculatorSectionTitleClass}>Goal & Pace</h2>
             <p className={calculatorSectionDescriptionClass}>
-              A slower pace is usually easier to sustain and protect your
+              A slower pace is usually easier to sustain and helps protect your
               energy.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -219,7 +219,7 @@ export default function WeightLossCalculatorPage() {
               <dt className={calculatorStatLabelClass}>Estimated duration</dt>
               <dd className={calculatorStatValueClass}>
                 {estimatedWeeks === 0
-                  ? "—"
+                  ? "-"
                   : `${estimatedWeeks} ${estimatedWeeks === 1 ? "week" : "weeks"}`}
               </dd>
             </div>
@@ -229,7 +229,7 @@ export default function WeightLossCalculatorPage() {
             <span className="block text-xs font-medium text-muted">
               {estimatedWeeks > 0 ? "Estimated goal date" : "Goal status"}
             </span>
-            <span className="mt-1 block text-lg font-bold text-foreground">
+            <span className="mt-1 block text-lg font-semibold text-foreground">
               {estimatedWeeks > 0
                 ? formattedDate
                 : isAtGoal

@@ -11,6 +11,7 @@ interface HeightFieldProps {
   max: number;
   required?: boolean;
   error?: string;
+  placeholder?: string;
 }
 
 export default function HeightField({
@@ -22,6 +23,7 @@ export default function HeightField({
   max,
   required,
   error,
+  placeholder,
 }: HeightFieldProps) {
   if (unitSystem === "metric") {
     return (
@@ -35,6 +37,7 @@ export default function HeightField({
         unit="cm"
         required={required}
         error={error}
+        placeholder={placeholder}
       />
     );
   }

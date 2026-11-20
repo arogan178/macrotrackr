@@ -20,7 +20,7 @@ interface MacroTotals {
 
 interface ReportingChartRow extends MacroTotals {
   name: string;
-  [key: string]: string | number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 function buildReportingData(
@@ -28,7 +28,7 @@ function buildReportingData(
   dateRange: string,
 ): {
   aggregatedData: ReportingChartRow[];
-  dailySeries: (ReportingChartRow & { date: string })[];
+  dailySeries: (ReportingChartRow & { date: string; hasEntries: boolean })[];
 } {
   if (!history?.length) {
     return {
@@ -72,6 +72,7 @@ function buildReportingData(
     return {
       name: formatDate(date),
       date,
+      hasEntries: Boolean(totals),
       calories: totals ? totals.calories : 0,
       protein: totals ? totals.protein : 0,
       carbs: totals ? totals.carbs : 0,

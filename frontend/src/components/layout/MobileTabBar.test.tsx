@@ -5,24 +5,33 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import MobileTabBar from "./MobileTabBar";
 
 let pathname = "/home";
-const navigateMock = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname }),
-  useNavigate: () => navigateMock,
+  Link: ({
+    to,
+    children,
+    ...rest
+  }: {
+    to: string;
+    children: React.ReactNode;
+  }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 
 describe("MobileTabBar", () => {
   beforeEach(() => {
     pathname = "/home";
-    navigateMock.mockReset();
   });
 
   it("puts all four destinations within thumb reach", () => {
     render(<MobileTabBar onLog={vi.fn()} />);
 
     for (const label of ["Home", "Goals", "Analytics", "Settings"]) {
-      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
   });
 
@@ -33,29 +42,27 @@ describe("MobileTabBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Log a meal" }));
 
     expect(onLog).toHaveBeenCalledOnce();
-    expect(navigateMock).not.toHaveBeenCalled();
   });
 
   it("marks exactly one destination as current", () => {
     pathname = "/reporting";
     render(<MobileTabBar onLog={vi.fn()} />);
 
-    const current = screen.getAllByRole("button", { current: "page" });
+    const current = screen.getAllByRole("link", { current: "page" });
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveTextContent("Analytics");
   });
 
-  it("navigates to the chosen destination", async () => {
+  it("links to the chosen destination", () => {
     render(<MobileTabBar onLog={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Goals" }));
-
-    expect(navigateMock).toHaveBeenCalledWith({ to: "/goals" });
+    expect(screen.getByRole("link", { name: "Goals" })).toHaveAttribute(
+      "href",
+      "/goals",
+    );
   });
 
   it("opens the sheet in place, without navigating away", async () => {
-    // The sheet is mounted by the layout, so logging from Goals must not throw
-    // away whatever the user was doing there.
     pathname = "/goals";
     const onLog = vi.fn();
     render(<MobileTabBar onLog={onLog} />);
@@ -63,7 +70,6 @@ describe("MobileTabBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Log a meal" }));
 
     expect(onLog).toHaveBeenCalledTimes(1);
-    expect(navigateMock).not.toHaveBeenCalled();
   });
 
   it("clears the home indicator", () => {
