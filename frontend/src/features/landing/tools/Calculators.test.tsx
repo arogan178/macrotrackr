@@ -95,6 +95,15 @@ describe("Free Calculators", () => {
       expect(screen.queryByText(/\bNaN\b/)).not.toBeInTheDocument();
     });
 
+    it("sets goal protein from bodyweight, matching the protein calculator", () => {
+      render(<TdeeCalculatorPage />);
+
+      // Default 75 kg: 2.4, 1.6 and 2.2 g/kg.
+      expect(screen.getByText("180g")).toBeInTheDocument();
+      expect(screen.getByText("120g")).toBeInTheDocument();
+      expect(screen.getByText("165g")).toBeInTheDocument();
+    });
+
     it("lets the activity breakdown rows set the activity level", () => {
       render(<TdeeCalculatorPage />);
 

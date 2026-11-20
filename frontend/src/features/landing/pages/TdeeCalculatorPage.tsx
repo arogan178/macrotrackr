@@ -1,10 +1,7 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { formatGrouped } from "@/lib/formatNumber";
-import {
-  calculateBMR,
-  calculateMacroTarget,
-  calculateTDEE,
-} from "@/utils/nutritionCalculations";
+import { CALORIES_PER_GRAM } from "@/utils/constants/nutrition";
+import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
 import {
   ACTIVITY_LEVELS,
   getActivityLevelFromString,
@@ -24,7 +21,9 @@ import {
 import ResultHeadline from "../tools/ResultHeadline";
 import { useBodyStats } from "../tools/useBodyStats";
 
-const GOAL_SPLIT = { protein: 30, carbs: 40, fats: 30 } as const;
+// Protein follows bodyweight, with the same g/kg bands as the protein
+// calculator, so the two pages give one answer for one person.
+const FAT_PERCENT = 30;
 
 export default function TdeeCalculatorPage() {
   const stats = useBodyStats();
@@ -44,6 +43,7 @@ export default function TdeeCalculatorPage() {
       accentClass: "text-primary",
       delta: "-500 kcal/day",
       calories: Math.max(1200, tdee - 500),
+      proteinPerKg: 2.4,
     },
     {
       key: "maintain",
@@ -51,6 +51,7 @@ export default function TdeeCalculatorPage() {
       accentClass: "text-primary",
       delta: "Match your burn",
       calories: tdee,
+      proteinPerKg: 1.6,
       highlighted: true,
     },
     {
@@ -59,16 +60,21 @@ export default function TdeeCalculatorPage() {
       accentClass: "text-success",
       delta: "+300 kcal/day",
       calories: tdee + 300,
+      proteinPerKg: 2.2,
     },
-  ].map((goal) => ({
-    ...goal,
-    macros: calculateMacroTarget(
-      goal.calories,
-      GOAL_SPLIT.protein,
-      GOAL_SPLIT.carbs,
-      GOAL_SPLIT.fats,
-    ),
-  }));
+  ].map((goal) => {
+    const protein = Math.round(weightKg * goal.proteinPerKg);
+    const fats = Math.round(
+      (goal.calories * FAT_PERCENT) / 100 / CALORIES_PER_GRAM.fats,
+    );
+    const carbCalories =
+      goal.calories -
+      protein * CALORIES_PER_GRAM.protein -
+      fats * CALORIES_PER_GRAM.fats;
+    const carbs = Math.max(0, Math.round(carbCalories / CALORIES_PER_GRAM.carbs));
+
+    return { ...goal, macros: { protein, carbs, fats } };
+  });
 
   return (
     <CalculatorLayout
@@ -163,8 +169,8 @@ export default function TdeeCalculatorPage() {
           Calorie & Macro Targets by Goal
         </h2>
         <p className="mx-auto mt-2 mb-6 max-w-xl text-center text-sm leading-relaxed text-muted">
-          Each target uses a balanced {GOAL_SPLIT.protein}/{GOAL_SPLIT.carbs}/
-          {GOAL_SPLIT.fats} protein, carb, and fat split.
+          Protein is set from your bodyweight, as in the protein calculator.
+          Fat is {FAT_PERCENT}% of calories and carbs make up the rest.
         </p>
 
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -192,26 +198,26 @@ export default function TdeeCalculatorPage() {
               <dl className="space-y-2 border-t border-border pt-4 text-xs">
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Protein {GOAL_SPLIT.protein}%
+                    Protein {goal.proteinPerKg} g/kg
                   </dt>
                   <dd className={calculatorStatValueClass}>
-                    {goal.macros.proteinTarget}g
+                    {goal.macros.protein}g
                   </dd>
                 </div>
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Carbs {GOAL_SPLIT.carbs}%
+                    Carbs
                   </dt>
                   <dd className={calculatorStatValueClass}>
-                    {goal.macros.carbsTarget}g
+                    {goal.macros.carbs}g
                   </dd>
                 </div>
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
-                    Fats {GOAL_SPLIT.fats}%
+                    Fats {FAT_PERCENT}%
                   </dt>
                   <dd className={calculatorStatValueClass}>
-                    {goal.macros.fatsTarget}g
+                    {goal.macros.fats}g
                   </dd>
                 </div>
               </dl>

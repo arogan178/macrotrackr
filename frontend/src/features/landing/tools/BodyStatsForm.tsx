@@ -111,18 +111,18 @@ export default function BodyStatsForm({
           <NumberField
             label="Weight"
             value={weightLb || ""}
-            onChange={(v) => setWeightKg(lbToKg(toNumericInput(v, 1000)))}
-            min={30}
-            max={1000}
+            onChange={(v) => setWeightKg(lbToKg(toNumericInput(v, 661)))}
+            min={66}
+            max={661}
             unit="lbs"
           />
         ) : (
           <NumberField
             label="Weight"
             value={weightKg || ""}
-            onChange={(v) => setWeightKg(toNumericInput(v, 500))}
-            min={15}
-            max={500}
+            onChange={(v) => setWeightKg(toNumericInput(v, 300))}
+            min={30}
+            max={300}
             unit="kg"
           />
         )}
@@ -135,7 +135,7 @@ export default function BodyStatsForm({
               onChange={(v) =>
                 setHeightCm(ftInToCm(toNumericInput(v, 8), inches))
               }
-              min={1}
+              min={3}
               max={8}
               unit="ft"
             />
@@ -155,7 +155,7 @@ export default function BodyStatsForm({
             label="Height"
             value={heightCm || ""}
             onChange={(v) => setHeightCm(toNumericInput(v, 250))}
-            min={50}
+            min={100}
             max={250}
             unit="cm"
           />

@@ -31,13 +31,13 @@ export function useBodyStats(initialWeightKg = 75) {
   const [heightCm, setHeightCm] = useState(175);
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>("medium");
 
-  // Same bounds as the form fields, in the metric units the state is kept in.
+  // Same bounds as the form fields and the BMR equations, in metric units.
   useSharedInputs((read) => {
     const units = read.oneOf("units", UNIT_SYSTEMS);
     const sex = read.oneOf("sex", SEXES);
     const sharedAge = read.number("age", 1, 120);
-    const weight = read.number("weight", 15, 500);
-    const height = read.number("height", 50, 250);
+    const weight = read.number("weight", 30, 300);
+    const height = read.number("height", 100, 250);
     const activity = read.oneOf("activity", ACTIVITY_LEVELS);
 
     if (units) setUnitSystem(units);

@@ -2,7 +2,7 @@
   "disclaimer": "These calculators give population-level estimates for general fitness planning, not medical advice. Individual needs vary. If you are pregnant, managing a health condition, or working with a clinician or dietitian, follow their guidance instead.",
   "calculators": {
     "tdee-calculator": {
-      "method": "Basal Metabolic Rate comes from the Mifflin-St Jeor equation (10 x weight in kg + 6.25 x height in cm - 5 x age, +5 for men and -161 for women), then multiplies by an activity factor from 1.2 for sedentary to 1.9 for very active. Activity factors are self-reported bands, so they are the least precise part of the estimate.",
+      "method": "Basal Metabolic Rate comes from the Mifflin-St Jeor equation (10 x weight in kg + 6.25 x height in cm - 5 x age, +5 for men and -161 for women), then multiplies by an activity factor from 1.2 for sedentary to 1.9 for very active. Activity factors are self-reported bands, so they are the least precise part of the estimate. In the goal targets, protein is bodyweight in kilograms multiplied by 2.4 g/kg for fat loss, 1.6 at maintenance and 2.2 for muscle gain, the same bands as the protein calculator. Fat is 30% of calories and carbohydrate makes up the rest.",
       "faqs": [
         {
           "question": "What is Total Daily Energy Expenditure (TDEE)?",
