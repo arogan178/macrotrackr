@@ -28,6 +28,7 @@ const ROUTE_SOURCES = {
   "/delete-account": [`${SRC}/DeleteAccountPage.tsx`],
   "/open-source": [`${SRC}/OpenSourcePage.tsx`, "src/data/open-source.json"],
   "/contact": [`${SRC}/ContactPage.tsx`, "src/data/contact.json"],
+  "/about": [`${SRC}/AboutPage.tsx`, "src/data/author.json"],
 };
 
 const routes = [
@@ -42,6 +43,7 @@ const routes = [
   { path: "/tools/bmr-vs-tdee", changefreq: "monthly", priority: 0.6 },
   { path: "/open-source", changefreq: "monthly", priority: 0.7 },
   { path: "/contact", changefreq: "yearly", priority: 0.4 },
+  { path: "/about", changefreq: "yearly", priority: 0.4 },
   { path: "/compare", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/myfitnesspal", changefreq: "weekly", priority: 0.8 },
   { path: "/compare/macrofactor", changefreq: "weekly", priority: 0.7 },

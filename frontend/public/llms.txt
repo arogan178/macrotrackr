@@ -84,6 +84,8 @@ with a preview before anything is written:
   SQLite, local accounts, no telemetry, no licence key.
 - [Pricing](https://macrotrackr.com/pricing)
 - [Blog](https://macrotrackr.com/blog)
+- [About](https://macrotrackr.com/about): who builds MacroTrackr and how the
+  nutrition content is sourced.
 - [Contact](https://macrotrackr.com/contact)
 - [Source code](https://github.com/arogan178/macrotrackr) (AGPLv3, Docker)
 - [Privacy policy](https://macrotrackr.com/privacy)

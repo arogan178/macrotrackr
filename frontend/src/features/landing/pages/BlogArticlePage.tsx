@@ -340,7 +340,7 @@ const BlogArticlePage: React.FC = () => {
                 "@type": "Person",
                 "name": author.name,
                 "jobTitle": author.role,
-                "url": `${APP_URL}/contact`,
+                "url": `${APP_URL}/about`,
               }
             : {
                 "@type": "Organization",
@@ -561,10 +561,10 @@ const BlogArticlePage: React.FC = () => {
                 {author.bio}
               </p>
               <Link
-                to="/contact"
+                to="/about"
                 className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
               >
-                Get in touch
+                About the author
               </Link>
             </section>
           )}
