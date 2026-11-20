@@ -137,7 +137,7 @@ Weigh and assemble containers:
 - Most cooked meals: 2-3 months
 - Label with date and contents
 
-**The rule of thumb:** if you won't eat something within the time listed above, freeze it on the day you cook it.
+**The rule of thumb:** a prepped meal keeps only as long as its shortest-lived ingredient. If you won't eat it within that refrigerator time, freeze it on the day you cook it.
 
 ### Reheating
 
@@ -259,7 +259,7 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 - Mixed nuts in 1-oz portions
 
 **Meals assembled:**
-- 5 lunches: Chicken, rice, roasted vegetables
+- 5 lunches: Chicken, rice, roasted vegetables (refrigerate Monday to Wednesday's, freeze Thursday's and Friday's and move each to the fridge the night before)
 - 5 snacks: Greek yogurt with berries
 - Breakfast ingredients prepped: Eggs ready to cook or overnight oats ready to grab
 
@@ -275,7 +275,7 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 - Add sauces when reheating, not when prepping
 - Keep a bottle of hot sauce, soy sauce, or dressing at work
 - Prep different seasonings on proteins
-- Do not overcook. Slightly undercook, knowing you will reheat
+- Cook meat and poultry to a safe internal temperature (165°F/74°C for poultry), but no further, so reheating does not dry it out
 
 ### "I get tired of eating the same thing."
 
@@ -307,7 +307,5 @@ Meal prep is not about being obsessive. It is about being prepared. When you hav
 Start small. Prep just lunches for one week. See how much easier your tracking becomes. Build from there.
 
 [Start tracking your prepped meals in MacroTrackr](/register) with our free tier: unlimited daily entries and 5 saved meals included.
-
-The MacroTrackr Team
 
 *Questions about meal prep strategies? Email us at support@macrotrackr.com.*
