@@ -160,7 +160,7 @@ export const MealGroupingFlow: React.FC = () => {
     {
       title: "Name & Save",
       description:
-        'Give your meal a name—like "Post-Workout Shake" or "Mom\'s Lasagna." The meal is instantly saved to your personal library.',
+        'Give your meal a name, like "Post-Workout Shake" or "Mom\'s Lasagna." It is saved straight to your library.',
       visual: (
         <div className="w-full max-w-60 space-y-3">
           <div className="rounded-control bg-surface p-4 ring-1 ring-primary/50">

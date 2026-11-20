@@ -30,4 +30,4 @@ export function getPageMetadata(path: string): PageMeta {
 }
 
 /** Blog articles title from their own frontmatter, so they carry only a suffix. */
-export const BLOG_TITLE_SUFFIX = " — MacroTrackr";
+export const BLOG_TITLE_SUFFIX = " | MacroTrackr";

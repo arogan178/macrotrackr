@@ -36,7 +36,7 @@ export const macroSearchRoutes = new Elysia()
         }
 
         if (!openFoodFactsApiClient) {
-          throw new BadRequestError("Food API client not available");
+          throw new BadRequestError("Food search is temporarily unavailable.");
         }
 
         const results = await openFoodFactsApiClient.search(searchQuery);
@@ -80,7 +80,7 @@ export const macroSearchRoutes = new Elysia()
         }
 
         if (!openFoodFactsApiClient) {
-          throw new BadRequestError("Food API client not available");
+          throw new BadRequestError("Food search is temporarily unavailable.");
         }
 
         const result = await openFoodFactsApiClient.getByBarcode(barcode);

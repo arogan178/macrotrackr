@@ -1,4 +1,5 @@
 import { memo, type ReactNode, useMemo, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { parseISO } from "date-fns";
 
 import IconButton from "@/components/ui/IconButton";
@@ -62,6 +63,7 @@ function DailySummaryInner({
   dayAction,
   breakdown,
 }: DailySummaryProps) {
+  const router = useRouter({ warn: false });
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
   const target = macroTarget ?? DEFAULT_TARGET;
@@ -255,8 +257,21 @@ function DailySummaryInner({
                     animate
                     value={macroCalories.total}
                   />
-                  <p className="mt-1 text-sm text-muted">
-                    eaten, no target set
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-muted">
+                    <span>eaten, no target set</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (router) {
+                          void router.navigate({ to: "/goals" });
+                        } else {
+                          globalThis.location.href = "/goals";
+                        }
+                      }}
+                      className="font-medium text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    >
+                      Set targets
+                    </button>
                   </p>
                 </>
               )}

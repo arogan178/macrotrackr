@@ -49,6 +49,20 @@ describe("BlogArticlePage", () => {
     expect(screen.queryByText(/article not found/i)).not.toBeInTheDocument();
   });
 
+  it("renders a table of contents for multi-section guides without a stock hero banner", () => {
+    mockParameters = { slug: "understanding-protein-intake" };
+    render(<BlogArticlePage />);
+
+    expect(
+      screen.getByRole("complementary", { name: "On this page" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", {
+        name: /understanding protein intake/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders not found state when given an invalid slug", () => {
     mockParameters = { slug: "non-existent-article-slug" };
     render(<BlogArticlePage />);

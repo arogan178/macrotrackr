@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 
 import {
   GoalsIcon,
@@ -23,27 +23,18 @@ interface MobileTabBarProps {
 }
 
 /**
- * All four destinations used to sit behind a top-right hamburger — the least
- * reachable point on a phone held one-handed — and logging a meal needed a
- * scroll. This is the one structural change in the plan: destinations at the
- * bottom, primary action in the middle, clear of the home indicator.
+ * All four destinations used to sit behind a top-right hamburger, the least
+ * reachable point on a phone held one-handed, and logging a meal needed a
+ * scroll. Destinations sit at the bottom, primary action in the middle, clear
+ * of the home indicator.
  */
 const MobileTabBar: React.FC<MobileTabBarProps> = ({ onLog }) => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const isActive = useCallback(
     (path: string) => location.pathname.startsWith(path),
     [location.pathname],
   );
-
-  const go = useCallback(
-    (path: string) => {
-      navigate({ to: path });
-    },
-    [navigate],
-  );
-
 
   const [left, right] = [TABS.slice(0, 2), TABS.slice(2)];
 
@@ -55,10 +46,9 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ onLog }) => {
     const active = isActive(path);
 
     return (
-      <button
+      <Link
         key={path}
-        type="button"
-        onClick={() => go(path)}
+        to={path}
         aria-current={active ? "page" : undefined}
         className={cn(
           "flex min-h-11 flex-1 flex-col items-center justify-center gap-1 px-1 py-1.5 text-[11px] font-medium transition-colors",
@@ -67,7 +57,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ onLog }) => {
       >
         <Icon className={cn("h-5 w-5", active && "text-primary")} />
         <span>{label}</span>
-      </button>
+      </Link>
     );
   };
 

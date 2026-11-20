@@ -13,7 +13,9 @@ import { useStore } from "@/store/store";
  */
 export function usePageDataSync() {
   const { data: user } = useUser();
-  const { setSubscriptionStatus } = useStore();
+  const setSubscriptionStatus = useStore(
+    (state) => state.setSubscriptionStatus,
+  );
 
   useEffect(() => {
     if (isLocalAuthMode) {

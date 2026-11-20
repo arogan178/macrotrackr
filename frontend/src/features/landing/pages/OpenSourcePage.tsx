@@ -41,7 +41,7 @@ export default function OpenSourcePage() {
       />
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-4xl px-4">
           <header className="mx-auto mb-10 max-w-3xl text-center">
             <p className={`${TYPE_SCALE.micro} text-primary`}>AGPLv3</p>
@@ -154,7 +154,7 @@ export default function OpenSourcePage() {
             </div>
           </section>
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

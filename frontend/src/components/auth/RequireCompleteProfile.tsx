@@ -55,7 +55,7 @@ export function RequireCompleteProfile({
 
   if (isUserLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -87,7 +87,7 @@ export function RequireCompleteProfile({
   // If query has not produced data yet (undefined), avoid crashing/looping.
   if (!user || isAwaitingFreshProfile) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     );

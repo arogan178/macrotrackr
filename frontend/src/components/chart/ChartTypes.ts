@@ -3,14 +3,15 @@
  */
 export interface ChartDataPoint {
   name: string; // x-axis label (e.g., date)
-  calories?: number;
-  protein?: number;
-  carbs?: number;
-  fats?: number;
-  weight?: number;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fats?: number | null;
+  weight?: number | null;
+  hasEntries?: boolean;
   fullDate?: string;
   id?: string;
-  [key: string]: number | string | undefined;
+  [key: string]: number | string | boolean | null | undefined;
 }
 
 export interface LineConfig {

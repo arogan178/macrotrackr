@@ -54,13 +54,13 @@ describe("LocalSignInForm", () => {
     await user.type(screen.getByLabelText("Email"), "Sam@Example.COM");
     await user.type(screen.getByLabelText("Password"), "hunter22");
     await user.click(screen.getByLabelText("Enable biometric sign-in"));
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(screen.getByRole("button", { name: "Signing in..." })).toBeDisabled();
     finishLogin();
 
     expect(
-      await screen.findByRole("button", { name: "Sign In" }),
+      await screen.findByRole("button", { name: "Sign in" }),
     ).toBeEnabled();
     expect(authApi.login).toHaveBeenCalledWith({
       email: "sam@example.com",
@@ -88,7 +88,7 @@ describe("LocalSignInForm", () => {
 
     await user.type(screen.getByLabelText("Email"), "sam@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter22");
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(authApi.login).toHaveBeenCalledWith({
       email: "sam@example.com",
@@ -106,14 +106,14 @@ describe("LocalSignInForm", () => {
 
     await user.type(screen.getByLabelText("Email"), "sam@example.com");
     await user.type(screen.getByLabelText("Password"), "wrong");
-    await user.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(showNotification).toHaveBeenCalledWith(
       "Invalid email or password.",
       "error",
     );
     expect(navigate).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Sign In" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
   });
 
   it("sends Forgot password to the reset help page without calling the API", async () => {

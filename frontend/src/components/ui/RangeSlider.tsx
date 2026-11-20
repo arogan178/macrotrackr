@@ -47,7 +47,7 @@ export default function RangeSlider({
   }
 
   return (
-    <div className={`relative flex h-4 items-center ${className}`}>
+    <div className={`relative flex min-h-11 items-center ${className}`}>
       {/* Background Track */}
       <div className="absolute z-0 h-2 w-full rounded-control bg-foreground/10" />
 
@@ -85,18 +85,18 @@ export default function RangeSlider({
         aria-valuenow={value}
         aria-valuetext={unit ? `${value} ${unit}` : `${value}`}
         className={[
-          "relative z-10 h-4 w-full appearance-none bg-transparent focus:outline-none",
+          "relative z-10 h-11 w-full appearance-none bg-transparent focus:outline-none",
           disabled ? "" : "cursor-pointer",
           // Thumb base [Firefox]
-          "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-transparent [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:",
+          "[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-transparent [&::-moz-range-thumb]:bg-white",
           "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-control [&::-moz-range-track]:bg-transparent",
-          // Thumb base [WebKit]: it aligns to the track top, so -mt-1 centres it
+          // Thumb base [WebKit]: aligns to the track top, so -mt-1.5 centres a 20px thumb on an 8px track
           "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-control [&::-webkit-slider-runnable-track]:bg-transparent",
-          "[&::-webkit-slider-thumb]:-mt-1 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-transparent [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:",
+          "[&::-webkit-slider-thumb]:-mt-1.5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-transparent [&::-webkit-slider-thumb]:bg-white",
           // Hover/focus only when interactive
           disabled
             ? ""
-            : "hover:[&::-moz-range-thumb]:scale-105 focus:[&::-moz-range-thumb]:ring-2 focus:[&::-moz-range-thumb]:ring-offset-2 hover:[&::-webkit-slider-thumb]:scale-105 focus:[&::-webkit-slider-thumb]:ring-2 focus:[&::-webkit-slider-thumb]:ring-offset-2",
+            : "hover:[&::-moz-range-thumb]:scale-105 focus-visible:[&::-moz-range-thumb]:ring-2 focus-visible:[&::-moz-range-thumb]:ring-primary focus-visible:[&::-moz-range-thumb]:ring-offset-2 focus-visible:[&::-moz-range-thumb]:ring-offset-background hover:[&::-webkit-slider-thumb]:scale-105 focus-visible:[&::-webkit-slider-thumb]:ring-2 focus-visible:[&::-webkit-slider-thumb]:ring-primary focus-visible:[&::-webkit-slider-thumb]:ring-offset-2 focus-visible:[&::-webkit-slider-thumb]:ring-offset-background",
         ].join(" ")}
       />
     </div>

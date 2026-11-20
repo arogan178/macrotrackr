@@ -62,26 +62,26 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         this.props.fallback ?? (
-          <div className="flex min-h-screen items-center justify-center bg-surface p-4">
-            <div className="w-full max-w-lg rounded-control border border-border bg-surface p-6 shadow-modal">
+          <div className="flex min-h-dvh items-center justify-center bg-background p-4">
+            <div className="w-full max-w-lg rounded-card border border-border bg-surface p-6 shadow-modal">
               <div className="mb-4 text-error">
                 <WarningIcon className="mx-auto mb-3 h-12 w-12" />
-                <h2 className="mb-1 text-center text-xl font-bold text-foreground">
+                <h2 className="mb-1 text-center text-xl font-semibold text-foreground">
                   {this.state.isQueryError
-                    ? "Data loading error"
+                    ? "Couldn't load data"
                     : "Something went wrong"}
                 </h2>
-                <p className="text-center text-foreground">
+                <p className="text-center text-sm text-muted">
                   {getErrorMessage(this.state.error)}
                 </p>
                 {this.state.isQueryError && (
-                  <p className="mt-2 text-center text-sm text-foreground">
+                  <p className="mt-2 text-center text-sm text-muted">
                     There was a problem loading your data. Please try again.
                   </p>
                 )}
               </div>
 
-              <div className="flex justify-center space-x-3">
+              <div className="flex justify-center gap-3">
                 <Button
                   onClick={() => {
                     this.setState({
@@ -92,15 +92,13 @@ export class ErrorBoundary extends Component<
                   }}
                   ariaLabel="Try again"
                   variant="secondary"
-                  className="rounded-control bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
                 >
-                  Try Again
+                  Try again
                 </Button>
                 <Button
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
-                  className="rounded-control bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
                 >
                   Reload page
                 </Button>

@@ -108,7 +108,7 @@ function ComparisonTable({
                         : "text-muted",
                     )}
                   >
-                    {row.values[column.key] ?? "—"}
+                    {row.values[column.key] ?? "-"}
                   </td>
                 ))}
               </tr>

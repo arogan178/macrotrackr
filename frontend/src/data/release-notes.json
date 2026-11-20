@@ -1,5 +1,20 @@
 [
   {
+    "version": "3.8.0",
+    "date": "2026-11-20",
+    "title": "Faster API and Queries, Editorial Blog Redesign, and UI Polish",
+    "type": "release",
+    "summary": "Version 3.8 cuts backend latency and network chatter across the app, redesigns the blog with a tighter reading layout and rewritten guides, and fixes a batch of modal, mobile, and chart rough edges.",
+    "highlights": [
+      "Backend speed: authenticated requests resolve linked users directly from SQLite instead of calling Clerk on every request, SQLite runs with WAL performance tuning and a sort-covering history index, and session updates throttle to once per 15 minutes",
+      "Lower bandwidth and memory: nginx serves gzip-compressed static assets, TanStack Query stops redundant 15 to 60 second background polling now that live SSE sync handles updates, and backend metrics and caches use bounded memory",
+      "Editorial blog redesign: articles drop stock hero photos in favor of a 65ch reading column, sticky table of contents, tabular data tables, and takeaway callouts, with all core nutrition guides rewritten in one plainspoken voice",
+      "Cleaner app states: Home hides confusing zero targets with an inline link to Goals, Goals explains missing expenditure data directly instead of leaving an empty box, Analytics plots unlogged days as gaps rather than fake zero-calorie cliffs, and Profile leaves unset height and weight empty with placeholders",
+      "Interaction and mobile fixes: modals use a topmost Escape stack and ref-counted scroll lock, Pro upgrade modals close cleanly on backdrop click, Habit card hover actions work again on desktop, signed-in users no longer see double headers on public pages, and the mobile Settings save bar sits above the tab bar",
+      "Self-hosting: one new database migration (0027_optimize_indexes) runs automatically on startup"
+    ]
+  },
+  {
     "version": "3.7.1",
     "date": "2026-11-13",
     "title": "Meal Breakdown on Phones and Fixes",
@@ -85,7 +100,7 @@
       "Shareable macro snapshots: a rendered scorecard of your day, drawn on your own device",
       "The installed app now opens on your log instead of the marketing page, and no longer sits on a spinner when it starts with no connection",
       "Signing in costs one round trip instead of two, with 150ms of fixed delay taken out of the path",
-      "An Android build with in-app Pro through Google Play Billing. Not on the Play Store yet \u2014 the listing is still being set up",
+      "An Android build with in-app Pro through Google Play Billing. Not on the Play Store yet, as the listing is still being set up",
       "Health data stays out of browser storage, and biometric unlock is opt-in and cleared when you sign out",
       "Migration guides for anyone moving from another tracker, and a comparison hub covering the alternatives",
       "Blog posts and comparison pages are pre-rendered, so a cold load and a search crawler both get real content instead of a flash of fallback",

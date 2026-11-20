@@ -51,18 +51,18 @@ describe("AppHeader", () => {
     pathname = "/goals";
     render(<AppHeader mode="app" />);
 
-    const current = screen.getAllByRole("button", { current: "page" });
+    const current = screen.getAllByRole("link", { current: "page" });
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveTextContent("Goals");
   });
 
-  it("navigates when an app route button is clicked", async () => {
+  it("links each app route to its path for intent preloading", () => {
     render(<AppHeader mode="app" />);
 
     const nav = screen.getByRole("navigation", { name: "Main navigation" });
-    await userEvent.click(within(nav).getByText("Analytics"));
-
-    expect(navigateMock).toHaveBeenCalledWith({ to: "/reporting" });
+    expect(
+      within(nav).getByRole("link", { name: "Analytics" }),
+    ).toHaveAttribute("href", "/reporting");
   });
 
   it("carries the public destinations in public mode", () => {
@@ -89,7 +89,7 @@ describe("AppHeader", () => {
       "Pricing",
       "Docs",
       "GitHub",
-      "Log in",
+      "Sign in",
       "Start free",
     ]) {
       expect(within(sheet).getByText(label)).toBeInTheDocument();

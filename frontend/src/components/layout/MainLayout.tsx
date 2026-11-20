@@ -1,12 +1,11 @@
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { useLocation } from "@tanstack/react-router";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
-import LogSheet from "@/features/macroTracking/components/LogSheet";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { useAppOpenedEvent } from "@/hooks/useAppOpenedEvent";
-import { openLogSheet } from "@/lib/logSheet";
+import { openLogSheet, useLogSheet } from "@/lib/logSheet";
 import { isNativePlatform } from "@/services/native/platform";
 
 import AppHeader from "./AppHeader";
@@ -19,16 +18,20 @@ import UpdatePrompt from "./UpdatePrompt";
 // Static route configuration - defined outside component to avoid recreation
 const PUBLIC_ROUTES = new Set([
   "/",
+  "/about",
+  "/contact",
+  "/delete-account",
   "/login",
-  "/register",
-  "/terms",
+  "/open-source",
   "/privacy",
+  "/register",
   "/reset-password",
+  "/terms",
 ]);
 
 // Route trees that render their own public header (features/landing). Without
-// these a signed-in user gets two stacked fixed bars on /tools/* and /blog/*.
-const PUBLIC_ROUTE_PREFIXES = ["/tools", "/blog"];
+// these a signed-in user gets two stacked fixed bars on public pages.
+const PUBLIC_ROUTE_PREFIXES = ["/tools", "/blog", "/compare", "/migrate"];
 
 const NO_NAV_ROUTES = new Set([
   "/profile-setup",
@@ -42,8 +45,42 @@ export const isPublicPathname = (pathname: string): boolean =>
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
+// Keep Modal + form skeleton off public routes and initial authenticated paint.
+const LogSheet = React.lazy(
+  () => import("@/features/macroTracking/components/LogSheet"),
+);
 // Reminders only exist in the app; the web never downloads the plugin.
 const MealReminders = React.lazy(() => import("@/features/reminders/MealReminders"));
+
+// Scoped to the authenticated shell so leaving to a public route clears open state,
+// while staying mounted inside the shell so a cold-load Log tap is never dropped.
+function AuthenticatedLogSheet() {
+  const [isLogSheetOpen, setLogSheetOpen] = useLogSheet();
+  const [logSheetMounted, setLogSheetMounted] = useState(isLogSheetOpen);
+  const [openedLogByShortcut, setOpenedLogByShortcut] = useState(isLogSheetOpen);
+  if (isLogSheetOpen && !logSheetMounted) {
+    setLogSheetMounted(true);
+  }
+  const handleLogSheetOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) setOpenedLogByShortcut(false);
+      setLogSheetOpen(open);
+    },
+    [setLogSheetOpen],
+  );
+
+  if (!logSheetMounted) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <LogSheet
+        isOpen={isLogSheetOpen}
+        onOpenChange={handleLogSheetOpenChange}
+        openedByShortcut={openedLogByShortcut}
+      />
+    </Suspense>
+  );
+}
 
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -80,7 +117,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <PageBackground />
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-control focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-90 focus:rounded-control focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"
       >
         Skip to content
       </a>
@@ -109,7 +146,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         />
       )}
       {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
-      {isAuthenticated && <LogSheet />}
+      {isAuthenticated && <AuthenticatedLogSheet />}
       {isAuthenticated && isNativePlatform() && (
         <Suspense fallback={null}>
           <MealReminders />

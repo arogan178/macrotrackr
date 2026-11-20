@@ -1,13 +1,19 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "@tanstack/react-router";
-import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
+import { m, useReducedMotion, useScroll, useSpring } from "motion/react";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ContentImage,
+  CopyIcon,
+  Link2Icon,
+} from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
 import Heading, { TYPE_SCALE } from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
@@ -46,17 +52,58 @@ interface LazyCodeHighlighterProps {
   language: string;
 }
 
+interface TocHeading {
+  id: string;
+  text: string;
+}
+
+/** Matches github-slugger (used by rehype-slug) for standard ASCII markdown h2s. */
+function extractH2Headings(markdown: string): TocHeading[] {
+  const headings: TocHeading[] = [];
+  const counts = new Map<string, number>();
+  let inFence = false;
+
+  for (const rawLine of markdown.split("\n")) {
+    const line = rawLine.trim();
+    if (line.startsWith("```")) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence || !line.startsWith("## ")) continue;
+
+    const text = line
+      .slice(3)
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/[*_`~]/g, "")
+      .trim();
+    if (!text) continue;
+
+    const base = text
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .trim()
+      .replace(/\s+/g, "-");
+    const seen = counts.get(base) ?? 0;
+    counts.set(base, seen + 1);
+    const id = seen === 0 ? base : `${base}-${seen}`;
+
+    headings.push({ id, text });
+  }
+
+  return headings;
+}
+
 const interactiveChipClasses =
-  "inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 py-2 text-xs font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const codeBlockClassName =
-  "overflow-x-auto p-5 font-mono text-sm leading-7 text-white";
+  "overflow-x-auto p-5 font-mono text-sm leading-7 text-foreground";
 const codeBlockStyle = {
   margin: 0,
   padding: "1.25rem",
   background: "transparent",
   fontSize: "0.875rem",
-  lineHeight: "1.7",
+  lineHeight: "1.65",
 };
 
 const LazyCodeHighlighter = React.lazy(async () => {
@@ -116,14 +163,14 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   const code = String(children).replace(/\n$/, "");
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(code);
+    void navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [code]);
 
   if (inline) {
     return (
-      <code className="rounded-control bg-surface-2 px-1.5 py-0.5 font-mono text-sm text-primary">
+      <code className="rounded-control bg-surface-2 px-1.5 py-0.5 font-mono text-[0.85em] text-primary">
         {children}
       </code>
     );
@@ -131,20 +178,20 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
 
   return (
     <div className="group relative my-6 overflow-hidden rounded-control border border-border-2 bg-surface-2">
-      <div className="flex items-center justify-between border-b border-border bg-black/30 px-4 py-2">
-        <span className="text-xs font-medium text-white/60">
+      <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-2">
+        <span className="font-mono text-xs font-medium text-muted">
           {language || "text"}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-control px-2 py-1 text-xs text-white/60 transition-colors hover:bg-surface-2 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
-          aria-label={copied ? "Copied!" : "Copy code"}
+          className="flex items-center gap-1.5 rounded-control px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          aria-label={copied ? "Copied" : "Copy code"}
         >
           {copied ? (
             <>
               <CheckIcon className="h-3.5 w-3.5 text-success" />
-              <span className="text-success">Copied!</span>
+              <span className="text-success">Copied</span>
             </>
           ) : (
             <>
@@ -171,7 +218,7 @@ const markdownComponents = {
   h1: ({ children, id }: { children?: React.ReactNode; id?: string }) => (
     <h1
       id={id}
-      className="mt-14 scroll-mt-32 text-3xl font-semibold tracking-tight text-foreground first:mt-0 sm:text-[2.25rem]"
+      className="mt-10 mb-4 scroll-mt-28 text-2xl font-semibold tracking-tight text-foreground first:mt-0"
     >
       {children}
     </h1>
@@ -179,7 +226,7 @@ const markdownComponents = {
   h2: ({ children, id }: { children?: React.ReactNode; id?: string }) => (
     <h2
       id={id}
-      className="mt-14 scroll-mt-32 text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]"
+      className="mt-12 mb-4 scroll-mt-28 border-t border-border pt-8 text-xl font-semibold tracking-tight text-foreground first:mt-0 first:border-t-0 first:pt-0"
     >
       {children}
     </h2>
@@ -187,28 +234,28 @@ const markdownComponents = {
   h3: ({ children, id }: { children?: React.ReactNode; id?: string }) => (
     <h3
       id={id}
-      className="mt-10 scroll-mt-32 text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+      className="mt-8 mb-3 scroll-mt-28 text-base font-semibold tracking-tight text-foreground"
     >
       {children}
     </h3>
   ),
   p: ({ children }: { children?: React.ReactNode }) => (
-    <p className="mb-7 text-[1.05rem] leading-8 text-foreground/88 sm:text-[1.1rem] sm:leading-9">
+    <p className="mb-5 text-[15.5px] leading-7 text-foreground/88">
       {children}
     </p>
   ),
   ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className="mb-8 list-outside list-disc space-y-3 pl-6 marker:text-primary">
+    <ul className="mb-6 list-outside list-disc space-y-2 pl-5 marker:text-primary">
       {children}
     </ul>
   ),
   ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className="mb-8 list-outside list-decimal space-y-3 pl-6 marker:text-primary">
+    <ol className="mb-6 list-outside list-decimal space-y-2 pl-5 marker:font-medium marker:text-primary">
       {children}
     </ol>
   ),
   li: ({ children }: { children?: React.ReactNode }) => (
-    <li className="pl-1 text-[1.02rem] leading-8 text-foreground/88">
+    <li className="pl-1 text-[15.5px] leading-7 text-foreground/88">
       {children}
     </li>
   ),
@@ -223,12 +270,11 @@ const markdownComponents = {
   }) => (
     <a
       href={href}
-      // A heading wrapped in its own anchor keeps the heading's colour: green
-      // and underlined, every section title read as a link to somewhere else.
+      // A heading wrapped in its own anchor keeps the heading's colour.
       className={
         className === "heading-anchor"
           ? "text-inherit no-underline"
-          : "text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
+          : "font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
       }
       target={href?.startsWith("http") ? "_blank" : undefined}
       rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
@@ -240,10 +286,11 @@ const markdownComponents = {
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
-    <blockquote className="my-10 rounded-card border-l-2 border-primary bg-surface-2 px-6 py-5 text-lg leading-8 italic">
+    <blockquote className="my-7 rounded-card border border-border border-l-2 border-l-primary bg-surface px-5 py-4 text-sm leading-relaxed text-foreground/90 [&>p]:mb-2 [&>p]:text-sm [&>p]:leading-relaxed [&>p:last-child]:mb-0">
       {children}
     </blockquote>
   ),
+  hr: () => <hr className="my-10 border-border" />,
   code: ({
     inline,
     className,
@@ -261,26 +308,28 @@ const markdownComponents = {
     <ContentImage
       src={src}
       alt={alt ?? ""}
-      containerClassName="my-10 overflow-hidden rounded-card border border-border"
+      containerClassName="my-8 overflow-hidden rounded-card border border-border"
       className="w-full rounded-control"
       loading="lazy"
     />
   ),
   table: ({ children }: { children?: React.ReactNode }) => (
-    <div className="my-6 overflow-x-auto rounded-control border border-border">
-      <table className="w-full border-collapse text-sm">{children}</table>
+    <div className="my-7 overflow-x-auto rounded-card border border-border bg-surface">
+      <table className="w-full border-collapse text-sm tabular-nums">
+        {children}
+      </table>
     </div>
   ),
   thead: ({ children }: { children?: React.ReactNode }) => (
-    <thead className="bg-surface-2">{children}</thead>
+    <thead className="border-b border-border bg-surface-2">{children}</thead>
   ),
   th: ({ children }: { children?: React.ReactNode }) => (
-    <th className="border-b border-border px-4 py-3 text-left font-semibold text-foreground">
+    <th className="px-4 py-2.5 text-left text-xs font-semibold tracking-wide text-muted uppercase">
       {children}
     </th>
   ),
   td: ({ children }: { children?: React.ReactNode }) => (
-    <td className="border-b border-border px-4 py-3 text-foreground/90 last:border-b-0">
+    <td className="border-t border-border px-4 py-2.5 text-foreground/90">
       {children}
     </td>
   ),
@@ -295,8 +344,8 @@ const ReadingProgress: React.FC = () => {
   });
 
   return (
-    <motion.div
-      className="fixed inset-x-0 top-0 z-60 h-1 origin-left bg-primary"
+    <m.div
+      className="fixed inset-x-0 top-0 z-60 h-0.5 origin-left bg-primary"
       style={{ scaleX }}
     />
   );
@@ -314,13 +363,13 @@ const BlogArticlePage: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState(false);
 
   usePageMetadata({
-    title: post ? `${post.title}${BLOG_TITLE_SUFFIX}` : "Blog — MacroTrackr",
+    title: post ? `${post.title}${BLOG_TITLE_SUFFIX}` : "Blog | MacroTrackr",
     description: post?.excerpt ?? "Read the latest from MacroTrackr.",
     canonical: buildCanonicalUrl(`/blog/${slug}`),
-    // Release notes stay reachable by direct link, but the feed already hides
-    // them and the sitemap no longer submits them.
     noindex: post?.category === RELEASE_CATEGORY,
   });
+
+  const tocHeadings = post?.content ? extractH2Headings(post.content) : [];
 
   const schemaScript = post
     ? JSON.stringify({
@@ -328,12 +377,8 @@ const BlogArticlePage: React.FC = () => {
         "@type": "BlogPosting",
         "headline": post.title,
         "description": post.excerpt,
-        // Site-relative in the JSON; schema.org needs it absolute.
         "image": post.image ? `${APP_URL}${post.image}` : undefined,
         "datePublished": post.date,
-        // A named human on health content, because "MacroTrackr Team" gives a
-        // reader nobody to hold responsible. Release notes keep the project as
-        // author: nobody signs a changelog.
         "author":
           post.author === author.name
             ? {
@@ -378,9 +423,11 @@ const BlogArticlePage: React.FC = () => {
     return <BlogNotFound />;
   }
 
+  const showToc = tocHeadings.length >= 2;
+
   return (
     <div
-      className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
+      className={`relative min-h-dvh bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       {schemaScript && (
         <script
@@ -391,98 +438,125 @@ const BlogArticlePage: React.FC = () => {
       <ReadingProgress />
       <AppHeader mode="public" />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <nav aria-label="Breadcrumb" className="mx-auto mb-6 max-w-3xl">
-            <ol className="flex items-center gap-1.5 text-xs text-muted">
-              <li>
-                <Link
-                  to="/blog"
-                  search={{ category: undefined, tag: undefined, q: undefined }}
-                  className="transition-colors hover:text-foreground"
+      <div className="relative z-10 mx-auto max-w-5xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
+        <div
+          className={
+            showToc
+              ? "lg:grid lg:grid-cols-[minmax(0,65ch)_13rem] lg:justify-between lg:gap-12"
+              : "mx-auto max-w-[65ch]"
+          }
+        >
+          <div className="min-w-0">
+            <nav aria-label="Breadcrumb" className="mb-5">
+              <ol className="flex items-center gap-1.5 text-xs text-muted">
+                <li>
+                  <Link
+                    to="/blog"
+                    search={{ category: undefined, tag: undefined, q: undefined }}
+                    className="transition-colors hover:text-foreground"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link
+                    to="/blog"
+                    search={{
+                      category: normalizeBlogFilter(post.category),
+                      tag: undefined,
+                      q: undefined,
+                    }}
+                    className="font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    {post.category}
+                  </Link>
+                </li>
+              </ol>
+            </nav>
+
+            <header>
+              <Heading level="display">{post.title}</Heading>
+              <p className="mt-4 text-base leading-relaxed text-muted">
+                {post.excerpt}
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-y border-border py-1.5 text-xs text-muted">
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <span className="font-medium text-foreground">
+                    {post.author}
+                  </span>
+                  <span className="tabular-nums">{formatDate(post.date)}</span>
+                  <span className="tabular-nums">{post.readingTime} read</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-control transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
                 >
-                  Blog
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="font-medium text-foreground" aria-current="page">
-                {post.category}
-              </li>
-            </ol>
-          </nav>
-
-          <motion.header
-            initial={shouldReduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.45 }}
-            className="mx-auto max-w-3xl"
-          >
-            {/* Left aligned and ruled, like the index it came from. The centred
-                version used a fifth page-title scale (larger than anything else
-                in the app) and a tracking value that existed only here. */}
-            <Heading level="display">{post.title}</Heading>
-            <p className="mt-4 text-lg leading-relaxed text-muted">
-              {post.excerpt}
-            </p>
-
-            {/* One ruled line of facts, then the one thing to do with them. */}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-y border-border py-2 text-xs text-muted">
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <span className="text-foreground">{post.author}</span>
-                <span className="tabular-nums">{formatDate(post.date)}</span>
-                <span className="tabular-nums">{post.readingTime} read</span>
+                  {copiedLink ? (
+                    <CheckIcon className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <Link2Icon className="h-3.5 w-3.5" />
+                  )}
+                  {copiedLink ? "Link copied" : "Copy link"}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="inline-flex min-h-11 items-center gap-2 rounded-control transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-              >
-                {copiedLink ? (
-                  <CheckIcon className="h-4 w-4 text-success" />
-                ) : (
-                  <Link2Icon className="h-4 w-4" />
-                )}
-                {copiedLink ? "Link copied" : "Copy link"}
-              </button>
-            </div>
-          </motion.header>
+            </header>
 
-          {post.image && (
-            <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.45, delay: 0.05 }}
-              className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface"
-            >
-              <ContentImage
-                src={post.image}
-                alt={post.title}
-                loading="eager"
-                fetchPriority="high"
-              />
-            </motion.div>
-          )}
+            {showToc && (
+              <details className="group mt-6 rounded-card border border-border bg-surface px-4 py-2 lg:hidden">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-medium text-muted transition-colors hover:text-foreground">
+                  <span>In this article</span>
+                  <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <ol className="space-y-1.5 border-t border-border pt-3 pb-2 text-sm">
+                  {tocHeadings.map((heading) => (
+                    <li key={heading.id}>
+                      <a
+                        href={`#${heading.id}`}
+                        className="block py-0.5 text-muted transition-colors hover:text-foreground"
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
 
-          <motion.article
-            initial={shouldReduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-            className="mt-12"
-          >
-            <div className="mx-auto max-w-3xl">
+            <article className="mt-9">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
                   rehypeSlug,
                   [
                     rehypeAutolinkHeadings,
-                    { behavior: "wrap", properties: { className: ["heading-anchor"] } },
+                    {
+                      behavior: "wrap",
+                      properties: { className: ["heading-anchor"] },
+                    },
                   ],
                 ]}
                 components={markdownComponents}
               >
                 {post.content ?? ""}
               </ReactMarkdown>
+
+              {post.slug === "v2-launch-complete-ui-overhaul" && (
+                <div className="mt-10 rounded-card border border-border bg-surface p-6">
+                  <h3 className="text-center text-xl font-semibold tracking-tight text-foreground">
+                    See grouped meals in action
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-xl text-center text-sm leading-6 text-muted">
+                    The release made grouped meals editable instead of
+                    flattening them into static totals.
+                  </p>
+                  <div className="mt-6">
+                    <MealGroupingFlow />
+                  </div>
+                </div>
+              )}
 
               {post.tags.length > 0 && (
                 <div className="mt-10 flex flex-wrap gap-2 border-t border-border pt-6">
@@ -502,94 +576,100 @@ const BlogArticlePage: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </article>
 
-            {post.slug === "v2-launch-complete-ui-overhaul" && (
-              <div className="mt-12 rounded-card border border-border bg-surface p-6">
-                <h3 className="text-center text-2xl font-semibold tracking-tight text-foreground">
-                  See grouped meals in action
-                </h3>
-                <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-6 text-muted">
-                  The release focused on making grouped meals editable instead
-                  of flattening them into dead totals. This flow shows the
-                  interaction pattern behind that change.
-                </p>
-                <div className="mt-8">
-                  <MealGroupingFlow />
+            {post.author === author.name && (
+              <section className="mt-8 border-t border-border pt-6">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <div>
+                    <span className="text-sm font-semibold text-foreground">
+                      {author.name}
+                    </span>
+                    <span className="ml-2 text-xs text-muted">
+                      {author.role}
+                    </span>
+                  </div>
+                  <Link
+                    to="/about"
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    About the author
+                  </Link>
                 </div>
-              </div>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  {author.bio}
+                </p>
+              </section>
             )}
-          </motion.article>
 
-          {/* Someone who has read to the end of an article on nutrition is the
-              warmest traffic this site gets, and until now the page offered
-              them nothing to do next. Placed before the related posts, which
-              are the alternative — keep reading — rather than the action. */}
-          <Panel
-            className="mt-16"
-            padding="regular"
-            title="Put this into practice"
-            description="MacroTrackr turns the targets in this article into a daily log you can actually keep. Free, no card, and your data stays exportable."
-          >
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Link
-                to="/register"
-                search={{ returnTo: undefined }}
-                className={getButtonClasses("primary", "lg", false, "px-6")}
-              >
-                Start tracking free
-              </Link>
-              <Link
-                to={TOOLS_HUB_PATH}
-                className={getButtonClasses("secondary", "lg", false, "px-6")}
-              >
-                Work out your numbers
-              </Link>
-            </div>
-          </Panel>
-
-          {/* A name in schema that a reader never sees is a signal aimed only at
-              a crawler. On health writing the person should be visible. */}
-          {post.author === author.name && (
-            <section className="mt-14 rounded-card border border-border bg-surface p-6">
-              <p className={`${TYPE_SCALE.micro} text-muted`}>Written by</p>
-              <p className="mt-2 text-base font-semibold text-foreground">
-                {author.name}
-              </p>
-              <p className="text-sm text-muted">{author.role}</p>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                {author.bio}
-              </p>
-              <Link
-                to="/about"
-                className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
-              >
-                About the author
-              </Link>
-            </section>
-          )}
-
-          {relatedPosts.length > 0 && (
-            <section className="mt-14">
-              <div className="mb-5 flex items-center justify-between">
-                <Heading level="panel">Keep reading</Heading>
+            <Panel
+              className="mt-10"
+              padding="regular"
+              title="Put this into practice"
+              description="Turn the targets in this guide into a daily log you can keep. Free, no card, and your data stays exportable."
+            >
+              <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link
-                  to="/blog"
-                  search={{
-                    category: undefined,
-                    tag: undefined,
-                    q: undefined,
-                  }}
-                  className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  to="/register"
+                  search={{ returnTo: undefined }}
+                  className={getButtonClasses("primary", "lg", false, "px-6")}
                 >
-                  View all posts
+                  Start tracking free
+                </Link>
+                <Link
+                  to={TOOLS_HUB_PATH}
+                  className={getButtonClasses("secondary", "lg", false, "px-6")}
+                >
+                  Work out your numbers
                 </Link>
               </div>
-              <BlogPostList posts={relatedPosts} />
-            </section>
+            </Panel>
+
+            {relatedPosts.length > 0 && (
+              <section className="mt-14">
+                <div className="mb-4 flex items-center justify-between">
+                  <Heading level="panel">Keep reading</Heading>
+                  <Link
+                    to="/blog"
+                    search={{
+                      category: undefined,
+                      tag: undefined,
+                      q: undefined,
+                    }}
+                    className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  >
+                    View all posts
+                  </Link>
+                </div>
+                <BlogPostList posts={relatedPosts} />
+              </section>
+            )}
+          </div>
+
+          {showToc && (
+            <aside
+              aria-label="On this page"
+              className="hidden lg:block"
+            >
+              <div className="sticky top-[var(--header-offset)] border-l border-border pl-4">
+                <p className={`${TYPE_SCALE.micro} text-muted`}>On this page</p>
+                <ol className="mt-3 space-y-2 text-xs leading-relaxed">
+                  {tocHeadings.map((heading) => (
+                    <li key={heading.id}>
+                      <a
+                        href={`#${heading.id}`}
+                        className="block text-muted transition-colors hover:text-foreground"
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </aside>
           )}
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

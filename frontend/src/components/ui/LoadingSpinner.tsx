@@ -27,15 +27,20 @@ function LoadingSpinner({
     <div
       className={
         fullScreen
-          ? "flex min-h-screen flex-col items-center justify-center"
+          ? "flex min-h-dvh flex-col items-center justify-center"
           : "flex flex-col items-center justify-center"
       }
     >
       <LoadingSpinnerIcon
         className={`animate-spin ${sizeClasses[size]} ${color}`}
+        aria-hidden="true"
       />
 
-      {label && <span className="mt-2 text-sm text-foreground">{label}</span>}
+      {label ? (
+        <span className="mt-2 text-sm text-foreground">{label}</span>
+      ) : (
+        <span className="sr-only">Loading...</span>
+      )}
     </div>
   );
 }

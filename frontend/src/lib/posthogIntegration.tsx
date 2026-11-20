@@ -16,7 +16,7 @@ import { withPostHog } from "./posthogClient";
  */
 export default function PostHogUserSync(): undefined {
   const { isLoaded, isSignedIn } = useAppAuthState();
-  const { data: user } = useUser({ enabled: true });
+  const { data: user } = useUser({ enabled: isLoaded && isSignedIn });
   const lastDistinctIdReference = useRef<string | undefined>(undefined);
   const isSignedOut = isLoaded && !isSignedIn;
 

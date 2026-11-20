@@ -50,9 +50,8 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className="max-w-md text-sm leading-7 text-muted">
-              The nutrition tracker built for real results. Log faster, see
-              clearer, and stay consistent with tools that work as hard as you
-              do.
+              Open-source calorie and macro tracking with no ads, full data
+              export, and optional self-hosting.
             </p>
             <p className="mt-3 text-xs text-muted">
               &copy; {new Date().getFullYear()} {APP_NAME}. All rights
@@ -61,9 +60,9 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+            <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
               Product
-            </h4>
+            </h2>
             <ul className="flex flex-col gap-1 text-sm text-muted">
               <li>
                 <a href="/#features" className={footerLinkClasses}>
@@ -108,13 +107,13 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
-              Legal
-            </h4>
+            <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+              Company & Legal
+            </h2>
             <ul className="flex flex-col gap-1 text-sm text-muted">
               <li>
                 <Link to="/terms" className={footerLinkClasses}>
-                  Terms of Service
+                  Terms and Conditions
                 </Link>
               </li>
               <li>

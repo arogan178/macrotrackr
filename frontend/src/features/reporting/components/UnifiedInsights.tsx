@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
@@ -157,17 +157,16 @@ function UnifiedInsights({
                       consistencyScore,
                       "consistency",
                     )}
-                    trackColorClass="text-surface border border-border rounded-full"
+                    trackColorClass="text-border"
                   >
                     <div className="flex flex-col items-center justify-center">
-                      <span className="text-3xl font-bold tracking-tight text-foreground">
+                      <span className="text-3xl font-semibold tracking-tight text-foreground">
                         <AnimatedNumber
                           value={consistencyScore}
                           toFixedValue={0}
-                          duration={0.8}
                         />
                       </span>
-                      <span className="text-[10px] font-medium text-muted">
+                      <span className="text-xs font-medium text-muted">
                         score
                       </span>
                     </div>
@@ -209,7 +208,7 @@ function UnifiedInsights({
               delay={0.1}
             >
               <div className="flex flex-1 flex-col justify-center pt-2">
-                <div className="flex justify-around px-1 md:px-6">
+                <div className="flex justify-around gap-2 px-1 md:px-6">
                   {(() => {
                     const currentParts = parseMacroRatio(
                       macroBalance.currentRatio,
@@ -228,19 +227,17 @@ function UnifiedInsights({
                       <div key={index} className="flex flex-col items-center">
                         <RadialProgress
                           progress={pct}
-                          size={96}
+                          size={88}
                           strokeWidth={8}
                           colorClass={colors[index]}
-                          trackColorClass="text-surface border border-border rounded-full"
+                          trackColorClass="text-border"
                         >
-                          <span className="text-xl font-bold text-foreground">
-                            {pct}%
-                          </span>
+                          <Value value={pct} unit="%" size="stat" />
                         </RadialProgress>
                         <span className="mt-2 text-xs font-medium text-muted">
                           {labels[index]}
                         </span>
-                        <span className="text-[10px] text-muted/60">
+                        <span className="text-xs text-muted">
                           target {targetParts[index]}%
                         </span>
                       </div>
@@ -255,7 +252,7 @@ function UnifiedInsights({
         {/* Trends get the full width, one column per figure. */}
         <div className="col-span-1 md:col-span-3">
           {/* Trend Analysis */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -312,7 +309,7 @@ function UnifiedInsights({
                 {overallTrendMessage}
               </p>
             </Panel>
-          </motion.div>
+          </m.div>
         </div>
 
         {/* Recommendations - Full width at bottom */}

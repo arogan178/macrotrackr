@@ -40,7 +40,7 @@ At the time of writing, FatSecret keeps calorie and macro tracking and the barco
 This is the one I build. It is aimed at people who set gram targets for protein, carbs and fat and want to see their weekly average rather than chase a perfect day.
 
 - **Free plan:** logging with no daily cap, barcode scanning, custom macro targets, the last 7 days of progress and 5 saved meals. No ads on any plan.
-- **Paid plan (Pro):** your full history, 30 and 90 day views, unlimited saved meals and CSV export. See [pricing](/pricing).
+- **Paid plan (Pro):** your full history, 30- and 90-day views, unlimited saved meals and CSV export. See [pricing](/pricing).
 - **Self-hosting:** the code is open source under AGPLv3, so you can [run it on your own server](/open-source) for free with every feature.
 - **Trade-off:** it is newer and smaller than everything else on this list. The food database is [Open Food Facts](https://world.openfoodfacts.org/) plus your own foods, so a regional product may be missing until someone adds it. It installs as an app from the browser rather than from the iOS App Store.
 

@@ -37,7 +37,7 @@ const PageShell: React.FC<PageShellProps> = ({
   width = "app",
   offsetHeader = true,
   className,
-  as: Element = "main",
+  as: Element = "div",
   id,
 }) => (
   // No height of its own: MainLayout's <main> is already min-h-dvh and, signed

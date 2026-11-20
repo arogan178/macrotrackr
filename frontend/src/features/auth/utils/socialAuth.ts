@@ -114,7 +114,7 @@ export function resolveSocialAuthError(
     return {
       message:
         intent === "signup"
-          ? "We couldn't finish signing you up with that provider. Create an account with your email instead — you can connect the provider afterwards from Settings."
+          ? "We couldn't finish signing you up with that provider. Create an account with your email instead, and connect the provider later in Settings."
           : "That provider isn't connected to an account yet. Sign up first, or use the email you registered with.",
       action: "show-email",
       tone: "warning",

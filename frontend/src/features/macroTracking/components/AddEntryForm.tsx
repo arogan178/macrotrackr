@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useId, useState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { format } from "date-fns";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 
 import CardContainer from "@/components/form/CardContainer";
 import DateField from "@/components/form/DateField";
@@ -13,6 +13,7 @@ import TimeField from "@/components/form/TimeField";
 import { Button, PlusIcon, StarIcon, TrashIcon } from "@/components/ui";
 import Heading from "@/components/ui/Heading";
 import Value from "@/components/ui/Value";
+import { DURATIONS, TOUCH_TARGET } from "@/components/utils/UiConstants";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
 import { type Ingredient, MealType } from "@/types/macro";
@@ -50,6 +51,11 @@ function currentDateTime() {
   return { date: todayISO(now), time: format(now, "HH:mm") };
 }
 
+const MEAL_TYPE_DROPDOWN_OPTIONS = MEAL_TYPE_OPTIONS.map((option) => ({
+  value: option.value,
+  label: option.display,
+}));
+
 function FormShell({
   inSheet,
   children,
@@ -60,8 +66,8 @@ function FormShell({
   if (inSheet) return children;
 
   return (
-    <CardContainer variant="interactive" className="relative h-full overflow-hidden">
-      <div className="relative z-10 flex h-full flex-col p-3.5 sm:p-5">{children}</div>
+    <CardContainer variant="default" className="relative h-full overflow-hidden">
+      <div className="relative z-10 flex h-full flex-col p-3.5 sm:p-4">{children}</div>
     </CardContainer>
   );
 }
@@ -528,12 +534,12 @@ function AddEntry({
   return (
     <FormShell inSheet={inSheet}>
         {!inSheet && (
-          <div className="mb-4 sm:mb-5">
+          <div className="mb-3 sm:mb-4">
             <Heading level="panel">Log a meal</Heading>
           </div>
         )}
 
-        <div className="mb-4 sm:mb-5">
+        <div className="mb-3 sm:mb-4">
           <CalorieSearch
             onResult={handleSearchResult}
             onSelectSavedMeal={handleSelectSavedMeal}
@@ -548,7 +554,7 @@ function AddEntry({
             void form.handleSubmit();
           }}
         >
-          <div className="mb-3.5 sm:mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 sm:items-start">
+          <div className="mb-3 grid grid-cols-1 gap-3 sm:mb-4 sm:grid-cols-3 sm:items-start sm:gap-4">
             <div className="col-span-1">
               <QuantityUnitField
                 label="Quantity"
@@ -573,13 +579,14 @@ function AddEntry({
                       onClick={() =>
                         form.setFieldValue("saveAsMeal", (previous) => !previous)
                       }
+                      aria-pressed={saveAsMeal}
                       className={cn(
-                        "flex items-center gap-1 rounded-control px-1.5 sm:px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
+                        TOUCH_TARGET,
+                        "flex cursor-pointer items-center gap-1 rounded-control px-1.5 py-0.5 text-xs font-medium transition-colors sm:px-2",
                         saveAsMeal
                           ? "bg-primary/15 text-primary hover:bg-primary/25"
                           : "text-muted hover:bg-muted/10 hover:text-foreground",
                       )}
-                      aria-label="Save as meal"
                       title={saveAsMeal ? "Will save as reusable meal" : "Save as reusable meal"}
                     >
                       <StarIcon
@@ -592,20 +599,23 @@ function AddEntry({
                     </button>
                     <AnimatePresence>
                       {(searchResult ?? mealName.length > 0) && (
-                        <motion.button
+                        <m.button
                           type="button"
                           onClick={handleClearSearch}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.15 }}
-                          className="flex items-center gap-1 rounded-control px-1.5 sm:px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                          transition={{ duration: DURATIONS.instant }}
+                          className={cn(
+                            TOUCH_TARGET,
+                            "flex items-center gap-1 rounded-control px-1.5 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error sm:px-2",
+                          )}
                           aria-label="Clear search"
                           title="Clear search result"
                         >
                           <TrashIcon className="h-3 w-3" />
                           <span className="hidden sm:inline">Clear</span>
-                        </motion.button>
+                        </m.button>
                       )}
                     </AnimatePresence>
                   </div>
@@ -626,13 +636,10 @@ function AddEntry({
             </div>
           </div>
 
-          <div className="mb-3.5 sm:mb-5">
+          <div className="mb-3 sm:mb-3.5">
             <Dropdown
               label="Meal type"
-              options={MEAL_TYPE_OPTIONS.map((option) => ({
-                value: option.value,
-                label: option.display,
-              }))}
+              options={MEAL_TYPE_DROPDOWN_OPTIONS}
               value={values.mealType}
               onChange={(value: string | number | undefined) =>
                 form.setFieldValue("mealType", value as MealType)
@@ -649,7 +656,7 @@ function AddEntry({
                 setIsDateTimeExpanded(true);
               }
             }}
-            className="mb-3.5 sm:mb-5 group"
+            className="mb-3 sm:mb-4 group"
           >
             <summary
               onClick={toggleDateTime}
@@ -750,14 +757,18 @@ function AddEntry({
           <div className="min-h-4 flex-1 sm:min-h-5" />
           <div
             className={cn(
-              "flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4",
+              "flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3.5 sm:gap-3 sm:pt-4",
               inSheet && "sticky bottom-0 z-10 -mx-6 -mb-5 bg-surface px-6 pb-5",
             )}
           >
             <Value value={Number(calories) || 0} unit="kcal" size="stat" className="shrink-0" />
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="ml-auto flex min-w-0 items-center gap-2">
               {validationHint && (
-                <p className="text-right text-xs text-muted">
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="text-right text-xs text-muted"
+                >
                   {validationHint}
                 </p>
               )}

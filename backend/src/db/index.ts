@@ -4,7 +4,14 @@ import { getConfig } from "../config";
 import { initializeSchema } from "./schema";
 
 function configureDatabase(db: Database) {
-  db.exec("PRAGMA journal_mode = WAL;");
+  db.exec(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA busy_timeout = 5000;
+    PRAGMA cache_size = -64000;
+    PRAGMA temp_store = MEMORY;
+    PRAGMA mmap_size = 268435456;
+  `);
 }
 
 export function createDatabase(databasePath: string) {

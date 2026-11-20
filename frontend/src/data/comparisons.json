@@ -84,7 +84,7 @@
       },
       {
         "question": "Is MacroTrackr free?",
-        "answer": "MacroTrackr is open source (AGPLv3) and free to self-host with Docker, with no plan limits. The hosted version has a free plan that shows your last 7 days and keeps 5 saved meals, and Pro at $3.99 a month for full history, unlimited saved meals and 30 and 90 day trends."
+        "answer": "MacroTrackr is open source (AGPLv3) and free to self-host with Docker, with no plan limits. The hosted version has a free plan that shows your last 7 days and keeps 5 saved meals, and Pro at $3.99 a month for full history, unlimited saved meals and 30- and 90-day trends."
       }
     ]
   },

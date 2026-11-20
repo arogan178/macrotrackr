@@ -55,13 +55,15 @@ export default function DateRangeSelector({
         onChange={handleRangeChange}
         isMotion
         layoutId="activeRangeHighlight"
+        ariaLabel="Analytics date range"
         size="sm"
         fullWidth
+        manualActivation
         className="flex-nowrap border border-border bg-surface-2"
       />
       {!hasProAccess && (
         <span className="w-full text-xs text-muted sm:w-auto">
-          30 and 90 day views are Pro
+          30- and 90-day views are Pro
         </span>
       )}
       <UpgradeModal

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
@@ -11,12 +12,13 @@ import { useStore } from "@/store/store";
 import FreeBillingView from "./FreeBillingView";
 import ProBillingView from "./ProBillingView";
 
-function handleUpgradeRedirect() {
-  globalThis.location.href = "/pricing";
-}
-
 const BillingForm: React.FC = () => {
-  const { subscriptionStatus, showNotification } = useStore();
+  const navigate = useNavigate();
+  const subscriptionStatus = useStore((state) => state.subscriptionStatus);
+  const showNotification = useStore((state) => state.showNotification);
+  const handleUpgradeRedirect = useCallback(() => {
+    void navigate({ to: "/pricing" });
+  }, [navigate]);
   const { hasProAccess } = useEntitlements();
   // Get billing details from TanStack Query
   const { data: billingDetails } = useBillingDetails();

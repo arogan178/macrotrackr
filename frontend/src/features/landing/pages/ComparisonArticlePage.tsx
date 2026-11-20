@@ -29,7 +29,7 @@ export default function ComparisonArticlePage() {
   usePageMetadata({
     ...(comparison
       ? getPageMetadata(`/compare/${comparison.slug}`)
-      : { title: `Comparison Not Found — ${APP_NAME}`, description: "" }),
+      : { title: `Comparison Not Found | ${APP_NAME}`, description: "" }),
     canonical: canonicalUrl,
     noindex: !comparison,
   });
@@ -38,9 +38,9 @@ export default function ComparisonArticlePage() {
 
   if (!comparison) {
     return (
-      <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+      <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
         <AppHeader mode="public" />
-        <main className="relative z-10 flex min-h-[60vh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
+        <div className="relative z-10 flex min-h-[60dvh] flex-col items-center justify-center px-4 pt-[var(--header-offset)] text-center">
           <Heading level="page">Comparison not found</Heading>
           <p className="mt-2 text-sm text-muted">
             The requested comparison does not exist or has moved.
@@ -52,7 +52,7 @@ export default function ComparisonArticlePage() {
             <BackIcon className="h-4 w-4" />
             All comparisons
           </Link>
-        </main>
+        </div>
         <Footer />
       </div>
     );
@@ -137,7 +137,7 @@ export default function ComparisonArticlePage() {
   }));
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
+    <div className="relative min-h-dvh bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
@@ -155,7 +155,7 @@ export default function ComparisonArticlePage() {
 
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-4xl px-4">
           {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumb" className="mb-6">
@@ -326,7 +326,7 @@ export default function ComparisonArticlePage() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

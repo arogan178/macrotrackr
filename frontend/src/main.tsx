@@ -66,8 +66,8 @@ globalThis.localStorage?.removeItem("macrotrackr-query-cache");
 
 function RuntimeConfigError() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-12">
+    <main className="min-h-dvh bg-background text-foreground">
+      <section className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center px-6 py-12">
         <h1 className="text-2xl font-semibold">Runtime configuration error</h1>
         <p className="mt-4 text-foreground/80">
           Clerk authentication is enabled but
@@ -135,7 +135,23 @@ const rootElement = (
           persister: queryCachePersister,
           maxAge: QUERY_CACHE_MAX_AGE,
           dehydrateOptions: {
-            shouldDehydrateQuery: (query) => shouldPersistQuery(query.queryKey),
+            shouldDehydrateQuery: (query) => {
+              if (!shouldPersistQuery(query.queryKey)) return false;
+              if (query.queryKey[0] === "auth") {
+                const data = query.state.data as
+                  | { authenticated?: boolean }
+                  | null
+                  | undefined;
+                if (query.queryKey[1] === "session") {
+                  return Boolean(data?.authenticated);
+                }
+                if (query.queryKey[1] === "user") {
+                  return data != null;
+                }
+              }
+
+              return true;
+            },
           },
           buster: "macrotrackr-v1",
         }}

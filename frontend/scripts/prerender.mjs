@@ -100,7 +100,7 @@ const pages = [
 for (const post of blogPosts) {
   pages.push({
     route: `blog/${post.slug}`,
-    title: `${post.title} — ${APP_NAME}`,
+    title: `${post.title} | ${APP_NAME}`,
     description: post.excerpt,
     canonical: `${APP_URL}/blog/${post.slug}`,
     type: "article",

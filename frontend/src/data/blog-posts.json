@@ -1,5 +1,19 @@
 [
   {
+    "slug": "v3-8-0",
+    "title": "MacroTrackr 3.8.0: Faster API and Queries, Editorial Blog Redesign, and UI Polish",
+    "excerpt": "Version 3.8 cuts backend latency and network chatter across the app, redesigns the blog with a tighter reading layout and rewritten guides, and fixes a batch of modal, mobile, and chart rough edges.",
+    "date": "2026-11-20",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v3-7-1",
     "title": "MacroTrackr 3.7.1: Meal Breakdown on Phones and Fixes",
     "excerpt": "Version 3.7.1 brings the per-meal breakdown back to Home on phones, fixes weights of 100 kg and over, and lets self-hosted instances close sign-ups.",
@@ -142,7 +156,7 @@
   {
     "slug": "v2-5-mobile-ux-polish-and-responsive-density",
     "title": "MacroTrackr v2.5: Compact Mobile Layouts, Sleeker Navigation, and Search Improvements",
-    "excerpt": "Version 2.5 brings a major mobile UX upgrade—reducing vertical scrolling by up to 50%, refining button layouts and form inputs, and polishing mobile navigation.",
+    "excerpt": "Version 2.5 brings a major mobile UX upgrade, reducing vertical scrolling by up to 50%, refining button layouts and form inputs, and polishing mobile navigation.",
     "date": "2026-08-11",
     "category": "Releases",
     "author": "MacroTrackr Team",
@@ -194,7 +208,7 @@
   {
     "slug": "how-to-estimate-restaurant-meals-without-guessing-blind",
     "title": "How to Estimate Restaurant Meals Without Guessing Blind",
-    "excerpt": "A practical framework for logging restaurant meals when there is no nutrition label, no exact recipe, and no time for perfectionism.",
+    "excerpt": "How to break down restaurant plates into four parts, account for hidden cooking oils, and log in sixty seconds.",
     "date": "2026-02-24",
     "category": "Tips",
     "author": "Andrea Bugeja",
@@ -210,7 +224,7 @@
   {
     "slug": "why-weekly-averages-beat-perfect-days",
     "title": "Why Weekly Averages Beat Perfect Days",
-    "excerpt": "If you keep swinging between over-control and all-or-nothing weekends, your weekly average is the metric that will calm everything down.",
+    "excerpt": "Why energy balance plays out over a full week, how normal weekend weight swings work, and which four numbers matter in Analytics.",
     "date": "2026-02-18",
     "category": "Nutrition Guides",
     "author": "Andrea Bugeja",
@@ -226,11 +240,11 @@
   {
     "slug": "macro-tracking-tips-for-beginners",
     "title": "Macro Tracking Tips for Beginners",
-    "excerpt": "Starting your macro tracking journey? Here are 7 practical tips to help you stay consistent and achieve your nutrition goals.",
+    "excerpt": "A practical two-week ramp into logging macros: what to weigh, what to estimate, and four habits that keep logging fast.",
     "date": "2026-02-15",
     "category": "Tips",
     "author": "Andrea Bugeja",
-    "readingTime": "4 min",
+    "readingTime": "3 min",
     "image": "/blog/photo-1493770348161-369560ae357d.webp",
     "tags": [
       "Beginners",
@@ -242,11 +256,11 @@
   {
     "slug": "understanding-protein-intake",
     "title": "Understanding Protein Intake: The Complete Guide",
-    "excerpt": "Everything you need to know about protein: how much you need, the best sources, and how to hit your targets consistently.",
+    "excerpt": "Evidence-based daily protein ranges in g/kg and g/lb, how to split intake across meals, and a quick reference of protein-dense foods.",
     "date": "2026-01-28",
     "category": "Nutrition Guides",
     "author": "Andrea Bugeja",
-    "readingTime": "6 min",
+    "readingTime": "4 min",
     "image": "/blog/photo-1546069901-ba9599a7e63c.webp",
     "tags": [
       "Protein",
@@ -258,11 +272,11 @@
   {
     "slug": "meal-prep-for-macro-tracking",
     "title": "Meal Prep Strategies for Accurate Macro Tracking",
-    "excerpt": "Learn how to meal prep effectively to make macro tracking easier and more accurate throughout your week.",
+    "excerpt": "How to prep two or three repeat weekday meals, weigh batch cooking accurately, and keep food fresh through the workweek.",
     "date": "2026-01-10",
     "category": "Tips",
     "author": "Andrea Bugeja",
-    "readingTime": "6 min",
+    "readingTime": "4 min",
     "image": "/blog/photo-1543339308-43e59d6b73a6.webp",
     "tags": [
       "Meal Prep",
@@ -274,11 +288,11 @@
   {
     "slug": "carbs-fats-balance",
     "title": "Finding Your Optimal Carb-to-Fat Ratio",
-    "excerpt": "How to determine the right balance of carbohydrates and fats for your goals, lifestyle, and preferences.",
+    "excerpt": "What feeding trials show about carb-to-fat splits, minimum fat floors, and a two-week method to tune your ratio.",
     "date": "2025-12-20",
     "category": "Nutrition Guides",
     "author": "Andrea Bugeja",
-    "readingTime": "6 min",
+    "readingTime": "4 min",
     "image": "/blog/photo-1547592180-85f173990554.webp",
     "tags": [
       "Carbs",

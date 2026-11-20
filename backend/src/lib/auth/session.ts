@@ -5,12 +5,18 @@ import { consumeSyncTicket } from "./sync-ticket";
 
 const SESSION_COOKIE_NAME = "mt_session";
 const SESSION_TTL_DAYS = 30;
+const SESSION_TOUCH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 interface SessionRow {
   id: string;
   user_id: number;
   secret_hash: string;
   expires_at: string;
+  last_used_at: string | null;
+}
+
+function queryStmt(db: Database, sql: string) {
+  return typeof db.query === "function" ? db.query(sql) : db.prepare(sql);
 }
 
 export interface SessionUser {
@@ -192,16 +198,15 @@ export function resolveSession(
     return null;
   }
 
-  const row = db
-    .prepare(
-      `SELECT s.id, s.user_id, s.secret_hash, s.expires_at,
-              u.id as user_db_id, u.email, u.first_name, u.last_name
-       FROM sessions s
-       INNER JOIN users u ON u.id = s.user_id
-       WHERE s.id = ?
-       LIMIT 1`,
-    )
-    .get(sessionId) as
+  const row = queryStmt(
+    db,
+    `SELECT s.id, s.user_id, s.secret_hash, s.expires_at, s.last_used_at,
+            u.id as user_db_id, u.email, u.first_name, u.last_name
+     FROM sessions s
+     INNER JOIN users u ON u.id = s.user_id
+     WHERE s.id = ?
+     LIMIT 1`,
+  ).get(sessionId) as
     | (SessionRow & {
         user_db_id: number;
         email: string;
@@ -218,16 +223,29 @@ export function resolveSession(
     return null;
   }
 
+  const now = new Date();
   const expiresAt = new Date(row.expires_at);
-  if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+  if (Number.isNaN(expiresAt.getTime()) || expiresAt <= now) {
     deleteSession(db, sessionId);
     return null;
   }
 
-  const nextExpiry = makeExpiryDate().toISOString();
-  db.prepare(
-    "UPDATE sessions SET last_used_at = CURRENT_TIMESTAMP, expires_at = ? WHERE id = ?",
-  ).run(nextExpiry, sessionId);
+  // Only refresh session expiry periodically so parallel read-only GET requests
+  // do not serialize behind SQLite write locks on every call.
+  const lastUsedMs = row.last_used_at
+    ? Date.parse(
+        row.last_used_at.includes("T")
+          ? row.last_used_at
+          : `${row.last_used_at.replace(" ", "T")}Z`,
+      )
+    : Number.NaN;
+  if (Number.isNaN(lastUsedMs) || now.getTime() - lastUsedMs >= SESSION_TOUCH_INTERVAL_MS) {
+    const nextExpiry = makeExpiryDate().toISOString();
+    queryStmt(
+      db,
+      "UPDATE sessions SET last_used_at = CURRENT_TIMESTAMP, expires_at = ? WHERE id = ?",
+    ).run(nextExpiry, sessionId);
+  }
 
   return {
     sessionId: row.id,

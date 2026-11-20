@@ -111,6 +111,7 @@ export default function MacroSlider({
               variant="custom"
               onClick={onToggleLock}
               ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
+              aria-pressed={isLocked}
               icon={
                 isLocked ? (
                   <LockIcon className={cn("h-3.5 w-3.5", classes.icon)} />

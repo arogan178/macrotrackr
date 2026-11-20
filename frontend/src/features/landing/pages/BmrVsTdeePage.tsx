@@ -38,7 +38,7 @@ export default function BmrVsTdeePage() {
       />
       <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
+      <div className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-3xl px-4">
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1 text-xs text-muted">
@@ -180,7 +180,7 @@ export default function BmrVsTdeePage() {
             planning, not medical advice.
           </p>
         </div>
-      </main>
+      </div>
 
       <Footer />
       <BackToTopButton label="Back to top" />

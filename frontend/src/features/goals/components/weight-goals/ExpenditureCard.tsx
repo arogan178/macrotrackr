@@ -98,37 +98,62 @@ export default function ExpenditureCard({
       flatOnPhone
       className="flex h-full flex-col"
     >
-      <div className="grid grid-cols-2 gap-4">
-        {measured && (
-          <Stat label="Measured expenditure" value={roundToTen(measured.estimate)} />
-        )}
-        {hasTdee && (
-          <Stat
-            label={maintenanceLabel(tdeeIsOverride)}
-            value={tdeeIsOverride ? tdee : roundToTen(tdee)}
-          />
-        )}
-      </div>
+      {(measured ?? hasTdee) ? (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            {measured && (
+              <Stat
+                label="Measured expenditure"
+                value={roundToTen(measured.estimate)}
+              />
+            )}
+            {hasTdee && (
+              <Stat
+                label={maintenanceLabel(tdeeIsOverride)}
+                value={tdeeIsOverride ? tdee : roundToTen(tdee)}
+              />
+            )}
+          </div>
 
-      {/* The working is detail: the figures above are the answer. */}
-      <details className="group mt-4 text-sm text-muted">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-xs text-muted transition-colors hover:text-foreground">
-          How this is worked out
-          <ChevronDownIcon className="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180" />
-        </summary>
-        <div className="space-y-1">
-        {expenditure === undefined ? (
-          <Skeleton lines={2} />
-        ) : expenditure.status === "measured" ? (
-          measuredWorking(expenditure, unitSystem).map((line) => <p key={line}>{line}</p>)
-        ) : (
-          <p>{missingSentence(expenditure.needs)}</p>
-        )}
-        <p className="text-xs">
-          Days marked as partly logged are left out. Your targets do not change on their own.
-        </p>
+          {/* The working is detail: the figures above are the answer. */}
+          <details className="group mt-4 text-sm text-muted">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-xs text-muted transition-colors hover:text-foreground">
+              How this is worked out
+              <ChevronDownIcon className="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180" />
+            </summary>
+            <div className="space-y-1">
+              {expenditure === undefined ? (
+                <Skeleton lines={2} />
+              ) : expenditure.status === "measured" ? (
+                measuredWorking(expenditure, unitSystem).map((line) => (
+                  <p key={line}>{line}</p>
+                ))
+              ) : (
+                <p>{missingSentence(expenditure.needs)}</p>
+              )}
+              <p className="text-xs">
+                Days marked as partly logged are left out. Your targets do not
+                change on their own.
+              </p>
+            </div>
+          </details>
+        </>
+      ) : (
+        <div className="space-y-2 text-sm text-muted">
+          {expenditure?.status === "insufficient" ? (
+            <p className="leading-relaxed text-foreground/85">
+              {missingSentence(expenditure.needs)}
+            </p>
+          ) : (
+            <Skeleton lines={2} />
+          )}
+          <p className="text-xs leading-relaxed text-muted">
+            Add your height, weight, and activity level in Settings for an
+            instant formula estimate while your trend builds. Days marked as
+            partly logged are left out.
+          </p>
         </div>
-      </details>
+      )}
     </Panel>
   );
 }

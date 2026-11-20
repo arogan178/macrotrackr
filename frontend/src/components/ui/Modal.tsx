@@ -7,18 +7,23 @@ import {
   useSyncExternalStore,
 } from "react";
 import ReactDOM from "react-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
+
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 
 import { cn } from "../../lib/classnameUtilities";
 
 import Button from "./Button";
 import IconButton from "./IconButton";
-import ProgressiveBlur from "./ProgressiveBlur";
 import type {
   ConfirmationModalProps,
   FormModalProps,
   ModalProps,
 } from "./UiTypes";
+
+// Track open modals in stacking order so Escape only closes the topmost dialog
+// and closing a nested dialog keeps body scroll locked while the parent is open.
+const openModalStack: string[] = [];
 
 // Below md this is a bottom sheet: a centred dialog puts its actions and its
 // close button at the least reachable part of a phone screen, and the keyboard
@@ -56,8 +61,8 @@ const modalVariants = {
     scale: 0.98,
     y: -5,
     transition: {
-      duration: 0.15,
-      ease: "easeOut" as const,
+      duration: DURATIONS.instant,
+      ease: EASINGS.out,
     },
   },
 };
@@ -66,11 +71,11 @@ const backdropVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { duration: 0.3, ease: "easeOut" as const },
+    transition: { duration: DURATIONS.base, ease: EASINGS.out },
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.2, ease: "easeIn" as const },
+    transition: { duration: DURATIONS.instant, ease: EASINGS.out },
   },
 };
 
@@ -102,9 +107,9 @@ function renderConfirmationFooter(
         <Button
           onClick={onClose}
           ariaLabel={cancelLabel}
-          variant="secondary"
+          variant="ghost"
           buttonSize={buttonSize}
-          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-surface-2 hover:text-foreground"
+          className="font-medium text-muted hover:text-foreground"
         >
           {cancelLabel}
         </Button>
@@ -147,9 +152,9 @@ function renderFormFooter(
         <Button
           onClick={onClose}
           ariaLabel={cancelLabel}
-          variant="secondary"
+          variant="ghost"
           buttonSize={buttonSize}
-          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-surface-2 hover:text-foreground"
+          className="font-medium text-muted hover:text-foreground"
         >
           {cancelLabel}
         </Button>
@@ -182,8 +187,14 @@ function Modal(properties: ModalProps) {
     isClient,
     isServer,
   );
-  const titleId = useId();
+  const modalId = useId();
+  const titleId = `${modalId}-title`;
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
   const [opened, setOpened] = useState<{
     isOpen: boolean;
     opener: Element | null;
@@ -206,13 +217,25 @@ function Modal(properties: ModalProps) {
   const { opener } = opened;
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    openModalStack.push(modalId);
+    document.body.classList.add("modal-open");
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isOpen) {
-        onClose();
+      // Only the topmost modal handles keyboard dismissal and focus trapping.
+      if (openModalStack[openModalStack.length - 1] !== modalId) {
+        return;
+      }
+
+      if (event.key === "Escape") {
+        onCloseRef.current();
+
+        return;
       }
 
       const dialog = dialogRef.current;
-      if (event.key !== "Tab" || !dialog?.contains(document.activeElement)) {
+      if (event.key !== "Tab" || !dialog) {
         return;
       }
 
@@ -223,6 +246,9 @@ function Modal(properties: ModalProps) {
 
       if (!first || !last) {
         event.preventDefault();
+      } else if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
       } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -232,18 +258,19 @@ function Modal(properties: ModalProps) {
       }
     };
 
-    if (isOpen) {
-      document.body.classList.add("modal-open");
-      globalThis.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.body.classList.remove("modal-open");
-    }
+    globalThis.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.classList.remove("modal-open");
+      const index = openModalStack.lastIndexOf(modalId);
+      if (index !== -1) {
+        openModalStack.splice(index, 1);
+      }
+      if (openModalStack.length === 0) {
+        document.body.classList.remove("modal-open");
+      }
       globalThis.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, modalId]);
 
   useEffect(() => {
     if (!isOpen || !isMounted) return;
@@ -273,20 +300,24 @@ function Modal(properties: ModalProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby={!hideClose && title ? titleId : undefined}
+          aria-label={hideClose && title ? title : undefined}
           tabIndex={-1}
           ref={dialogRef}
           style={{ perspective: "1000px" }}
         >
-          <motion.div
+          <m.div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             variants={backdropVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            onClick={onClose}
+            onClick={(event) => {
+              event.stopPropagation();
+              onClose();
+            }}
           />
 
-          <motion.div
+          <m.div
             className={cn(CONTENT_CLASS, SIZE_CLASS_MAP[size])}
             style={{ overflowX: "hidden" }}
             variants={modalVariants}
@@ -321,26 +352,18 @@ function Modal(properties: ModalProps) {
             )}
 
             <div className="relative grow overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5">
-              <div className="relative z-10">
-                {properties.variant === "confirmation" && (
-                  <p className="mb-5 text-sm leading-relaxed text-muted">
-                    {properties.message}
-                  </p>
-                )}
-                {children}
-              </div>
-              <ProgressiveBlur
-                direction="up"
-                intensity={0.3}
-                height="50px"
-                className="pointer-events-none z-0"
-              />
+              {properties.variant === "confirmation" && (
+                <p className="mb-5 text-sm leading-relaxed text-muted">
+                  {properties.message}
+                </p>
+              )}
+              {children}
             </div>
 
             {properties.variant === "confirmation"
               ? renderConfirmationFooter(properties, onClose, buttonSize)
               : renderFormFooter(properties, onClose, buttonSize)}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>,

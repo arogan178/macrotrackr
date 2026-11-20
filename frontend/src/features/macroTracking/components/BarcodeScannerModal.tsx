@@ -376,7 +376,7 @@ const BarcodeScannerModal = memo(function BarcodeScannerModal({
                 ariaLabel="Look up product barcode"
                 className="h-11 shrink-0 px-4 font-semibold"
               >
-                Lookup
+                Look up
               </Button>
             </div>
           </form>

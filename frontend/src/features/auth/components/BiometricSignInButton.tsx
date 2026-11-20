@@ -49,7 +49,7 @@ export function BiometricSignInButton({
   const handleBiometricAuth = async () => {
     if (!availability.hasStoredCredentials) {
       showNotification(
-        "Please sign in with your email & password once to save your biometric login for future use.",
+        "Please sign in with your email and password once to save your biometric login for future use.",
         "info",
       );
 
@@ -78,7 +78,7 @@ export function BiometricSignInButton({
           queryKey: queryKeys.auth.session(),
         });
 
-        showNotification("Authenticated with Biometrics!", "success");
+        showNotification("Signed in with biometrics", "success");
 
         const destination = normalizeAuthRedirect(redirectTo);
         if (destination === "/home") {
@@ -95,7 +95,7 @@ export function BiometricSignInButton({
         }
       } else {
         showNotification(
-          "Biometric credentials not found. Please sign in with email/password once to enable biometrics.",
+          "Biometric credentials not found. Please sign in with email and password once to enable biometrics.",
           "info",
         );
       }

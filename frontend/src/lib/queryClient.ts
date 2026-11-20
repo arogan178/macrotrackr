@@ -54,33 +54,33 @@ export const queryClient = createAppQueryClient();
 
 export const queryConfigs = {
   auth: {
-    staleTime: 30 * SECOND,
-    gcTime: 5 * MINUTE,
-    refetchInterval: 1 * MINUTE,
+    staleTime: 2 * MINUTE,
+    gcTime: 10 * MINUTE,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   longLived: {
-    staleTime: 30 * SECOND,
-    gcTime: 10 * MINUTE,
-    refetchInterval: 1 * MINUTE,
+    staleTime: 5 * MINUTE,
+    gcTime: 15 * MINUTE,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   macros: {
-    staleTime: 10 * SECOND,
+    staleTime: 2 * MINUTE,
     gcTime: 10 * MINUTE,
-    refetchInterval: 30 * SECOND,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   realTime: {
-    staleTime: 5 * SECOND,
-    gcTime: 2 * MINUTE,
-    refetchInterval: 15 * SECOND,
+    staleTime: 1 * MINUTE,
+    gcTime: 5 * MINUTE,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },

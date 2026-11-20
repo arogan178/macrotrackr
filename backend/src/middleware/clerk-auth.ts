@@ -312,48 +312,86 @@ export const clerkAuthMiddleware = clerkPlugin({
 
       const userId = authResult.userId;
 
-      // Fetch the full user object from Clerk if needed
-      let clerkUser: ClerkUserObject | null = null;
-      try {
-        const clerkClient = clerk as ClerkContextObject | null;
-        if (!clerkClient?.users?.getUser) {
-          throw new AuthIntegrationError("Clerk users client is unavailable");
+      // Resolve linked users directly from SQLite instead of calling Clerk's
+      // REST API on every request. Only fetch from Clerk when the account is
+      // not linked yet (e.g. during initial /api/auth/clerk-sync).
+      const linkedUser = db
+        ? (typeof db.query === "function"
+            ? db.query(
+                "SELECT id, email, first_name, last_name FROM users WHERE clerk_id = ?",
+              )
+            : db.prepare(
+                "SELECT id, email, first_name, last_name FROM users WHERE clerk_id = ?",
+              )
+          ).get(userId) as
+            | {
+                id: number;
+                email: string;
+                first_name: string | null;
+                last_name: string | null;
+              }
+            | undefined
+        : undefined;
+
+      let email = linkedUser?.email;
+      let firstName = linkedUser?.first_name ?? undefined;
+      let lastName = linkedUser?.last_name ?? undefined;
+      let imageUrl: string | undefined;
+      let internalUserId: number | null = linkedUser?.id ?? null;
+
+      if (!linkedUser) {
+        let clerkUser: ClerkUserObject | null = null;
+        try {
+          const clerkClient = clerk as ClerkContextObject | null;
+          if (!clerkClient?.users?.getUser) {
+            throw new AuthIntegrationError("Clerk users client is unavailable");
+          }
+
+          clerkUser = await clerkClient.users.getUser(userId);
+        } catch (err) {
+          logger.error(
+            { userId, error: err },
+            "Failed to fetch Clerk user details",
+          );
+          throw new AuthIntegrationError(
+            "Failed to load Clerk user details",
+          );
         }
 
-        clerkUser = await clerkClient.users.getUser(userId);
-      } catch (err) {
-        logger.error({ userId, error: err }, "Failed to fetch Clerk user details");
-        throw new AuthIntegrationError(
-          "Failed to load Clerk user details",
+        email = getPrimaryClerkEmail(clerkUser);
+        firstName = clerkUser.firstName;
+        lastName = clerkUser.lastName;
+        imageUrl = clerkUser.imageUrl;
+        internalUserId = db
+          ? getInternalUserId(db as Database, userId, email)
+          : null;
+      }
+
+      // Debug logging - only in development
+      if (config.NODE_ENV === "development") {
+        logger.debug(
+          {
+            path,
+            requestPath,
+            userId,
+            email,
+            firstName,
+          },
+          "User authenticated successfully",
         );
       }
 
-      const email = getPrimaryClerkEmail(clerkUser);
-      
-      // Debug logging - only in development
-      if (config.NODE_ENV === 'development') {
-        logger.debug({ 
-          path, 
+      logger.debug(
+        {
+          path,
           requestPath,
-          userId, 
+          clerkUserId: userId,
           email,
-          firstName: clerkUser.firstName 
-        }, "User authenticated successfully");
-      }
-
-      // Look up internal user ID from database
-      const internalUserId = db 
-        ? getInternalUserId(db as Database, userId, email)
-        : null;
-
-      logger.debug({
-        path,
-        requestPath,
-        clerkUserId: userId,
-        email,
-        internalUserId,
-        hasDb: !!db
-      }, "Clerk auth middleware - internal user ID lookup result");
+          internalUserId,
+          hasDb: !!db,
+        },
+        "Clerk auth middleware - internal user ID lookup result",
+      );
 
       // Return user info for use in route handlers
       const authenticatedUser = {
@@ -361,9 +399,9 @@ export const clerkAuthMiddleware = clerkPlugin({
         providerUserId: userId,
         authProvider: "clerk" as const,
         email,
-        firstName: clerkUser.firstName,
-        lastName: clerkUser.lastName,
-        imageUrl: clerkUser.imageUrl,
+        firstName,
+        lastName,
+        imageUrl,
       };
 
       return {

@@ -174,7 +174,6 @@ export const macroEntryRoutes = new Elysia()
         };
 
         const visibleWhere = buildWhereClause(isRestricted);
-        const totalWhere = buildWhereClause(false);
 
         const countResult = safeQuery<{ count: number }>(
           db,
@@ -183,12 +182,16 @@ export const macroEntryRoutes = new Elysia()
         );
         const visibleTotal = countResult?.count ?? 0;
 
-        const totalAvailableResult = safeQuery<{ count: number }>(
-          db,
-          `SELECT COUNT(*) as count FROM macro_entries WHERE ${totalWhere.where}`,
-          totalWhere.parameters,
-        );
-        const totalAvailable = totalAvailableResult?.count ?? 0;
+        let totalAvailable = visibleTotal;
+        if (isRestricted) {
+          const totalWhere = buildWhereClause(false);
+          const totalAvailableResult = safeQuery<{ count: number }>(
+            db,
+            `SELECT COUNT(*) as count FROM macro_entries WHERE ${totalWhere.where}`,
+            totalWhere.parameters,
+          );
+          totalAvailable = totalAvailableResult?.count ?? 0;
+        }
 
         const historyQuery = `SELECT ${ENTRY_COLUMNS}
            FROM macro_entries
@@ -308,15 +311,17 @@ export const macroEntryRoutes = new Elysia()
 
         const { result, created, trackedThirdDay, wasFirstMeal } =
           withTransaction(db, () => {
-            const progress = safeQuery<TrackingProgress>(
+            // Bounded O(1) index lookup instead of scanning every entry for the user.
+            // We only need to know whether the user has 0 days logged (first meal)
+            // or exactly 2 distinct days logged that do not include entryDate (third day).
+            const existingDates = safeQueryAll<{ entry_date: string }>(
               db,
-              `SELECT COUNT(*) AS entryCount,
-                      COUNT(DISTINCT entry_date) AS distinctDays,
-                      MAX(CASE WHEN entry_date = ? THEN 1 ELSE 0 END) AS hasEntryForDate
+              `SELECT DISTINCT entry_date
                  FROM macro_entries
-                WHERE user_id = ?`,
-              [entryDate, internalUserId],
-            ) ?? { distinctDays: 0, entryCount: 0, hasEntryForDate: 0 };
+                WHERE user_id = ?
+                LIMIT 3`,
+              [internalUserId],
+            );
 
             const inserted = safeQuery<MacroEntryRow>(
               db,
@@ -349,8 +354,9 @@ export const macroEntryRoutes = new Elysia()
                 ),
               created: inserted !== undefined,
               trackedThirdDay:
-                progress.distinctDays === 2 && progress.hasEntryForDate !== 1,
-              wasFirstMeal: progress.entryCount === 0,
+                existingDates.length === 2 &&
+                !existingDates.some((row) => row.entry_date === entryDate),
+              wasFirstMeal: existingDates.length === 0,
             };
           });
 

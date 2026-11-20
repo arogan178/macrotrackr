@@ -94,7 +94,7 @@ export const COLOR_MAP = {
 
 // Progress bar colors
 export const PROGRESS_BAR_COLORS = {
-  blue: "bg-surface",
+  blue: "bg-carbs",
   green: "bg-success",
   red: "bg-error",
   accent: "bg-primary",

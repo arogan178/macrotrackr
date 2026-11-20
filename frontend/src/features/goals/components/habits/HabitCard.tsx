@@ -146,7 +146,7 @@ export default function HabitCard({
   return (
     // A habit is a row in a list, not a tinted card: the icon and the bar
     // carry its colour.
-    <div className={variant === "sm" ? "py-3" : "py-4"}>
+    <div className={cn("group", variant === "sm" ? "py-3" : "py-4")}>
         {/* The actions wrap onto their own row when the title would not fit beside them */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <div className="flex min-w-0 flex-auto items-center">
@@ -193,7 +193,7 @@ export default function HabitCard({
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-baseline gap-1">
               {resolvedShow.numbers && (
-                <span className={cn(numberClass, "font-bold text-foreground")}>
+                <span className={cn(numberClass, "font-semibold text-foreground")}>
                   {current}
                 </span>
               )}

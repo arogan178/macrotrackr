@@ -34,11 +34,11 @@ export const Route = createRootRoute({
 function NotFoundRouteComponent() {
   // The server serves the SPA shell with a 200 for any unmatched path, so
   // without this every typo and guessed slug is an indexable duplicate.
-  usePageMetadata({ title: "Page not found — MacroTrackr", noindex: true });
+  usePageMetadata({ title: "Page not found | MacroTrackr", noindex: true });
 
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <h1 className="mb-4 text-6xl font-bold tracking-tighter text-foreground">
+    <div className="flex min-h-[70dvh] flex-col items-center justify-center px-4 text-center">
+      <h1 className="mb-4 text-6xl font-semibold tracking-tighter text-foreground">
         404
       </h1>
       <h2 className="mb-6 text-2xl font-medium text-foreground">
@@ -88,14 +88,14 @@ function RootComponent() {
     <ErrorBoundary>
       <MotionConfig reducedMotion="user">
         <LazyMotion features={() => import("@/lib/motionFeatures").then((module_) => module_.domAnimation)}>
-          <div id="app-root" className="relative min-h-screen">
+          <div id="app-root" className="relative min-h-dvh">
             <TopLoadingBar />
             <GlobalLoadingOverlay />
             <MainLayout>
               <Suspense fallback={<LoadingFallback />}>
                 {/* No entrance animation on the first page: prerendered markup has
                     to paint visible, and hydrate into the same styles. */}
-                <AnimatePresence mode="wait" initial={false}>
+                <AnimatePresence initial={false}>
                   <PageTransition key={location.pathname}>
                     <Outlet />
                   </PageTransition>

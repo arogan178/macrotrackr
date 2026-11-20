@@ -322,8 +322,8 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           <div className="rounded-control border border-warning/30 bg-warning/10 p-4 text-warning">
             <p className="text-sm font-semibold">Profile details incomplete</p>
             <p className="mt-1 text-xs">
-              Please complete your profile details (Date of Birth, Gender,
-              Height, Weight, and Activity Level) in Settings to calculate your
+              Please complete your profile details (date of birth, gender,
+              height, weight, and activity level) in Settings to calculate your
               BMR and TDEE before setting a weight goal.
             </p>
           </div>
@@ -408,7 +408,8 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                     })}
                   </p>
                   <p className="mt-1 text-xs text-muted">
-                    Estimated duration: {goalPlan.calculatedWeeks} weeks
+                    Estimated duration: {goalPlan.calculatedWeeks}{" "}
+                    {goalPlan.calculatedWeeks === 1 ? "week" : "weeks"}
                   </p>
                 </>
               )}

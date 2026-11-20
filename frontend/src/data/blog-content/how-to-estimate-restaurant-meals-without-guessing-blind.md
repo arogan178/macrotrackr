@@ -1,79 +1,49 @@
-Restaurant meals are one of the first places people give up on tracking.
+Eating out is where many people abandon their food log. There is no nutrition label on the plate, you did not see how much oil went into the pan, and guessing feels inaccurate enough that skipping the log altogether seems tempting.
 
-That is understandable. You did not cook the meal, you cannot see every ingredient, and the menu description usually hides the things that matter most: oils, sauces, butter, dressings, and portion sizes that are much larger than they look in a quick glance.
+Skipping is the worse choice. A reasonable estimate within 15 to 20% keeps your weekly average honest, whereas leaving a 1,100 kcal dinner blank creates a blind spot that throws off your whole week.
 
-But the answer is not to pretend the meal never happened. The answer is to get better at estimating the parts that move the result.
+## Deconstruct the plate into four pieces
 
-## The goal is useful accuracy, not forensic accuracy
+Instead of searching for one generic entry like "restaurant pasta" (which could mean anything from 550 to 1,400 kcal), break the meal into its visible components:
 
-If your estimate is good enough to keep your weekly average honest, it has done its job.
+1. **The protein:** estimate cooked weight using your palm (~110 to 140 g cooked meat or fish is about one palm-sized portion).
+2. **The starch or carb base:** rice, pasta, bread, potatoes, or tortilla.
+3. **The vegetables:** small calorie impact unless drenched in butter or creamy sauce.
+4. **The hidden fats:** cooking oil, butter, cheese, creamy sauces, and dressings.
 
-Most restaurant logging goes wrong in one of two ways: either the meal never gets logged because exactness feels impossible, or the lowest-calorie match gets chosen because it feels emotionally easier. Both create cleaner-looking data and worse decisions.
+That fourth item is where almost every restaurant underestimate lives. Home-cooked meals usually use half a tablespoon of oil; restaurant kitchens routinely use 1.5 to 3 tablespoons per dish to build flavor and texture.
 
-A realistic estimate beats both.
+## Quick portion reference without a scale
 
-## Start with the anchor, not the whole plate
+| Visual cue | Approximate portion | Typical calories |
+| --- | --- | --- |
+| 1 palm of grilled chicken, steak, or fish | 110 to 140 g cooked | 180 to 280 kcal (28 to 35 g protein) |
+| 1 cupped hand of cooked rice or pasta | ~150 g cooked | 190 to 220 kcal (40 to 45 g carbs) |
+| 1 thumb of butter, oil, or salad dressing | 1 tbsp (~14 g) | 100 to 120 kcal (11 to 14 g fat) |
+| 1 slice of sourdough or restaurant bread | 45 to 60 g | 120 to 160 kcal |
+| 1 restaurant scoop of mashed potatoes | ~180 g | 220 to 280 kcal (often with butter/cream) |
 
-Every restaurant meal has a few anchor items that do most of the nutritional work. Usually that means the protein, the main carb source, and the obvious fats or sauces.
+## Add the restaurant fat buffer
 
-If you estimate those well, the rest of the plate usually becomes manageable.
+When a meal is cooked in a restaurant kitchen, add **1 to 2 tablespoons of oil or butter** (120 to 240 kcal, 14 to 28 g fat) on top of the plain ingredients unless the dish is clearly steamed, raw, or grilled dry.
 
-### Example: chicken burrito bowl
+Take a typical steak-frites dinner:
 
-Instead of searching for one perfect entry, break the bowl into components: roughly five to six ounces of chicken, about one to one and a half cups of rice, half to one cup of beans, an ounce of cheese, and a realistic serving of sour cream or sauce. Vegetables and salsa usually matter less unless they are clearly cooked in a lot of oil.
+| Logged component | Estimate | Calories | Protein | Carbs | Fats |
+| --- | --- | --- | --- | --- | --- |
+| Sirloin steak (cooked) | 200 g | 420 kcal | 54 g | 0 g | 22 g |
+| French fries (medium plate) | 180 g | 520 kcal | 6 g | 68 g | 25 g |
+| Butter / cooking oil buffer | 1.5 tbsp | 165 kcal | 0 g | 0 g | 18 g |
+| Side salad (light dressing) | 1 bowl | 60 kcal | 1 g | 5 g | 4 g |
+| **Total estimate** | | **1,165 kcal** | **61 g** | **73 g** | **69 g** |
 
-That approach turns one giant mystery into a set of smaller estimates you can actually reason about.
+Is that exact to the gram? No. Is it close enough to keep your weekly trend accurate without ruining dinner with a pocket scale? Yes.
 
-## Build a repeatable estimation system
+> Do not spend ten minutes hunting for the exact dish. Log four components in sixty seconds, add an oil buffer, and enjoy the meal.
 
-The easiest way to improve is to use the same decision process every time.
+## Making restaurant meals easier to fit
 
-### Step 1: Find the closest verified chain equivalent
-
-If the meal came from a local burger place, compare it with a chain burger that has a similar bun, cheese, and sauce setup. If it came from a neighborhood poke shop, use a large chain bowl as your baseline.
-
-You are not looking for a perfect brand match. You are looking for a believable starting point.
-
-### Step 2: Adjust up for the hidden fat
-
-Independent restaurants usually use more oil, butter, dressing, and finishing fat than people expect. A simple correction goes a long way. Add roughly one tablespoon of fat for a grilled or sautéed dish with no detailed nutrition info, and closer to two for glossy stir-fries, creamy bowls, or vegetables that look heavily coated.
-
-That one adjustment fixes a surprising amount of under-logging.
-
-### Step 3: Overestimate dense extras on purpose
-
-Be stricter with the parts that can swing the meal quickly: aioli, mayo-based sauces, dressings, fries, cheese, butter, nuts, and the small shared bites people forget to count. If you are between two estimates, choose the higher number for calorie-dense extras and the more conservative one for vegetables.
-
-## Use your hand when you cannot weigh
-
-A rough hand guide is still useful in restaurants. A palm-sized protein portion is usually around $25$ to $30$ grams of protein. A cupped hand of cooked carbs often lands around $25$ to $35$ grams of carbs. A thumb-sized portion of fats is often around $10$ to $12$ grams of fat.
-
-It is not exact, but it is consistent, and consistency is far more useful than pretending a random app entry is perfectly true.
-
-## Three examples that usually work well
-
-### 1. Steak frites
-
-Think of steak frites as three separate decisions: the steak portion itself, a full restaurant fries serving rather than a tiny fast-food one, and at least one tablespoon of finishing butter or oil unless you know otherwise. The finishing fat and the real fry size are what most people miss.
-
-### 2. Pasta dish
-
-For pasta, assume the restaurant bowl is larger than what you would plate at home. Two to three cups cooked is often a more honest range, then add protein separately if chicken or shrimp is included. Tomato sauces are usually lower-risk estimates; cream sauces almost never are. And there is usually extra oil or butter layered in on top of what feels visible.
-
-### 3. Sushi dinner
-
-For sushi, estimate roll by roll. Spicy mayo, eel sauce, cream cheese, and tempura flakes deserve their own attention because they can change a fairly light order into a calorie-dense one very quickly. If the meal is mostly sashimi, keep it simple and count by pieces.
-
-## What to do the next day
-
-Do not follow one imperfect meal with an overcorrection. The best move is usually the most boring one: go back to your normal breakfast, hit protein early, drink water, and let your weekly average absorb the noise.
-
-People who stay consistent are rarely the ones who never eat out. They are the ones who return to normal quickly afterward.
-
-## A rule worth keeping
-
-If the meal was hard to track but easy to enjoy, log it honestly and move on.
-
-Macro tracking works when it helps you notice patterns, not when it turns every dinner into a courtroom cross-examination. Use the same estimation framework every time and two things usually happen at once: your data gets cleaner, and your stress drops.
-
-Once you have a number you trust, the [macro calculator](/tools/macro-calculator) will tell you what the rest of your day has room for.
+- **Anchor protein earlier in the day.** If you know dinner is pizza, pasta, or tapas, eat leaner high-protein meals at breakfast and lunch so you arrive at dinner with room for carbs and fats.
+- **Ask for dressings and sauces on the side** when it does not spoil the dish. That single choice often saves 200 to 300 kcal of invisible oil.
+- **Use chain menus as anchors.** Even at an independent burger spot or ramen shop, a comparable chain entry gives a surprisingly solid ballpark for portion size and macro split.
+- **If a meal was truly unmeasurable**, log a rough calorie estimate or mark the day as partly logged in MacroTrackr so it stays out of your measured expenditure calculation without leaving a fake zero-calorie hole.

@@ -3,12 +3,12 @@ import { format, isValid, parseISO } from "date-fns"; // Import isValid and pars
 
 import type { WeightLogEntry } from "@/api/goals";
 import {
+  GoalsIcon,
   IconButton,
   LoadingSpinner,
   Modal,
   ProgressiveBlur,
   StateCard,
-  TrashIcon,
 } from "@/components/ui";
 import {
   useDeleteWeightLogEntry,
@@ -126,14 +126,22 @@ function WeightLogList({
     setItemToDelete(undefined);
   };
 
-  // Sort log by timestamp descending for display
+  // Sort log by timestamp descending and precompute date labels once per change
   const sortedLog = useMemo(() => {
-    return [...weightLog]
-      .filter((entry) => entry.timestamp && isValid(parseISO(entry.timestamp))) // Filter out invalid timestamps first
-      .sort(
-        (a, b) =>
-          parseISO(b.timestamp).getTime() - parseISO(a.timestamp).getTime(),
-      );
+    return weightLog
+      .map((entry) => {
+        const parsedDate = entry.timestamp ? parseISO(entry.timestamp) : null;
+        if (!parsedDate || !isValid(parsedDate)) return null;
+
+        return {
+          entry,
+          timestampMs: parsedDate.getTime(),
+          displayDate: formatLogDate(parsedDate),
+          ariaDate: format(parsedDate, "PPPp"),
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((a, b) => b.timestampMs - a.timestampMs);
   }, [weightLog]);
 
   // Loading state
@@ -153,7 +161,7 @@ function WeightLogList({
         <StateCard
           title="No weight logged yet"
           message="Your recorded weights will appear here."
-          icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
+          icon={<GoalsIcon className="h-12 w-12 text-muted" />}
           action={{
             label: "Log weight",
             onClick: () => setLogWeightModalOpen(true),
@@ -173,68 +181,52 @@ function WeightLogList({
           onScroll={handleScroll}
         >
           <ul className="divide-y divide-border pb-8">
-            {sortedLog.map((entry) => {
-              // Double-check validity here just in case, though filter should handle it
-              const entryDate = parseISO(entry.timestamp);
-              const isValidDate = isValid(entryDate);
-
-              return (
-                <li
-                  key={entry.id}
-                  className="group/item flex min-h-16 items-center justify-between gap-3"
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="text-base font-semibold tracking-tight text-foreground tabular-nums">
-                      {formatWeight(entry.weight, unitSystem)}
-                    </span>
-                    <span className="truncate text-xs text-muted">
-                      {isValidDate ? formatLogDate(entryDate) : "Unknown date"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <IconButton
-                      variant="edit"
-                      ariaLabel={
-                        isValidDate
-                          ? `Edit entry from ${format(entryDate, "PPPp")}`
-                          : "Cannot edit entry with invalid date"
-                      }
-                      onClick={() => setEntryToEdit(entry)}
-                      disabled={isSaving || !isValidDate}
-                      className="opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100"
-                    />
-                    <IconButton
-                      variant="delete"
-                      ariaLabel={
-                        isValidDate
-                          ? `Delete entry from ${format(entryDate, "PPPp")}`
-                          : "Cannot delete entry with invalid date"
-                      }
-                      onClick={() => {
-                        if (isValidDate)
-                          handleDeleteClick(
-                            entry.id,
-                            entry.timestamp,
-                            entry.weight,
-                          );
-                      }}
-                      disabled={isSaving || !isValidDate}
-                      icon={
-                        isSaving && itemToDelete?.id === entry.id ? (
-                          <LoadingSpinner size="sm" />
-                        ) : undefined
-                      }
-                      className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100 [@media(hover:none)]:opacity-100 ${
-                        (isSaving && itemToDelete?.id === entry.id) ||
-                        !isValidDate
-                          ? "cursor-not-allowed opacity-50"
-                          : ""
-                      }`}
-                    />
-                  </div>
-                </li>
-              );
-            })}
+            {sortedLog.map(({ entry, displayDate, ariaDate }) => (
+              <li
+                key={entry.id}
+                className="group/item flex min-h-16 items-center justify-between gap-3"
+              >
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-base font-semibold tracking-tight text-foreground tabular-nums">
+                    {formatWeight(entry.weight, unitSystem)}
+                  </span>
+                  <span className="truncate text-xs text-muted">
+                    {displayDate}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconButton
+                    variant="edit"
+                    ariaLabel={`Edit entry from ${ariaDate}`}
+                    onClick={() => setEntryToEdit(entry)}
+                    disabled={isSaving}
+                    className="opacity-0 transition-opacity duration-200 group-focus-within/item:opacity-100 group-hover/item:opacity-100 [@media(hover:none)]:opacity-100"
+                  />
+                  <IconButton
+                    variant="delete"
+                    ariaLabel={`Delete entry from ${ariaDate}`}
+                    onClick={() =>
+                      handleDeleteClick(
+                        entry.id,
+                        entry.timestamp,
+                        entry.weight,
+                      )
+                    }
+                    disabled={isSaving}
+                    icon={
+                      isSaving && itemToDelete?.id === entry.id ? (
+                        <LoadingSpinner size="sm" />
+                      ) : undefined
+                    }
+                    className={`opacity-0 transition-opacity duration-200 group-focus-within/item:opacity-100 group-hover/item:opacity-100 [@media(hover:none)]:opacity-100 ${
+                      isSaving && itemToDelete?.id === entry.id
+                        ? "cursor-not-allowed opacity-50"
+                        : ""
+                    }`}
+                  />
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
         {/* Progressive blur fixed at bottom of container - hidden when scrolled to bottom */}
@@ -283,9 +275,7 @@ function WeightLogList({
           onClose={onBulkCancel}
           title="Delete all entries"
           variant="confirmation"
-          message={
-            "Are you sure you want to delete ALL weight log entries? This action cannot be undone."
-          }
+          message="Delete all weight log entries? This cannot be undone."
           confirmLabel="Delete all"
           cancelLabel="Cancel"
           onConfirm={handleConfirmBulkDelete}

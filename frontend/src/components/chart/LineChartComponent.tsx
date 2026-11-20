@@ -1,5 +1,5 @@
-import React from "react";
-import { AnimatePresence, motion } from "motion/react";
+import React, { memo } from "react";
+import { AnimatePresence, m } from "motion/react";
 import {
   Area,
   CartesianGrid,
@@ -20,7 +20,8 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 import type { ContentType } from "recharts/types/component/Tooltip";
 
-import { LoadingSpinner } from "@/components/ui";
+import { LoadingSpinner, StateCard } from "@/components/ui";
+import { DURATIONS } from "@/components/utils/UiConstants";
 import { formatGrouped } from "@/lib/formatNumber";
 
 import ChartTooltip from "./ChartTooltip";
@@ -30,7 +31,9 @@ import type { ChartDataPoint, LineConfig } from "./ChartTypes";
 interface CustomDotProps {
   cx?: number;
   cy?: number;
+  index?: number;
   payload?: ChartDataPoint;
+  data?: ChartDataPoint[];
   dataKey?: string;
   r?: number;
   dataLength?: number;
@@ -39,27 +42,56 @@ interface CustomDotProps {
   strokeWidth?: string | number;
 }
 
-// Custom dot component that adapts based on data length and hides when value is 0
+// Custom dot component that adapts based on data length and hides gaps
+const isGapValue = (value: unknown): boolean =>
+  value === undefined || value === null;
+
 const CustomDot = (properties: CustomDotProps) => {
-  const { cx, cy, payload, dataKey, r = 2, dataLength = 0 } = properties;
+  const {
+    cx,
+    cy,
+    index,
+    payload,
+    data,
+    dataKey,
+    r = 3,
+    dataLength = 0,
+  } = properties;
   const value = payload && dataKey ? payload[dataKey] : undefined;
 
-  // Don't render dot if value is 0 or undefined/undefined
-  if (!value || value === 0) {
+  // Don't render dot for missing/unlogged gaps
+  if (isGapValue(value)) {
     return;
   }
 
-  // Hide dots completely for very long datasets (90+ days) to reduce clutter
-  if (dataLength > 60) {
+  // Keep dots on isolated logged days bounded by gaps so they remain visible
+  // even in 90-day views where normal dots are hidden to reduce clutter.
+  const previousValue =
+    typeof index === "number" && data && dataKey
+      ? data[index - 1]?.[dataKey]
+      : undefined;
+  const nextValue =
+    typeof index === "number" && data && dataKey
+      ? data[index + 1]?.[dataKey]
+      : undefined;
+  const isIsolated =
+    typeof index === "number" &&
+    data !== undefined &&
+    isGapValue(previousValue) &&
+    isGapValue(nextValue);
+
+  if (dataLength > 60 && !isIsolated) {
     return;
   }
 
   // Adaptive dot size based on data length
   let dotSize = r;
-  if (dataLength > 30) {
-    dotSize = Math.max(1, r * 0.7); // Smaller dots for 30-60 days
+  if (isIsolated && dataLength > 60) {
+    dotSize = Math.max(2.5, r * 0.85);
+  } else if (dataLength > 30) {
+    dotSize = Math.max(1.5, r * 0.7);
   } else if (dataLength > 15) {
-    dotSize = Math.max(1.5, r * 0.85); // Slightly smaller for 15-30 days
+    dotSize = Math.max(2, r * 0.85);
   }
 
   return (
@@ -154,13 +186,13 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (
-          <motion.div
+          <m.div
             key="loader"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-control bg-surface "
+            transition={{ duration: DURATIONS.base }}
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-control bg-surface"
           >
             <div className="flex flex-col items-center">
               <LoadingSpinner size="md" />
@@ -168,94 +200,65 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                 Loading chart data...
               </p>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Error State */}
       <AnimatePresence>
         {!isLoading && error && (
-          <motion.div
+          <m.div
             key="error"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: DURATIONS.base }}
             className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
-            <div className="flex flex-col items-center rounded-control border border-error/50 bg-error/30 p-6 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="mb-3 h-10 w-10 text-error"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <h3 className="mb-1 text-lg font-medium text-error">
-                Error Loading Chart
-              </h3>
-              <p className="max-w-xs text-sm text-error">{error}</p>
-            </div>
-          </motion.div>
+            <StateCard
+              tone="error"
+              title="Couldn't load chart"
+              message={error}
+              size="sm"
+            />
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Empty State (Custom) */}
       <AnimatePresence>
         {!isLoading && !error && !hasData && emptyState && (
-          <motion.div
+          <m.div
             key="empty-state"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: DURATIONS.base }}
             className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
             {emptyState}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Default No Data Message */}
       <AnimatePresence>
         {shouldShowDefaultNoData && (
-          <motion.div
+          <m.div
             key="no-data-default"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-0 flex items-center justify-center"
+            transition={{ duration: DURATIONS.base }}
+            className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
-            <div className="flex flex-col items-center text-center">
-              <svg
-                className="mb-4 h-16 w-16 text-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                  d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="max-w-xs text-sm text-foreground">
-                No data available for the selected period.
-              </p>
-            </div>
-          </motion.div>
+            <StateCard
+              tone="empty"
+              title="No chart data yet"
+              message="No data available for the selected period."
+              size="sm"
+            />
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -276,8 +279,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             {chartElements}{" "}
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(75, 85, 99, 0.2)"
-              opacity={data.length > 60 ? 0.1 : 0.2}
+              stroke="var(--color-border)"
+              opacity={data.length > 60 ? 0.35 : 0.6}
             />
             <XAxis {...defaultXAxisProps} />
             <YAxis {...defaultYAxisProps} />
@@ -285,7 +288,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
               // ContentType is what the prop declares; the previous cast to
               // ComponentType<Record<string, unknown>> was not assignable to it.
               content={TooltipContent as ContentType<ValueType, NameType>}
-              cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
+              cursor={{ fill: "var(--color-surface-3)", fillOpacity: 0.35 }}
             />
             {showLegend && (
               <Legend
@@ -316,7 +319,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                 isDrawing && line.isAnimationActive
                   ? false
                   : (line.dot ?? (
-                      <CustomDot dataKey={line.dataKey} dataLength={dataLength} />
+                      <CustomDot
+                        dataKey={line.dataKey}
+                        dataLength={dataLength}
+                        data={data}
+                      />
                     ));
 
               return line.isArea ? (
@@ -360,4 +367,4 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   );
 };
 
-export default LineChartComponent;
+export default memo(LineChartComponent);

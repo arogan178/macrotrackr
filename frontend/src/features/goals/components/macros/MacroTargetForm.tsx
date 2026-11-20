@@ -5,6 +5,7 @@ import CardContainer from "@/components/form/CardContainer";
 import MacroTarget from "@/components/macros/MacroTarget";
 import { Button, CheckIcon, Heading } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Skeleton from "@/components/ui/Skeleton";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
@@ -103,59 +104,50 @@ function MacroTargetForm({ macroTarget, calorieTarget }: MacroTargetFormProps) {
         ) : (
           <div className="space-y-10">
             {/* Skeleton for the stacked bar */}
-            <div className="relative mb-6 h-2 animate-pulse overflow-hidden rounded-full bg-surface" />
+            <Skeleton className="mb-6 h-2 w-full" rounded="full" />
 
             {/* Skeleton for sliders */}
             <div className="space-y-8">
-              {/* Protein slider skeleton */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
-                  <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                  <Skeleton className="h-2 w-full" rounded="full" />
                 </div>
-                <div className="h-2 animate-pulse rounded-full bg-surface" />
-              </div>
-
-              {/* Carbs slider skeleton */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
-                  <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
-                </div>
-                <div className="h-2 animate-pulse rounded-full bg-surface" />
-              </div>
-
-              {/* Fats slider skeleton */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
-                  <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
-                </div>
-                <div className="h-2 animate-pulse rounded-full bg-surface" />
-              </div>
+              ))}
             </div>
 
             {/* Skeleton for badges */}
             <div className="grid grid-cols-3 gap-2 pt-5">
-              <div className="h-10 animate-pulse rounded-control bg-surface" />
-              <div className="h-10 animate-pulse rounded-control bg-surface" />
-              <div className="h-10 animate-pulse rounded-control bg-surface" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
             </div>
           </div>
         )}
       </div>
 
       {/* Save/Reset Controls */}
-      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
         {isPending ? (
-          <div className="flex items-center text-sm text-foreground">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center text-sm text-foreground"
+          >
             <LoadingSpinner size="sm" color="text-foreground" />
-            <span className="ml-2">Loading your saved targets...</span>
+            <span className="ml-2">Saving targets...</span>
           </div>
         ) : (
           <>
             {saveSuccess && (
-              <div className="flex items-center text-sm text-success">
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center text-sm text-success"
+              >
                 <CheckIcon className="mr-1 h-4 w-4" />
                 Settings saved successfully
               </div>
@@ -166,7 +158,11 @@ function MacroTargetForm({ macroTarget, calorieTarget }: MacroTargetFormProps) {
               </div>
             )}
             {!saveSuccess && !submitError && hasChanges && (
-              <div className="text-sm text-warning">
+              <div
+                role="status"
+                aria-live="polite"
+                className="text-sm text-warning"
+              >
                 You have unsaved changes
               </div>
             )}

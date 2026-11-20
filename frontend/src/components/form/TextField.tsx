@@ -82,6 +82,7 @@ function TextField({
           required={required}
           name={name}
           autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
           aria-describedby={
             describedByIds.length > 0 ? describedByIds.join(" ") : undefined
           }
@@ -109,7 +110,7 @@ function TextField({
         </p>
       )}
       {error && (
-        <p id={`${inputId}-error`} className={formStyles.error}>
+        <p id={`${inputId}-error`} role="alert" className={formStyles.error}>
           {error}
         </p>
       )}

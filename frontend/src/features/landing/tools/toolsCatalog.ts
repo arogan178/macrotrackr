@@ -13,6 +13,8 @@ export interface CalculatorTool {
   tagline: string;
   /** Longer supporting copy for the tools hub. */
   description: string;
+  /** Short output unit hint shown on the tools hub. */
+  outputLabel: string;
   /** Renders full width at the top of the hub grid. */
   featured?: boolean;
 }
@@ -24,14 +26,16 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
     tagline: "Maintenance calories and activity burn",
     description:
       "Start with your estimated maintenance calories, then use them to plan a cut, maintenance phase, or gain phase.",
+    outputLabel: "kcal/day",
     featured: true,
   },
   {
     title: "BMR Calculator",
     path: "/tools/bmr-calculator",
-    tagline: "Resting energy your body burns at rest",
+    tagline: "Energy your body burns at rest",
     description:
-      "Estimate your Basal Metabolic Rate—the energy your body uses at rest for vital functions.",
+      "Estimate your Basal Metabolic Rate: the energy your body uses at rest for vital functions.",
+    outputLabel: "kcal at rest",
   },
   {
     title: "Macro Calculator",
@@ -39,6 +43,7 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
     tagline: "Protein, carb, and fat percentage splits",
     description:
       "Set daily protein, carb, and fat ratios with interactive, lockable percentage sliders.",
+    outputLabel: "g P · C · F",
   },
   {
     title: "Weight Loss & Timeline Calculator",
@@ -47,6 +52,7 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
     tagline: "Calorie deficit, weekly pace, and goal date",
     description:
       "Estimate daily calorie deficits, weekly progress rates, and projected completion dates for your target weight.",
+    outputLabel: "weeks & date",
   },
   {
     title: "Protein Intake Calculator",
@@ -55,6 +61,7 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
     tagline: "Daily and per-meal protein targets",
     description:
       "Estimate daily and per-meal protein targets for muscle building, fat loss, or endurance goals.",
+    outputLabel: "g/day & meal",
   },
 ] as const;
 

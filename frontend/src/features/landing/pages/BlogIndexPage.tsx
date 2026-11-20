@@ -65,25 +65,22 @@ const BlogIndexPage: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
+      className={`relative min-h-dvh bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       <AppHeader mode="public" />
-      <main className="relative z-10 mx-auto max-w-5xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         {/* The header the calculators use, not a fourth page-title treatment.
             The "Back to Home" pill it replaced existed nowhere else in the app,
             and the header logo already goes home. */}
         <section className="mb-12 text-center">
           <Heading level="display">Writing</Heading>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-            How to set a target, how to hit it, and what the numbers actually
-            mean. No product announcements.
+            Practical guides on macro tracking, protein, meal prep, and
+            MacroTrackr release notes.
           </p>
         </section>
 
-        {/* The shared TabBar, not two hand-rolled chip styles. These were the
-            last filter controls in the app drawing their own active state, and
-            an active chip was solid brand green — the same green as the primary
-            action, on a control that selects rather than commits. */}
+        {/* The shared TabBar, not two hand-rolled chip styles. */}
         <section className="mb-12 border-b border-border pb-6">
           <TabBar
             items={[
@@ -94,6 +91,7 @@ const BlogIndexPage: React.FC = () => {
             onChange={(key) =>
               handleCategorySelection(key === "all" ? undefined : key)
             }
+            ariaLabel="Article categories"
             isMotion={false}
             size="sm"
             className="mx-auto flex-wrap justify-center"
@@ -108,13 +106,26 @@ const BlogIndexPage: React.FC = () => {
             aligns the metadata the way every other number in the app is
             aligned. */}
         <section id="blog-posts" className="scroll-mt-32">
-          <div className="flex items-baseline justify-between border-b border-border pb-3">
-            <h2 className="text-sm font-semibold text-muted">
-              {activeCategory === "all"
-                ? "All writing"
-                : (categories.find((c) => c.slug === activeCategory)?.name ??
-                  activeCategory)}
-            </h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-semibold text-muted">
+                {search.tag
+                  ? `Tagged "${search.tag}"`
+                  : activeCategory === "all"
+                    ? "All writing"
+                    : (categories.find((c) => c.slug === activeCategory)?.name ??
+                      activeCategory)}
+              </h2>
+              {search.tag && (
+                <button
+                  type="button"
+                  onClick={() => handleCategorySelection(undefined)}
+                  className="inline-flex items-center rounded-control border border-border px-2 py-0.5 text-xs text-muted transition-colors hover:bg-surface hover:text-foreground"
+                >
+                  Clear tag
+                </button>
+              )}
+            </div>
             <p className="text-sm text-muted tabular-nums">
               {filteredPosts.length}{" "}
               {filteredPosts.length === 1 ? "article" : "articles"}
@@ -154,7 +165,7 @@ const BlogIndexPage: React.FC = () => {
             Open the calculators
           </Link>
         </section>
-      </main>
+      </div>
       <Footer />
       <BackToTopButton label="Back to top" />
     </div>

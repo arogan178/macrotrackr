@@ -37,19 +37,22 @@ describe("queryClient", () => {
   describe("queryConfigs", () => {
     it("has auth config", () => {
       expect(queryConfigs.auth).toBeDefined();
-      expect(queryConfigs.auth.staleTime).toBe(30 * 1000);
+      expect(queryConfigs.auth.staleTime).toBe(2 * 60 * 1000);
+      expect(queryConfigs.auth.refetchInterval).toBe(false);
       expect(queryConfigs.auth.refetchOnWindowFocus).toBe(true);
     });
 
     it("has longLived config", () => {
       expect(queryConfigs.longLived).toBeDefined();
-      expect(queryConfigs.longLived.staleTime).toBe(30 * 1000);
+      expect(queryConfigs.longLived.staleTime).toBe(5 * 60 * 1000);
+      expect(queryConfigs.longLived.refetchInterval).toBe(false);
       expect(queryConfigs.longLived.refetchOnWindowFocus).toBe(true);
     });
 
     it("has macros config", () => {
       expect(queryConfigs.macros).toBeDefined();
-      expect(queryConfigs.macros.staleTime).toBe(10 * 1000);
+      expect(queryConfigs.macros.staleTime).toBe(2 * 60 * 1000);
+      expect(queryConfigs.macros.refetchInterval).toBe(false);
       expect(queryConfigs.macros.refetchOnWindowFocus).toBe(true);
     });
   });

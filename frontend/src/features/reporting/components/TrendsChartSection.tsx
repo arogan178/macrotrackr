@@ -26,6 +26,31 @@ export default function TrendsChartSection({
   const chartShowNoDataMessage =
     !isHistoryLoading && isHistoryReady && dailySeries.length === 0;
 
+  // Plot unlogged days as gaps instead of misleading zero-calorie cliffs.
+  const chartData = useMemo(
+    () =>
+      dailySeries.map((day) => {
+        const calories = Number(day.calories ?? 0);
+        const protein = Number(day.protein ?? 0);
+        const carbs = Number(day.carbs ?? 0);
+        const fats = Number(day.fats ?? 0);
+        const isUnlogged =
+          day.hasEntries !== undefined
+            ? !day.hasEntries
+            : calories === 0 && protein === 0 && carbs === 0 && fats === 0;
+        if (!isUnlogged) return day;
+
+        return {
+          ...day,
+          calories: null,
+          protein: null,
+          carbs: null,
+          fats: null,
+        };
+      }),
+    [dailySeries],
+  );
+
   const tabItems = useMemo(
     () => [
       {
@@ -70,7 +95,7 @@ export default function TrendsChartSection({
           axis sits on the panel's foot rather than above an empty band. */}
       <div className="absolute inset-0">
         <LineChartComponent
-          data={dailySeries}
+          data={chartData}
           lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
           showLegend={activeTab !== "calories"}
           isLoading={isHistoryLoading || !isHistoryReady}

@@ -7,6 +7,7 @@ mock.module("../../src/lib/sync/eventBus", () => ({
 }));
 
 import { migrations } from "../../src/db/migrations";
+import { userDetailsExpenditureOverride } from "../../src/db/migrations/0026_user_details_expenditure_override";
 import { initializeSchema } from "../../src/db/schema";
 import { userRoutes } from "../../src/modules/user/routes";
 
@@ -34,7 +35,7 @@ describe("expenditure_override migration", () => {
       VALUES (1, 'Test', 'User', 'test@example.com', 'hash');
       INSERT INTO user_details (user_id, height, weight) VALUES (1, 180, 80);
       ALTER TABLE user_details DROP COLUMN expenditure_override;
-      PRAGMA user_version = ${migrations.length - 1};
+      PRAGMA user_version = ${migrations.indexOf(userDetailsExpenditureOverride)};
     `);
 
     initializeSchema(db);

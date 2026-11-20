@@ -30,6 +30,11 @@ function TimeField({
 
   const autoId = useId();
   const resolvedId = id ?? name ?? autoId;
+  const errorId = `${resolvedId}-error`;
+  const describedBy =
+    [error && errorId, helperText && !error && `${resolvedId}-helper`]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   return (
     <div className={formStyles.container}>
@@ -49,7 +54,8 @@ function TimeField({
           required={required}
           disabled={disabled}
           step={step}
-          aria-describedby={helperText ? `${resolvedId}-helper` : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
         />
       </div>
       {helperText && !error && (
@@ -57,7 +63,11 @@ function TimeField({
           {helperText}
         </p>
       )}
-      {error && <p className={formStyles.error}>{error}</p>}
+      {error && (
+        <p id={errorId} role="alert" className={formStyles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

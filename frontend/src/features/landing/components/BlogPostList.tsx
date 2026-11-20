@@ -20,10 +20,10 @@ export default function BlogPostList({
           <Link
             to="/blog/$slug"
             params={{ slug: post.slug }}
-            className="group flex flex-col gap-2 border-b border-border py-6 transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:flex-row sm:items-baseline sm:gap-8"
+            className="group -mx-3 flex flex-col gap-2 rounded-control border-b border-border px-3 py-5 transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:flex-row sm:items-baseline sm:gap-8"
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-lg font-semibold tracking-tight text-foreground">
+              <span className="block text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
                 {post.title}
               </span>
               <span className="mt-1 block text-sm leading-relaxed text-muted">

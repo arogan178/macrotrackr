@@ -15,6 +15,8 @@ export function useAppAuthState(): AppAuthState {
     queryKey: queryKeys.auth.session(),
     queryFn: authApi.getSession,
     ...queryConfigs.auth,
+    staleTime: (query) =>
+      query.state.data?.authenticated ? queryConfigs.auth.staleTime : 0,
     retry: false,
   });
 

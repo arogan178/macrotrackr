@@ -33,7 +33,7 @@ const DeleteAccountPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <AppHeader mode="minimal" />
       <PageShell>
         <div className="mx-auto max-w-3xl px-4 py-16">

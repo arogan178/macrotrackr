@@ -73,7 +73,7 @@ const mockSavedMeals = (meals: SavedMeal[]) => {
 };
 
 const openSavedMealEditor = async (mealName: string) => {
-  fireEvent.focus(screen.getByRole("textbox", { name: "Search for food" }));
+  fireEvent.focus(screen.getByRole("combobox", { name: "Search for food" }));
   fireEvent.click(screen.getByRole("tab", { name: "Saved meals" }));
   fireEvent.click(
     await screen.findByRole("button", { name: `Edit ${mealName}` }),
@@ -131,7 +131,7 @@ describe("CalorieSearchForm", () => {
           focusOnOpen
         />,
       );
-      const input = screen.getByRole("textbox", { name: "Search for food" });
+      const input = screen.getByRole("combobox", { name: "Search for food" });
       expect(input).not.toHaveFocus();
 
       act(() => {
@@ -153,7 +153,7 @@ describe("CalorieSearchForm", () => {
       <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />,
     );
     await new Promise((resolve) => setTimeout(resolve, 350));
-    expect(screen.getByRole("textbox", { name: "Search for food" })).not.toHaveFocus();
+    expect(screen.getByRole("combobox", { name: "Search for food" })).not.toHaveFocus();
   });
 
   it("renders without crashing", () => {
@@ -172,7 +172,7 @@ describe("CalorieSearchForm", () => {
         <CalorieSearchForm onResult={() => {}} onSelectSavedMeal={() => {}} />
       </>,
     );
-    expect(screen.getByRole("textbox", { name: "Search for food" })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: "Search for food" })).toBeVisible();
   });
 
   it("scales calories and macros in dropdown according to portion size", async () => {
@@ -196,7 +196,7 @@ describe("CalorieSearchForm", () => {
       <CalorieSearchForm onResult={onResultMock} onSelectSavedMeal={() => {}} />,
     );
 
-    const input = screen.getByRole("textbox", { name: "Search for food" });
+    const input = screen.getByRole("combobox", { name: "Search for food" });
     fireEvent.change(input, { target: { value: "milk" } });
 
     const searchButton = screen.getByRole("button", { name: "Search for food" });
@@ -206,10 +206,10 @@ describe("CalorieSearchForm", () => {
       expect(screen.getByText("Full Cream Milk")).toBeInTheDocument();
     });
 
-    // 60 kcal * 2.5 = 150.0 kcal, 4g P * 2.5 = 10.0g, 10g C * 2.5 = 25.0g, 0.5g F * 2.5 = 1.3g
-    expect(screen.getByText(/Calories: 150.0 kcal/)).toBeInTheDocument();
-
+    // 60 kcal * 2.5 = 150 kcal, 4g P * 2.5 = 10.0g, 10g C * 2.5 = 25.0g, 0.5g F * 2.5 = 1.3g
     const resultButton = screen.getByRole("button", { name: /Full Cream Milk/ });
+    expect(resultButton).toHaveTextContent(/150\s*kcal/);
+    expect(resultButton).toHaveTextContent("P 10.0g · C 25.0g · F 1.3g");
     fireEvent.click(resultButton);
 
     expect(onResultMock).toHaveBeenCalledWith(
@@ -249,7 +249,7 @@ describe("CalorieSearchForm", () => {
       />,
     );
 
-    const input = screen.getByRole("textbox", { name: "Search for food" });
+    const input = screen.getByRole("combobox", { name: "Search for food" });
     fireEvent.focus(input);
 
     expect(screen.getByRole("tab", { name: "Recents" })).toBeInTheDocument();
@@ -296,7 +296,7 @@ describe("CalorieSearchForm", () => {
       />,
     );
 
-    fireEvent.focus(screen.getByRole("textbox", { name: "Search for food" }));
+    fireEvent.focus(screen.getByRole("combobox", { name: "Search for food" }));
 
     const recents = screen.getAllByRole("button", { name: /kcal/ });
     expect(recents.map((button) => button.textContent)).toEqual([
@@ -327,7 +327,7 @@ describe("CalorieSearchForm", () => {
           recentEntries={[logged(1, "Banana"), logged(2, "Greek Yogurt")]}
         />,
       );
-      const input = screen.getByRole("textbox", { name: "Search for food" });
+      const input = screen.getByRole("combobox", { name: "Search for food" });
       fireEvent.focus(input);
       fireEvent.change(input, { target: { value } });
 

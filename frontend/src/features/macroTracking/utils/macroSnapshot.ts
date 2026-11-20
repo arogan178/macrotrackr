@@ -173,7 +173,7 @@ export function buildSnapshotModel(data: MacroSnapshotData): SnapshotModel {
         : `${formatGrouped(Math.abs(remaining))} kcal over`,
     macros,
     totalMacroCalories,
-    shareText: `${formatGrouped(calories)} of ${formatGrouped(calorieTarget)} kcal — ${macros
+    shareText: `${formatGrouped(calories)} of ${formatGrouped(calorieTarget)} kcal: ${macros
       .map((macro) => `${macro.label.toLowerCase()} ${macro.grams}g`)
       .join(", ")}.`,
     fileStem: toFileStem(dateLabel),

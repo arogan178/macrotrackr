@@ -301,7 +301,7 @@ export const billingRoutes = new Elysia({ prefix: "/api/billing" })
                 );
               }
               throw new BadRequestError(
-                "User already has an active Pro subscription",
+                "This account already has an active Pro subscription.",
               );
             }
             let customerId = userSubscription.stripe_customer_id;
@@ -394,7 +394,9 @@ export const billingRoutes = new Elysia({ prefix: "/api/billing" })
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (!userSubscription.stripe_customer_id) {
-              throw new BadRequestError("User has no Stripe customer ID");
+              throw new BadRequestError(
+                "No web billing profile was found for this account.",
+              );
             }
 
             const returnUrl = body.returnUrl;
@@ -526,7 +528,9 @@ export const billingRoutes = new Elysia({ prefix: "/api/billing" })
 
             const purchaseToken = body?.purchaseToken;
             if (!purchaseToken) {
-              throw new BadRequestError("purchaseToken is required");
+              throw new BadRequestError(
+                "A Google Play purchase token is required.",
+              );
             }
 
             // Refuse to sell Pro twice. Someone already paying through Stripe

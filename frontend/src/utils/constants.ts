@@ -22,4 +22,6 @@ export const NUMBER_FIELD_ALLOWED_KEYS = [
   "ArrowRight",
   "ArrowUp",
   "ArrowDown",
+  "Home",
+  "End",
 ];

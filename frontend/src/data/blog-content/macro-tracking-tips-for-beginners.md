@@ -1,206 +1,58 @@
-Macro tracking can feel overwhelming at first. The numbers, the ratios, the fear of getting it "wrong". It is enough to make many people quit before they start seeing results.
+Most people quit macro tracking in the first two weeks for the same reason: they try to weigh every leaf of spinach and hit exact gram targets on day one. Tracking works much better when you treat it as a skill you build over a couple of weeks rather than an exam you pass immediately.
 
-But here's the truth: you don't need to be perfect. You need to be consistent.
+## Week 1: log your baseline first
 
-This guide will walk you through starting simple and building habits that actually stick.
+For the first seven days, log what you normally eat without trying to overhaul your diet. Do not chase targets yet.
 
-## Week 1: Just Log, Don't Judge
+This removes the pressure of "getting it right" while showing you where your calories actually come from. Most people are surprised by two or three repeat items: cooking oils, coffee drinks, dressings, or handfuls of snacks between meals. Seeing your real baseline gives you a much better starting point than guessing.
 
-Your only goal for the first week is to log what you eat. Don't worry about hitting targets. Don't change what you eat. Just observe.
+## Week 2: set reasonable targets
 
-**Why this works:** Most people have no idea what they're actually eating. That "healthy" salad with dressing? 600 calories. The coffee with cream and sugar? 200 calories. The handful of nuts while cooking? 300 calories.
+Once you have a week of logs, set daily targets that match your actual schedule. Start with your estimated maintenance calories from the [TDEE calculator](/tools/tdee-calculator), then decide whether you want to maintain, lose, or gain weight.
 
-**Your daily task:**
-1. Log everything you eat and drink
-2. Don't try to hit any numbers
-3. Don't judge yourself
-4. Look for patterns at week's end
+A straightforward way to build your first split:
 
-**Common mistake:** Changing your diet immediately. Don't. First, understand your baseline.
+1. **Set calories first** based on your goal (maintenance, a modest 300 to 500 kcal deficit for fat loss, or a 200 to 300 kcal surplus for muscle gain).
+2. **Anchor protein** around 1.6 to 2.0 g/kg of body weight (0.73 to 0.91 g/lb).
+3. **Split the remaining calories** between carbs and fats in whatever ratio feels comfortable to eat.
 
-## Week 2: Set Realistic Targets
+| Example daily target (75 kg / 165 lb, maintenance) | Grams | Calories | Share |
+| --- | --- | --- | --- |
+| Protein | 140 g | 560 kcal | 25% |
+| Carbs | 240 g | 960 kcal | 44% |
+| Fats | 75 g | 675 kcal | 31% |
+| **Total** | | **2,195 kcal** | **100%** |
 
-Now that you know what you're eating, set targets based on reality, not ideals.
+> Aim within roughly 5% of calories and 10 g of protein rather than chasing exact single-gram perfection. Consistency across the week beats a flawless Tuesday followed by an unlogged weekend.
 
-**Calculate your TDEE (Total Daily Energy Expenditure):**
+## The 80/20 rule for weighing food
 
-Use a simple formula:
-- Body weight (lbs) × 14 = sedentary
-- Body weight (lbs) × 16 = lightly active
-- Body weight (lbs) × 18 = very active
+You do not need a food scale for everything. Spend precision where calories are dense, and estimate where errors are tiny.
 
-**Set protein first:**
-- Minimum: 0.7g per pound of body weight
-- Optimal: 1g per pound of body weight
+| Weigh it (high calorie density) | Estimate it (low calorie density) |
+| --- | --- |
+| Cooking oils and butter (120 kcal/tbsp) | Leafy greens and non-starchy vegetables |
+| Nut butters, nuts, and seeds | Black coffee, plain tea, sparkling water |
+| Cheese, cream, and full-fat sauces | Herbs, spices, vinegar, mustard |
+| Dry pasta, rice, oats, and cereal | Whole fruit by piece (1 medium apple) |
+| Meat, fish, and tofu | |
 
-**Fill in carbs and fats:**
-- There's no magic ratio
-- Start with 40% carbs, 30% protein, 30% fat
-- Adjust based on how you feel and perform
+A basic $15 digital kitchen scale is worth owning. Volume measures like cups and tablespoons easily swing by 30 to 50%: a packed cup of oats can weigh 110 g while a loose scoop weighs 70 g, a difference of 150 kcal before you add toppings.
 
-**Example for a 160 lb person:**
-- Calories: 2,400 (moderately active)
-- Protein: 160g (640 calories)
-- Carbs: 240g (960 calories)
-- Fats: 80g (720 calories)
+## Four habits that cut logging time in half
 
-## The 80/20 Method
+### Weigh foods raw (or pick the matching database entry)
+Meat loses roughly 20 to 25% of its weight when cooked as water evaporates, while rice and pasta absorb water and roughly triple in weight. Pick whichever convention is easiest for you, then stay consistent with the matching entry in your search results.
 
-You don't need to weigh every single gram. Focus on the foods that matter:
+### Log before or right after you eat
+Trying to reconstruct the entire day at 10 pm guarantees missed snacks, oils, and drinks. Logging takes under a minute when the ingredients are still on the counter. Planning tomorrow's main meals the night before works even better on busy workdays.
 
-**Weigh these (high calorie density):**
-- Oils and butters (120+ calories per tablespoon)
-- Nut butters (200+ calories per serving)
-- Cheese (100+ calories per ounce)
-- Pasta and rice (dry weight is most accurate)
-- Meat and fish
+### Save the meals you repeat
+Most people rotate through the same 5 to 10 breakfasts, lunches, and snacks. Turning your regular yogurt bowl, protein oats, or chicken-and-rice lunch into a saved meal turns a 4-ingredient log into a single tap.
 
-**Estimate these (low calorie density):**
-- Vegetables (most are under 50 calories per cup)
-- Leafy greens (negligible calories)
-- Black coffee and tea
+### Use weekly averages to judge progress
+Single days will always bounce around because of social dinners, hunger, or training volume. Look at your 7-day average in Analytics alongside your weight trend rather than treating one high day as a failure. If your average weight is not moving in the direction you expect after 2 to 3 weeks of honest logging, adjust daily calories by 150 to 200 kcal and recheck.
 
-**The rule:** If a food is under 50 calories per serving, estimate it. If it's over 100 calories per serving, weigh it.
+## What to do when you miss a meal or a day
 
-## Practical Tracking Tips
-
-### 1. Use a Digital Scale
-
-A $15 scale from Amazon will transform your accuracy. Volume measurements (cups, tablespoons) can be off by 30-50%.
-
-**Example:** One "cup" of oats can range from 70g to 120g depending on how you pack it. That's 130-220 calories of difference.
-
-### 2. Log as You Go (Or Plan Ahead)
-
-Two approaches work:
-
-**Approach A: Log as you eat**
-- Keep the app open while cooking
-- Log immediately after each meal
-- Takes 2-3 minutes per meal
-
-**Approach B: Plan the night before**
-- Log tomorrow's meals tonight
-- Prep and portion accordingly
-- Reduces decision fatigue
-
-**Don't:** Try to remember everything and log at day's end. You'll forget the small stuff (that handful of chips, the cream in your coffee).
-
-### 3. Create Saved Meals for Repeats
-
-Most people eat 10-15 foods regularly. Create saved meals for:
-- Your breakfast routine
-- Lunch staples
-- Pre-workout snack
-- Post-workout shake
-
-**In MacroTrackr:** Build the meal once, save it, then log with one tap.
-
-### 4. Learn Restaurant Strategies
-
-Eating out doesn't have to derail your tracking:
-
-**Chain restaurants:** Use their nutrition info (usually accurate)
-
-**Local restaurants:**
-- Look up a comparable chain restaurant entry
-- Overestimate by 20% (restaurants use more oil/butter)
-- Focus on protein source and portion size
-
-**Pro tip:** Order sauces and dressings on the side. They're calorie-dense and easy to control.
-
-## Common Beginner Mistakes
-
-### Mistake 1: The Perfect Day Trap
-
-You log perfectly Monday through Thursday. Friday night, you have pizza and beer. You decide the week is ruined and binge all weekend.
-
-**The fix:** One meal doesn't define a week. One day doesn't define a month. Get back on track at the next meal, not Monday.
-
-### Mistake 2: Setting Aggressive Deficits
-
-You want to lose weight fast, so you cut calories by 50%. By day 4, you're ravenous and binge.
-
-**The fix:** Start with a 300-500 calorie deficit. You might lose "only" 0.5-1 lb per week, but you'll actually stick with it.
-
-### Mistake 3: Ignoring Liquid Calories
-
-Coffee with cream and sugar. Soda. Juice. Alcohol. These add up fast and rarely keep you full.
-
-**The fix:** Log everything you drink. Consider switching to black coffee, diet soda, or water.
-
-### Mistake 4: Obsessing Over Daily Numbers
-
-You hit 179g protein instead of 180g. You stress about it.
-
-**The fix:** Weekly averages matter more than daily precision. If you're within 10% of your targets most days, you're doing great.
-
-## Building Long-Term Habits
-
-### Give It Time
-
-In a study of people building a new daily habit, modelling their progress put the median time to near-peak automaticity at 66 days, with a range of 18 to 254 days ([Lally et al., 2010](https://doi.org/10.1002/ejsp.674)). The study did not look at food tracking, but the lesson carries over: a slow start is normal, so don't read it as failure.
-
-### Track Something, Even on Bad Days
-
-Had a day where you ate everything in sight? Still log it. Here's why:
-
-1. **Awareness:** Seeing the number can help you understand triggers
-2. **Data:** Your weekly average still matters
-3. **Habit:** Breaking the chain makes it harder to restart
-
-**The rule:** Log something, even if it's a rough estimate. Don't let perfect be the enemy of good.
-
-### Review Weekly, Not Daily
-
-Every Sunday, review your week:
-- How many days did you log?
-- What was your average daily intake?
-- Did you hit protein consistently?
-- Where can you improve?
-
-**Don't:** Stress about one bad day. Look at the trend.
-
-## When to Adjust Your Targets
-
-After tracking consistently for two weeks, ask:
-
-**If weight loss is your goal:**
-- Losing 0.5-1 lb per week? Keep your targets.
-- Losing faster? Consider adding 100-200 calories.
-- Not losing? Reduce by 100-200 calories.
-
-**If muscle gain is your goal:**
-- Gaining 0.25-0.5 lb per week? Perfect.
-- Gaining faster? You're adding unnecessary fat. Reduce calories.
-- Not gaining? Add 100-200 calories.
-
-**Important:** Give each adjustment 2 weeks before changing again. Weight fluctuates daily, so look for trends.
-
-## Work Out Your Numbers First
-
-Before tracking anything, you need a target. The [TDEE calculator](/tools/tdee-calculator) estimates what you burn in a day, and the [macro calculator](/tools/macro-calculator) turns that into a protein, carb and fat split. Both are free and neither asks for an account.
-
-## Tools That Help
-
-Beyond MacroTrackr, consider:
-
-- **Digital food scale** ($15-30): essential for accuracy
-- **Meal prep containers**: portion control made easy
-- **Water bottle with time markers**: hydration affects hunger
-- **Notepad for meal ideas**: when you are stuck, reference it
-
-## Start Today
-
-You don't need to wait for Monday. You don't need to finish reading every nutrition book. You need to:
-
-1. Download MacroTrackr
-2. Log what you eat today (no changes needed)
-3. Set targets tomorrow based on today's data
-4. Aim to hit protein and stay within 100 calories of your goal
-
-That's it. Start simple. Stay consistent. The results will come.
-
-[Start your free MacroTrackr account](/register) and make today Day 1.
-
-*Questions about getting started? Email us at support@macrotrackr.com. We read every message.*
+Nothing breaks when a day goes off plan. Log an honest rough estimate (or mark the day as partly logged so it does not skew your expenditure estimate), and move straight on to the next normal meal. The only mistake that actually slows progress is skipping logs whenever the numbers feel uncomfortable.

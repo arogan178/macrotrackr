@@ -5,42 +5,43 @@ import { useStore } from "@/store/store";
 import FloatingNotification from "./FloatingNotification";
 
 /**
- * Global notification manager that renders notifications from the app state
- * This component should be mounted once near the root of your application
+ * Global notification manager that renders notifications from the app state.
+ * Keep the live region mounted so screen readers reliably announce the first toast.
  */
 function NotificationManager() {
-  const { notifications, hideNotification } = useStore();
-
-  if (notifications.length === 0) {
-    return;
-  }
+  const notifications = useStore((state) => state.notifications);
+  const hideNotification = useStore((state) => state.hideNotification);
 
   return (
     <div
       // z-110: above AppHeader and MobileTabBar (both z-70) and Modal (z-100)
       // so notifications/toasts appear above modal backdrop and dialogs.
       // At the foot, newest nearest the edge, as Android's snackbars sit.
+      aria-live="polite"
+      aria-atomic="false"
       className="pointer-events-none fixed left-1/2 z-110 -translate-x-1/2"
       style={{ bottom: "var(--toast-bottom)" }}
     >
-      <div className="flex w-screen max-w-md flex-col gap-2 px-4">
-        {notifications.map((notification, index) => (
-          <div
-            key={notification.id}
-            className="pointer-events-auto"
-            style={{ zIndex: 9999 - index }}
-          >
-            <FloatingNotification
-              message={notification.message}
-              type={notification.type}
-              duration={notification.duration}
-              autoClose={notification.autoClose}
-              action={notification.action}
-              onClose={() => hideNotification(notification.id)}
-            />
-          </div>
-        ))}
-      </div>
+      {notifications.length > 0 && (
+        <div className="flex w-screen max-w-md flex-col gap-2 px-4">
+          {notifications.map((notification, index) => (
+            <div
+              key={notification.id}
+              className="pointer-events-auto"
+              style={{ zIndex: 9999 - index }}
+            >
+              <FloatingNotification
+                message={notification.message}
+                type={notification.type}
+                duration={notification.duration}
+                autoClose={notification.autoClose}
+                action={notification.action}
+                onClose={() => hideNotification(notification.id)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

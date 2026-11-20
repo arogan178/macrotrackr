@@ -41,7 +41,7 @@ export function RequireUnauth({ children }: { children: React.ReactNode }) {
 
 export function LoadingFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface">
+    <div className="flex min-h-dvh items-center justify-center bg-background">
       <LoadingSpinner size="lg" />
     </div>
   );

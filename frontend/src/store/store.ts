@@ -17,12 +17,15 @@ export type StoreState = UserUISlice &
 
 // Create the store with all slices (removed createHabitsSlice, createGoalsSlice, and createMacrosSlice - kept UI slices for UI state)
 export const useStore = create<StoreState>()(
-  devtools((...a) => ({
-    ...createUserUISlice(...a),
-    ...createGoalsUISlice(...a),
-    ...createMacroUISlice(...a),
-    ...createNotificationSlice(...a),
-  })),
+  devtools(
+    (...a) => ({
+      ...createUserUISlice(...a),
+      ...createGoalsUISlice(...a),
+      ...createMacroUISlice(...a),
+      ...createNotificationSlice(...a),
+    }),
+    { enabled: import.meta.env.DEV },
+  ),
 );
 
 // If you need to reset slices for testing, implement a reset method in each slice and call them here.

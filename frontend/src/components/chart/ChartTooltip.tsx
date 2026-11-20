@@ -1,4 +1,4 @@
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { formatGrouped } from "@/lib/formatNumber";
 import { getUnitForStat } from "@/utils/chartColors";
 
 /**
@@ -38,6 +38,19 @@ export interface ChartTooltipProps {
   formatter?: (value: number, key?: string) => string;
 }
 
+const TOOLTIP_SURFACE_CLASS =
+  "rounded-control border border-border-2 bg-surface-3 p-2.5 text-sm shadow-modal tabular-nums";
+
+function formatStatNumber(value: number, selectedStat: string): string {
+  if (!Number.isFinite(value)) return "0";
+  if (selectedStat === "calories") {
+    return formatGrouped(Math.round(value));
+  }
+  const rounded = Math.round(value * 10) / 10;
+
+  return Number.isInteger(rounded) ? formatGrouped(rounded) : rounded.toFixed(1);
+}
+
 /**
  * ChartTooltip - Default tooltip used for line charts showing a single selected stat
  */
@@ -51,17 +64,12 @@ function ChartTooltip({
     return;
   }
 
-  // Type guards for recharts payloads
-  // Line chart: [{ name: dataKey, value, ... }]
-  // Bar chart: [{ payload: { ... } }]
   let value: number | undefined;
   let label: string | undefined;
   let percentage: number | undefined;
   let calories: number | undefined;
   let count: number | undefined;
 
-  // Check if this is a line chart payload (has .name and .value)
-  // Try to find a line chart entry (has name and value)
   const lineEntry = payload.find(
     (item): item is LineChartPayloadEntry =>
       typeof item.name === "string" &&
@@ -89,7 +97,6 @@ function ChartTooltip({
     typeof payload[0].payload === "object" &&
     payload[0].payload !== null
   ) {
-    // Bar chart fallback
     const data = payload[0].payload;
     value =
       typeof data[selectedStat] === "number"
@@ -107,31 +114,29 @@ function ChartTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="rounded-control border border-border bg-surface-2 p-2 text-sm shadow-modal">
+    <div className={TOOLTIP_SURFACE_CLASS}>
       <p className="font-medium text-foreground">{label}</p>
       <p className="text-foreground">
         <span className="font-medium">
           {selectedStat === "calories" ? "~" : ""}
-          {formatter ? (
-            formatter(value ?? 0, selectedStat)
-          ) : (
-            <AnimatedNumber value={value ?? 0} toFixedValue={1} suffix={unit} />
-          )}
+          {formatter
+            ? formatter(value ?? 0, selectedStat)
+            : `${formatStatNumber(value ?? 0, selectedStat)}${unit}`}
         </span>
         {typeof percentage === "number" && (
-          <span className="ml-1 text-foreground">
-            (<AnimatedNumber value={percentage} suffix="%" />)
+          <span className="ml-1 text-muted">
+            ({Math.round(percentage)}%)
           </span>
         )}
       </p>
       {selectedStat !== "calories" && typeof calories === "number" && (
-        <p className="mt-1 text-xs text-foreground">
-          ~ <AnimatedNumber value={calories} toFixedValue={0} suffix=" kcal" />
+        <p className="mt-1 text-xs text-muted">
+          ~{formatGrouped(Math.round(calories))} kcal
         </p>
       )}
       {selectedStat !== "count" && typeof count === "number" && (
-        <p className="text-xs text-foreground">
-          <AnimatedNumber value={count} /> {count === 1 ? "item" : "items"}
+        <p className="text-xs text-muted">
+          {formatGrouped(count)} {count === 1 ? "item" : "items"}
         </p>
       )}
     </div>
@@ -168,40 +173,29 @@ export function BarValueTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="rounded-control border border-border bg-surface p-2 text-sm shadow-modal">
+    <div className={TOOLTIP_SURFACE_CLASS}>
       <p className="font-medium text-foreground">{data.name}</p>
       <p className="text-foreground">
         <span className="font-medium">
           {selectedStat === "calories" ? "~" : ""}
-          {formatter ? (
-            formatter(data.value, selectedStat)
-          ) : (
-            <>
-              <AnimatedNumber value={data.value} toFixedValue={1} />
-              {unit}
-            </>
-          )}
+          {formatter
+            ? formatter(data.value, selectedStat)
+            : `${formatStatNumber(data.value, selectedStat)}${unit}`}
         </span>
         {typeof data.percentage === "number" && (
-          <span className="ml-1 text-foreground">
-            (<AnimatedNumber value={data.percentage} suffix="%" />)
+          <span className="ml-1 text-muted">
+            ({Math.round(data.percentage)}%)
           </span>
         )}
       </p>
       {selectedStat !== "calories" && typeof data.calories === "number" && (
-        <p className="mt-1 text-xs text-foreground">
-          ~{" "}
-          <AnimatedNumber
-            value={data.calories}
-            toFixedValue={0}
-            suffix=" kcal"
-          />
+        <p className="mt-1 text-xs text-muted">
+          ~{formatGrouped(Math.round(data.calories))} kcal
         </p>
       )}
       {selectedStat !== "count" && typeof data.count === "number" && (
-        <p className="text-xs text-foreground">
-          <AnimatedNumber value={data.count} /> meal
-          {data.count === 1 ? "" : "s"}
+        <p className="text-xs text-muted">
+          {formatGrouped(data.count)} meal{data.count === 1 ? "" : "s"}
         </p>
       )}
     </div>
@@ -241,7 +235,7 @@ export function StackedBarPercentageTooltip({
   const macroKeys = ["protein", "carbs", "fats"] as const;
 
   return (
-    <div className="rounded-control border border-border bg-surface p-2 text-sm shadow-modal">
+    <div className={TOOLTIP_SURFACE_CLASS}>
       <p className="mb-1 font-medium text-foreground">
         {String(data[labelKey] ?? "")}
       </p>
@@ -253,27 +247,20 @@ export function StackedBarPercentageTooltip({
           return (
             <p key={key} className="text-foreground">
               <span
-                className="mr-2 inline-block h-3 w-3 rounded-full"
+                className="mr-2 inline-block h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: color }}
               />
               <span className="capitalize">{key}</span>{" "}
               <span className="font-medium">
-                <AnimatedNumber
-                  value={Number.isFinite(pct) ? pct : 0}
-                  toFixedValue={0}
-                  suffix="%"
-                />
+                {Number.isFinite(pct) ? Math.round(pct) : 0}%
               </span>
             </p>
           );
         })}
       </div>
       {typeof data.calories === "number" && (
-        <p className="mt-1 border-t border-border pt-1 text-xs text-foreground">
-          <AnimatedNumber
-            value={Math.round(data.calories)}
-            suffix=" calories"
-          />
+        <p className="mt-1 border-t border-border pt-1 text-xs text-muted">
+          {formatGrouped(Math.round(data.calories))} kcal
         </p>
       )}
     </div>

@@ -1,270 +1,66 @@
-Protein is the most discussed macronutrient in fitness, and for good reason. It's the building block of muscle, essential for recovery, and the most satiating nutrient you can eat.
+Protein is the one macro worth anchoring before you worry about the rest of the split. It drives muscle retention and growth, keeps hunger quieter during a deficit, and costs more energy to digest than carbs or fat.
 
-But walk into any gym or scroll through fitness forums and you'll hear conflicting advice:
-- "You need 2g per pound of body weight!"
-- "Your body can only absorb 30g at once!"
-- "Plant protein doesn't count!"
+Most confusion around protein comes from two extremes: conservative government minimums designed to prevent deficiency, and gym folklore telling everyone to eat 2 g per pound of body weight. The research sits comfortably between them.
 
-Let's cut through the noise with what the research actually shows.
+## What protein actually does
 
-## Why Protein Matters
+Protein supplies the amino acids your body uses to repair and build tissue, including skeletal muscle after resistance training. Beyond muscle, two practical properties make it unusually useful when tracking macros:
 
-Before diving into numbers, understand what protein actually does in your body:
+- **Satiety:** Gram for gram, protein fills you up longer than carbohydrate or fat. People who raise protein intake often find calorie targets easier to stick to without feeling constantly hungry.
+- **Thermic effect:** Digesting and processing protein uses roughly 20 to 30% of its calories, compared with 5 to 10% for carbohydrate and 0 to 3% for fat ([Westerterp, 2004](https://doi.org/10.1186/1743-7075-1-5)).
 
-**Muscle Protein Synthesis (MPS):** Protein provides amino acids that build and repair muscle tissue. Without adequate protein, you can't recover from training or build new muscle.
+## How much protein you actually need
 
-**Satiety:** Protein is the most filling macronutrient. Eat 200 calories of chicken breast versus 200 calories of bread. The chicken keeps you full longer.
+The official RDA is **0.8 g per kg** of body weight (0.36 g/lb), or about 60 g/day for a 75 kg (165 lb) adult. That figure prevents deficiency in sedentary populations, not optimal recovery for someone who trains.
 
-**Thermic Effect:** Your body burns 20-30% of protein calories just digesting it. For carbohydrate it is 5-10%, and for fat 0-3% ([Westerterp, 2004](https://doi.org/10.1186/1743-7075-1-5)).
+A meta-analysis of 49 studies and 1,863 participants found that gains in fat-free mass from resistance training plateaued around **1.62 g/kg/day**, with the upper 95% confidence interval reaching **2.2 g/kg/day** ([Morton et al., 2018, *British Journal of Sports Medicine*](https://pubmed.ncbi.nlm.nih.gov/28698222/)). The International Society of Sports Nutrition places the practical daily band for active adults at **1.4 to 2.0 g/kg/day** ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)).
 
-**Metabolic Health:** Protein helps regulate blood sugar and supports a healthy metabolism.
+| Goal or activity level | Daily target (g/kg) | Daily target (g/lb) | Example for 75 kg (165 lb) |
+| --- | --- | --- | --- |
+| Sedentary baseline | 0.8 to 1.2 | 0.36 to 0.55 | 60 to 90 g |
+| General fitness (3 to 4 sessions/week) | 1.2 to 1.6 | 0.55 to 0.73 | 90 to 120 g |
+| Strength training and muscle gain | 1.6 to 2.0 | 0.73 to 0.91 | 120 to 150 g |
+| Fat loss while keeping muscle | 1.8 to 2.2 | 0.82 to 1.00 | 135 to 165 g |
 
-## How Much Protein Do You Actually Need?
+If you carry significant extra body fat, scaling off total scale weight can push targets unnecessarily high. Use your goal body weight (or lean body mass) instead. To skip the arithmetic, the [protein calculator](/tools/protein-calculator) computes your daily and per-meal range directly from your stats.
 
-The answer depends on your goals, activity level, and body composition. If you would rather not do the arithmetic, the [protein calculator](/tools/protein-calculator) works it out from your weight and training load, and needs no account.
+> A practical default for most people who lift weights: aim for 1.6 to 2.0 g/kg/day (0.75 to 0.9 g/lb), and nudge toward the upper end when dieting in a calorie deficit.
 
-### The Bare Minimum (RDA)
+## Timing and per-meal distribution
 
-The government recommends **0.36g per pound** (0.8g per kg) of body weight. For a 160 lb person, that's about 58g per day. That figure is set to prevent deficiency in the general population, not to support training.
+You do not need to panic about a 30-minute post-workout window, and your body does not waste protein beyond 30 g in a single sitting. Digestion simply slows down and absorbs the rest over several hours.
 
-**Problem:** This prevents deficiency, but it's not optimal for anyone training regularly. A meta-analysis of 49 studies and 1,863 participants found gains in fat-free mass from resistance training stopped improving beyond **1.62 g/kg/day**, with the confidence interval reaching about 2.2 g/kg ([Morton et al., 2018, *British Journal of Sports Medicine*](https://pubmed.ncbi.nlm.nih.gov/28698222/)). The International Society of Sports Nutrition puts the practical range at 1.4-2.0 g/kg/day ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)).
+What does help is spreading intake across **3 to 5 meals of roughly 25 to 45 g each** (about 0.25 to 0.40 g/kg per meal). Splitting protein evenly makes hitting a 140 g daily target far easier than trying to cram 90 g into dinner, and it keeps muscle protein synthesis stimulated across the day.
 
-### Recreational Exercisers
+## Practical protein sources
 
-If you work out 3-4 times per week: **0.5-0.7g per pound**
+Most people fall short because they treat protein as a side dish rather than the anchor of each meal. Comparing protein per 100 g alongside calorie cost helps you pick foods that fit your daily budget.
 
-- 120 lb person: 60-85g protein daily
-- 160 lb person: 80-110g protein daily
-- 200 lb person: 100-140g protein daily
+| Food (100 g portion) | Protein | Calories | Notes |
+| --- | --- | --- | --- |
+| Chicken breast, cooked | 31 g | 165 kcal | Lean staple, easy to batch cook |
+| Lean beef (93% lean), cooked | 26 g | 180 kcal | Higher iron and B12 |
+| Salmon, cooked | 25 g | 206 kcal | Adds omega-3 fats |
+| Canned tuna, drained | 26 g | 116 kcal | Fast zero-cook lunch option |
+| Eggs (2 large, ~100 g) | 13 g | 143 kcal | Pair with egg whites for higher protein |
+| Greek yogurt (0% fat) | 10 g | 59 kcal | 250 g bowl gives 25 g protein |
+| Cottage cheese (low fat) | 11 g | 82 kcal | Slow-digesting, easy snack |
+| Firm tofu | 17 g | 144 kcal | Versatile plant anchor |
+| Cooked lentils | 9 g | 116 kcal | High fiber, pair with grains or tofu |
+| Whey or pea isolate (1 scoop, 30 g) | 24 g | 120 kcal | Convenience tool, not a requirement |
 
-### Serious Trainees
+Plant-based diets can easily hit the same daily targets. Because individual plant foods tend to be slightly lower in leucine and total protein density per calorie, aiming toward the upper half of your target range and mixing sources (tofu, tempeh, seitan, edamame, legumes, soy milk, pea/rice blends) closes the gap cleanly.
 
-If you train 4-6 times per week with progressive overload: **0.7-1g per pound**
+## Making the target stick
 
-- 120 lb person: 85-120g protein daily
-- 160 lb person: 110-160g protein daily
-- 200 lb person: 140-200g protein daily
+If you currently eat 70 g of protein a day and jump straight to 160 g overnight, it will feel like a chore. Build the habit in three small steps:
 
-### During Caloric Deficit (Fat Loss)
+1. **Anchor breakfast.** Starting the day with 30 to 40 g of protein (Greek yogurt, eggs plus egg whites, or oats with whey) removes half the pressure from the evening.
+2. **Double the portion you already eat.** Going from 100 g to 160 g of chicken or tofu in a meal you already cook adds ~18 g of protein with zero new recipes.
+3. **Keep one effortless backup.** A tub of Greek yogurt, cottage cheese, or a scoop of protein powder covers busy afternoons when real cooking is not happening.
 
-When eating fewer calories, protein needs increase to preserve muscle: **0.8-1.2g per pound**
+## Common myths worth ignoring
 
-- 120 lb person: 95-145g protein daily
-- 160 lb person: 130-190g protein daily
-- 200 lb person: 160-240g protein daily
-
-**Why higher during deficits?** With fewer calories coming in, your body is more likely to break down muscle for energy. Extra protein provides a buffer. A systematic review of lean, resistance-trained athletes in a deficit put the requirement at **2.3-3.1 g/kg of fat-free mass**, scaling up the leaner you are and the steeper the cut ([Helms et al., 2014, *IJSNEM*](https://journals.humankinetics.com/view/journals/ijsnem/24/2/article-p127.xml)).
-
-## The "Upper Limit" Myth
-
-You'll hear people claim you "can't absorb more than 30g of protein per meal." This is misinformation.
-
-**What the 30g number actually refers to:** The ISSN's per-meal guidance is 0.25 g/kg of bodyweight, or an absolute dose of 20-40g, to maximally stimulate muscle protein synthesis (MPS) in a single sitting ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)). This doesn't mean excess protein is wasted. It just means the *rate* of muscle building may not increase beyond that point.
-
-**What actually happens:** Your body absorbs what you eat. Eat 60g of protein in a meal, and you'll absorb 60g. Some will be used for MPS, some for other bodily functions, and yes, excess can be converted to glucose or fat, but this is true of any macronutrient in excess.
-
-A 2023 trial tested this directly: 100g of protein after resistance exercise produced a larger and longer muscle protein synthesis response than 25g, lasting beyond 12 hours, with under 15% of the amino acids oxidised. The authors concluded there is no practical upper limit to the anabolic response ([Trommelen et al., 2023, *Cell Reports Medicine*](https://www.cell.com/cell-reports-medicine/fulltext/S2666-3791(23)00540-2)).
-
-**Practical takeaway:** Distribute protein across 3-5 meals for optimal MPS, but don't stress if one meal is protein-heavy.
-
-## Protein Distribution: Does Timing Matter?
-
-### The Anabolic Window
-
-Old school bodybuilding said you needed protein within 30 minutes post-workout or the session was "wasted."
-
-**Current research shows:** The ISSN position stand states the anabolic effect of exercise lasts at least 24 hours, though it diminishes as time passes ([Jäger et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)). Total daily protein intake matters far more than timing.
-
-### Optimal Distribution
-
-While timing isn't critical, distribution helps:
-
-**3 meals:** Divide daily target by 3
-**4 meals:** Divide daily target by 4
-
-Example for 160g daily target:
-- 3 meals: ~50g per meal
-- 4 meals: ~40g per meal
-
-**Pre-bed protein:** Some evidence suggests 30-40g of casein protein before bed can help overnight recovery. Not essential, but potentially beneficial.
-
-### Per-Meal Targets
-
-Aim for **20-40g of high-quality protein** per meal. This range maximizes MPS stimulation.
-
-Less than 20g? You're leaving gains on the table.
-More than 40g? You're not getting extra MPS benefit, but the protein isn't wasted.
-
-## Complete vs. Incomplete Proteins
-
-### Complete Proteins (All 9 Essential Amino Acids)
-
-**Animal Sources:**
-- Chicken breast (31g protein per 100g)
-- Turkey (29g protein per 100g)
-- Salmon (25g protein per 100g)
-- Eggs (6g per large egg)
-- Greek yogurt (10g per 100g)
-- Cottage cheese (11g per 100g)
-- Whey protein (25g per scoop)
-
-### Incomplete Proteins (Missing Some Essential Amino Acids)
-
-**Plant Sources:**
-- Lentils (9g protein per 100g cooked)
-- Chickpeas (9g protein per 100g)
-- Black beans (9g protein per 100g)
-- Tofu (8g protein per 100g)
-- Quinoa (4g protein per 100g cooked)
-- Nuts and seeds (varies by type)
-
-### Quick Reference Table
-
-| Food Source | Protein per 100g | Protein Quality | Best For |
-|-------------|------------------|-----------------|----------|
-| Chicken Breast | 31g | Excellent | Lean muscle building |
-| Salmon | 25g | Excellent | Omega-3s + protein |
-| Greek Yogurt | 10g | Excellent | Breakfast/snacks |
-| Lentils | 9g | Good (combine with grains) | Budget-friendly |
-| Tofu | 8g | Good | Vegetarian/vegan |
-| Eggs | 13g | Excellent | Any meal |
-
-**The fix for plant proteins:** Combine complementary sources throughout the day. You don't need them in the same meal, just within the same 24-hour period.
-
-**Classic combinations:**
-- Rice + beans
-- Hummus + whole grain pita
-- Lentil soup + bread
-- Peanut butter + whole grain bread
-
-## Protein Quality: Bioavailability Matters
-
-Not all proteins are equal. The Protein Digestibility Corrected Amino Acid Score (PDCAAS) and Digestible Indispensable Amino Acid Score (DIAAS) measure protein quality.
-
-**Top tier (DIAAS 1.0 or higher):**
-- Whey protein isolate
-- Milk protein
-- Eggs
-- Beef
-- Chicken
-- Soy protein isolate
-
-**Good tier (DIAAS 0.75-1.0):**
-- Pea protein
-- Chickpeas
-- Black beans
-- Oats
-
-**Lower tier (DIAAS below 0.75):**
-- Wheat
-- Peanuts
-- Tree nuts
-
-**Practical takeaway:** If you eat mostly plant protein, aim for the higher end of the protein range (1-1.2g per pound) to compensate for lower bioavailability.
-
-## Whole Foods vs. Protein Powder
-
-### When to Prioritize Whole Foods
-
-Most of your protein should come from whole food sources. They provide:
-- Micronutrients (vitamins and minerals)
-- Satiety (you feel fuller)
-- Slower digestion (better for sustained amino acid release)
-
-### When to Use Protein Powder
-
-**Convenience:** You're traveling, at work, or short on time
-**Post-workout:** Fast-digesting whey can be beneficial
-**Meeting targets:** You've eaten whole foods but still need 30g to hit your goal
-**Budget:** Whey is often cheaper per gram of protein than meat
-
-**Types of protein powder:**
-- **Whey (concentrate or isolate):** Fast-digesting, great post-workout
-- **Casein:** Slow-digesting, good before bed
-- **Plant blends (pea/rice):** Good option for vegans
-- **Soy:** Complete protein, though some prefer to limit due to phytoestrogens (research is mixed)
-
-## Sample Protein Strategies
-
-### The 3-Meal Approach (160g target)
-
-**Breakfast (40g):**
-- Greek yogurt (200g): 20g
-- Protein shake: 25g
-- *Total: 45g*
-
-**Lunch (50g):**
-- Chicken breast (150g): 47g
-- *Total: 47g*
-
-**Dinner (70g):**
-- Salmon (200g): 50g
-- Side of quinoa: 8g
-- Vegetables with cheese: 12g
-- *Total: 70g*
-
-**Daily total: 162g**
-
-### The 4-Meal Approach (160g target)
-
-**Breakfast (35g):**
-- Eggs (3): 18g
-- Egg whites (150g): 16g
-- *Total: 34g*
-
-**Lunch (40g):**
-- Turkey sandwich with extra meat: 40g
-
-**Pre-workout snack (25g):**
-- Protein shake: 25g
-
-**Dinner (60g):**
-- Lean beef (200g): 52g
-- Side of beans: 8g
-- *Total: 60g*
-
-**Daily total: 159g**
-
-## Tracking Protein in MacroTrackr
-
-Setting and hitting your protein target is simple:
-
-1. **Set your target:** Go to Goals → Macro Targets
-2. **Watch the progress bar:** The protein bar on your home screen shows daily progress
-3. **Review trends:** Check the weekly view to see your consistency
-4. **Use saved meals:** Build high-protein meals you enjoy and save them for quick logging
-
-[Create your free MacroTrackr account](/register) and start hitting your protein goals consistently.
-
-## Common Protein Myths
-
-**Myth:** "Too much protein damages your kidneys."
-**Truth:** A one-year crossover trial in resistance-trained men averaging 3.3 g/kg/day found no adverse effect on kidney function, liver function or blood lipids ([Antonio et al., 2016, *Journal of Nutrition and Metabolism*](https://pubmed.ncbi.nlm.nih.gov/27807480/)). That evidence covers healthy adults with normal kidney function. If you have existing kidney disease, follow the intake your clinician sets.
-
-**Myth:** "You must eat protein immediately post-workout."
-**Truth:** The anabolic window is much wider than 30 minutes. Get protein within a few hours and you're fine.
-
-**Myth:** "Plant protein doesn't build muscle."
-**Truth:** With proper planning and adequate total intake, plant proteins support muscle growth just fine. You may need slightly more total protein to compensate for bioavailability.
-
-**Myth:** "Protein makes you bulky."
-**Truth:** Protein supports muscle, but "bulk" comes from excess calories plus resistance training. Protein alone won't make you bulky.
-
-## Final Thoughts
-
-Protein is the most important macronutrient for anyone training regularly. Set your target based on your goals (0.7-1g per pound for most), distribute it across 3-5 meals, and prioritize whole food sources.
-
-Don't overcomplicate it. Hit your daily target consistently, train hard, and the results will follow.
-
-## References
-
-1. Westerterp KR. Diet induced thermogenesis. *Nutrition & Metabolism*. 2004;1:5. [doi:10.1186/1743-7075-1-5](https://doi.org/10.1186/1743-7075-1-5)
-2. Morton RW, Murphy KT, McKellar SR, et al. A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. *British Journal of Sports Medicine*. 2018;52(6):376-384. [PubMed](https://pubmed.ncbi.nlm.nih.gov/28698222/)
-3. Jäger R, Kerksick CM, Campbell BI, et al. International Society of Sports Nutrition Position Stand: protein and exercise. *Journal of the International Society of Sports Nutrition*. 2017;14:20. [Full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/)
-4. Helms ER, Zinn C, Rowlands DS, Brown SR. A systematic review of dietary protein during caloric restriction in resistance trained lean athletes: a case for higher intakes. *International Journal of Sport Nutrition and Exercise Metabolism*. 2014;24(2):127-138. [Journal](https://journals.humankinetics.com/view/journals/ijsnem/24/2/article-p127.xml)
-5. Trommelen J, van Lieshout GAA, Nyakayiru J, et al. The anabolic response to protein ingestion during recovery from exercise has no upper limit in magnitude and duration in vivo in humans. *Cell Reports Medicine*. 2023;4(12):101324. [Full text](https://www.cell.com/cell-reports-medicine/fulltext/S2666-3791(23)00540-2)
-6. Antonio J, Ellerbroek A, Silver T, et al. A high protein diet has no harmful effects: a one-year crossover study in resistance-trained males. *Journal of Nutrition and Metabolism*. 2016;2016:9104792. [PubMed](https://pubmed.ncbi.nlm.nih.gov/27807480/)
-
-*This article summarises published research for general fitness planning. It is not medical advice.*
-
-*Track your protein intake effortlessly with MacroTrackr's free tier. [Sign up here](/register).*
+- **"High protein harms healthy kidneys."** Controlled studies in healthy adults consistently show no kidney damage at intakes up to 2.2 g/kg/day. Anyone with pre-existing kidney disease should follow their doctor's guidance.
+- **"You must drink a shake immediately after lifting."** Total daily protein matters far more than exact timing. Eating a normal protein-rich meal within a couple of hours of training is plenty.
+- **"More is always better."** Past roughly 2.2 g/kg/day, extra protein adds little muscle benefit and just crowds out carbohydrates and fats that fuel training and make meals enjoyable.

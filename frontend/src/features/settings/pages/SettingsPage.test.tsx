@@ -40,7 +40,7 @@ describe("SettingsPage sign-out", () => {
     mocks.unsent = 0;
     render(<SettingsPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Log out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 
     await waitFor(() => expect(mocks.logout).toHaveBeenCalledTimes(1));
   });
@@ -49,7 +49,7 @@ describe("SettingsPage sign-out", () => {
     mocks.unsent = 2;
     render(<SettingsPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Log out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 
     expect(
       await screen.findByText(

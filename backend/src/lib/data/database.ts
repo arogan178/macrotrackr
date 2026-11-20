@@ -43,6 +43,10 @@ export async function withTransactionAsync<T>(
 
 export type SQLParam = string | number | boolean | null | Uint8Array;
 
+function getStatement(db: Database, query: string) {
+  return typeof db.query === "function" ? db.query(query) : db.prepare(query);
+}
+
 export function safeQuery<T>(
   db: Database,
   query: string,
@@ -50,7 +54,7 @@ export function safeQuery<T>(
 ): T | undefined {
   return traceQuerySync(query, params, () => {
     try {
-      const statement = db.prepare(query);
+      const statement = getStatement(db, query);
       const result = statement.get(...params) as T | undefined;
       loggerHelpers.dbQuery("SELECT", extractTableName(query));
       return result;
@@ -73,7 +77,7 @@ export function safeQueryAll<T>(
 ): T[] {
   return traceQuerySync(query, params, () => {
     try {
-      const statement = db.prepare(query);
+      const statement = getStatement(db, query);
       const result = statement.all(...params) as T[];
       loggerHelpers.dbQuery(
         "SELECT_ALL",
@@ -101,7 +105,7 @@ export function safeExecute(
 ): { changes: number; lastInsertRowid: number | bigint } {
   return traceQuerySync(query, params, () => {
     try {
-      const statement = db.prepare(query);
+      const statement = getStatement(db, query);
       const result = statement.run(...params);
       loggerHelpers.dbQuery(
         getQueryOperation(query),

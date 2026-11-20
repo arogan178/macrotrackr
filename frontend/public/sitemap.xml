@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://macrotrackr.com/</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/blog</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/tdee-calculator</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/bmr-calculator</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/macro-calculator</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -44,13 +44,13 @@
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/protein-calculator</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/tools/bmr-vs-tdee</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -67,32 +67,38 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://macrotrackr.com/about</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://macrotrackr.com/compare</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/myfitnesspal</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/macrofactor</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/cronometer</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/compare/lose-it</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -128,7 +134,7 @@
   </url>
   <url>
     <loc>https://macrotrackr.com/pricing</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -149,6 +155,12 @@
     <lastmod>2026-09-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://macrotrackr.com/blog/myfitnesspal-alternatives</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://macrotrackr.com/blog/how-to-estimate-restaurant-meals-without-guessing-blind</loc>

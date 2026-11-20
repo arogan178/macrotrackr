@@ -105,6 +105,14 @@
     opacity: 0.5;
     pointer-events: auto;
   }
+
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  summary.list-none::-webkit-details-marker {
+    display: none;
+  }
 }
 
 /* Unlayered on purpose. iOS WebKit auto-zooms on focus for any control under

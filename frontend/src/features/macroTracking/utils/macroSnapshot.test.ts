@@ -112,7 +112,7 @@ describe("buildSnapshotModel", () => {
     const text = buildSnapshotModel(base).shareText;
 
     expect(text).toBe(
-      "1,222 of 2,000 kcal — protein 50g, carbs 181g, fats 33g.",
+      "1,222 of 2,000 kcal: protein 50g, carbs 181g, fats 33g.",
     );
     expect(text).not.toMatch(/!/);
   });

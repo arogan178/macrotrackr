@@ -33,7 +33,7 @@ function ResultHeadline({
           {ready ? (
             <AnimatedNumber value={value} />
           ) : (
-            <span aria-hidden>—</span>
+            <span aria-hidden>-</span>
           )}
         </span>
         <span className="text-lg font-medium text-muted">{unit}</span>
