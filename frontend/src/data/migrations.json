@@ -48,15 +48,15 @@
     "slug": "lose-it",
     "sourceName": "Lose It!",
     "title": "How to Export Your Lose It! Data: Step-by-Step Guide",
-    "description": "Export Lose It! data in 3 steps: sign in on desktop, open loseit.com/export/data, keep the food-log CSV. Then import it into MacroTrackr.",
+    "description": "Lose It! only exports from its website, as one full-account download with no date range. The steps, how to spot your food-log CSV, and where to take it.",
     "summary": "Bring your existing logs into an ad-free tracker with custom macro targets and optional self-hosting.",
     "exportSteps": [
-      "Sign in to my.loseit.com from a desktop web browser.",
+      "Sign in to my.loseit.com in a web browser. The export is only on the website, not in the phone app.",
       "Open loseit.com/export/data to start the full account download.",
       "Extract the download and keep the CSV containing your food log."
     ],
-    "fileGuidance": "Upload the food-log CSV. MacroTrackr previews recognized foods, meal types, dates, and macro totals before import.",
-    "caveat": "Lose It! provides a full account export rather than a selectable food-log date range.",
+    "fileGuidance": "Your food log is the CSV whose first row reads Date, Name, Type, Quantity, Units, Calories, Fat (g), Protein (g), Carbohydrates (g). It opens as it is in Excel or Google Sheets. Upload that file and MacroTrackr previews recognized foods, meal types, dates, and macro totals before import.",
+    "caveat": "Lose It! provides a full account export rather than a selectable food-log date range. Custom goals export separately: on the website, open Goals, choose a goal and click Export.",
     "officialExportUrl": "https://loseit.zendesk.com/hc/en-us/articles/47497914864916-How-to-Download-Your-Data"
   }
 ]

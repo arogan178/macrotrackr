@@ -86,6 +86,7 @@ const pages = [
   staticPage("tools"),
   staticPage("tools/bmr-vs-tdee", "article"),
   staticPage("contact"),
+  staticPage("about"),
   staticPage("open-source"),
   staticPage("compare"),
   staticPage("migrate"),

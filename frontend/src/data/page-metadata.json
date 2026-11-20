@@ -97,7 +97,7 @@
   },
   "/migrate/lose-it": {
     "title": "How to Export Your Lose It! Data: Step-by-Step Guide",
-    "description": "Export Lose It! data in 3 steps: sign in on desktop, open loseit.com/export/data, keep the food-log CSV. Then import it into MacroTrackr.",
+    "description": "Lose It! only exports from its website, as one full-account download with no date range. The steps, how to spot your food-log CSV, and where to take it.",
     "h1": "How to Export Your Lose It! Data: Step-by-Step Guide"
   },
   "/open-source": {
@@ -109,6 +109,11 @@
     "title": "BMR vs TDEE: What's the Difference? — MacroTrackr",
     "description": "BMR is what you burn at rest, TDEE is what you burn across the day. Which one to set calorie targets from, the activity factors that connect them, and why sedentary is 1.2.",
     "h1": "BMR vs TDEE, and which one to set targets from"
+  },
+  "/about": {
+    "title": "About MacroTrackr: Who Builds It and How It Is Checked",
+    "description": "MacroTrackr is built by Andrea Bugeja. Who writes the calculators and guides, how the nutrition claims are sourced, how the site is paid for, and how to report a mistake.",
+    "h1": "Who runs MacroTrackr"
   },
   "/contact": {
     "title": "Contact MacroTrackr — Support, Bugs and Security",
