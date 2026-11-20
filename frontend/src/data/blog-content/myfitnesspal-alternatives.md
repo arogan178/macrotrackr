@@ -24,7 +24,7 @@ MacroFactor estimates your energy expenditure from what you log and how your wei
 Lose It! is built around a simple daily calorie budget and is quick to log in. Its barcode scanner is moving to Premium, and Lose It! says some free accounts keep it during the transition while others do not ([Lose It!](https://loseit.zendesk.com/hc/en-us/articles/47773984823700-Unlocking-the-Barcode-Scanner-Scan-It)).
 
 - **Free plan:** calorie tracking, with ads.
-- **Paid plan (Premium):** adds custom macro goals, more detailed reports and, on most accounts, the barcode scanner.
+- **Paid plan (Premium):** adds custom macro goals and more detailed reports, and is becoming the way to get the barcode scanner. The scanner also needs your device language set to English.
 - **Trade-off:** if your targets are in grams of protein rather than total calories, the parts you need are behind Premium.
 
 ## FatSecret: if you want the most for free

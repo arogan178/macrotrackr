@@ -112,7 +112,7 @@ export default function BodyStatsForm({
             label="Weight"
             value={weightLb || ""}
             onChange={(v) => setWeightKg(lbToKg(toNumericInput(v, 661)))}
-            min={66}
+            min={67}
             max={661}
             unit="lbs"
           />
