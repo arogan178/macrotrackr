@@ -130,7 +130,7 @@ Weigh and assemble containers:
 - Cooked chicken: 3-4 days
 - Cooked beef/pork: 3-4 days
 - Cooked fish: 1-2 days
-- Cooked rice: 1 day. Cool it within an hour and freeze any portions for later in the week ([Food Standards Agency](https://www.food.gov.uk/safety-hygiene/student-guide-to-food-safety-and-hygiene))
+- Cooked rice: 1 day. Cool it within an hour and freeze any portions for later in the week ([Food Standards Agency](https://www.gov.uk/government/publications/student-guide-to-food-safety-and-hygiene/student-guide-to-food-safety-and-hygiene))
 - Cooked vegetables: 3-5 days
 
 **Freezer (0°F/-18°C):**
