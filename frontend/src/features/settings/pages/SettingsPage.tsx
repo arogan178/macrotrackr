@@ -241,7 +241,9 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (key !== activeTab) setPhonePanelKey((value) => value + 1);
+                    if (key !== activeTab && !hasSettingsChanges) {
+                      setPhonePanelKey((value) => value + 1);
+                    }
                     handleTabChange(key);
                     setIsPhoneSectionOpen(true);
                   }}
