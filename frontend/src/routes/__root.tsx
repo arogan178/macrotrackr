@@ -95,7 +95,7 @@ function RootComponent() {
               <Suspense fallback={<LoadingFallback />}>
                 {/* No entrance animation on the first page: prerendered markup has
                     to paint visible, and hydrate into the same styles. */}
-                <AnimatePresence initial={false}>
+                <AnimatePresence mode="popLayout" initial={false}>
                   <PageTransition key={location.pathname}>
                     <Outlet />
                   </PageTransition>

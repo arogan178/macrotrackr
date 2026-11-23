@@ -124,6 +124,9 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
   // On a phone the page opens as a list of sections; a ?tab= link opens one directly.
   const [isPhoneSectionOpen, setIsPhoneSectionOpen] = useState(Boolean(search.tab));
+  // Bumped when the phone list opens a different section: the old tab sat
+  // hidden behind the list and must not fade out over the new one.
+  const [phonePanelKey, setPhonePanelKey] = useState(0);
   const activeSection = SECTIONS.find((section) => section.key === activeTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
@@ -238,6 +241,9 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (key !== activeTab && !hasSettingsChanges) {
+                      setPhonePanelKey((value) => value + 1);
+                    }
                     handleTabChange(key);
                     setIsPhoneSectionOpen(true);
                   }}
@@ -266,7 +272,7 @@ export default function SettingsPage() {
               action={{ label: "Try again", onClick: () => void refetchSettings() }}
             />
           ) : settingsData ? (
-            <AnimatePresence>
+            <AnimatePresence key={phonePanelKey} mode="popLayout">
               {activeTab === "profile" && (
                 <PageTransition key="profile">
                   <ProfileForm
