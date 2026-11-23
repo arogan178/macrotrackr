@@ -266,7 +266,9 @@ export default function SettingsPage() {
               action={{ label: "Try again", onClick: () => void refetchSettings() }}
             />
           ) : settingsData ? (
-            <AnimatePresence mode="popLayout">
+            // A fresh boundary when the phone panel opens, so the tab that was
+            // hidden behind the list does not fade out over the new one.
+            <AnimatePresence key={String(isPhoneSectionOpen)} mode="popLayout">
               {activeTab === "profile" && (
                 <PageTransition key="profile">
                   <ProfileForm
