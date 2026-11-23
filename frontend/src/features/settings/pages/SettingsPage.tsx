@@ -266,7 +266,7 @@ export default function SettingsPage() {
               action={{ label: "Try again", onClick: () => void refetchSettings() }}
             />
           ) : settingsData ? (
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {activeTab === "profile" && (
                 <PageTransition key="profile">
                   <ProfileForm

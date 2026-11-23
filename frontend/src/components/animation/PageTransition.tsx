@@ -5,7 +5,7 @@
  * Respects `prefers-reduced-motion` for accessibility.
  *
  * @example
- * <AnimatePresence mode="wait">
+ * <AnimatePresence mode="popLayout">
  *   <PageTransition key={pathname}>
  *     <PageContent />
  *   </PageTransition>
@@ -19,6 +19,8 @@ import { usePrefersReducedMotion } from "@/hooks";
 interface PageTransitionProps {
   children: React.ReactNode;
   className?: string;
+  // popLayout needs the DOM node to take the exiting page out of flow.
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 // Animation variants for smooth fade transition
@@ -54,6 +56,7 @@ const reducedMotionTransition = {
 const PageTransition: React.FC<PageTransitionProps> = ({
   children,
   className = "",
+  ref,
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -65,6 +68,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({
 
   return (
     <m.div
+      ref={ref}
       initial="initial"
       animate="animate"
       exit="exit"
