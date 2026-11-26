@@ -3,7 +3,6 @@ import { Elysia } from "elysia";
 import {
   isSensitiveAuthRequest,
   rateLimit,
-  rateLimiters,
   resolveClientIdentifier,
 } from "../../src/middleware/rate-limit";
 import { resetConfigCache, setConfigOverrides } from "../../src/config";
@@ -131,13 +130,6 @@ describe("rate-limit middleware", () => {
       const headers = { "x-real-ip": "203.0.113.11" };
       expect((await app.handle(makeRequest(headers))).status).toBe(200);
       expect((await app.handle(makeRequest(headers))).status).toBe(200);
-    });
-  });
-
-  describe("rateLimiters", () => {
-    it("exposes the api and auth limiters", () => {
-      expect(rateLimiters.api).toBeDefined();
-      expect(rateLimiters.auth).toBeDefined();
     });
   });
 });

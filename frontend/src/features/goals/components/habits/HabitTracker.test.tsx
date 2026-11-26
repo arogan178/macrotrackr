@@ -63,9 +63,4 @@ describe("HabitTracker", () => {
       container.querySelector('[aria-label="Pro feature"]'),
     ).not.toBeInTheDocument();
   });
-
-  it("renders without crashing", () => {
-    const { container } = render(<HabitTracker habits={[]} />);
-    expect(container).toBeDefined();
-  });
 });

@@ -17,11 +17,11 @@ jobs:
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
       with:
-        bun-version: latest
+        bun-version: 1.3.14
 
     - name: Install dependencies
       working-directory: ./backend
-      run: bun install
+      run: bun install --frozen-lockfile
 
     - name: Typecheck
       working-directory: ./backend
@@ -52,11 +52,11 @@ jobs:
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
       with:
-        bun-version: latest
+        bun-version: 1.3.14
 
     - name: Install dependencies
       working-directory: ./frontend
-      run: bun install
+      run: bun install --frozen-lockfile
 
     - name: Typecheck
       working-directory: ./frontend
@@ -69,6 +69,10 @@ jobs:
         # otherwise, and the check falls back to the budget alone.
         UI_BUDGET_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
       run: bun run lint
+
+    - name: Test
+      working-directory: ./frontend
+      run: bun run test
 
     # Five releases' worth of drift went unnoticed because this only ever ran
     # by hand. A release note with no post is a release nobody was told about.

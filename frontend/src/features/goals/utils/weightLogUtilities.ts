@@ -1,20 +1,6 @@
 import type { TrendWeightPoint } from "@shared/trendWeight";
-import { formatISO } from "date-fns";
 
-import type { AddWeightLogPayload, WeightLogEntry } from "@/api/goals";
-
-// Weight log data utilities
-export function createWeightLogEntry(
-  weight: number,
-  date?: string,
-): AddWeightLogPayload {
-  const entryDate = date ?? new Date().toISOString().split("T")[0];
-
-  return {
-    weight,
-    timestamp: formatISO(new Date(entryDate)),
-  };
-}
+import type { WeightLogEntry } from "@/api/goals";
 
 // Weight log sorting and filtering utilities
 export function sortWeightLogByDate(

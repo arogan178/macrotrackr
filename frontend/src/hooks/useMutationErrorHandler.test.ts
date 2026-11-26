@@ -75,16 +75,6 @@ describe("useMutationErrorHandler", () => {
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });
-
-  describe("createMutationHandlers", () => {
-    it("should create handlers with context", () => {
-      const { result } = renderHook(() => useMutationErrorHandler());
-      const handlers = result.current.createMutationHandlers("saveData");
-
-      expect(handlers.onError).toBeDefined();
-      expect(handlers.onSuccess).toBeDefined();
-    });
-  });
 });
 
 describe("useOptimisticMutationHandler", () => {

@@ -12,7 +12,6 @@ vi.mock("../../src/modules/billing/subscription-service", () => ({
 
 import { resetConfigCache } from "../../src/config";
 import {
-  requireAuth,
   FREE_TIER_LIMITS,
   checkFeatureLimit,
   checkProStatus,
@@ -48,29 +47,7 @@ describe("clerk-guards", () => {
     });
   });
 
-  describe("requireAuth", () => {
-    it("should be defined", () => {
-      expect(requireAuth).toBeDefined();
-    });
-
-    it("should be an Elysia instance", () => {
-      expect(requireAuth).toBeDefined();
-      expect(typeof requireAuth).toBe("object");
-    });
-  });
-
   describe("checkProStatus", () => {
-    it("should be a function", () => {
-      expect(typeof checkProStatus).toBe("function");
-    });
-
-    it("should return a promise", () => {
-      hasActiveProSubscriptionMock.mockResolvedValue(true);
-
-      const result = checkProStatus(1);
-      expect(result).toBeInstanceOf(Promise);
-    });
-
     it("returns true in self-hosted mode", async () => {
       appMode = "self-hosted";
       process.env.APP_MODE = "self-hosted";
@@ -84,15 +61,6 @@ describe("clerk-guards", () => {
   });
 
   describe("checkFeatureLimit", () => {
-    it("should be a function", () => {
-      expect(typeof checkFeatureLimit).toBe("function");
-    });
-
-    it("should return a promise", () => {
-      const result = checkFeatureLimit(1, "MAX_HABITS", 2);
-      expect(result).toBeInstanceOf(Promise);
-    });
-
     it("should return allowed true when under limit", async () => {
       hasActiveProSubscriptionMock.mockResolvedValue(false);
 

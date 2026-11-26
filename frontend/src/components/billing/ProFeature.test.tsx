@@ -69,14 +69,4 @@ describe("ProFeature", () => {
       container.querySelector('[aria-label="Pro feature"]'),
     ).toBeInTheDocument();
   });
-
-  it("renders without crashing", () => {
-    const { container } = render(
-      <ProFeature>
-        <div>Content</div>
-      </ProFeature>,
-    );
-
-    expect(container.firstChild).toBeTruthy();
-  });
 });

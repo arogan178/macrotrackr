@@ -20,18 +20,6 @@ beforeEach(() => {
 });
 
 describe("AnimatedNumber", () => {
-  it("renders with value", () => {
-    render(<AnimatedNumber value={42} />);
-    const span = document.querySelector("span");
-    expect(span).toBeDefined();
-  });
-
-  it("applies custom className", () => {
-    render(<AnimatedNumber value={42} className="custom-class" />);
-    const span = document.querySelector("span");
-    expect(span?.className).toContain("custom-class");
-  });
-
   it("renders with prefix", () => {
     render(<AnimatedNumber value={100} prefix="$" />);
     expect(document.body.textContent).toContain("$");

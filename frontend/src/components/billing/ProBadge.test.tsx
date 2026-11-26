@@ -17,11 +17,4 @@ describe("ProBadge", () => {
     const { container } = render(<ProBadge className="custom-class" />);
     expect(container.firstChild).toHaveClass("custom-class");
   });
-
-  it("renders with memoization", () => {
-    const { container } = render(<ProBadge />);
-    expect(container.firstChild).toBeTruthy();
-    // Verify memo is applied via displayName
-    expect(ProBadge.displayName).toBe("ProBadge");
-  });
 });

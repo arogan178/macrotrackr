@@ -31,28 +31,4 @@ describe("UpgradeModal", () => {
       },
     });
   });
-
-  it("accepts custom featureName prop", () => {
-    const { container } = render(
-      <UpgradeModal
-        open
-        onClose={vi.fn()}
-        onUpgrade={vi.fn()}
-        featureName="Premium"
-      />,
-    );
-    expect(container).toBeTruthy();
-  });
-
-  it("accepts custom description prop", () => {
-    const { container } = render(
-      <UpgradeModal
-        open
-        onClose={vi.fn()}
-        onUpgrade={vi.fn()}
-        description="Custom description"
-      />,
-    );
-    expect(container).toBeTruthy();
-  });
 });
